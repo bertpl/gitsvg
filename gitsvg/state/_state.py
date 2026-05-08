@@ -40,6 +40,7 @@ class BranchState:
         rooted_on_commit: Resolved commit the branch is rooted on at
             declaration time. None when the source branch was empty
             or this is the first branch.
+        declaration_file: Source file the `branch` op was parsed from.
         declaration_line: 1-based source line of the `branch` op for error attribution.
         commit_ids: Ordered list of commit ids appended to this branch.
     """
@@ -51,6 +52,7 @@ class BranchState:
     from_branch: str | None = None
     from_commit: str | None = None
     rooted_on_commit: str | None = None
+    declaration_file: str = ""
     declaration_line: int = 0
     commit_ids: list[str] = field(default_factory=list)
 
@@ -69,6 +71,7 @@ class CommitState:
         highlight: True when the commit is marked for visual highlight.
         commit_pos: Optional explicit slot index along the commit axis.
         branch_pos: Optional explicit slot index along the branch axis.
+        declaration_file: Source file the op that introduced the commit was parsed from.
         declaration_line: 1-based source line of the op that introduced the commit.
     """
 
@@ -81,6 +84,7 @@ class CommitState:
     highlight: bool = False
     commit_pos: int | None = None
     branch_pos: int | None = None
+    declaration_file: str = ""
     declaration_line: int = 0
 
 

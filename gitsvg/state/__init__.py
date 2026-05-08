@@ -10,6 +10,7 @@ Public surface:
 """
 
 from gitsvg.state._engine import apply_ops
+from gitsvg.state._eof import check_end_of_file
 from gitsvg.state._state import BranchState, CanvasState, CommitState, State
 
 __all__ = [
@@ -18,4 +19,5 @@ __all__ = [
     "CommitState",
     "State",
     "apply_ops",
+    "check_end_of_file",
 ]

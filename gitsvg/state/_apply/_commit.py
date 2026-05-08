@@ -96,6 +96,7 @@ def apply_commit_op(state: State, parsed: ParsedOp, report: ValidationReport) ->
         highlight=bool(op.highlight),
         commit_pos=op.commit_pos,
         branch_pos=op.branch_pos,
+        declaration_file=file,
         declaration_line=line,
     )
     state.branches[op.branch].commit_ids.append(commit_id)
