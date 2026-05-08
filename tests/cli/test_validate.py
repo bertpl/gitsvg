@@ -107,3 +107,25 @@ def test_validate_resolves_import_chain(tmp_path: Path) -> None:
     # --- assert -----------------------
     assert result.exit_code == 0
     assert result.output == ""
+
+
+def test_validate_flags_eof_dangling_reference(tmp_path: Path) -> None:
+    """End-of-file checks flow through the validate pipeline end-to-end."""
+    # --- arrange ----------------------
+    file = _write(
+        tmp_path / "dangling.jsonl",
+        (
+            '{"op": "branch", "name": "main"}\n'
+            '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
+            '{"op": "branch", "name": "feat", "from_commit": "c1"}\n'
+            '{"op": "remove", "commits": ["c1"]}\n'
+        ),
+    )
+    runner = CliRunner()
+
+    # --- act --------------------------
+    result = runner.invoke(cli, ["validate", str(file)])
+
+    # --- assert -----------------------
+    assert result.exit_code == 1
+    assert "[E400]" in result.output

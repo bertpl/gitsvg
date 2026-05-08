@@ -72,6 +72,7 @@ def apply_merge_op(state: State, parsed: ParsedOp, report: ValidationReport) -> 
         branch=op.into,
         msg=op.msg,
         parents=parents,
+        declaration_file=file,
         declaration_line=line,
     )
     state.branches[op.into].commit_ids.append(merge_id)

@@ -105,6 +105,7 @@ def apply_branch_op(state: State, parsed: ParsedOp, report: ValidationReport) ->
         from_branch=op.from_branch,
         from_commit=op.from_commit,
         rooted_on_commit=rooted_on,
+        declaration_file=file,
         declaration_line=line,
     )
     state.branch_order.append(op.name)
