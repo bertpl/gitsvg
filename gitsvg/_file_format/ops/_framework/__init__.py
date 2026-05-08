@@ -4,12 +4,12 @@
 discriminated union and registries from the op classes in `_impl`.
 
 Op-implementation modules under `_impl` must import `OpBase` via the
-leaf path (`gitsvg._format.ops._framework._base`), not via this
+leaf path (`gitsvg._file_format.ops._framework._base`), not via this
 package, to avoid circular imports during `_union` loading.
 """
 
-from gitsvg._format.ops._framework._base import OpBase
-from gitsvg._format.ops._framework._union import (
+from gitsvg._file_format.ops._framework._base import OpBase
+from gitsvg._file_format.ops._framework._union import (
     ALL_OP_TYPES,
     OP_ADAPTER,
     OP_BY_NAME,

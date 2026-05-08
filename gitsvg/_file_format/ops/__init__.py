@@ -8,7 +8,7 @@ Subpackage layout:
 External callers should import from this package directly.
 """
 
-from gitsvg._format.ops._framework import (
+from gitsvg._file_format.ops._framework import (
     ALL_OP_TYPES,
     OP_ADAPTER,
     OP_BY_NAME,
@@ -16,7 +16,7 @@ from gitsvg._format.ops._framework import (
     OpBase,
     OpUnion,
 )
-from gitsvg._format.ops._impl import (
+from gitsvg._file_format.ops._impl import (
     BranchOp,
     CanvasOp,
     CommitOp,

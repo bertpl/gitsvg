@@ -2,7 +2,7 @@
 
 import pytest
 
-from gitsvg._format._schema import list_op_names, op_one_liner, op_schema, schema_index
+from gitsvg._file_format._schema import list_op_names, op_one_liner, op_schema, schema_index
 
 
 def test_list_op_names_returns_canonical_order() -> None:

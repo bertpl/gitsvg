@@ -2,7 +2,7 @@
 
 from typing import Literal
 
-from gitsvg._format.ops._framework._base import OpBase
+from gitsvg._file_format.ops._framework._base import OpBase
 
 
 class ImportOp(OpBase):

@@ -10,13 +10,13 @@ from typing import Annotated, Union, get_args
 
 from pydantic import BaseModel, Field, TypeAdapter
 
-from gitsvg._format.ops._impl._branch import BranchOp
-from gitsvg._format.ops._impl._canvas import CanvasOp
-from gitsvg._format.ops._impl._commit import CommitOp
-from gitsvg._format.ops._impl._highlight import HighlightOp
-from gitsvg._format.ops._impl._import import ImportOp
-from gitsvg._format.ops._impl._merge import MergeOp
-from gitsvg._format.ops._impl._remove import RemoveOp
+from gitsvg._file_format.ops._impl._branch import BranchOp
+from gitsvg._file_format.ops._impl._canvas import CanvasOp
+from gitsvg._file_format.ops._impl._commit import CommitOp
+from gitsvg._file_format.ops._impl._highlight import HighlightOp
+from gitsvg._file_format.ops._impl._import import ImportOp
+from gitsvg._file_format.ops._impl._merge import MergeOp
+from gitsvg._file_format.ops._impl._remove import RemoveOp
 
 # ==================================================================================================
 #  Op type registry — single source of truth for the op set
