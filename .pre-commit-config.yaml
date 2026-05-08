@@ -16,12 +16,12 @@ repos:
         entry: uv run ruff format
         language: system
         types: [python]
-        files: ^(gitsvg|tests/python|scripts)/
+        files: ^(gitsvg|tests|scripts)/
         pass_filenames: true
       - id: ruff
         name: ruff check
         entry: uv run ruff check
         language: system
         types: [python]
-        files: ^(gitsvg|tests/python|scripts)/
+        files: ^(gitsvg|tests|scripts)/
         pass_filenames: true

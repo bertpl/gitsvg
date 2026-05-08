@@ -1,7 +1,7 @@
 [project]
 name = "gitsvg"
 version = "0.0.1"
-description = "CLI that renders git tree visualizations as SVG from JSON/YAML/Markdown input."
+description = "CLI that renders git tree visualizations as SVG from JSONL input."
 readme = "README.md"
 license = "MIT"
 authors = [
@@ -22,7 +22,7 @@ classifiers = [
 ]
 dependencies = [
     "click>=8.2.0",
-    "rich>=13.0.0",
+    "pydantic>=2.10.0",
 ]
 
 [dependency-groups]
@@ -59,7 +59,7 @@ target-version = "py311"
 select = ["I"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests/python"]
+testpaths = ["tests"]
 
 [tool.coverage.run]
 source = ["gitsvg"]

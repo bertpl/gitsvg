@@ -1,3 +1,5 @@
+"""Top-level CLI tests."""
+
 from click.testing import CliRunner
 
 from gitsvg import __version__
@@ -16,13 +18,13 @@ def test_version_flag() -> None:
     assert __version__ in result.output
 
 
-def test_render_command_runs() -> None:
+def test_help_lists_schema_subcommand() -> None:
     # --- arrange ----------------------
     runner = CliRunner()
 
     # --- act --------------------------
-    result = runner.invoke(cli, ["render"])
+    result = runner.invoke(cli, ["--help"])
 
     # --- assert -----------------------
     assert result.exit_code == 0
-    assert "not implemented yet" in result.output.lower()
+    assert "schema" in result.output

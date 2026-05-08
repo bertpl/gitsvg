@@ -45,7 +45,7 @@ jobs:
       - uses: actions/checkout@v5
       - uses: astral-sh/setup-uv@v7
       - run: uv sync --group dev
-      - run: uv run ruff check gitsvg tests/python scripts
+      - run: uv run ruff check gitsvg tests scripts
 
   test:
     needs: [validate-branch-name]
