@@ -1,8 +1,9 @@
 """The `gitsvg validate` CLI command.
 
-Runs parse + per-op shape validation against an input file and reports any
-errors found. State-engine, import-resolution, and end-of-file
-cross-reference checks land in subsequent versions of the validator.
+Runs parse + per-op shape validation + per-op semantic validation against
+an input file and reports any errors found. Import-resolution and
+end-of-file cross-reference checks land in subsequent versions of the
+validator.
 
 Output:
 
@@ -20,6 +21,7 @@ from pathlib import Path
 import click
 
 from gitsvg.parse import parse_jsonl_file
+from gitsvg.state import apply_ops
 
 
 # ==================================================================================================
@@ -31,10 +33,12 @@ from gitsvg.parse import parse_jsonl_file
 def validate_command(path: Path, json_output: bool) -> None:
     """Validate a `.gitsvg.jsonl` input file.
 
-    Runs JSONL parsing and per-op shape validation. Prints any errors and
-    exits non-zero when validation fails.
+    Runs JSONL parsing, per-op shape validation, and per-op semantic
+    validation. Prints any errors and exits non-zero when validation
+    fails.
     """
-    _, report = parse_jsonl_file(path)
+    parsed_ops, report = parse_jsonl_file(path)
+    apply_ops(parsed_ops, report)
     if json_output:
         click.echo(_render_json(report))
     else:
