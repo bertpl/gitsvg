@@ -86,3 +86,24 @@ def test_validate_missing_file_exits_non_zero() -> None:
 
     # --- assert -----------------------
     assert result.exit_code != 0
+
+
+def test_validate_resolves_import_chain(tmp_path: Path) -> None:
+    """Import resolution flows through the validate pipeline end-to-end."""
+    # --- arrange ----------------------
+    base = _write(
+        tmp_path / "base.jsonl",
+        '{"op": "branch", "name": "main"}\n{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n',
+    )
+    derived = _write(
+        tmp_path / "derived.jsonl",
+        f'{{"op": "import", "path": "./{base.name}"}}\n{{"op": "highlight", "commit": "c1"}}\n',
+    )
+    runner = CliRunner()
+
+    # --- act --------------------------
+    result = runner.invoke(cli, ["validate", str(derived)])
+
+    # --- assert -----------------------
+    assert result.exit_code == 0
+    assert result.output == ""

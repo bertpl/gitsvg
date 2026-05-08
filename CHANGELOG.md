@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `gitsvg validate <file>` command: parses a `.gitsvg.jsonl` input file line by line, runs per-op shape validation, and reports any errors with `file:line: [code] field: message` formatting. Pass `--json` for a structured `{ ok, errors }` report. Exits non-zero when validation fails. Import-resolution and end-of-file checks land in subsequent versions of the validator.
 - `gitsvg validate` now runs per-op semantic validation in addition to shape validation. Branch existence, commit-id uniqueness, commit-id references, the `replaces:` 7-rule check, branch-root constraints, and remove-cascade behaviour all surface as structured errors with their own catalog codes.
 - Error catalog now spans 23 entries: parse-phase (E001-E004), shape-phase (E100-E108), and semantic-phase (E200-E209). Each entry is browseable via `gitsvg errors <code>`.
+- Import resolution: `gitsvg validate` now expands a leading `import` op into the imported file's ops before running shape and semantic checks. Cycle detection (on resolved absolute paths), depth-limit cap (1000), missing-file errors, and structural rules (at most one import, must be first) all surface as catalog codes E300-E304. Each parsed op carries `(file, line)` provenance, so errors against imported ops still point at the original file. Final pipeline: parse → import-expand → state-apply.
 
 ### Changed
 
