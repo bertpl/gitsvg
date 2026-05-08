@@ -21,7 +21,6 @@ from gitsvg._format.ops._impl._remove import RemoveOp
 # ==================================================================================================
 #  Op type registry — single source of truth for the op set
 # ==================================================================================================
-
 ALL_OP_TYPES: list[type[BaseModel]] = [
     ImportOp,
     CanvasOp,
@@ -55,7 +54,6 @@ OP_NAMES: list[str] = list(OP_BY_NAME.keys())
 # ==================================================================================================
 #  Discriminated union + adapter
 # ==================================================================================================
-
 OpUnion = Annotated[
     Union[
         ImportOp,

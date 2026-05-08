@@ -16,11 +16,10 @@ from gitsvg._format.ops import (
     RemoveOp,
 )
 
+
 # ==================================================================================================
 #  Happy-path: minimal valid input per op
 # ==================================================================================================
-
-
 @pytest.mark.parametrize(
     "raw, expected_cls",
     [
@@ -45,8 +44,6 @@ def test_minimal_valid_input_dispatches_to_correct_op(raw: dict, expected_cls: t
 # ==================================================================================================
 #  Per-op specifics
 # ==================================================================================================
-
-
 def test_import_path_round_trip() -> None:
     # --- arrange ----------------------
     raw = {"op": "import", "path": "./prev.gitsvg.jsonl"}
@@ -179,8 +176,6 @@ def test_highlight_targets_a_commit_id() -> None:
 # ==================================================================================================
 #  Cross-cutting: extra="forbid" and discriminator behaviour
 # ==================================================================================================
-
-
 @pytest.mark.parametrize("op_name", OP_NAMES)
 def test_unknown_field_is_rejected_for_every_op(op_name: str) -> None:
     # --- arrange ----------------------

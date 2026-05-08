@@ -15,11 +15,10 @@ import click
 from gitsvg._format._schema import list_op_names, op_one_liner, op_schema
 from gitsvg._format.ops import OP_BY_NAME
 
+
 # ==================================================================================================
 #  Click command
 # ==================================================================================================
-
-
 @click.command(name="schema")
 @click.argument("op_name", required=False)
 @click.option("--list-ops", "list_ops", is_flag=True, help="Print bare op names, one per line.")
@@ -51,8 +50,6 @@ def schema_command(op_name: str | None, list_ops: bool) -> None:
 # ==================================================================================================
 #  Index rendering
 # ==================================================================================================
-
-
 def _render_index() -> str:
     """Render the prose-form op index for `gitsvg schema` with no arguments.
 

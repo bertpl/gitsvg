@@ -10,11 +10,10 @@ from typing import Any
 
 from gitsvg._format.ops import OP_BY_NAME, OP_NAMES
 
+
 # ==================================================================================================
 #  Public API
 # ==================================================================================================
-
-
 def list_op_names() -> list[str]:
     """Return the names of all operations, in canonical order."""
     return list(OP_NAMES)
