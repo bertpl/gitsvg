@@ -1,0 +1,12 @@
+"""The `import` operation."""
+
+from typing import Literal
+
+from gitsvg._format.ops._base import OpBase
+
+
+class ImportOp(OpBase):
+    """Replay another file as a prelude before applying further ops."""
+
+    op: Literal["import"]
+    path: str
