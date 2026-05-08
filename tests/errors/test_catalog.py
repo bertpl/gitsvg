@@ -30,13 +30,14 @@ def test_default_catalog_dir_resolves_to_package_subdir() -> None:
     assert catalog is not None
 
 
-def test_production_catalog_is_empty_in_v0_0_2_pr2() -> None:
-    """PR2 ships zero catalog entries; the directory should contain no `.md` files."""
+def test_production_catalog_holds_parser_and_shape_entries() -> None:
+    """The production catalog ships markdown files for the parse and shape codes."""
     # --- arrange ----------------------
     catalog = default_catalog_dir()
 
     # --- act --------------------------
-    md_entries = [item.name for item in catalog.iterdir() if item.name.endswith(".md")]
+    md_entries = {item.name for item in catalog.iterdir() if item.name.endswith(".md")}
 
     # --- assert -----------------------
-    assert md_entries == []
+    expected = {f"E{n:03d}.md" for n in (1, 2, 3, 4, 100, 101, 102, 103, 104, 105, 106, 107, 108)}
+    assert expected.issubset(md_entries)

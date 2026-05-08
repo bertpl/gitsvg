@@ -5,6 +5,7 @@ import click
 from gitsvg import __version__
 from gitsvg.cli._errors import errors_command
 from gitsvg.cli._schema import schema_command
+from gitsvg.cli._validate import validate_command
 
 
 @click.group()
@@ -15,3 +16,4 @@ def cli() -> None:
 
 cli.add_command(schema_command)
 cli.add_command(errors_command)
+cli.add_command(validate_command)

@@ -18,7 +18,7 @@ def test_version_flag() -> None:
     assert __version__ in result.output
 
 
-def test_help_lists_schema_and_errors_subcommands() -> None:
+def test_help_lists_all_subcommands() -> None:
     # --- arrange ----------------------
     runner = CliRunner()
 
@@ -29,3 +29,4 @@ def test_help_lists_schema_and_errors_subcommands() -> None:
     assert result.exit_code == 0
     assert "schema" in result.output
     assert "errors" in result.output
+    assert "validate" in result.output
