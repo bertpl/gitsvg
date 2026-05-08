@@ -80,4 +80,4 @@ def test_merge_auto_generates_id_when_as_omitted() -> None:
     assert report.is_clean()
     assert len(state.branches["main"].commit_ids) == 2
     auto_id = state.branches["main"].commit_ids[-1]
-    assert auto_id.startswith("c")
+    assert auto_id.startswith("_c")

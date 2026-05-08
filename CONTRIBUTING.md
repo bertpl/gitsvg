@@ -23,19 +23,19 @@ make validate-local  # Validate every .gitsvg.jsonl under local/test_examples/
 
 ## Local example smoke test
 
-Real input files (with author-specific reference SVGs and content
-not part of the public repo) live under `local/test_examples/`. The
-directory is gitignored; CI never sees it.
-
-`make validate-local` walks the tree recursively, runs the full
-validate pipeline on every `*.gitsvg.jsonl` it finds, and prints a
-pass/fail summary. The make target skips silently when the directory
-is absent — fresh clones work without needing local fixtures.
+`make validate-local` walks `local/test_examples/` recursively and
+runs the full validate pipeline on every `*.gitsvg.jsonl` it finds.
+The directory is gitignored — drop your own input files there if you
+want to keep them out of the public repo while still being able to
+smoke-test them with one command. The make target skips silently
+when the directory is absent, so fresh clones work without any
+local fixtures.
 
 The synthetic corpus that ships with the repo (under
-`tests/fixtures/inputs/`) covers the same shape via the `pytest`
-suite. `make validate-local` is the developer-side regression guard
-against breaking real diagrams.
+`tests/fixtures/inputs/`) covers the canonical happy and sad paths
+via the `pytest` suite. `make validate-local` is the additional
+developer-side regression guard for any private inputs you keep
+locally.
 
 ## Branching
 

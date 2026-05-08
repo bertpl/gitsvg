@@ -106,11 +106,17 @@ def apply_commit_op(state: State, parsed: ParsedOp, report: ValidationReport) ->
 #  Helpers
 # ==================================================================================================
 def _generate_auto_commit_id(state: State) -> str:
-    """Return the lowest `c<N>` not already used by a commit in `state`."""
+    """Return the lowest `_c<N>` not already used by a commit in `state`.
+
+    The leading underscore is the convention for auto-generated ids:
+    user-supplied ids should not start with `_`, which keeps the two
+    namespaces from colliding even when many ops in an import chain
+    use auto-generation.
+    """
     n = 1
-    while f"c{n}" in state.commits:
+    while f"_c{n}" in state.commits:
         n += 1
-    return f"c{n}"
+    return f"_c{n}"
 
 
 def _remove_commit(state: State, commit_id: str) -> None:

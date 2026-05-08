@@ -22,7 +22,7 @@ def test_commit_appends_to_branch() -> None:
     assert state.commits["c1"].branch == "main"
 
 
-def test_auto_id_generation_picks_lowest_unused_c_n() -> None:
+def test_auto_id_generation_uses_underscore_c_n_namespace() -> None:
     # --- arrange ----------------------
     text = (
         '{"op": "branch", "name": "main"}\n'
@@ -35,14 +35,17 @@ def test_auto_id_generation_picks_lowest_unused_c_n() -> None:
     state, _ = run(text)
 
     # --- assert -----------------------
-    assert state.branches["main"].commit_ids == ["c1", "c2", "c3"]
+    # User-supplied `c1` does not collide with the `_c<N>` auto-id namespace.
+    assert state.branches["main"].commit_ids == ["c1", "_c1", "_c2"]
 
 
-def test_auto_id_skips_already_used_explicit_ids() -> None:
+def test_auto_id_skips_already_used_underscore_c_n_ids() -> None:
+    """An explicit `_c2` (rare; reserved-pattern but legal) makes auto-id pick `_c1` then `_c3`."""
     # --- arrange ----------------------
     text = (
         '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c2", "msg": "x"}\n'
+        '{"op": "commit", "branch": "main", "id": "_c2", "msg": "x"}\n'
+        '{"op": "commit", "branch": "main", "msg": "x"}\n'
         '{"op": "commit", "branch": "main", "msg": "x"}\n'
     )
 
@@ -50,7 +53,7 @@ def test_auto_id_skips_already_used_explicit_ids() -> None:
     state, _ = run(text)
 
     # --- assert -----------------------
-    assert state.branches["main"].commit_ids == ["c2", "c1"]
+    assert state.branches["main"].commit_ids == ["_c2", "_c1", "_c3"]
 
 
 # ==================================================================================================
