@@ -134,10 +134,11 @@ def test_all_codes_returns_sorted_entries(populated_registry: dict) -> None:
     assert codes == ["E998", "E999"]
 
 
-def test_production_registry_is_empty_in_v0_0_2_pr2() -> None:
-    """The production catalog is empty; `all_codes()` returns no entries."""
+def test_production_registry_includes_parser_and_shape_codes() -> None:
+    """The production catalog declares the parse-phase and shape-phase codes."""
     # --- act --------------------------
-    codes = all_codes()
+    codes = {entry.code for entry in all_codes()}
 
     # --- assert -----------------------
-    assert codes == []
+    assert {"E001", "E002", "E003", "E004"}.issubset(codes)
+    assert {"E100", "E101", "E102", "E103", "E104", "E105", "E106", "E107", "E108"}.issubset(codes)
