@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## 0.0.2 (2026-05-08)
 
 ### Added
 
@@ -19,19 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Synthetic input corpus under `tests/fixtures/inputs/` — 13 hand-authored files spanning happy paths (basics, squash + rebuild, import chain) and sad paths (parse / shape / semantic / replaces / EOF / import errors). Run via the integration test suite alongside `make test`.
 - `make validate-local` target — walks `local/test_examples/` recursively and runs the full validate pipeline on every `*.gitsvg.jsonl`. Skipped silently when the directory is absent. Useful as a developer-side regression guard against breaking real diagrams.
 
-### Changed
-
-### Deprecated
-
 ### Removed
 
 - The placeholder `gitsvg render` command (shipped only with v0.0.1) is removed; rendering will return as part of v0.0.3.
 - The `rich` dependency, which was unused in v0.0.1 scaffolding.
-
-### Fixed
-
-### Security
-
 ## 0.0.1 (2026-05-08)
 
 ### Added
