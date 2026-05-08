@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 
-from gitsvg._errors._codes import lookup_code
+from gitsvg._errors._codes import find_error_code
 
 
 @dataclass(frozen=True, slots=True)
@@ -36,7 +36,7 @@ class ValidationError:
 
     def __post_init__(self) -> None:
         """Reject construction with an unregistered code."""
-        if lookup_code(self.code) is None:
+        if find_error_code(self.code) is None:
             raise ValueError(
                 f"error code {self.code!r} is not in the catalog (add `{self.code}.md` to `gitsvg/_errors/catalog/`)"
             )

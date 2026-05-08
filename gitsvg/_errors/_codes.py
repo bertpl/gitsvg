@@ -119,7 +119,7 @@ def _scan_catalog(catalog_dir: Traversable) -> dict[str, ErrorCode]:
 _REGISTERED_CODES: dict[str, ErrorCode] = _scan_catalog(default_catalog_dir())
 
 
-def lookup_code(code: str) -> ErrorCode | None:
+def find_error_code(code: str) -> ErrorCode | None:
     """Return the registered `ErrorCode` for `code`, or None if unknown."""
     return _REGISTERED_CODES.get(code)
 

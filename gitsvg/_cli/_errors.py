@@ -11,7 +11,7 @@ import sys
 
 import click
 
-from gitsvg._errors import all_codes, load_catalog_entry, lookup_code
+from gitsvg._errors import all_codes, find_error_code, load_catalog_entry
 
 
 # ==================================================================================================
@@ -37,7 +37,7 @@ def errors_command(code: str | None, list_codes: bool) -> None:
         click.echo(_render_index())
         return
 
-    entry = lookup_code(code)
+    entry = find_error_code(code)
     if entry is None:
         click.echo(f"Unknown error code: {code!r}", err=True)
         sys.exit(2)
