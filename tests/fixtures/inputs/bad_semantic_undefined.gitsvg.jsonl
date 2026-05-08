@@ -1,0 +1,3 @@
+{"op": "branch", "name": "main"}
+{"op": "commit", "branch": "ghost", "msg": "x"}
+{"op": "highlight", "commit": "missing"}

@@ -1,0 +1,5 @@
+{"op": "branch", "name": "main"}
+{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}
+{"op": "commit", "branch": "main", "id": "c2", "msg": "x"}
+{"op": "commit", "branch": "main", "id": "c3", "msg": "x"}
+{"op": "commit", "branch": "main", "id": "c_squash", "msg": "non-contiguous", "replaces": ["c1", "c3"]}
