@@ -15,10 +15,27 @@ This syncs dev dependencies via `uv` and installs pre-commit hooks.
 ## Common commands
 
 ```bash
-make test       # Run the test suite (pytest)
-make format     # Format and auto-fix with ruff
-make lint       # Lint with ruff
+make test            # Run the test suite (pytest)
+make format          # Format and auto-fix with ruff
+make lint            # Lint with ruff
+make validate-local  # Validate every .gitsvg.jsonl under local/test_examples/
 ```
+
+## Local example smoke test
+
+`make validate-local` walks `local/test_examples/` recursively and
+runs the full validate pipeline on every `*.gitsvg.jsonl` it finds.
+The directory is gitignored — drop your own input files there if you
+want to keep them out of the public repo while still being able to
+smoke-test them with one command. The make target skips silently
+when the directory is absent, so fresh clones work without any
+local fixtures.
+
+The synthetic corpus that ships with the repo (under
+`tests/fixtures/inputs/`) covers the canonical happy and sad paths
+via the `pytest` suite. `make validate-local` is the additional
+developer-side regression guard for any private inputs you keep
+locally.
 
 ## Branching
 

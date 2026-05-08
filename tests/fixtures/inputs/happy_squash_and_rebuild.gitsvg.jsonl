@@ -1,0 +1,10 @@
+{"op": "branch", "name": "main"}
+{"op": "commit", "branch": "main", "id": "c1", "msg": "first"}
+{"op": "commit", "branch": "main", "id": "c2", "msg": "second"}
+{"op": "commit", "branch": "main", "id": "c3", "msg": "third"}
+{"op": "commit", "branch": "main", "id": "c123", "msg": "squashed", "replaces": ["c1", "c2", "c3"]}
+{"op": "branch", "name": "feat", "from_commit": "c123"}
+{"op": "commit", "branch": "feat", "id": "f1", "msg": "feat work"}
+{"op": "remove", "branches": ["feat"]}
+{"op": "branch", "name": "feat", "from_commit": "c123"}
+{"op": "commit", "branch": "feat", "id": "f1", "msg": "feat rewritten"}

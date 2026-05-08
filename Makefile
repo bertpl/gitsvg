@@ -1,15 +1,16 @@
-.PHONY: help dev-setup build test format lint update-deps install release
+.PHONY: help dev-setup build test format lint update-deps install release validate-local
 
 help:
 	@echo 'Commands:'
-	@echo '  dev-setup   One-time: sync dev deps, install pre-commit hooks'
-	@echo '  build       Build package'
-	@echo '  test        Run pytest'
-	@echo '  format      Format and fix with ruff'
-	@echo '  lint        Ruff check'
-	@echo '  update-deps Re-resolve uv.lock to latest versions'
-	@echo '  install     Re-install gitsvg stand-alone tool'
-	@echo '  release     Bump version, validate, tag, push (VERSION=X.Y.Z)'
+	@echo '  dev-setup      One-time: sync dev deps, install pre-commit hooks'
+	@echo '  build          Build package'
+	@echo '  test           Run pytest'
+	@echo '  format         Format and fix with ruff'
+	@echo '  lint           Ruff check'
+	@echo '  update-deps    Re-resolve uv.lock to latest versions'
+	@echo '  install        Re-install gitsvg stand-alone tool'
+	@echo '  validate-local Validate every .gitsvg.jsonl under local/test_examples/'
+	@echo '  release        Bump version, validate, tag, push (VERSION=X.Y.Z)'
 
 dev-setup:
 	uv sync --group dev
@@ -33,6 +34,9 @@ update-deps:
 
 install:
 	uv tool install --editable .
+
+validate-local:
+	uv run python scripts/validate_local.py
 
 release:
 	@test -n "$(VERSION)" || (echo "Usage: make release VERSION=X.Y.Z" && exit 1)

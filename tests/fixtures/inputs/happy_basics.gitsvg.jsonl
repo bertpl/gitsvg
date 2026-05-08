@@ -1,0 +1,12 @@
+{"op": "canvas", "n_commits": 10, "n_branches": 3}
+{"op": "branch", "name": "main", "color": "#0066cc"}
+{"op": "commit", "branch": "main", "id": "c1", "msg": "initial"}
+{"op": "commit", "branch": "main", "id": "c2", "msg": "fix"}
+{"op": "branch", "name": "feature", "from_branch": "main", "color": "#cc6600", "label_side": "left"}
+{"op": "commit", "branch": "feature", "id": "f1", "msg": "feature work"}
+{"op": "commit", "branch": "feature", "id": "f2", "msg": "more feature"}
+{"op": "merge", "from": "feature", "into": "main", "as": "m1", "msg": "merge feature"}
+{"op": "highlight", "commit": "m1"}
+{"op": "branch", "name": "scratch", "from_branch": "main"}
+{"op": "commit", "branch": "scratch", "id": "s1", "msg": "scratch", "hash": "auto"}
+{"op": "remove", "branches": ["scratch"]}

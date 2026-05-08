@@ -1,0 +1,3 @@
+{"op": "import", "path": "./happy_import_base.gitsvg.jsonl"}
+{"op": "branch", "name": "feat", "from_branch": "main"}
+{"op": "commit", "branch": "feat", "id": "f1", "msg": "derived"}
