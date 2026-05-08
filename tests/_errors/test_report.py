@@ -3,7 +3,7 @@
 from gitsvg._errors import ValidationError, ValidationReport
 
 
-def _make_error(line: int = 1, code: str = "E001") -> ValidationError:
+def _make_error(line: int = 1, code: str = "E999") -> ValidationError:
     """Construct a minimal `ValidationError` for use in tests."""
     return ValidationError(file="x.jsonl", line=line, code=code, message="msg")
 
@@ -18,11 +18,11 @@ def test_new_report_is_clean_and_empty() -> None:
     assert report.errors == []
 
 
-def test_add_appends_in_insertion_order() -> None:
+def test_add_appends_in_insertion_order(populated_registry: dict) -> None:
     # --- arrange ----------------------
     report = ValidationReport()
-    e1 = _make_error(line=1)
-    e2 = _make_error(line=5)
+    e1 = _make_error(line=1, code="E999")
+    e2 = _make_error(line=5, code="E998")
 
     # --- act --------------------------
     report.add(e1)
@@ -34,7 +34,7 @@ def test_add_appends_in_insertion_order() -> None:
     assert report.errors == [e1, e2]
 
 
-def test_errors_returns_defensive_copy() -> None:
+def test_errors_returns_defensive_copy(populated_registry: dict) -> None:
     # --- arrange ----------------------
     report = ValidationReport()
     report.add(_make_error())

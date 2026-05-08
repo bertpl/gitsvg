@@ -1,25 +1,27 @@
 """Tests for the `ValidationError` record dataclass."""
 
+import pytest
+
 from gitsvg._errors import ValidationError
 
 
-def test_format_renders_minimal_error() -> None:
+def test_format_renders_minimal_error(populated_registry: dict) -> None:
     # --- arrange ----------------------
-    err = ValidationError(file="x.jsonl", line=7, code="E210", message="replaces rule 3 violated")
+    err = ValidationError(file="x.jsonl", line=7, code="E999", message="some failure happened")
 
     # --- act --------------------------
     rendered = err.format()
 
     # --- assert -----------------------
-    assert rendered == "x.jsonl:7: [E210] replaces rule 3 violated"
+    assert rendered == "x.jsonl:7: [E999] some failure happened"
 
 
-def test_format_includes_field_when_set() -> None:
+def test_format_includes_field_when_set(populated_registry: dict) -> None:
     # --- arrange ----------------------
     err = ValidationError(
         file="x.jsonl",
         line=7,
-        code="E110",
+        code="E998",
         message="missing required field",
         field="branch",
     )
@@ -28,12 +30,25 @@ def test_format_includes_field_when_set() -> None:
     rendered = err.format()
 
     # --- assert -----------------------
-    assert rendered == "x.jsonl:7: [E110] branch: missing required field"
+    assert rendered == "x.jsonl:7: [E998] branch: missing required field"
 
 
-def test_validation_error_is_frozen_and_hashable() -> None:
+def test_validation_error_is_frozen_and_hashable(populated_registry: dict) -> None:
     # --- arrange ----------------------
-    err = ValidationError(file="x.jsonl", line=1, code="E001", message="invalid JSON")
+    err = ValidationError(file="x.jsonl", line=1, code="E999", message="msg")
 
     # --- act / assert -----------------
     assert hash(err) == hash(err)
+
+
+def test_construction_rejects_unregistered_code(populated_registry: dict) -> None:
+    # --- act / assert -----------------
+    with pytest.raises(ValueError, match="not in the catalog"):
+        ValidationError(file="x.jsonl", line=1, code="E000", message="unknown code")
+
+
+def test_construction_rejects_unregistered_code_under_empty_registry(empty_registry: dict) -> None:
+    """With an empty catalog, every code is unregistered and construction must fail."""
+    # --- act / assert -----------------
+    with pytest.raises(ValueError, match="not in the catalog"):
+        ValidationError(file="x.jsonl", line=1, code="E001", message="msg")
