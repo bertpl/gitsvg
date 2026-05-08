@@ -34,7 +34,7 @@ dev = [
 ]
 
 [project.scripts]
-gitsvg = "gitsvg._cli._cli:cli"
+gitsvg = "gitsvg.cli._cli:cli"
 
 [project.urls]
 Source = "https://github.com/bertpl/gitsvg"

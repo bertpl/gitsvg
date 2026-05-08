@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from gitsvg._errors import _codes
+from gitsvg.errors import _codes
 
 
 @pytest.fixture
