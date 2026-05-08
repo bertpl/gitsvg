@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from gitsvg._errors import ErrorCode, _codes, all_codes, get
+from gitsvg._errors import ErrorCode, _codes, all_codes, lookup_code
 
 
 # ==================================================================================================
@@ -107,20 +107,20 @@ def test_extract_summary_ignores_h2_headings() -> None:
 
 
 # ==================================================================================================
-#  Registry public API (get / all_codes)
+#  Registry public API (lookup_code / all_codes)
 # ==================================================================================================
-def test_get_returns_registered_entry(populated_registry: dict) -> None:
+def test_lookup_code_returns_registered_entry(populated_registry: dict) -> None:
     # --- act --------------------------
-    entry = get("E999")
+    entry = lookup_code("E999")
 
     # --- assert -----------------------
     assert entry is not None
     assert entry.code == "E999"
 
 
-def test_get_returns_none_for_unknown_code(populated_registry: dict) -> None:
+def test_lookup_code_returns_none_for_unknown_code(populated_registry: dict) -> None:
     # --- act --------------------------
-    entry = get("E000")
+    entry = lookup_code("E000")
 
     # --- assert -----------------------
     assert entry is None

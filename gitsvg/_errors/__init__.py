@@ -14,7 +14,7 @@ External callers should import from this package directly.
 """
 
 from gitsvg._errors._catalog import default_catalog_dir, load_catalog_entry
-from gitsvg._errors._codes import ErrorCode, all_codes, get
+from gitsvg._errors._codes import ErrorCode, all_codes, lookup_code
 from gitsvg._errors._report import ValidationReport
 from gitsvg._errors._validation_error import ValidationError
 
@@ -24,6 +24,6 @@ __all__ = [
     "ValidationReport",
     "all_codes",
     "default_catalog_dir",
-    "get",
     "load_catalog_entry",
+    "lookup_code",
 ]
