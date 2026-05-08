@@ -1,6 +1,6 @@
 [project]
 name = "gitsvg"
-version = "0.0.0"
+version = "0.0.1"
 description = "CLI that renders git tree visualizations as SVG from JSON/YAML/Markdown input."
 readme = "README.md"
 license = "MIT"
