@@ -220,3 +220,182 @@ def test_op_by_name_registry_matches_canonical_order() -> None:
     # --- assert -----------------------
     assert actual_order == OP_NAMES
     assert actual_order == ["import", "canvas", "branch", "commit", "merge", "remove", "highlight"]
+
+
+# ==================================================================================================
+#  Field-level shape constraints — string contents
+# ==================================================================================================
+@pytest.mark.parametrize(
+    "raw",
+    [
+        {"op": "import", "path": ""},
+        {"op": "branch", "name": ""},
+        {"op": "branch", "name": "has space"},
+        {"op": "branch", "name": "main", "from_branch": "with space"},
+        {"op": "commit", "branch": "", "msg": "x"},
+        {"op": "commit", "branch": "has space", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "has space", "msg": "x"},
+        {"op": "commit", "branch": "main", "msg": "x", "hash": "has space"},
+        {"op": "commit", "branch": "main", "msg": ""},
+        {"op": "merge", "from": "", "into": "main"},
+        {"op": "merge", "from": "feat", "into": "has space"},
+        {"op": "merge", "from": "feat", "into": "main", "as": "has space"},
+        {"op": "merge", "from": "feat", "into": "main", "msg": ""},
+        {"op": "remove", "commits": ["has space"]},
+        {"op": "remove", "branches": [""]},
+        {"op": "highlight", "commit": ""},
+        {"op": "highlight", "commit": "has space"},
+    ],
+)
+def test_string_constraints_reject_empty_or_whitespace(raw: dict) -> None:
+    # --- act / assert -----------------
+    with pytest.raises(ValidationError):
+        OP_ADAPTER.validate_python(raw)
+
+
+@pytest.mark.parametrize(
+    "color",
+    ["#abc", "#ABC", "#7b8fb2", "#7B8FB2"],
+)
+def test_branch_color_accepts_valid_hex_forms(color: str) -> None:
+    # --- arrange ----------------------
+    raw = {"op": "branch", "name": "main", "color": color}
+
+    # --- act --------------------------
+    op = BranchOp.model_validate(raw)
+
+    # --- assert -----------------------
+    assert op.color == color
+
+
+@pytest.mark.parametrize(
+    "color",
+    ["7b8fb2", "#xyz", "#1234", "#1234567", "blue", ""],
+)
+def test_branch_color_rejects_invalid_hex_forms(color: str) -> None:
+    # --- arrange ----------------------
+    raw = {"op": "branch", "name": "main", "color": color}
+
+    # --- act / assert -----------------
+    with pytest.raises(ValidationError):
+        BranchOp.model_validate(raw)
+
+
+# ==================================================================================================
+#  Field-level shape constraints — numeric ranges
+# ==================================================================================================
+@pytest.mark.parametrize(
+    "raw",
+    [
+        {"op": "branch", "name": "main", "branch_pos": -1},
+        {"op": "canvas", "n_commits": -1},
+        {"op": "canvas", "n_branches": -1},
+        {"op": "canvas", "commit_spacing": -0.1},
+        {"op": "canvas", "branch_spacing": -1.0},
+        {"op": "commit", "branch": "main", "msg": "x", "commit_pos": -1},
+        {"op": "commit", "branch": "main", "msg": "x", "branch_pos": -1},
+    ],
+)
+def test_numeric_fields_reject_negative_values(raw: dict) -> None:
+    # --- act / assert -----------------
+    with pytest.raises(ValidationError):
+        OP_ADAPTER.validate_python(raw)
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        {"op": "branch", "name": "main", "branch_pos": 0},
+        {"op": "canvas", "n_commits": 0, "commit_spacing": 0, "branch_spacing": 0},
+        {"op": "commit", "branch": "main", "msg": "x", "commit_pos": 0, "branch_pos": 0},
+    ],
+)
+def test_numeric_fields_accept_zero(raw: dict) -> None:
+    # --- act --------------------------
+    op = OP_ADAPTER.validate_python(raw)
+
+    # --- assert -----------------------
+    assert op.op == raw["op"]
+
+
+# ==================================================================================================
+#  Field-level shape constraints — list non-emptiness and item shape
+# ==================================================================================================
+@pytest.mark.parametrize(
+    "raw",
+    [
+        {"op": "commit", "branch": "main", "msg": "x", "parents": []},
+        {"op": "commit", "branch": "main", "msg": "x", "replaces": []},
+        {"op": "remove", "commits": []},
+        {"op": "remove", "branches": []},
+    ],
+)
+def test_list_fields_reject_empty_lists(raw: dict) -> None:
+    # --- act / assert -----------------
+    with pytest.raises(ValidationError):
+        OP_ADAPTER.validate_python(raw)
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        {"op": "commit", "branch": "main", "msg": "x", "parents": ["has space"]},
+        {"op": "commit", "branch": "main", "msg": "x", "replaces": [""]},
+        {"op": "remove", "commits": ["", "ok"]},
+    ],
+)
+def test_list_fields_reject_empty_or_whitespace_items(raw: dict) -> None:
+    # --- act / assert -----------------
+    with pytest.raises(ValidationError):
+        OP_ADAPTER.validate_python(raw)
+
+
+# ==================================================================================================
+#  Inter-field shape constraints (model_validator)
+# ==================================================================================================
+def test_branch_rejects_both_from_branch_and_from_commit() -> None:
+    # --- arrange ----------------------
+    raw = {"op": "branch", "name": "feat/x", "from_branch": "main", "from_commit": "c1"}
+
+    # --- act / assert -----------------
+    with pytest.raises(ValidationError):
+        BranchOp.model_validate(raw)
+
+
+def test_commit_rejects_neither_msg_nor_hash() -> None:
+    # --- arrange ----------------------
+    raw = {"op": "commit", "branch": "main"}
+
+    # --- act / assert -----------------
+    with pytest.raises(ValidationError):
+        CommitOp.model_validate(raw)
+
+
+def test_commit_accepts_hash_only_without_msg() -> None:
+    # --- arrange ----------------------
+    raw = {"op": "commit", "branch": "main", "hash": "auto"}
+
+    # --- act --------------------------
+    op = CommitOp.model_validate(raw)
+
+    # --- assert -----------------------
+    assert op.msg is None
+    assert op.hash == "auto"
+
+
+def test_remove_rejects_neither_commits_nor_branches() -> None:
+    # --- arrange ----------------------
+    raw = {"op": "remove"}
+
+    # --- act / assert -----------------
+    with pytest.raises(ValidationError):
+        RemoveOp.model_validate(raw)
+
+
+def test_remove_rejects_both_commits_and_branches() -> None:
+    # --- arrange ----------------------
+    raw = {"op": "remove", "commits": ["c1"], "branches": ["feat/x"]}
+
+    # --- act / assert -----------------
+    with pytest.raises(ValidationError):
+        RemoveOp.model_validate(raw)
