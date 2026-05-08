@@ -1,22 +1,29 @@
 """Pydantic models for the seven v0.0.x gitsvg operations.
 
-Each module under this package defines one operation model. The
-discriminated union and registries live in `_union`.
+Subpackage layout:
+
+- `_framework/` — `OpBase` and the discriminated union + registries.
+- `_impl/` — one pydantic model per operation.
+
+External callers should import from this package directly.
 """
 
-from gitsvg._format.ops._branch import BranchOp
-from gitsvg._format.ops._canvas import CanvasOp
-from gitsvg._format.ops._commit import CommitOp
-from gitsvg._format.ops._highlight import HighlightOp
-from gitsvg._format.ops._import import ImportOp
-from gitsvg._format.ops._merge import MergeOp
-from gitsvg._format.ops._remove import RemoveOp
-from gitsvg._format.ops._union import (
+from gitsvg._format.ops._framework import (
     ALL_OP_TYPES,
     OP_ADAPTER,
     OP_BY_NAME,
     OP_NAMES,
+    OpBase,
     OpUnion,
+)
+from gitsvg._format.ops._impl import (
+    BranchOp,
+    CanvasOp,
+    CommitOp,
+    HighlightOp,
+    ImportOp,
+    MergeOp,
+    RemoveOp,
 )
 
 __all__ = [
@@ -30,6 +37,7 @@ __all__ = [
     "OP_ADAPTER",
     "OP_BY_NAME",
     "OP_NAMES",
+    "OpBase",
     "OpUnion",
     "RemoveOp",
 ]

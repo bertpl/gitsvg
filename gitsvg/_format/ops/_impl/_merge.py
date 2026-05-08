@@ -4,7 +4,7 @@ from typing import Literal
 
 from pydantic import Field
 
-from gitsvg._format.ops._base import OpBase
+from gitsvg._format.ops._framework._base import OpBase
 
 
 class MergeOp(OpBase):
