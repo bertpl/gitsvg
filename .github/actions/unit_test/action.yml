@@ -22,4 +22,4 @@ runs:
 
     - name: Run pytest
       shell: bash
-      run: uv run pytest tests/python --durations=20
+      run: uv run pytest tests --durations=20

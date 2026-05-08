@@ -22,11 +22,11 @@ test:
 	uv run pytest
 
 format:
-	uv run ruff format gitsvg tests/python scripts
-	uv run ruff check --fix gitsvg tests/python scripts
+	uv run ruff format gitsvg tests scripts
+	uv run ruff check --fix gitsvg tests scripts
 
 lint:
-	uv run ruff check gitsvg tests/python scripts
+	uv run ruff check gitsvg tests scripts
 
 update-deps:
 	uv lock --upgrade

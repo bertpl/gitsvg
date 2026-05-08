@@ -59,7 +59,7 @@ target-version = "py311"
 select = ["I"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests/python"]
+testpaths = ["tests"]
 
 [tool.coverage.run]
 source = ["gitsvg"]
