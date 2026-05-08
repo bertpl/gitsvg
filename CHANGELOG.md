@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `gitsvg schema` command: prints an index of all input operations with one-line descriptions; `gitsvg schema <op>` prints the JSON Schema for that op; `gitsvg schema --list-ops` prints a bare op-name list.
+- `gitsvg errors` command: prints an index of all registered validation error codes; `gitsvg errors <code>` prints that code's long-form catalog entry; `gitsvg errors --list-codes` prints a bare code list. The catalog ships empty for now; entries are added as the validator gains error sites.
 
 ### Changed
 

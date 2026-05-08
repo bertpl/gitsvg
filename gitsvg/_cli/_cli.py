@@ -3,6 +3,7 @@
 import click
 
 from gitsvg import __version__
+from gitsvg._cli._errors import errors_command
 from gitsvg._cli._schema import schema_command
 
 
@@ -13,3 +14,4 @@ def cli() -> None:
 
 
 cli.add_command(schema_command)
+cli.add_command(errors_command)
