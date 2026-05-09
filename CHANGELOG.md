@@ -19,6 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `make render-local` target — walks `local/test_examples/` and renders every `.gitsvg.jsonl` to a sibling `_render_outputs/` directory. Skipped silently when the directory is absent.
 - Render output now includes branch-off arcs (quarter-circle curves from a parent commit on one lane to the start of a child branch on another, in the new branch's colour) and merge arcs (vertical-first quarter-circle curves from a merging-from branch's tip to the merge commit on the merging-into branch's lane, in the source branch's colour).
 - Render output now includes branch guides — faint dashed vertical lines at every occupied lane, sitting behind branch lines and arcs as a subtle visual anchor.
+- Render output now includes commit labels — the commit's `msg` is drawn as the primary line in `LABEL_FONT_SIZE` next to the dot (on the side indicated by `label_side`); when `hash` is set, it appears as a smaller secondary line in `HASH_FONT_SIZE`/`HASH_COLOR` directly below. Multi-line `msg` strings (split on `\n`) stack vertically with consistent line spacing, centred on the dot's y.
+- Render output now includes branch-name pills — coloured rounded rectangles with the branch name in white, positioned `BRANCH_NAME_PILL_OFFSET` pixels below each branch's start point. Canvas height auto-reserves room for the bottom-most pill.
+- Highlight visual: a commit with `highlight: true` now renders with an enlarged dot (`HIGHLIGHT_RADIUS`) and a bold (weight 700) `msg` label. The hash secondary line stays at regular weight.
 
 ### Changed
 

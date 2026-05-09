@@ -2,7 +2,7 @@
 
 import drawsvg as draw
 
-from gitsvg._visual_constants import COMMIT_RADIUS, COMMIT_STROKE_WIDTH
+from gitsvg._visual_constants import COMMIT_RADIUS, COMMIT_STROKE_WIDTH, HIGHLIGHT_RADIUS
 from gitsvg.layout import LayoutCommit
 from gitsvg.render._geometry import branch_axis_to_x, commit_axis_to_y
 
@@ -10,16 +10,18 @@ from gitsvg.render._geometry import branch_axis_to_x, commit_axis_to_y
 def draw_commit_dot(d: draw.Drawing, commit: LayoutCommit, color: str, n_commits: int) -> None:
     """Append a commit dot to the drawing.
 
-    PR4 always uses `COMMIT_RADIUS`. The highlight visual (enlarged
-    dot + bold label) lands in PR6.
+    Highlighted commits render with `HIGHLIGHT_RADIUS` (40 % bigger
+    than `COMMIT_RADIUS`); the bold label is wired separately in the
+    label primitive.
     """
     x = branch_axis_to_x(commit.branch_pos)
     y = commit_axis_to_y(commit.commit_pos, n_commits)
+    radius = HIGHLIGHT_RADIUS if commit.highlight else COMMIT_RADIUS
     d.append(
         draw.Circle(
             x,
             y,
-            COMMIT_RADIUS,
+            radius,
             fill=color,
             stroke="white",
             stroke_width=COMMIT_STROKE_WIDTH,
