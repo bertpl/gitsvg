@@ -1,4 +1,4 @@
-.PHONY: help dev-setup build test format lint update-deps install release validate-local
+.PHONY: help dev-setup build test format lint update-deps install release validate-local render-local
 
 help:
 	@echo 'Commands:'
@@ -10,6 +10,7 @@ help:
 	@echo '  update-deps    Re-resolve uv.lock to latest versions'
 	@echo '  install        Re-install gitsvg stand-alone tool'
 	@echo '  validate-local Validate every .gitsvg.jsonl under local/test_examples/'
+	@echo '  render-local   Render every .gitsvg.jsonl under local/test_examples/ to SVG'
 	@echo '  release        Bump version, validate, tag, push (VERSION=X.Y.Z)'
 
 dev-setup:
@@ -37,6 +38,9 @@ install:
 
 validate-local:
 	uv run python scripts/validate_local.py
+
+render-local:
+	uv run python scripts/render_local.py
 
 release:
 	@test -n "$(VERSION)" || (echo "Usage: make release VERSION=X.Y.Z" && exit 1)
