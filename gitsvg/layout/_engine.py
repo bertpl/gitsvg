@@ -32,6 +32,7 @@ Heuristics for the v0.0.3 default strategy:
 """
 
 from gitsvg._visual_constants import (
+    BRANCH_NAME_PILL_OFFSET,
     BRANCH_SPACING,
     COLORS,
     COMMIT_SPACING,
@@ -289,13 +290,22 @@ def _merge_arcs(
 #  Helpers — canvas
 # ==================================================================================================
 def _compute_canvas(branches: list[LayoutBranch], commit_layouts: dict[str, LayoutCommit]) -> LayoutCanvas:
-    """Auto-fit canvas dimensions from the layout extent."""
+    """Auto-fit canvas dimensions from the layout extent.
+
+    The commit-axis height reserves an extra `BRANCH_NAME_PILL_OFFSET`
+    below the lowest dot when there are branches, since branch-name
+    pills sit below their start point in screen y. Without this room,
+    pills on root branches (the bottommost) would clip past the canvas
+    edge.
+    """
     max_branch_pos = max((b.branch_pos for b in branches), default=0)
     max_commit_pos_from_commits = max((c.commit_pos for c in commit_layouts.values()), default=-1)
     max_commit_pos_from_branches = max((b.end for b in branches), default=-1)
     max_commit_pos = max(max_commit_pos_from_commits, max_commit_pos_from_branches)
     n_commits = max_commit_pos + 1 if max_commit_pos >= 0 else 1
 
+    pill_room = BRANCH_NAME_PILL_OFFSET if branches else 0
+
     width = MARGIN_BRANCH_AXIS_LOWER + max_branch_pos * BRANCH_SPACING + MARGIN_BRANCH_AXIS_UPPER
-    height = MARGIN_COMMIT_AXIS_UPPER + (n_commits - 1) * COMMIT_SPACING + MARGIN_COMMIT_AXIS_LOWER
+    height = MARGIN_COMMIT_AXIS_UPPER + (n_commits - 1) * COMMIT_SPACING + MARGIN_COMMIT_AXIS_LOWER + pill_room
     return LayoutCanvas(width=width, height=height, n_commits=n_commits)

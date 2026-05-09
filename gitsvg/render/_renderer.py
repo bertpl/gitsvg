@@ -11,7 +11,12 @@ Z-order (back to front):
 2. Arcs (branch-off + merge), in the order produced by the layout
    engine.
 3. Branch lines (vertical, in branch colour).
-4. Commit dots (in branch colour, with white outline).
+4. Branch-name pills (coloured rounded rectangles + branch name).
+5. Commit dots (in branch colour, with white outline; enlarged when
+   highlighted).
+6. Commit labels (`msg` primary lines + optional `hash` secondary
+   line, on the side indicated by `label_side`; bold msg when
+   highlighted).
 """
 
 import drawsvg as draw
@@ -20,7 +25,9 @@ from gitsvg.layout import Layout
 from gitsvg.render._primitives._arc import draw_arc
 from gitsvg.render._primitives._branch_guide import draw_branch_guide
 from gitsvg.render._primitives._branch_line import draw_branch_line
+from gitsvg.render._primitives._branch_pill import draw_branch_pill
 from gitsvg.render._primitives._commit_dot import draw_commit_dot
+from gitsvg.render._primitives._commit_label import draw_commit_label
 
 
 def render(layout: Layout) -> draw.Drawing:
@@ -59,8 +66,16 @@ def render(layout: Layout) -> draw.Drawing:
     for branch in layout.branches:
         draw_branch_line(d, branch, branch.color, n_commits)
 
+    # --- Branch-name pills ------------
+    for branch in layout.branches:
+        draw_branch_pill(d, branch, n_commits)
+
     # --- Commit dots ------------------
     for commit in layout.commits.values():
         draw_commit_dot(d, commit, commit.color, n_commits)
+
+    # --- Commit labels ----------------
+    for commit in layout.commits.values():
+        draw_commit_label(d, commit, n_commits)
 
     return d

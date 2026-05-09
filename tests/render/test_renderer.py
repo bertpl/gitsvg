@@ -28,9 +28,10 @@ def test_render_produces_valid_svg_with_correct_root_dimensions() -> None:
 
     # --- assert -----------------------
     assert svg_text.startswith("<?xml") or svg_text.startswith("<svg")
-    # Single branch with 3 commits: 200 × 150.
+    # Single branch with 3 commits: 200 × 175 (150 for content + 25 reserved for the
+    # branch-name pill below the lowest dot).
     assert 'width="200"' in svg_text
-    assert 'height="150"' in svg_text
+    assert 'height="175"' in svg_text
 
 
 def test_render_emits_expected_path_and_circle_counts() -> None:

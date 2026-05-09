@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 from gitsvg._visual_constants import (
+    BRANCH_NAME_PILL_OFFSET,
     BRANCH_SPACING,
     COLORS,
     COMMIT_SPACING,
@@ -473,10 +474,15 @@ def test_canvas_size_for_single_branch_three_commits() -> None:
     layout = _layout_from(text)
 
     # --- assert -----------------------
+    # Width: 1 lane → MARGIN_LOWER + 0 * SPACING + MARGIN_UPPER.
+    # Height: standard margins + (n-1) * spacing + BRANCH_NAME_PILL_OFFSET (pill room
+    # below the lowest dot).
     canvas = layout.canvas
     assert canvas.n_commits == 3
     assert canvas.width == MARGIN_BRANCH_AXIS_LOWER + 0 * BRANCH_SPACING + MARGIN_BRANCH_AXIS_UPPER
-    assert canvas.height == MARGIN_COMMIT_AXIS_UPPER + (3 - 1) * COMMIT_SPACING + MARGIN_COMMIT_AXIS_LOWER
+    assert canvas.height == (
+        MARGIN_COMMIT_AXIS_UPPER + (3 - 1) * COMMIT_SPACING + MARGIN_COMMIT_AXIS_LOWER + BRANCH_NAME_PILL_OFFSET
+    )
 
 
 def test_canvas_widens_for_two_branches() -> None:
