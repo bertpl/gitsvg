@@ -32,11 +32,13 @@ Heuristics for the v0.0.3 default strategy:
 """
 
 from gitsvg._visual_constants import (
+    BRANCH_LABEL_FONT_SIZE,
     BRANCH_NAME_PILL_OFFSET,
     BRANCH_SPACING,
     COLORS,
     COMMIT_SPACING,
     DEFAULT_BRANCH_COLORS,
+    LABEL_OFFSET,
     MARGIN_BRANCH_AXIS_LOWER,
     MARGIN_BRANCH_AXIS_UPPER,
     MARGIN_COMMIT_AXIS_LOWER,
@@ -50,6 +52,7 @@ from gitsvg.layout._layout import (
     LayoutCommit,
     LayoutGuide,
 )
+from gitsvg.layout._metrics import commit_label_width, pill_width
 from gitsvg.state import State
 
 _DEFAULT_LABEL_SIDE = "right"
@@ -123,8 +126,8 @@ def compute_layout(state: State) -> Layout:
     occupied_lanes = sorted({b.branch_pos for b in branches})
     guides = [LayoutGuide(branch_pos=p) for p in occupied_lanes]
 
-    # --- Compute canvas size ---------------------
-    canvas = _compute_canvas(branches, commit_layouts)
+    # --- Compute canvas spec ---------------------
+    canvas = _compute_canvas(state, branches, commit_layouts)
 
     return Layout(canvas=canvas, branches=branches, commits=commit_layouts, arcs=arcs, guides=guides)
 
@@ -289,23 +292,121 @@ def _merge_arcs(
 # ==================================================================================================
 #  Helpers — canvas
 # ==================================================================================================
-def _compute_canvas(branches: list[LayoutBranch], commit_layouts: dict[str, LayoutCommit]) -> LayoutCanvas:
-    """Auto-fit canvas dimensions from the layout extent.
+def _compute_canvas(
+    state: State,
+    branches: list[LayoutBranch],
+    commit_layouts: dict[str, LayoutCommit],
+) -> LayoutCanvas:
+    """Compute the effective canvas spec.
 
-    The commit-axis height reserves an extra `BRANCH_NAME_PILL_OFFSET`
-    below the lowest dot when there are branches, since branch-name
-    pills sit below their start point in screen y. Without this room,
-    pills on root branches (the bottommost) would clip past the canvas
-    edge.
+    Honours every `canvas:` op field that's set; falls back to auto-fit
+    defaults for fields that aren't pinned. Auto-fit keeps the canvas
+    just big enough to contain the longest visible labels and the
+    branch-name pills.
+
+    When `n_commits` / `n_branches` are pinned smaller than the actual
+    content extent, the pinned values win — content past the pinned
+    bounds is clipped by SVG's default overflow behaviour at render
+    time.
     """
+    user_canvas = state.canvas
+
+    # Effective spacing — pinned wins, otherwise default constants.
+    branch_spacing = _override(user_canvas, "branch_spacing", BRANCH_SPACING)
+    commit_spacing = _override(user_canvas, "commit_spacing", COMMIT_SPACING)
+
+    # Effective slot counts — pinned wins, otherwise auto-fit from extent.
     max_branch_pos = max((b.branch_pos for b in branches), default=0)
     max_commit_pos_from_commits = max((c.commit_pos for c in commit_layouts.values()), default=-1)
     max_commit_pos_from_branches = max((b.end for b in branches), default=-1)
     max_commit_pos = max(max_commit_pos_from_commits, max_commit_pos_from_branches)
-    n_commits = max_commit_pos + 1 if max_commit_pos >= 0 else 1
+    auto_n_commits = max_commit_pos + 1 if max_commit_pos >= 0 else 1
+    auto_n_branches = max_branch_pos + 1 if branches else 1
+    n_commits = _override(user_canvas, "n_commits", auto_n_commits)
+    n_branches = _override(user_canvas, "n_branches", auto_n_branches)
 
-    pill_room = BRANCH_NAME_PILL_OFFSET if branches else 0
+    # Effective margins — pinned wins, otherwise auto-fit each side.
+    margin_branch_axis_lower = _override(
+        user_canvas,
+        "margin_branch_axis_lower",
+        _auto_fit_margin_branch_axis(branches, commit_layouts, branch_pos_filter=0, side="left"),
+    )
+    margin_branch_axis_upper = _override(
+        user_canvas,
+        "margin_branch_axis_upper",
+        _auto_fit_margin_branch_axis(branches, commit_layouts, branch_pos_filter=max_branch_pos, side="right"),
+    )
+    margin_commit_axis_lower = _override(
+        user_canvas,
+        "margin_commit_axis_lower",
+        _auto_fit_margin_commit_axis_lower(branches),
+    )
+    margin_commit_axis_upper = _override(user_canvas, "margin_commit_axis_upper", float(MARGIN_COMMIT_AXIS_UPPER))
 
-    width = MARGIN_BRANCH_AXIS_LOWER + max_branch_pos * BRANCH_SPACING + MARGIN_BRANCH_AXIS_UPPER
-    height = MARGIN_COMMIT_AXIS_UPPER + (n_commits - 1) * COMMIT_SPACING + MARGIN_COMMIT_AXIS_LOWER + pill_room
-    return LayoutCanvas(width=width, height=height, n_commits=n_commits)
+    width = margin_branch_axis_lower + (n_branches - 1) * branch_spacing + margin_branch_axis_upper
+    height = margin_commit_axis_upper + (n_commits - 1) * commit_spacing + margin_commit_axis_lower
+    return LayoutCanvas(
+        width=width,
+        height=height,
+        n_commits=n_commits,
+        n_branches=n_branches,
+        branch_spacing=branch_spacing,
+        commit_spacing=commit_spacing,
+        margin_branch_axis_lower=margin_branch_axis_lower,
+        margin_branch_axis_upper=margin_branch_axis_upper,
+        margin_commit_axis_lower=margin_commit_axis_lower,
+        margin_commit_axis_upper=margin_commit_axis_upper,
+    )
+
+
+def _override(user_canvas, attr: str, default):
+    """Return the user's pinned value for `attr` if set, else the default."""
+    if user_canvas is None:
+        return default
+    pinned = getattr(user_canvas, attr, None)
+    return pinned if pinned is not None else default
+
+
+def _auto_fit_margin_branch_axis(
+    branches: list[LayoutBranch],
+    commit_layouts: dict[str, LayoutCommit],
+    *,
+    branch_pos_filter: int,
+    side: str,
+) -> float:
+    """Compute the auto-fit margin for one branch-axis end (left or right).
+
+    Considers the half-pill-width of any pill on the edge lane plus the
+    width of any commit label whose `label_side` points outward from
+    that lane.
+    """
+    if side == "left":
+        default = MARGIN_BRANCH_AXIS_LOWER
+        outward_label_side = "left"
+    else:
+        default = MARGIN_BRANCH_AXIS_UPPER
+        outward_label_side = "right"
+
+    needed: float = 0.0
+    pad = 4.0
+    for branch in branches:
+        if branch.branch_pos == branch_pos_filter:
+            needed = max(needed, pill_width(branch.name) / 2 + pad)
+    for commit in commit_layouts.values():
+        if commit.branch_pos == branch_pos_filter and commit.label_side == outward_label_side:
+            needed = max(needed, LABEL_OFFSET + commit_label_width(commit) + pad)
+    return max(default, needed)
+
+
+def _auto_fit_margin_commit_axis_lower(branches: list[LayoutBranch]) -> float:
+    """Compute the auto-fit lower margin on the commit axis.
+
+    The pill of any branch with `start = min(start)` sits closest to the
+    canvas bottom. Reserve enough room for it: `BRANCH_NAME_PILL_OFFSET`
+    (centre offset) + half the pill height + a small pad.
+    """
+    if not branches:
+        return float(MARGIN_COMMIT_AXIS_LOWER)
+    pill_height = BRANCH_LABEL_FONT_SIZE + 8  # matches `_branch_pill._PILL_PADDING_Y`
+    pill_room = BRANCH_NAME_PILL_OFFSET + pill_height / 2 + 4.0
+    return max(float(MARGIN_COMMIT_AXIS_LOWER), pill_room)

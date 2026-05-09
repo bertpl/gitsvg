@@ -22,6 +22,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Render output now includes commit labels — the commit's `msg` is drawn as the primary line in `LABEL_FONT_SIZE` next to the dot (on the side indicated by `label_side`); when `hash` is set, it appears as a smaller secondary line in `HASH_FONT_SIZE`/`HASH_COLOR` directly below. Multi-line `msg` strings (split on `\n`) stack vertically with consistent line spacing, centred on the dot's y.
 - Render output now includes branch-name pills — coloured rounded rectangles with the branch name in white, positioned `BRANCH_NAME_PILL_OFFSET` pixels below each branch's start point. Canvas height auto-reserves room for the bottom-most pill.
 - Highlight visual: a commit with `highlight: true` now renders with an enlarged dot (`HIGHLIGHT_RADIUS`) and a bold (weight 700) `msg` label. The hash secondary line stays at regular weight.
+- `canvas:` op honours all eight optional fields end-to-end: `n_commits`, `n_branches`, `commit_spacing`, `branch_spacing`, and the four `margin_*_axis_*` margins. Pinned values flow through to the rendered SVG dimensions and the renderer's coordinate transform; auto-fit kicks in for any field left unset.
+- Auto-fit margins reserve room for the longest visible labels per side: the lower / upper branch-axis margins extend to fit pills on the leftmost / rightmost lane and any commit msg/hash whose `label_side` points outward; the lower commit-axis margin reserves room for the bottom-most pill (the root branch's). Authors who pin a margin via `canvas:` opt out of auto-fit for that side.
+- Pinned-canvas overflow: when content exceeds pinned `n_commits`/`n_branches`, the rendered SVG keeps the pinned dimensions; content past the canvas edge is clipped by SVG default `overflow:hidden`. Authors who pin canvas size are expected to ensure content fits.
 
 ### Changed
 

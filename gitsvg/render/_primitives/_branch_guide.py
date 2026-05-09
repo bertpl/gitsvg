@@ -11,19 +11,18 @@ from gitsvg._visual_constants import (
     BRANCH_GUIDE_COLOR,
     BRANCH_GUIDE_DASH,
     BRANCH_GUIDE_WIDTH,
-    MARGIN_COMMIT_AXIS_LOWER,
-    MARGIN_COMMIT_AXIS_UPPER,
 )
+from gitsvg.layout import LayoutCanvas
 from gitsvg.render._geometry import branch_axis_to_x
 
 _OVERSHOOT_PX = 10
 
 
-def draw_branch_guide(d: draw.Drawing, branch_pos: int, canvas_height: float) -> None:
+def draw_branch_guide(d: draw.Drawing, branch_pos: int, canvas: LayoutCanvas) -> None:
     """Append a dashed vertical guide for a single lane to the drawing."""
-    x = branch_axis_to_x(branch_pos)
-    y_top = MARGIN_COMMIT_AXIS_UPPER - _OVERSHOOT_PX
-    y_bottom = canvas_height - MARGIN_COMMIT_AXIS_LOWER + _OVERSHOOT_PX
+    x = branch_axis_to_x(branch_pos, canvas)
+    y_top = canvas.margin_commit_axis_upper - _OVERSHOOT_PX
+    y_bottom = canvas.height - canvas.margin_commit_axis_lower + _OVERSHOOT_PX
     d.append(
         draw.Line(
             x,

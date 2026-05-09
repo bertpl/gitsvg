@@ -23,19 +23,40 @@ from dataclasses import dataclass, field
 
 @dataclass(slots=True)
 class LayoutCanvas:
-    """Computed canvas dimensions used by the renderer.
+    """Computed canvas dimensions and the effective spacing/margins the
+    renderer's geometry transform reads from.
+
+    Effective values come from the layout engine after merging the input's
+    `canvas:` op overrides with auto-fit defaults. The renderer never has
+    to look at constants — every value it needs to place a primitive is
+    on this object.
 
     Attributes:
         width: SVG canvas width in pixels.
         height: SVG canvas height in pixels.
-        n_commits: Total commit-axis slot count, needed by the renderer's
-            coordinate transform (commit-axis index 0 sits at the largest
-            y in the bottom-to-top orientation).
+        n_commits: Effective commit-axis slot count (pinned via `canvas.n_commits`
+            or auto-fit from content). Needed by the coordinate transform
+            because the bottom-to-top orientation places index 0 at the
+            largest y.
+        n_branches: Effective branch-axis slot count.
+        branch_spacing: Effective pixel distance between adjacent branch-axis slots.
+        commit_spacing: Effective pixel distance between adjacent commit-axis slots.
+        margin_branch_axis_lower: Effective branch-axis margin at the lower end (lane 0 side).
+        margin_branch_axis_upper: Effective branch-axis margin at the upper end (highest-lane side).
+        margin_commit_axis_lower: Effective commit-axis margin at the lower end (oldest-commit side).
+        margin_commit_axis_upper: Effective commit-axis margin at the upper end (newest-commit side).
     """
 
     width: float
     height: float
     n_commits: int
+    n_branches: int
+    branch_spacing: float
+    commit_spacing: float
+    margin_branch_axis_lower: float
+    margin_branch_axis_upper: float
+    margin_commit_axis_lower: float
+    margin_commit_axis_upper: float
 
 
 @dataclass(slots=True)
