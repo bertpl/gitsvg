@@ -111,7 +111,6 @@ class _LayoutBuilder:
         self._next_branch_pos: int = 0
         self._trackers: dict[str, _BranchTracker] = {}
         self._commit_branch: dict[str, str] = {}
-        self._auto_id_counter: int = 1
 
     # --------------------------------------------------------------------------
     #  Dispatch
@@ -287,9 +286,16 @@ class _LayoutBuilder:
             branch.end = branch.start
 
     def _next_auto_commit_id(self) -> str:
-        """Return the lowest `_c<N>` not already used by any commit in the layout."""
-        while f"_c{self._auto_id_counter}" in self.layout.commits:
-            self._auto_id_counter += 1
-        cid = f"_c{self._auto_id_counter}"
-        self._auto_id_counter += 1
-        return cid
+        """Return the lowest `_c<N>` not already used by any commit in the layout.
+
+        Mirrors `gitsvg.state._apply._commit._generate_auto_commit_id` exactly:
+        we always start the search from 1 so a commit removed by `remove:` or
+        `replaces:` frees its id for reuse. State and layout walk the same op
+        stream independently, so they must produce the same id sequence at every
+        step — otherwise the renderer can't look up a layout position by the
+        commit id state has stored.
+        """
+        n = 1
+        while f"_c{n}" in self.layout.commits:
+            n += 1
+        return f"_c{n}"

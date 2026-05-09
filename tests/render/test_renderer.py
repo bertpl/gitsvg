@@ -33,9 +33,10 @@ def test_render_produces_valid_svg_with_correct_root_dimensions() -> None:
     assert 'height="150"' in svg_text
 
 
-def test_render_emits_one_path_per_branch_and_one_circle_per_commit() -> None:
-    """drawsvg renders `Line` as a single `<path>` element; PR4 has no other
-    paths in the output, so the count equals the branch count."""
+def test_render_emits_expected_path_and_circle_counts() -> None:
+    """drawsvg renders `Line` and `Path` both as `<path>`. With two branches and
+    a fork, the SVG carries: 2 guides + 1 branch-off arc + 2 branch lines = 5
+    paths, plus one circle per commit."""
     # --- arrange ----------------------
     text = (
         '{"op": "branch", "name": "main"}\n'
@@ -49,7 +50,7 @@ def test_render_emits_one_path_per_branch_and_one_circle_per_commit() -> None:
     svg_text = _render_from(text).as_svg()
 
     # --- assert -----------------------
-    assert svg_text.count("<path") == 2  # main + feat branch lines
+    assert svg_text.count("<path") == 5  # 2 guides + 1 arc + 2 lines
     assert svg_text.count("<circle") == 3  # c1 + f1 + f2
 
 
@@ -67,7 +68,8 @@ def test_empty_branch_still_emits_a_path_element() -> None:
     svg_text = _render_from(text).as_svg()
 
     # --- assert -----------------------
-    assert svg_text.count("<path") == 2  # main + empty feat
+    # 2 guides + 1 branch-off arc (degenerate, same row) + 2 branch lines.
+    assert svg_text.count("<path") == 5
 
 
 def test_render_preserves_branch_colour_in_dot_fill() -> None:

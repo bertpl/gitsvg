@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Internal: layout engine (`gitsvg.layout`) — pure-computation module that turns a validated op stream into per-branch and per-commit axis positions. Not exposed through the CLI yet; consumed by rendering work to follow.
 - `gitsvg render <input> -o <output>` command — renders a validated `.gitsvg.jsonl` file to SVG (single file in, single file out). Runs the validate pipeline first; emits no output and exits non-zero on errors.
 - `make render-local` target — walks `local/test_examples/` and renders every `.gitsvg.jsonl` to a sibling `_render_outputs/` directory. Skipped silently when the directory is absent.
+- Render output now includes branch-off arcs (quarter-circle curves from a parent commit on one lane to the start of a child branch on another, in the new branch's colour) and merge arcs (vertical-first quarter-circle curves from a merging-from branch's tip to the merge commit on the merging-into branch's lane, in the source branch's colour).
+- Render output now includes branch guides — faint dashed vertical lines at every occupied lane, sitting behind branch lines and arcs as a subtle visual anchor.
 
 ### Changed
 
