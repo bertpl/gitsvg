@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## 0.0.3 (2026-05-09)
 
 ### Added
 
@@ -30,17 +30,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Internal: rendering pipeline restructured into a three-stage architecture — state engine (op stream → entities) → layout engine (entities → render-ready model with positions, resolved colours, arcs, guides, canvas dimensions) → renderer (model → SVG primitives). The renderer no longer depends on state internals; alternative layout strategies and renderers can be plugged in without touching each other. No user-visible behaviour change for the existing corpus.
 
-### Deprecated
-
 ### Removed
 
 - `commit_pos:` and `branch_pos:` fields on `commit:` op. The commit-axis case is replaced by relative `gap:`; commit-level branch-axis overrides aren't needed in v0.0.x (commits always live on their branch's lane).
 - `branch_pos:` field on `branch:` op. Branch-axis position is now auto-assigned in declaration order; an override mechanism may return when lane-reuse heuristics land.
-
-### Fixed
-
-### Security
-
 ## 0.0.2 (2026-05-08)
 
 ### Added
