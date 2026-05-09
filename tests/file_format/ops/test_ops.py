@@ -1,4 +1,4 @@
-"""Per-op happy-path and field-shape tests for the seven v0.0.x operations."""
+"""Per-op happy-path and field-schema tests for the seven v0.0.x operations."""
 
 import pytest
 from pydantic import ValidationError
@@ -223,7 +223,7 @@ def test_op_by_name_registry_matches_canonical_order() -> None:
 
 
 # ==================================================================================================
-#  Field-level shape constraints — string contents
+#  Field-level schema constraints — string contents
 # ==================================================================================================
 @pytest.mark.parametrize(
     "raw",
@@ -282,7 +282,7 @@ def test_branch_color_rejects_invalid_hex_forms(color: str) -> None:
 
 
 # ==================================================================================================
-#  Field-level shape constraints — numeric ranges
+#  Field-level schema constraints — numeric ranges
 # ==================================================================================================
 @pytest.mark.parametrize(
     "raw",
@@ -319,7 +319,7 @@ def test_numeric_fields_accept_zero(raw: dict) -> None:
 
 
 # ==================================================================================================
-#  Field-level shape constraints — list non-emptiness and item shape
+#  Field-level schema constraints — list non-emptiness and item schema
 # ==================================================================================================
 @pytest.mark.parametrize(
     "raw",
@@ -351,7 +351,7 @@ def test_list_fields_reject_empty_or_whitespace_items(raw: dict) -> None:
 
 
 # ==================================================================================================
-#  Inter-field shape constraints (model_validator)
+#  Inter-field schema constraints (model_validator)
 # ==================================================================================================
 def test_branch_rejects_both_from_branch_and_from_commit() -> None:
     # --- arrange ----------------------

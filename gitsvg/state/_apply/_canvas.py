@@ -12,7 +12,7 @@ def apply_canvas_op(state: State, parsed: ParsedOp, report: ValidationReport) ->
     """Apply a `canvas` op — overwrite any prior canvas spec.
 
     The canvas op is passive at this layer — no semantic checks beyond
-    the shape phase that already ran. Successive `canvas` ops overwrite
+    the schema phase that already ran. Successive `canvas` ops overwrite
     each other; the last one wins.
     """
     _ = report  # canvas op never emits semantic errors

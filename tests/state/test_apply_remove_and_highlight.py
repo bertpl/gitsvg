@@ -1,6 +1,6 @@
 """Tests for the `remove`, `highlight`, and `canvas` op state-apply handlers."""
 
-from tests.state._helpers import run
+from tests.state._helpers import build_state_from_jsonl
 
 
 # ==================================================================================================
@@ -16,7 +16,7 @@ def test_remove_commits_drops_them_from_state() -> None:
     )
 
     # --- act --------------------------
-    state, report = run(text)
+    state, report = build_state_from_jsonl(text)
 
     # --- assert -----------------------
     assert report.is_clean()
@@ -35,7 +35,7 @@ def test_remove_branch_cascades_to_its_commits() -> None:
     )
 
     # --- act --------------------------
-    state, report = run(text)
+    state, report = build_state_from_jsonl(text)
 
     # --- assert -----------------------
     assert report.is_clean()
@@ -46,7 +46,7 @@ def test_remove_branch_cascades_to_its_commits() -> None:
 
 def test_remove_unknown_commit_emits_e201() -> None:
     # --- act --------------------------
-    _, report = run('{"op": "branch", "name": "main"}\n{"op": "remove", "commits": ["ghost"]}\n')
+    _, report = build_state_from_jsonl('{"op": "branch", "name": "main"}\n{"op": "remove", "commits": ["ghost"]}\n')
 
     # --- assert -----------------------
     assert [e.code for e in report.errors] == ["E201"]
@@ -54,7 +54,7 @@ def test_remove_unknown_commit_emits_e201() -> None:
 
 def test_remove_unknown_branch_emits_e200() -> None:
     # --- act --------------------------
-    _, report = run('{"op": "branch", "name": "main"}\n{"op": "remove", "branches": ["ghost"]}\n')
+    _, report = build_state_from_jsonl('{"op": "branch", "name": "main"}\n{"op": "remove", "branches": ["ghost"]}\n')
 
     # --- assert -----------------------
     assert [e.code for e in report.errors] == ["E200"]
@@ -71,7 +71,7 @@ def test_remove_then_redeclare_branch_with_same_name_works() -> None:
     )
 
     # --- act --------------------------
-    state, report = run(text)
+    state, report = build_state_from_jsonl(text)
 
     # --- assert -----------------------
     assert report.is_clean()
@@ -90,7 +90,7 @@ def test_highlight_existing_commit_sets_flag() -> None:
     )
 
     # --- act --------------------------
-    state, report = run(text)
+    state, report = build_state_from_jsonl(text)
 
     # --- assert -----------------------
     assert report.is_clean()
@@ -99,7 +99,7 @@ def test_highlight_existing_commit_sets_flag() -> None:
 
 def test_highlight_unknown_commit_emits_e201() -> None:
     # --- act --------------------------
-    _, report = run('{"op": "branch", "name": "main"}\n{"op": "highlight", "commit": "ghost"}\n')
+    _, report = build_state_from_jsonl('{"op": "branch", "name": "main"}\n{"op": "highlight", "commit": "ghost"}\n')
 
     # --- assert -----------------------
     assert [e.code for e in report.errors] == ["E201"]
@@ -113,7 +113,7 @@ def test_canvas_op_pins_dimensions_in_state() -> None:
     text = '{"op": "canvas", "n_commits": 5, "branch_spacing": 40}\n'
 
     # --- act --------------------------
-    state, report = run(text)
+    state, report = build_state_from_jsonl(text)
 
     # --- assert -----------------------
     assert report.is_clean()
@@ -127,7 +127,7 @@ def test_canvas_last_op_wins() -> None:
     text = '{"op": "canvas", "n_commits": 5}\n{"op": "canvas", "n_commits": 10}\n'
 
     # --- act --------------------------
-    state, report = run(text)
+    state, report = build_state_from_jsonl(text)
 
     # --- assert -----------------------
     assert report.is_clean()

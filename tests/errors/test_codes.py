@@ -135,7 +135,7 @@ def test_all_codes_returns_sorted_entries(populated_registry: dict) -> None:
 
 
 def test_production_registry_includes_parser_and_shape_codes() -> None:
-    """The production catalog declares the parse-phase and shape-phase codes."""
+    """The production catalog declares the parse-phase and schema-phase codes."""
     # --- act --------------------------
     codes = {entry.code for entry in all_codes()}
 

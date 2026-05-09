@@ -1,11 +1,11 @@
 """End-to-end tests for the state engine — multiple ops, error accumulation, import skipping."""
 
-from tests.state._helpers import run
+from tests.state._helpers import build_state_from_jsonl
 
 
 def test_empty_input_returns_empty_state_and_clean_report() -> None:
     # --- act --------------------------
-    state, report = run("")
+    state, report = build_state_from_jsonl("")
 
     # --- assert -----------------------
     assert report.is_clean()
@@ -25,7 +25,7 @@ def test_engine_continues_past_semantic_errors() -> None:
     )
 
     # --- act --------------------------
-    state, report = run(text)
+    state, report = build_state_from_jsonl(text)
 
     # --- assert -----------------------
     assert [(e.line, e.code) for e in report.errors] == [(2, "E200"), (4, "E202")]
@@ -34,12 +34,12 @@ def test_engine_continues_past_semantic_errors() -> None:
 
 
 def test_import_op_is_skipped_during_state_apply() -> None:
-    """Imports are shape-only at this layer; resolution comes later."""
+    """Imports are schema-only at this layer; resolution comes later."""
     # --- arrange ----------------------
     text = '{"op": "import", "path": "./other.gitsvg.jsonl"}\n{"op": "branch", "name": "main"}\n'
 
     # --- act --------------------------
-    state, report = run(text)
+    state, report = build_state_from_jsonl(text)
 
     # --- assert -----------------------
     assert report.is_clean()
@@ -59,7 +59,7 @@ def test_full_realistic_scenario_with_branches_commits_merge_highlight() -> None
     )
 
     # --- act --------------------------
-    state, report = run(text)
+    state, report = build_state_from_jsonl(text)
 
     # --- assert -----------------------
     assert report.is_clean()

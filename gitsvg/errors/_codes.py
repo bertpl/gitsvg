@@ -14,7 +14,7 @@ populated by scanning that directory at import time:
 The numeric range encodes the validation phase the code belongs to:
 
 - E001-E099: parse / JSONL syntax
-- E100-E199: per-op shape (pydantic-level)
+- E100-E199: per-op schema (pydantic-level)
 - E200-E299: per-op semantic (state-aware)
 - E300-E399: imports (cycle, depth, path, ordering)
 - E400-E499: end-of-file cross-reference checks

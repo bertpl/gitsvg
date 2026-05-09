@@ -1,7 +1,7 @@
 """The `gitsvg validate` CLI command.
 
 Runs the full single-file validator pipeline: parse → import resolution →
-per-op shape → per-op semantic → end-of-file cross-reference check.
+per-op schema → per-op semantic → end-of-file cross-reference check.
 
 Output:
 
@@ -18,6 +18,7 @@ from pathlib import Path
 
 import click
 
+from gitsvg.errors import ValidationReport
 from gitsvg.imports import resolve_imports
 from gitsvg.parse import parse_jsonl_file
 from gitsvg.state import apply_ops, check_end_of_file
@@ -32,7 +33,7 @@ from gitsvg.state import apply_ops, check_end_of_file
 def validate_command(path: Path, json_output: bool) -> None:
     """Validate a `.gitsvg.jsonl` input file.
 
-    Runs JSONL parsing, import resolution, per-op shape validation,
+    Runs JSONL parsing, import resolution, per-op schema validation,
     per-op semantic validation, and end-of-file cross-reference
     validation. Prints any errors and exits non-zero when validation
     fails.
@@ -51,14 +52,14 @@ def validate_command(path: Path, json_output: bool) -> None:
 # ==================================================================================================
 #  Output rendering
 # ==================================================================================================
-def _print_plain(report) -> None:
+def _print_plain(report: ValidationReport) -> None:
     """Print the report as plain text, one error per line."""
     for err in report.errors:
         click.echo(err.format())
 
 
-def _render_json(report) -> str:
-    """Render the report as a JSON string with shape `{ok, errors}`."""
+def _render_json(report: ValidationReport) -> str:
+    """Render the report as a JSON string with structure `{ok, errors}`."""
     payload = {
         "ok": report.is_clean(),
         "errors": [dataclasses.asdict(err) for err in report.errors],

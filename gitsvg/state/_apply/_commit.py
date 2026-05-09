@@ -30,7 +30,7 @@ def apply_commit_op(state: State, parsed: ParsedOp, report: ValidationReport) ->
     file = parsed.file
     line = parsed.line
 
-    # --- Branch reference ----------------------
+    # --- Branch reference -----------------------
     if not state.has_branch(op.branch):
         report.add(
             ValidationError(
@@ -43,13 +43,13 @@ def apply_commit_op(state: State, parsed: ParsedOp, report: ValidationReport) ->
         )
         return
 
-    # --- Replaces rules ------------------------
+    # --- Replaces rules -------------------------
     if op.replaces and not check_replaces_rules(state, parsed, report):
         return
 
     replaced_set: set[str] = set(op.replaces or [])
 
-    # --- Parents existence ---------------------
+    # --- Parents existence ----------------------
     for index, parent_id in enumerate(op.parents or []):
         if parent_id in replaced_set:
             # Rule 7 in `_replaces.py` already caught this; defensive guard.
@@ -66,7 +66,7 @@ def apply_commit_op(state: State, parsed: ParsedOp, report: ValidationReport) ->
             )
             return
 
-    # --- Resolve commit id ---------------------
+    # --- Resolve commit id ----------------------
     explicit_id = op.id
     commit_id = explicit_id if explicit_id is not None else _generate_auto_commit_id(state)
     if explicit_id is not None and explicit_id in state.commits and explicit_id not in replaced_set:
@@ -81,11 +81,11 @@ def apply_commit_op(state: State, parsed: ParsedOp, report: ValidationReport) ->
         )
         return
 
-    # --- Apply replaces removals ---------------
+    # --- Apply replaces removals ----------------
     for rid in op.replaces or []:
         _remove_commit(state, rid)
 
-    # --- Add the commit ------------------------
+    # --- Add the commit -------------------------
     state.commits[commit_id] = CommitState(
         id=commit_id,
         branch=op.branch,
@@ -125,8 +125,8 @@ def _remove_commit(state: State, commit_id: str) -> None:
     Drops the commit from the global commits dict and from its branch's
     commit-ids list. Cross-references (parents, replaces, captured
     `from_branch` snapshots, etc.) are left untouched — `remove` is
-    permissive about dangling references; end-of-file checks (a later
-    layer) catch any that aren't restored.
+    permissive about dangling references; `check_end_of_file` (in
+    `gitsvg.state._eof`) catches any that aren't restored.
     """
     commit = state.commits.pop(commit_id, None)
     if commit is None:

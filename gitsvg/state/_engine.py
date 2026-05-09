@@ -2,12 +2,14 @@
 
 `apply_ops` is the only entry point. It dispatches each `ParsedOp` to
 the right per-op handler under `gitsvg.state._apply`, accumulating
-semantic errors into the provided `ValidationReport`. Shape-failed
+semantic errors into the provided `ValidationReport`. Schema-failed
 lines never reach this layer — they were dropped by the parser before
 becoming `ParsedOp` records.
 
-`import` ops are skipped here. Import resolution lands in a later
-version; in this layer they're shape-only.
+`import` ops are expanded away upstream by `gitsvg.imports.resolve_imports`
+before `apply_ops` runs, so they normally do not reach the engine. Any
+leftover `ImportOp` (e.g. when a caller skips the resolver) is treated
+as a no-op here.
 """
 
 from gitsvg.errors import ValidationReport
@@ -36,7 +38,7 @@ def apply_ops(parsed_ops: list[ParsedOp], report: ValidationReport) -> State:
     """Apply parsed ops to a fresh state, accumulating semantic errors into `report`.
 
     Args:
-        parsed_ops: Shape-validated ops in source order.
+        parsed_ops: Schema-validated ops in source order.
         report: Report to which semantic errors are appended. The report
             may already hold parser errors; this function only adds.
 
@@ -66,5 +68,6 @@ def _apply_one(state: State, parsed: ParsedOp, report: ValidationReport) -> None
     elif isinstance(op, CanvasOp):
         apply_canvas_op(state, parsed, report)
     elif isinstance(op, ImportOp):
-        # Import resolution lands in a later version; this layer is shape-only.
+        # Import ops are normally expanded away by gitsvg.imports.resolve_imports
+        # before apply_ops runs; treat any leftover as a no-op.
         return
