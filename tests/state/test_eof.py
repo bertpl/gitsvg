@@ -2,7 +2,7 @@
 
 from gitsvg.errors import ValidationReport
 from gitsvg.state import check_end_of_file
-from tests.state._helpers import parse_and_apply
+from tests.state._helpers import build_state_from_jsonl
 
 
 # ==================================================================================================
@@ -18,7 +18,7 @@ def test_clean_state_produces_no_eof_errors() -> None:
     )
 
     # --- act --------------------------
-    state, report = parse_and_apply(text)
+    state, report = build_state_from_jsonl(text)
     eof_report = ValidationReport()
     check_end_of_file(state, eof_report)
 
@@ -40,7 +40,7 @@ def test_dangling_branch_root_via_from_commit_emits_e400() -> None:
     )
 
     # --- act --------------------------
-    state, report = parse_and_apply(text)
+    state, report = build_state_from_jsonl(text)
     check_end_of_file(state, report)
 
     # --- assert -----------------------
@@ -58,7 +58,7 @@ def test_dangling_branch_root_via_from_branch_emits_e400() -> None:
     )
 
     # --- act --------------------------
-    state, report = parse_and_apply(text)
+    state, report = build_state_from_jsonl(text)
     check_end_of_file(state, report)
 
     # --- assert -----------------------
@@ -71,7 +71,7 @@ def test_branch_with_no_resolved_root_does_not_dangle() -> None:
     text = '{"op": "branch", "name": "main"}\n{"op": "branch", "name": "feat", "from_branch": "main"}\n'
 
     # --- act --------------------------
-    state, report = parse_and_apply(text)
+    state, report = build_state_from_jsonl(text)
     check_end_of_file(state, report)
 
     # --- assert -----------------------
@@ -92,7 +92,7 @@ def test_dangling_explicit_parent_emits_e401() -> None:
     )
 
     # --- act --------------------------
-    state, report = parse_and_apply(text)
+    state, report = build_state_from_jsonl(text)
     check_end_of_file(state, report)
 
     # --- assert -----------------------
@@ -115,7 +115,7 @@ def test_dangling_merge_parent_emits_e401() -> None:
     )
 
     # --- act --------------------------
-    state, report = parse_and_apply(text)
+    state, report = build_state_from_jsonl(text)
     check_end_of_file(state, report)
 
     # --- assert -----------------------
@@ -138,7 +138,7 @@ def test_rebuild_pattern_with_same_id_restores_state_and_passes_eof() -> None:
     )
 
     # --- act --------------------------
-    state, report = parse_and_apply(text)
+    state, report = build_state_from_jsonl(text)
     check_end_of_file(state, report)
 
     # --- assert -----------------------
@@ -158,7 +158,7 @@ def test_rebuild_pattern_for_branch_remove_then_redeclare() -> None:
     )
 
     # --- act --------------------------
-    state, report = parse_and_apply(text)
+    state, report = build_state_from_jsonl(text)
     check_end_of_file(state, report)
 
     # --- assert -----------------------
@@ -181,7 +181,7 @@ def test_multiple_missing_parents_emit_one_error_per_dangling_parent() -> None:
     )
 
     # --- act --------------------------
-    state, report = parse_and_apply(text)
+    state, report = build_state_from_jsonl(text)
     check_end_of_file(state, report)
 
     # --- assert -----------------------
