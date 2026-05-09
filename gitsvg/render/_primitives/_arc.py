@@ -20,7 +20,7 @@ the two endpoints are very close.
 
 import drawsvg as draw
 
-from gitsvg.render._constants import ARC_CORNER_RADIUS, BRANCH_LINE_WIDTH
+from gitsvg._visual_constants import ARC_CORNER_RADIUS, BRANCH_LINE_WIDTH
 from gitsvg.render._geometry import branch_axis_to_x, commit_axis_to_y
 
 

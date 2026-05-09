@@ -1,26 +1,35 @@
-"""Layout — assign axis positions to validated branches and commits.
+"""Layout — turn validated `State` into a render-ready `Layout`.
 
 Public surface:
 
-- `compute_layout(parsed_ops)` — walk a stream of parsed ops in source
-  order and return the resulting `Layout`.
-- `Layout`, `LayoutBranch`, `LayoutCommit` — output dataclasses
-  consumed by the renderer.
+- `compute_layout(state)` — pure transformation; takes the state engine's
+  output and returns a complete `Layout` (positions, resolved colours,
+  resolved label sides, pre-computed arcs and guides, canvas dimensions).
+- `Layout`, `LayoutBranch`, `LayoutCommit`, `LayoutArc`, `LayoutGuide`,
+  `LayoutCanvas` — the dataclasses the renderer consumes.
 
-Layout is computed independently of the state engine: both walk the
-same op stream, but state stores entity data (color, msg, hash,
-parents, …) while layout stores axis positions. This keeps the
-renderer free to read positions without depending on state-engine
-internals, and keeps the layout engine swappable when smarter
-heuristics land.
+The renderer never imports `State`. Every field it needs is pre-resolved
+in `Layout`, so different layout strategies (the v0.0.3 default;
+v0.0.4 lane reuse; future left-to-right orientation; …) can be plugged
+in without touching the renderer.
 """
 
 from gitsvg.layout._engine import compute_layout
-from gitsvg.layout._layout import Layout, LayoutBranch, LayoutCommit
+from gitsvg.layout._layout import (
+    Layout,
+    LayoutArc,
+    LayoutBranch,
+    LayoutCanvas,
+    LayoutCommit,
+    LayoutGuide,
+)
 
 __all__ = [
     "Layout",
+    "LayoutArc",
     "LayoutBranch",
+    "LayoutCanvas",
     "LayoutCommit",
+    "LayoutGuide",
     "compute_layout",
 ]

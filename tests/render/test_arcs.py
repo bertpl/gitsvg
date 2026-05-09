@@ -9,8 +9,8 @@ from gitsvg.state import apply_ops
 def _render_from(text: str):
     parsed, report = parse_jsonl_text(text, file="x.jsonl")
     state = apply_ops(parsed, report)
-    layout = compute_layout(parsed)
-    return render(state, layout)
+    layout = compute_layout(state)
+    return render(layout)
 
 
 # ==================================================================================================

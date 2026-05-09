@@ -5,7 +5,7 @@ at the bottom of the canvas (oldest), higher indices sit higher
 (newer); branch-axis index 0 sits at the left.
 """
 
-from gitsvg.render._constants import (
+from gitsvg._visual_constants import (
     BRANCH_SPACING,
     COMMIT_SPACING,
     MARGIN_BRANCH_AXIS_LOWER,

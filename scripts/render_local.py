@@ -40,8 +40,8 @@ def render_one(input_path: Path, output_path: Path) -> ValidationReport:
     check_end_of_file(state, report)
     if not report.is_clean():
         return report
-    layout = compute_layout(expanded)
-    drawing = render(state, layout)
+    layout = compute_layout(state)
+    drawing = render(layout)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     drawing.save_svg(str(output_path))
     return report

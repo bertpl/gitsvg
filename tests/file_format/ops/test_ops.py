@@ -439,7 +439,13 @@ def test_merge_gap_round_trip() -> None:
     assert op.gap == 1
 
 
-def test_commit_rejects_gap_with_replaces() -> None:
+def test_commit_accepts_gap_with_replaces() -> None:
+    """`gap` and `replaces:` may both be set on the same commit op.
+
+    The state engine resolves the squash commit's effective `gap`:
+    `op.gap` overrides; otherwise it inherits the earliest replaced
+    commit's gap.
+    """
     # --- arrange ----------------------
     raw = {
         "op": "commit",
@@ -450,6 +456,9 @@ def test_commit_rejects_gap_with_replaces() -> None:
         "gap": 1,
     }
 
-    # --- act / assert -----------------
-    with pytest.raises(ValidationError):
-        CommitOp.model_validate(raw)
+    # --- act --------------------------
+    op = CommitOp.model_validate(raw)
+
+    # --- assert -----------------------
+    assert op.gap == 1
+    assert op.replaces == ["c2", "c3"]

@@ -7,7 +7,7 @@ sit at the bottom of the z-order; everything else draws on top.
 
 import drawsvg as draw
 
-from gitsvg.render._constants import (
+from gitsvg._visual_constants import (
     BRANCH_GUIDE_COLOR,
     BRANCH_GUIDE_DASH,
     BRANCH_GUIDE_WIDTH,

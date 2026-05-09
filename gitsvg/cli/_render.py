@@ -48,6 +48,6 @@ def render_command(input_path: Path, output_path: Path) -> None:
             click.echo(err.format(), err=True)
         sys.exit(1)
 
-    layout = compute_layout(expanded_ops)
-    drawing = render(state, layout)
+    layout = compute_layout(state)
+    drawing = render(layout)
     drawing.save_svg(str(output_path))

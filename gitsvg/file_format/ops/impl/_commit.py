@@ -31,15 +31,3 @@ class CommitOp(OpBase):
         if self.msg is None and self.hash is None:
             raise ValueError("commit op must specify at least one of 'msg' or 'hash'")
         return self
-
-    @model_validator(mode="after")
-    def _validate_gap_not_with_replaces(self) -> Self:
-        """Reject `gap:` on commits that also set `replaces:`.
-
-        A `replaces:` commit lands *at* the first replaced commit's
-        position by definition, so a gap-style commit-axis offset
-        contradicts the squash semantics.
-        """
-        if self.gap is not None and self.replaces is not None:
-            raise ValueError("'gap' is not allowed on a commit with 'replaces' (the squash position is fixed)")
-        return self

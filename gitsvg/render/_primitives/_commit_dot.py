@@ -2,8 +2,8 @@
 
 import drawsvg as draw
 
+from gitsvg._visual_constants import COMMIT_RADIUS, COMMIT_STROKE_WIDTH
 from gitsvg.layout import LayoutCommit
-from gitsvg.render._constants import COMMIT_RADIUS, COMMIT_STROKE_WIDTH
 from gitsvg.render._geometry import branch_axis_to_x, commit_axis_to_y
 
 

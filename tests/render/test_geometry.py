@@ -1,6 +1,6 @@
 """Tests for coordinate transforms — branch axis → x, commit axis → y."""
 
-from gitsvg.render._constants import (
+from gitsvg._visual_constants import (
     BRANCH_SPACING,
     COMMIT_SPACING,
     MARGIN_BRANCH_AXIS_LOWER,
