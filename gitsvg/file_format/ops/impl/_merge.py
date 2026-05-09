@@ -16,4 +16,5 @@ class MergeOp(OpBase):
     into: IdStr
     as_: IdStr | None = Field(default=None, alias="as")
     msg: NonEmptyStr | None = None
+    hash: IdStr | None = None
     gap: NonNegativeInt | None = None

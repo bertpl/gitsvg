@@ -6,6 +6,7 @@ from gitsvg.errors import ValidationError, ValidationReport
 from gitsvg.file_format.ops import MergeOp
 from gitsvg.parse import ParsedOp
 from gitsvg.state._apply._commit import _generate_auto_commit_id
+from gitsvg.state._auto_hash import compute_auto_hash, effective_parent_ids
 from gitsvg.state._state import CommitState, State
 
 
@@ -71,9 +72,14 @@ def apply_merge_op(state: State, parsed: ParsedOp, report: ValidationReport) -> 
         id=merge_id,
         branch=op.into,
         msg=op.msg,
+        hash=op.hash,
         parents=parents,
         gap=op.gap or 0,
         declaration_file=file,
         declaration_line=line,
     )
     state.branches[op.into].commit_ids.append(merge_id)
+
+    # --- Resolve `hash: "auto"` -----------------
+    if op.hash == "auto":
+        state.commits[merge_id].hash = compute_auto_hash(merge_id, effective_parent_ids(state, merge_id, op.into))
