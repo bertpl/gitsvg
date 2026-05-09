@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `hash: "auto"` on `commit:` ops now resolves to a deterministic 7-character hex string. The hash is the lower-cased hex of `sha256(id + "\n" + sorted(immediate_parent_ids))[:7]`. Sorting parents makes the hash insensitive to declaration order on merge parents; including parent ids makes it sensitive to rebase-style chain changes (so a downstream commit gets a new hash when an upstream commit's id is renamed).
 - `merge:` op gains a `hash:` field (with the same `"auto"` sentinel as `commit:`), so merge commits can carry a stable, auto-generated identifier across animation frames.
 - Internal: layout engine (`gitsvg.layout`) — pure-computation module that turns a validated op stream into per-branch and per-commit axis positions. Not exposed through the CLI yet; consumed by rendering work to follow.
+- `gitsvg render <input> -o <output>` command — renders a validated `.gitsvg.jsonl` file to SVG (single file in, single file out). Runs the validate pipeline first; emits no output and exits non-zero on errors.
+- `make render-local` target — walks `local/test_examples/` and renders every `.gitsvg.jsonl` to a sibling `_render_outputs/` directory. Skipped silently when the directory is absent.
 
 ### Changed
 
