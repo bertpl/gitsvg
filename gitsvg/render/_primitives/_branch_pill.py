@@ -18,7 +18,7 @@ from gitsvg._visual_constants import (
     BRANCH_NAME_PILL_OFFSET,
     LABEL_FONT_FAMILY,
 )
-from gitsvg.layout import LayoutBranch
+from gitsvg.layout import LayoutBranch, LayoutCanvas
 from gitsvg.render._geometry import branch_axis_to_x, commit_axis_to_y
 
 _PILL_PADDING_X = 12  # extra width beyond the rendered text
@@ -27,10 +27,10 @@ _PILL_CORNER_RADIUS = 4
 _CHAR_WIDTH_FACTOR = 0.58  # rough char-width estimate at weight 500
 
 
-def draw_branch_pill(d: draw.Drawing, branch: LayoutBranch, n_commits: int) -> None:
+def draw_branch_pill(d: draw.Drawing, branch: LayoutBranch, canvas: LayoutCanvas) -> None:
     """Append a branch-name pill (background rectangle + text) to the drawing."""
-    x = branch_axis_to_x(branch.branch_pos)
-    y = commit_axis_to_y(branch.start, n_commits) + BRANCH_NAME_PILL_OFFSET
+    x = branch_axis_to_x(branch.branch_pos, canvas)
+    y = commit_axis_to_y(branch.start, canvas) + BRANCH_NAME_PILL_OFFSET
 
     width = len(branch.name) * BRANCH_LABEL_FONT_SIZE * _CHAR_WIDTH_FACTOR + _PILL_PADDING_X
     height = BRANCH_LABEL_FONT_SIZE + _PILL_PADDING_Y

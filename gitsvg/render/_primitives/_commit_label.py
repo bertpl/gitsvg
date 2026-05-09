@@ -24,13 +24,13 @@ from gitsvg._visual_constants import (
     LABEL_FONT_SIZE,
     LABEL_OFFSET,
 )
-from gitsvg.layout import LayoutCommit
+from gitsvg.layout import LayoutCanvas, LayoutCommit
 from gitsvg.render._geometry import branch_axis_to_x, commit_axis_to_y
 
 _LINE_HEIGHT = LABEL_FONT_SIZE + 4
 
 
-def draw_commit_label(d: draw.Drawing, commit: LayoutCommit, n_commits: int) -> None:
+def draw_commit_label(d: draw.Drawing, commit: LayoutCommit, canvas: LayoutCanvas) -> None:
     """Append a commit's label lines to the drawing.
 
     Skipped silently when the commit has neither `msg` nor `hash` to
@@ -40,8 +40,8 @@ def draw_commit_label(d: draw.Drawing, commit: LayoutCommit, n_commits: int) -> 
     if not lines:
         return
 
-    cx = branch_axis_to_x(commit.branch_pos)
-    cy = commit_axis_to_y(commit.commit_pos, n_commits)
+    cx = branch_axis_to_x(commit.branch_pos, canvas)
+    cy = commit_axis_to_y(commit.commit_pos, canvas)
 
     if commit.label_side == "left":
         anchor = "end"

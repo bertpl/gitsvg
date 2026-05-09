@@ -2,8 +2,9 @@
 
 The renderer is purely "Layout dataclass tree → SVG primitives." It never
 imports `State`. Every visual decision (resolved colours, label sides,
-which arcs/guides to draw, canvas dimensions, …) was made in the layout
-engine and is already encoded in the `Layout` it receives.
+which arcs/guides to draw, canvas dimensions and effective spacing/
+margins, …) was made in the layout engine and is already encoded in the
+`Layout` it receives.
 
 Z-order (back to front):
 
@@ -43,11 +44,10 @@ def render(layout: Layout) -> draw.Drawing:
     """
     canvas = layout.canvas
     d = draw.Drawing(canvas.width, canvas.height)
-    n_commits = canvas.n_commits
 
     # --- Branch guides ----------------
     for guide in layout.guides:
-        draw_branch_guide(d, guide.branch_pos, canvas.height)
+        draw_branch_guide(d, guide.branch_pos, canvas)
 
     # --- Arcs (branch-off + merge) -----
     for arc in layout.arcs:
@@ -57,25 +57,25 @@ def render(layout: Layout) -> draw.Drawing:
             from_commit_pos=arc.from_commit_pos,
             to_branch_pos=arc.to_branch_pos,
             to_commit_pos=arc.to_commit_pos,
-            n_commits=n_commits,
+            canvas=canvas,
             color=arc.color,
             vertical_first=arc.vertical_first,
         )
 
     # --- Branch lines -----------------
     for branch in layout.branches:
-        draw_branch_line(d, branch, branch.color, n_commits)
+        draw_branch_line(d, branch, branch.color, canvas)
 
     # --- Branch-name pills ------------
     for branch in layout.branches:
-        draw_branch_pill(d, branch, n_commits)
+        draw_branch_pill(d, branch, canvas)
 
     # --- Commit dots ------------------
     for commit in layout.commits.values():
-        draw_commit_dot(d, commit, commit.color, n_commits)
+        draw_commit_dot(d, commit, commit.color, canvas)
 
     # --- Commit labels ----------------
     for commit in layout.commits.values():
-        draw_commit_label(d, commit, n_commits)
+        draw_commit_label(d, commit, canvas)
 
     return d

@@ -474,15 +474,16 @@ def test_canvas_size_for_single_branch_three_commits() -> None:
     layout = _layout_from(text)
 
     # --- assert -----------------------
-    # Width: 1 lane → MARGIN_LOWER + 0 * SPACING + MARGIN_UPPER.
-    # Height: standard margins + (n-1) * spacing + BRANCH_NAME_PILL_OFFSET (pill room
-    # below the lowest dot).
     canvas = layout.canvas
+    # 3 commits → n_commits = 3.
     assert canvas.n_commits == 3
+    # Width: short branch name "main" auto-fits within the default lower/upper margins.
     assert canvas.width == MARGIN_BRANCH_AXIS_LOWER + 0 * BRANCH_SPACING + MARGIN_BRANCH_AXIS_UPPER
-    assert canvas.height == (
-        MARGIN_COMMIT_AXIS_UPPER + (3 - 1) * COMMIT_SPACING + MARGIN_COMMIT_AXIS_LOWER + BRANCH_NAME_PILL_OFFSET
-    )
+    # Height: upper-margin + content + auto-fit lower margin (which extends past the
+    # default to make room for the root branch's pill below the lowest dot).
+    assert canvas.height == (MARGIN_COMMIT_AXIS_UPPER + (3 - 1) * COMMIT_SPACING + canvas.margin_commit_axis_lower)
+    # The auto-fit lower margin is at least the pill-room (PILL_OFFSET + half pill height + pad).
+    assert canvas.margin_commit_axis_lower >= BRANCH_NAME_PILL_OFFSET
 
 
 def test_canvas_widens_for_two_branches() -> None:

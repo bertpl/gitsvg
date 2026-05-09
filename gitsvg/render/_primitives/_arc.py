@@ -21,6 +21,7 @@ the two endpoints are very close.
 import drawsvg as draw
 
 from gitsvg._visual_constants import ARC_CORNER_RADIUS, BRANCH_LINE_WIDTH
+from gitsvg.layout import LayoutCanvas
 from gitsvg.render._geometry import branch_axis_to_x, commit_axis_to_y
 
 
@@ -31,7 +32,7 @@ def draw_arc(
     from_commit_pos: int,
     to_branch_pos: int,
     to_commit_pos: int,
-    n_commits: int,
+    canvas: LayoutCanvas,
     color: str,
     vertical_first: bool,
 ) -> None:
@@ -43,17 +44,16 @@ def draw_arc(
         from_commit_pos: Source point's commit-axis index.
         to_branch_pos: Target point's branch-axis index.
         to_commit_pos: Target point's commit-axis index.
-        n_commits: Total commit-axis slots (passed through to the
-            geometry transform).
+        canvas: Effective canvas spec, used for the geometry transform.
         color: Stroke colour for the arc.
         vertical_first: When True, the arc starts with a vertical
             segment (used for merge connectors). When False, it starts
             horizontal (used for branch-off connectors).
     """
-    x1 = branch_axis_to_x(from_branch_pos)
-    y1 = commit_axis_to_y(from_commit_pos, n_commits)
-    x2 = branch_axis_to_x(to_branch_pos)
-    y2 = commit_axis_to_y(to_commit_pos, n_commits)
+    x1 = branch_axis_to_x(from_branch_pos, canvas)
+    y1 = commit_axis_to_y(from_commit_pos, canvas)
+    x2 = branch_axis_to_x(to_branch_pos, canvas)
+    y2 = commit_axis_to_y(to_commit_pos, canvas)
 
     p = draw.Path(
         stroke=color,
