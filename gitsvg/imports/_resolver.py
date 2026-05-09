@@ -120,7 +120,7 @@ def _expand(
 
     target = (current_file.parent / import_op.path).resolve()
 
-    # --- Cycle check ---------------------------
+    # --- Cycle check ----------------------------
     if target in cycle_stack:
         chain = " -> ".join(str(p) for p in cycle_stack + [target])
         report.add(
@@ -134,7 +134,7 @@ def _expand(
         )
         return rest
 
-    # --- Depth check ---------------------------
+    # --- Depth check ----------------------------
     if depth + 1 > depth_limit:
         report.add(
             ValidationError(
@@ -147,7 +147,7 @@ def _expand(
         )
         return rest
 
-    # --- Read + parse the imported file -------
+    # --- Read + parse the imported file ---------
     try:
         text = target.read_text(encoding="utf-8")
     except (FileNotFoundError, IsADirectoryError, PermissionError, OSError) as exc:
@@ -166,7 +166,7 @@ def _expand(
     for err in imported_report.errors:
         report.add(err)
 
-    # --- Recurse -------------------------------
+    # --- Recurse --------------------------------
     expanded = _expand(
         imported_parsed,
         current_file=target,

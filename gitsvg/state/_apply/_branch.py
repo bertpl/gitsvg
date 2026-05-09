@@ -15,7 +15,8 @@ def apply_branch_op(state: State, parsed: ParsedOp, report: ValidationReport) ->
 
     1. Branch name must not already be declared (E202).
     2. Non-first branch must specify exactly one of `from_branch` / `from_commit` (E204).
-       (The mutex is shape-level — caught in PR1; the at-least-one is state-aware.)
+       (The mutex is shape-level — enforced by the pydantic model in `BranchOp`;
+       the at-least-one rule is state-aware and lives here.)
     3. `from_branch` (when set) must reference an existing branch (E200).
        Diagnostic note: when the name exists as a commit id instead, the
        message hints at using `from_commit`.
@@ -28,7 +29,7 @@ def apply_branch_op(state: State, parsed: ParsedOp, report: ValidationReport) ->
     file = parsed.file
     line = parsed.line
 
-    # --- Uniqueness ----------------------------
+    # --- Uniqueness -----------------------------
     if op.name in state.branches:
         report.add(
             ValidationError(
@@ -41,7 +42,7 @@ def apply_branch_op(state: State, parsed: ParsedOp, report: ValidationReport) ->
         )
         return
 
-    # --- Root presence -------------------------
+    # --- Root presence --------------------------
     is_first = state.is_first_branch()
     has_root = op.from_branch is not None or op.from_commit is not None
     if not is_first and not has_root:
@@ -55,7 +56,7 @@ def apply_branch_op(state: State, parsed: ParsedOp, report: ValidationReport) ->
         )
         return
 
-    # --- from_branch existence -----------------
+    # --- from_branch existence ------------------
     rooted_on: str | None = None
     if op.from_branch is not None:
         if not state.has_branch(op.from_branch):
@@ -76,7 +77,7 @@ def apply_branch_op(state: State, parsed: ParsedOp, report: ValidationReport) ->
             return
         rooted_on = state.branch_tip(op.from_branch)
 
-    # --- from_commit existence -----------------
+    # --- from_commit existence ------------------
     if op.from_commit is not None:
         if not state.has_commit(op.from_commit):
             hint = (
@@ -96,7 +97,7 @@ def apply_branch_op(state: State, parsed: ParsedOp, report: ValidationReport) ->
             return
         rooted_on = op.from_commit
 
-    # --- Add to state --------------------------
+    # --- Add to state ---------------------------
     state.branches[op.name] = BranchState(
         name=op.name,
         color=op.color,

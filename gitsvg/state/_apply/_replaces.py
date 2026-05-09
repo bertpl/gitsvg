@@ -5,8 +5,8 @@ mutation. It validates the replaces field against current state and returns
 True only when all applicable rules pass. Errors are appended to the report
 as they're discovered.
 
-Rule numbering matches `design/format.md` (rule 6 — tags/annotate — is
-dormant in v0.0.x).
+Rule numbering follows the locked-in format spec; rule 6 (tags/annotate)
+is reserved and currently dormant.
 """
 
 from typing import cast

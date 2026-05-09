@@ -19,7 +19,8 @@ def apply_remove_op(state: State, parsed: ParsedOp, report: ValidationReport) ->
     but the rest of the list still attempts to remove. This matches
     the format spec's permissive stance on cross-references — dangling
     references are tolerated mid-file and end-of-file validation
-    (a later layer) flags any that aren't restored.
+    (`check_end_of_file` in `gitsvg.state._eof`) flags any that aren't
+    restored.
     """
     op = cast(RemoveOp, parsed.op)
     file = parsed.file

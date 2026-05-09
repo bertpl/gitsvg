@@ -6,8 +6,10 @@ semantic errors into the provided `ValidationReport`. Shape-failed
 lines never reach this layer — they were dropped by the parser before
 becoming `ParsedOp` records.
 
-`import` ops are skipped here. Import resolution lands in a later
-version; in this layer they're shape-only.
+`import` ops are expanded away upstream by `gitsvg.imports.resolve_imports`
+before `apply_ops` runs, so they normally do not reach the engine. Any
+leftover `ImportOp` (e.g. when a caller skips the resolver) is treated
+as a no-op here.
 """
 
 from gitsvg.errors import ValidationReport
@@ -66,5 +68,6 @@ def _apply_one(state: State, parsed: ParsedOp, report: ValidationReport) -> None
     elif isinstance(op, CanvasOp):
         apply_canvas_op(state, parsed, report)
     elif isinstance(op, ImportOp):
-        # Import resolution lands in a later version; this layer is shape-only.
+        # Import ops are normally expanded away by gitsvg.imports.resolve_imports
+        # before apply_ops runs; treat any leftover as a no-op.
         return

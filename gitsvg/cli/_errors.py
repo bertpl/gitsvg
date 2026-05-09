@@ -71,7 +71,7 @@ def _render_index() -> str:
         lines += [
             "(no error codes registered yet)",
             "",
-            "Codes are added as features land — see the v0.0.2 implementation plan.",
+            "Codes are added as features land. Run `gitsvg errors --list-codes` once the registry is populated.",
         ]
     else:
         width = max(len(e.code) for e in entries)

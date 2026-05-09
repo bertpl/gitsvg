@@ -18,6 +18,7 @@ from pathlib import Path
 
 import click
 
+from gitsvg.errors import ValidationReport
 from gitsvg.imports import resolve_imports
 from gitsvg.parse import parse_jsonl_file
 from gitsvg.state import apply_ops, check_end_of_file
@@ -51,13 +52,13 @@ def validate_command(path: Path, json_output: bool) -> None:
 # ==================================================================================================
 #  Output rendering
 # ==================================================================================================
-def _print_plain(report) -> None:
+def _print_plain(report: ValidationReport) -> None:
     """Print the report as plain text, one error per line."""
     for err in report.errors:
         click.echo(err.format())
 
 
-def _render_json(report) -> str:
+def _render_json(report: ValidationReport) -> str:
     """Render the report as a JSON string with shape `{ok, errors}`."""
     payload = {
         "ok": report.is_clean(),
