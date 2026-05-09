@@ -1,7 +1,7 @@
 """The `gitsvg validate` CLI command.
 
 Runs the full single-file validator pipeline: parse → import resolution →
-per-op shape → per-op semantic → end-of-file cross-reference check.
+per-op schema → per-op semantic → end-of-file cross-reference check.
 
 Output:
 
@@ -33,7 +33,7 @@ from gitsvg.state import apply_ops, check_end_of_file
 def validate_command(path: Path, json_output: bool) -> None:
     """Validate a `.gitsvg.jsonl` input file.
 
-    Runs JSONL parsing, import resolution, per-op shape validation,
+    Runs JSONL parsing, import resolution, per-op schema validation,
     per-op semantic validation, and end-of-file cross-reference
     validation. Prints any errors and exits non-zero when validation
     fails.
@@ -59,7 +59,7 @@ def _print_plain(report: ValidationReport) -> None:
 
 
 def _render_json(report: ValidationReport) -> str:
-    """Render the report as a JSON string with shape `{ok, errors}`."""
+    """Render the report as a JSON string with structure `{ok, errors}`."""
     payload = {
         "ok": report.is_clean(),
         "errors": [dataclasses.asdict(err) for err in report.errors],

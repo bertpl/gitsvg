@@ -15,7 +15,7 @@ also means an emit site cannot use a code that has no catalog entry:
 Entries are organised by validation phase:
 
 - E0xx — parse / JSONL syntax
-- E1xx — per-op shape (pydantic-level)
+- E1xx — per-op schema (pydantic-level)
 - E2xx — per-op semantic (state-aware)
 - E3xx — imports (cycle, depth, path, ordering)
 - E4xx — end-of-file cross-reference checks

@@ -2,7 +2,7 @@
 
 `apply_ops` is the only entry point. It dispatches each `ParsedOp` to
 the right per-op handler under `gitsvg.state._apply`, accumulating
-semantic errors into the provided `ValidationReport`. Shape-failed
+semantic errors into the provided `ValidationReport`. Schema-failed
 lines never reach this layer — they were dropped by the parser before
 becoming `ParsedOp` records.
 
@@ -38,7 +38,7 @@ def apply_ops(parsed_ops: list[ParsedOp], report: ValidationReport) -> State:
     """Apply parsed ops to a fresh state, accumulating semantic errors into `report`.
 
     Args:
-        parsed_ops: Shape-validated ops in source order.
+        parsed_ops: Schema-validated ops in source order.
         report: Report to which semantic errors are appended. The report
             may already hold parser errors; this function only adds.
 

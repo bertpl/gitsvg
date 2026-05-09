@@ -34,7 +34,7 @@ def test_engine_continues_past_semantic_errors() -> None:
 
 
 def test_import_op_is_skipped_during_state_apply() -> None:
-    """Imports are shape-only at this layer; resolution comes later."""
+    """Imports are schema-only at this layer; resolution comes later."""
     # --- arrange ----------------------
     text = '{"op": "import", "path": "./other.gitsvg.jsonl"}\n{"op": "branch", "name": "main"}\n'
 

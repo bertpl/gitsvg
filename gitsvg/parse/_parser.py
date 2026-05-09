@@ -24,7 +24,7 @@ from gitsvg.parse._parsed_op import ParsedOp
 #  Public API
 # ==================================================================================================
 def parse_jsonl_file(path: Path) -> tuple[list[ParsedOp], ValidationReport]:
-    """Parse a `.gitsvg.jsonl` file and shape-validate every op.
+    """Parse a `.gitsvg.jsonl` file and schema-validate every op.
 
     Args:
         path: Path to the JSONL file.
@@ -40,7 +40,7 @@ def parse_jsonl_file(path: Path) -> tuple[list[ParsedOp], ValidationReport]:
 
 
 def parse_jsonl_text(text: str, *, file: str = "<input>") -> tuple[list[ParsedOp], ValidationReport]:
-    """Parse JSONL text and shape-validate every op.
+    """Parse JSONL text and schema-validate every op.
 
     Args:
         text: The full JSONL content.
@@ -94,7 +94,7 @@ def _parse_one_line(raw: str, *, file: str, line: int) -> ParsedOp | list[Valida
             )
         ]
 
-    # --- Pydantic shape phase -------------------
+    # --- Pydantic schema phase -------------------
     try:
         op = OP_ADAPTER.validate_python(value)
     except PydanticValidationError as exc:
@@ -114,7 +114,7 @@ _PYDANTIC_TYPE_TO_CODE: dict[str, str] = {
     "union_tag_not_found": "E002",
     "union_tag_invalid": "E003",
     "model_attributes_type": "E004",
-    # Per-field shape
+    # Per-field schema
     "extra_forbidden": "E100",
     "missing": "E101",
     "string_pattern_mismatch": "E104",

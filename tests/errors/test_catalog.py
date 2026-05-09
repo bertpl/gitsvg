@@ -31,7 +31,7 @@ def test_default_catalog_dir_resolves_to_package_subdir() -> None:
 
 
 def test_production_catalog_holds_parser_and_shape_entries() -> None:
-    """The production catalog ships markdown files for the parse and shape codes."""
+    """The production catalog ships markdown files for the parse and schema codes."""
     # --- arrange ----------------------
     catalog = default_catalog_dir()
 

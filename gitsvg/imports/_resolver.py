@@ -2,8 +2,8 @@
 imported file's ops, recursively, with cycle detection and a depth cap.
 
 The resolver sits between the parser and the state engine. It takes a list
-of `ParsedOp` records (already shape-validated) for one file and returns a
-flat expanded list with the same shape — the state engine sees no `import`
+of `ParsedOp` records (already schema-validated) for one file and returns a
+flat expanded list with the same structure — the state engine sees no `import`
 ops, only the underlying op stream.
 
 Each `ParsedOp` already carries `(file, line)` provenance from the parser,
@@ -30,7 +30,7 @@ def resolve_imports(
     """Expand any leading `import` op in `parsed_ops` recursively.
 
     Args:
-        parsed_ops: Shape-validated ops parsed from `file`.
+        parsed_ops: Schema-validated ops parsed from `file`.
         file: Path of the file the ops were parsed from. Used as the
             base directory for resolving relative import paths and as
             the first entry in the cycle stack.

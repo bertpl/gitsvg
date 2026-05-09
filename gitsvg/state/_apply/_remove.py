@@ -11,7 +11,7 @@ from gitsvg.state._state import State
 def apply_remove_op(state: State, parsed: ParsedOp, report: ValidationReport) -> None:
     """Apply a `remove` op.
 
-    Removes either commits or branches (the shape phase guarantees
+    Removes either commits or branches (the schema phase guarantees
     exactly one of the two list fields is set). Removing a branch
     cascades to its commits.
 

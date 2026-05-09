@@ -106,7 +106,7 @@ def test_non_object_line_emits_e004() -> None:
 
 
 # ==================================================================================================
-#  Shape-phase errors (E100-E108)
+#  Schema-phase errors (E100-E108)
 # ==================================================================================================
 @pytest.mark.parametrize(
     "raw, expected_code, expected_field",
