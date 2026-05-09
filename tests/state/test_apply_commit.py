@@ -3,7 +3,7 @@ parents validation, id uniqueness, and the seven `replaces:` rules."""
 
 import pytest
 
-from tests.state._helpers import run
+from tests.state._helpers import parse_and_apply
 
 
 # ==================================================================================================
@@ -14,7 +14,7 @@ def test_commit_appends_to_branch() -> None:
     text = '{"op": "branch", "name": "main"}\n{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
 
     # --- act --------------------------
-    state, report = run(text)
+    state, report = parse_and_apply(text)
 
     # --- assert -----------------------
     assert report.is_clean()
@@ -32,7 +32,7 @@ def test_auto_id_generation_uses_underscore_c_n_namespace() -> None:
     )
 
     # --- act --------------------------
-    state, _ = run(text)
+    state, _ = parse_and_apply(text)
 
     # --- assert -----------------------
     # User-supplied `c1` does not collide with the `_c<N>` auto-id namespace.
@@ -50,7 +50,7 @@ def test_auto_id_skips_already_used_underscore_c_n_ids() -> None:
     )
 
     # --- act --------------------------
-    state, _ = run(text)
+    state, _ = parse_and_apply(text)
 
     # --- assert -----------------------
     assert state.branches["main"].commit_ids == ["_c2", "_c1", "_c3"]
@@ -61,7 +61,7 @@ def test_auto_id_skips_already_used_underscore_c_n_ids() -> None:
 # ==================================================================================================
 def test_commit_on_undeclared_branch_emits_e200() -> None:
     # --- act --------------------------
-    _, report = run('{"op": "commit", "branch": "main", "msg": "x"}\n')
+    _, report = parse_and_apply('{"op": "commit", "branch": "main", "msg": "x"}\n')
 
     # --- assert -----------------------
     assert [e.code for e in report.errors] == ["E200"]
@@ -72,7 +72,7 @@ def test_commit_with_unknown_parent_emits_e201() -> None:
     text = '{"op": "branch", "name": "main"}\n{"op": "commit", "branch": "main", "msg": "x", "parents": ["ghost"]}\n'
 
     # --- act --------------------------
-    _, report = run(text)
+    _, report = parse_and_apply(text)
 
     # --- assert -----------------------
     assert [e.code for e in report.errors] == ["E201"]
@@ -87,7 +87,7 @@ def test_duplicate_commit_id_emits_e203() -> None:
     )
 
     # --- act --------------------------
-    _, report = run(text)
+    _, report = parse_and_apply(text)
 
     # --- assert -----------------------
     assert [e.code for e in report.errors] == ["E203"]
@@ -102,7 +102,7 @@ def test_replaces_rule_1_undefined_commit_emits_e201() -> None:
     text = '{"op": "branch", "name": "main"}\n{"op": "commit", "branch": "main", "msg": "x", "replaces": ["ghost"]}\n'
 
     # --- act --------------------------
-    _, report = run(text)
+    _, report = parse_and_apply(text)
 
     # --- assert -----------------------
     assert [e.code for e in report.errors] == ["E201"]
@@ -120,7 +120,7 @@ def test_replaces_rule_2_cross_branch_emits_e205() -> None:
     )
 
     # --- act --------------------------
-    _, report = run(text)
+    _, report = parse_and_apply(text)
 
     # --- assert -----------------------
     assert [e.code for e in report.errors] == ["E205"]
@@ -138,7 +138,7 @@ def test_replaces_rule_3_non_contiguous_tail_emits_e206() -> None:
     )
 
     # --- act --------------------------
-    _, report = run(text)
+    _, report = parse_and_apply(text)
 
     # --- assert -----------------------
     assert [e.code for e in report.errors] == ["E206"]
@@ -155,7 +155,7 @@ def test_replaces_rule_4_other_branch_rooted_emits_e207() -> None:
     )
 
     # --- act --------------------------
-    _, report = run(text)
+    _, report = parse_and_apply(text)
 
     # --- assert -----------------------
     assert [e.code for e in report.errors] == ["E207"]
@@ -173,7 +173,7 @@ def test_replaces_rule_5_external_parents_emits_e208() -> None:
     )
 
     # --- act --------------------------
-    _, report = run(text)
+    _, report = parse_and_apply(text)
 
     # --- assert -----------------------
     # E207 also fires (feat is rooted on c1) — but the parents-rule violation is what we're testing.
@@ -192,7 +192,7 @@ def test_replaces_rule_7_self_parents_emits_e209() -> None:
     )
 
     # --- act --------------------------
-    _, report = run(text)
+    _, report = parse_and_apply(text)
 
     # --- assert -----------------------
     assert [e.code for e in report.errors] == ["E209"]
@@ -209,7 +209,7 @@ def test_replaces_happy_path_atomically_squashes_tail() -> None:
     )
 
     # --- act --------------------------
-    state, report = run(text)
+    state, report = parse_and_apply(text)
 
     # --- assert -----------------------
     assert report.is_clean()
@@ -228,7 +228,7 @@ def test_replaces_can_reuse_a_vacated_id() -> None:
     )
 
     # --- act --------------------------
-    state, report = run(text)
+    state, report = parse_and_apply(text)
 
     # --- assert -----------------------
     assert report.is_clean()
@@ -249,7 +249,7 @@ def test_highlight_field_propagates_to_commit_state(highlight_value: bool | None
     )
 
     # --- act --------------------------
-    state, report = run(text)
+    state, report = parse_and_apply(text)
 
     # --- assert -----------------------
     assert report.is_clean()
