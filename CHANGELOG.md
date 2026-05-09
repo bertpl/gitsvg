@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `branch:` op gains a `branch_pos:` field (non-negative integer, optional): pins the branch's lane index, overriding whatever the layout engine would otherwise pick. Lenient — no validation against the default strategy, no overlap check, no leftward-branching rejection. Authors who set it take responsibility for the resulting layout.
+
 ### Changed
 
 ### Deprecated

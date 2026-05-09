@@ -103,3 +103,29 @@ def test_from_branch_when_name_is_actually_a_commit_id_hints_at_from_commit() ->
     err = report.errors[0]
     assert err.code == "E200"
     assert "from_commit" in err.message
+
+
+def test_branch_pos_override_is_stored_on_branch_state() -> None:
+    # --- arrange ----------------------
+    text = (
+        '{"op": "branch", "name": "main"}\n{"op": "branch", "name": "feat", "from_branch": "main", "branch_pos": 5}\n'
+    )
+
+    # --- act --------------------------
+    state, report = build_state_from_jsonl(text)
+
+    # --- assert -----------------------
+    assert report.is_clean()
+    assert state.branches["feat"].branch_pos == 5
+
+
+def test_branch_pos_omitted_leaves_branch_state_value_none() -> None:
+    # --- arrange ----------------------
+    text = '{"op": "branch", "name": "main"}\n'
+
+    # --- act --------------------------
+    state, report = build_state_from_jsonl(text)
+
+    # --- assert -----------------------
+    assert report.is_clean()
+    assert state.branches["main"].branch_pos is None

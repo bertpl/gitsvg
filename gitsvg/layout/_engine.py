@@ -71,7 +71,7 @@ def compute_layout(state: State) -> Layout:
         pre-computed arcs and guides, and canvas dimensions.
     """
     # --- Per-branch bookkeeping ------------------
-    branch_pos_by_name: dict[str, int] = {name: i for i, name in enumerate(state.branch_order)}
+    branch_pos_by_name: dict[str, int] = _assign_branch_positions(state)
     chain_parent: dict[str, str | None] = _compute_chain_parents(state)
 
     # --- Resolve per-branch view fields ----------
@@ -135,6 +135,26 @@ def compute_layout(state: State) -> Layout:
 # ==================================================================================================
 #  Helpers — bookkeeping
 # ==================================================================================================
+def _assign_branch_positions(state: State) -> dict[str, int]:
+    """Map every branch name to its branch-axis lane index.
+
+    A branch with a `branch_pos:` override on its declaration uses that
+    value verbatim. Otherwise the branch falls through to the default
+    monotonic strategy (`branch_pos = state.branch_order.index(name)`);
+    the lane-reuse heuristic that will replace this default lands in a
+    later layer.
+
+    The override is lenient — no validation, no overlap check, no
+    "branching leftward" rejection. Authors who pin a value take
+    responsibility for the resulting layout.
+    """
+    positions: dict[str, int] = {}
+    for declaration_index, name in enumerate(state.branch_order):
+        override = state.branches[name].branch_pos
+        positions[name] = override if override is not None else declaration_index
+    return positions
+
+
 def _compute_chain_parents(state: State) -> dict[str, str | None]:
     """Build a map of `commit_id → chain parent id` from `branch.commit_ids` order."""
     chain_parent: dict[str, str | None] = {}

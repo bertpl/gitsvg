@@ -38,6 +38,9 @@ class BranchState:
         name: Unique branch name.
         color: Optional hex color override from the declaration.
         label_side: Optional label-side hint from the declaration.
+        branch_pos: Optional explicit lane-index override from the
+            declaration. Stored verbatim; the layout engine consumes it
+            and bypasses the lane-reuse heuristic when set.
         from_branch: Source-branch name captured at declaration time
             (or None for the first branch).
         from_commit: Source-commit id captured at declaration time
@@ -53,6 +56,7 @@ class BranchState:
     name: str
     color: str | None = None
     label_side: str | None = None
+    branch_pos: int | None = None
     from_branch: str | None = None
     from_commit: str | None = None
     rooted_on_commit: str | None = None

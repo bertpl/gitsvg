@@ -111,6 +111,39 @@ def test_branch_label_side_rejects_unknown_value() -> None:
         BranchOp.model_validate(raw)
 
 
+@pytest.mark.parametrize("branch_pos", [0, 1, 7, 42])
+def test_branch_pos_accepts_non_negative_int(branch_pos: int) -> None:
+    # --- arrange ----------------------
+    raw = {"op": "branch", "name": "feat/x", "from_branch": "main", "branch_pos": branch_pos}
+
+    # --- act --------------------------
+    op = BranchOp.model_validate(raw)
+
+    # --- assert -----------------------
+    assert op.branch_pos == branch_pos
+
+
+def test_branch_pos_omitted_defaults_to_none() -> None:
+    # --- arrange ----------------------
+    raw = {"op": "branch", "name": "main"}
+
+    # --- act --------------------------
+    op = BranchOp.model_validate(raw)
+
+    # --- assert -----------------------
+    assert op.branch_pos is None
+
+
+@pytest.mark.parametrize("branch_pos", [-1, -42])
+def test_branch_pos_rejects_negative(branch_pos: int) -> None:
+    # --- arrange ----------------------
+    raw = {"op": "branch", "name": "feat/x", "from_branch": "main", "branch_pos": branch_pos}
+
+    # --- act / assert -----------------
+    with pytest.raises(ValidationError):
+        BranchOp.model_validate(raw)
+
+
 def test_commit_hash_auto_sentinel_accepted() -> None:
     # --- arrange ----------------------
     raw = {"op": "commit", "branch": "main", "msg": "wip", "hash": "auto"}
