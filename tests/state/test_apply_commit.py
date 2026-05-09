@@ -273,3 +273,82 @@ def test_gap_field_propagates_to_commit_state(gap_value: int | None, expected: i
     # --- assert -----------------------
     assert report.is_clean()
     assert state.commits["c1"].gap == expected
+
+
+# ==================================================================================================
+#  Gap inheritance for replaces commits
+# ==================================================================================================
+def test_replaces_commit_inherits_earliest_replaced_gap_when_op_gap_unset() -> None:
+    """A `replaces:` commit without `op.gap` inherits the earliest replaced
+    commit's gap, preserving any visual breathing room the original chain had."""
+    # --- arrange ----------------------
+    text = (
+        '{"op": "branch", "name": "main"}\n'
+        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
+        '{"op": "commit", "branch": "main", "id": "c2", "msg": "x", "gap": 2}\n'
+        '{"op": "commit", "branch": "main", "id": "c3", "msg": "x"}\n'
+        '{"op": "commit", "branch": "main", "id": "csquash", "msg": "squash", "replaces": ["c2", "c3"]}\n'
+    )
+
+    # --- act --------------------------
+    state, report = build_state_from_jsonl(text)
+
+    # --- assert -----------------------
+    assert report.is_clean()
+    # c2 was the earliest replaced commit; its gap was 2.
+    assert state.commits["csquash"].gap == 2
+
+
+def test_replaces_commit_op_gap_overrides_inheritance() -> None:
+    """An explicit `op.gap` on a `replaces:` commit wins over inheritance."""
+    # --- arrange ----------------------
+    text = (
+        '{"op": "branch", "name": "main"}\n'
+        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
+        '{"op": "commit", "branch": "main", "id": "c2", "msg": "x", "gap": 5}\n'
+        '{"op": "commit", "branch": "main", "id": "csquash", "msg": "squash", "replaces": ["c2"], "gap": 1}\n'
+    )
+
+    # --- act --------------------------
+    state, _ = build_state_from_jsonl(text)
+
+    # --- assert -----------------------
+    # Explicit gap=1 on csquash overrides the inherited gap=5 from c2.
+    assert state.commits["csquash"].gap == 1
+
+
+def test_replaces_commit_inherits_zero_when_replaced_had_no_gap() -> None:
+    """The common case: replaced commits had gap=0; squash inherits 0."""
+    # --- arrange ----------------------
+    text = (
+        '{"op": "branch", "name": "main"}\n'
+        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
+        '{"op": "commit", "branch": "main", "id": "c2", "msg": "x"}\n'
+        '{"op": "commit", "branch": "main", "id": "csquash", "msg": "squash", "replaces": ["c2"]}\n'
+    )
+
+    # --- act --------------------------
+    state, _ = build_state_from_jsonl(text)
+
+    # --- assert -----------------------
+    assert state.commits["csquash"].gap == 0
+
+
+def test_replaces_with_unordered_list_picks_earliest_in_branch_order() -> None:
+    """The `replaces:` list order is user-controlled; inheritance picks the
+    earliest replaced commit in branch.commit_ids order, not list order."""
+    # --- arrange ----------------------
+    text = (
+        '{"op": "branch", "name": "main"}\n'
+        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
+        '{"op": "commit", "branch": "main", "id": "c2", "msg": "x", "gap": 3}\n'
+        '{"op": "commit", "branch": "main", "id": "c3", "msg": "x", "gap": 7}\n'
+        # `replaces` list reverses the order — but inheritance still picks c2's gap.
+        '{"op": "commit", "branch": "main", "id": "csquash", "msg": "squash", "replaces": ["c3", "c2"]}\n'
+    )
+
+    # --- act --------------------------
+    state, _ = build_state_from_jsonl(text)
+
+    # --- assert -----------------------
+    assert state.commits["csquash"].gap == 3

@@ -9,8 +9,8 @@ from gitsvg.state import apply_ops
 def _render_from(text: str):
     parsed, report = parse_jsonl_text(text, file="x.jsonl")
     state = apply_ops(parsed, report)
-    layout = compute_layout(parsed)
-    return render(state, layout)
+    layout = compute_layout(state)
+    return render(layout)
 
 
 def test_render_produces_valid_svg_with_correct_root_dimensions() -> None:
@@ -28,13 +28,13 @@ def test_render_produces_valid_svg_with_correct_root_dimensions() -> None:
 
     # --- assert -----------------------
     assert svg_text.startswith("<?xml") or svg_text.startswith("<svg")
-    # Single branch with 3 commits: 200 × 150 (matches `compute_canvas_size`).
+    # Single branch with 3 commits: 200 × 150.
     assert 'width="200"' in svg_text
     assert 'height="150"' in svg_text
 
 
 def test_render_emits_expected_path_and_circle_counts() -> None:
-    """drawsvg renders `Line` and `Path` both as `<path>`. With two branches and
+    """drawsvg renders both `Line` and `Path` as `<path>`. With two branches and
     a fork, the SVG carries: 2 guides + 1 branch-off arc + 2 branch lines = 5
     paths, plus one circle per commit."""
     # --- arrange ----------------------
@@ -56,7 +56,7 @@ def test_render_emits_expected_path_and_circle_counts() -> None:
 
 def test_empty_branch_still_emits_a_path_element() -> None:
     """A declared branch with no commits gets a zero-length path — a degenerate
-    placeholder that becomes visible once labels (PR6) are drawn at its start."""
+    placeholder that becomes visible once labels (PR7) are drawn at its start."""
     # --- arrange ----------------------
     text = (
         '{"op": "branch", "name": "main"}\n'

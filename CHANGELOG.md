@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `commit:` op gains a `gap:` field (non-negative integer, default `0`): leaves N empty commit-axis slots between the branch's tip and the new commit's landing position, for hand-tuned breathing room. Rejected when used together with `replaces:`, where the squash position is fixed by definition.
+- `commit:` op gains a `gap:` field (non-negative integer, default `0`): leaves N empty commit-axis slots between the branch's tip and the new commit's landing position, for hand-tuned breathing room. Allowed on squash (`replaces:`) commits too; when unset there, the state engine inherits the earliest replaced commit's `gap` by default — preserving any breathing room the original chain had.
 - `merge:` op gains the same `gap:` field, applied above the natural anchor at `max(into.tip, from.tip) + 1`.
 - `canvas:` op gains four pixel-margin fields — `margin_commit_axis_lower`, `margin_commit_axis_upper`, `margin_branch_axis_lower`, `margin_branch_axis_upper` — one per axis end. Default is renderer auto-fit; pin them only when stable per-frame margins matter (animation series).
 - `hash: "auto"` on `commit:` ops now resolves to a deterministic 7-character hex string. The hash is the lower-cased hex of `sha256(id + "\n" + sorted(immediate_parent_ids))[:7]`. Sorting parents makes the hash insensitive to declaration order on merge parents; including parent ids makes it sensitive to rebase-style chain changes (so a downstream commit gets a new hash when an upstream commit's id is renamed).
@@ -21,6 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Render output now includes branch guides — faint dashed vertical lines at every occupied lane, sitting behind branch lines and arcs as a subtle visual anchor.
 
 ### Changed
+
+- Internal: rendering pipeline restructured into a three-stage architecture — state engine (op stream → entities) → layout engine (entities → render-ready model with positions, resolved colours, arcs, guides, canvas dimensions) → renderer (model → SVG primitives). The renderer no longer depends on state internals; alternative layout strategies and renderers can be plugged in without touching each other. No user-visible behaviour change for the existing corpus.
 
 ### Deprecated
 

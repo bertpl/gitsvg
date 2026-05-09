@@ -2,8 +2,8 @@
 
 import drawsvg as draw
 
+from gitsvg._visual_constants import BRANCH_LINE_WIDTH
 from gitsvg.layout import LayoutBranch
-from gitsvg.render._constants import BRANCH_LINE_WIDTH
 from gitsvg.render._geometry import branch_axis_to_x, commit_axis_to_y
 
 

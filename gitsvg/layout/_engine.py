@@ -1,301 +1,301 @@
-"""Layout engine — assign axis positions to every branch and commit.
+"""Layout engine — turn validated `State` into a render-ready `Layout`.
 
-`compute_layout(parsed_ops)` walks an op stream in source order and
-builds a `Layout`. The walk mirrors the state engine's bookkeeping
-just enough to:
+`compute_layout(state)` is a pure transformation. It walks state once,
+producing a `Layout` with positions, resolved colours, resolved label
+sides, pre-computed arcs (branch-off + merge), pre-enumerated branch
+guides, and canvas dimensions. The renderer consumes the result with no
+need to peek back into state.
 
-- Generate the same auto-ids the state engine generates (so layout
-  positions can be looked up by the same commit ids state uses).
-- Track each branch's commit-axis tip and commit list, which is what
-  drives subsequent commits' positions.
+Heuristics for the v0.0.3 default strategy:
 
-Heuristics applied (per the v0.0.3 layout decisions):
-
-- **Branch axis.** Branches get monotonically incrementing positions
-  in declaration order. Lane-reuse heuristics are deferred.
-- **Branch start (commit axis).** A new branch is rooted at
-  `parent_commit.commit_pos + 1`, where `parent_commit` is the commit
-  resolved from `from_commit:` directly or from `from_branch:`'s tip
-  at the moment the `branch` op runs. The first declared branch
-  starts at 0.
-- **Commit on a branch.** First commit lands at `start + gap`;
-  subsequent commits at `tip + 1 + gap`. Equivalently, the branch
-  has a `next_commit_pos` initialised to `start`; each commit places
-  at `next_commit_pos + gap`, then advances by one.
-- **Merge commit.** Lands on the `into` branch at
-  `max(into.tip, from.tip) + 1 + gap`, always above both parents.
-- **`replaces:` commit.** Takes the position of the *first* replaced
-  commit; the replaced commits are removed; the branch's tip rolls
-  back to the new commit. (`gap:` is rejected on `replaces:` commits
-  by the schema layer; the engine therefore never sees both at once.)
-- **`remove`.** Removes commits/branches from the layout. The branch
-  axis is not compacted (lane-reuse is v0.0.4).
-
-The walker treats `import`, `canvas`, and `highlight` as no-ops for
-layout — `import` is already expanded upstream; `canvas` is consumed
-elsewhere; `highlight` toggles a visual flag without affecting
-positions.
+- **Branch axis**: monotonic declaration order. `branch_pos[name] =
+  state.branch_order.index(name)`. Lane reuse heuristics are deferred
+  to v0.0.4 (they would replace this strategy with a smarter one).
+- **Branch start (commit axis)**: `start = parent_commit.commit_pos + 1`
+  for non-root branches; `0` for the root branch.
+- **Commit positions** follow a single uniform rule:
+  `commit_pos = max(effective_parent.commit_pos) + 1 + gap`,
+  where *effective parents* are the commit's chain parent (the previous
+  commit on its branch in `branch.commit_ids` order) plus its declared
+  `parents:` list (deduplicated). For commits with no effective parents
+  (the first commit on a branch), the formula reduces to
+  `start + gap`. Merge commits and squash commits fall out as special
+  cases of this rule with no extra logic.
+- **Branch line span**: from `start` to `max(commit_pos for commit in
+  branch.commits)`, or just `start` for empty branches.
+- **Branch-off arcs**: one per non-root branch, from the parent
+  commit's position to the branch's start, in the *target* (new)
+  branch's colour.
+- **Merge arcs**: one per cross-lane parent on any commit with
+  `len(parents) >= 2`, in the *source* (parent) branch's colour.
+- **Branch guides**: one per occupied branch-axis lane.
 """
 
-from dataclasses import dataclass, field
-
-from gitsvg.file_format.ops import (
-    BranchOp,
-    CanvasOp,
-    CommitOp,
-    HighlightOp,
-    ImportOp,
-    MergeOp,
-    RemoveOp,
+from gitsvg._visual_constants import (
+    BRANCH_SPACING,
+    COLORS,
+    COMMIT_SPACING,
+    DEFAULT_BRANCH_COLORS,
+    MARGIN_BRANCH_AXIS_LOWER,
+    MARGIN_BRANCH_AXIS_UPPER,
+    MARGIN_COMMIT_AXIS_LOWER,
+    MARGIN_COMMIT_AXIS_UPPER,
 )
-from gitsvg.layout._layout import Layout, LayoutBranch, LayoutCommit
-from gitsvg.parse import ParsedOp
+from gitsvg.layout._layout import (
+    Layout,
+    LayoutArc,
+    LayoutBranch,
+    LayoutCanvas,
+    LayoutCommit,
+    LayoutGuide,
+)
+from gitsvg.state import State
+
+_DEFAULT_LABEL_SIDE = "right"
 
 
-def compute_layout(parsed_ops: list[ParsedOp]) -> Layout:
-    """Compute a `Layout` from a stream of parsed ops.
-
-    Assumes `parsed_ops` has been schema- and semantically validated
-    (e.g. by `gitsvg.state.apply_ops`) and that `import` ops are
-    already expanded by `gitsvg.imports.resolve_imports`. Layout does
-    not re-validate; ill-formed inputs may produce inconsistent
-    positions.
+def compute_layout(state: State) -> Layout:
+    """Compute a render-ready `Layout` from a fully-built `State`.
 
     Args:
-        parsed_ops: Ops in source order, with imports already
-            expanded.
+        state: The state engine's output. Must be a clean validation
+            (any errors would have been caught before this point); the
+            layout engine does not re-validate.
 
     Returns:
-        A `Layout` mapping each branch and commit to axis positions.
+        A `Layout` with positions, resolved colours/label sides,
+        pre-computed arcs and guides, and canvas dimensions.
     """
-    builder = _LayoutBuilder()
-    for parsed in parsed_ops:
-        builder.handle(parsed.op)
-    return builder.layout
+    # --- Per-branch bookkeeping ------------------
+    branch_pos_by_name: dict[str, int] = {name: i for i, name in enumerate(state.branch_order)}
+    chain_parent: dict[str, str | None] = _compute_chain_parents(state)
+
+    # --- Resolve per-branch view fields ----------
+    branch_color_by_name: dict[str, str] = {
+        name: _resolve_branch_color(state, name, branch_pos_by_name[name]) for name in state.branch_order
+    }
+    branch_label_side_by_name: dict[str, str] = {name: _resolve_label_side(state, name) for name in state.branch_order}
+
+    # --- Lay out commits in state-insertion order ------
+    commit_layouts: dict[str, LayoutCommit] = {}
+    branch_starts: dict[str, int] = {}
+    branch_ends: dict[str, int] = {}
+    for cid, cstate in state.commits.items():
+        _ensure_branch_start(cstate.branch, state, commit_layouts, branch_starts, branch_ends)
+        commit_pos = _compute_commit_pos(cid, cstate, chain_parent, commit_layouts, branch_starts)
+        commit_layouts[cid] = LayoutCommit(
+            id=cid,
+            branch_pos=branch_pos_by_name[cstate.branch],
+            commit_pos=commit_pos,
+            color=branch_color_by_name[cstate.branch],
+            msg=cstate.msg,
+            hash=cstate.hash,
+            highlight=cstate.highlight,
+            label_side=branch_label_side_by_name[cstate.branch],
+        )
+        branch_ends[cstate.branch] = max(branch_ends[cstate.branch], commit_pos)
+
+    # --- Lay out empty branches (no commits) -----
+    for name in state.branch_order:
+        _ensure_branch_start(name, state, commit_layouts, branch_starts, branch_ends)
+
+    # --- Build LayoutBranch list -----------------
+    branches: list[LayoutBranch] = [
+        LayoutBranch(
+            name=name,
+            branch_pos=branch_pos_by_name[name],
+            start=branch_starts[name],
+            end=branch_ends[name],
+            color=branch_color_by_name[name],
+            label_side=branch_label_side_by_name[name],
+        )
+        for name in state.branch_order
+    ]
+
+    # --- Build arc list --------------------------
+    arcs: list[LayoutArc] = [
+        *_branch_off_arcs(state, branches, commit_layouts, branch_color_by_name, branch_pos_by_name),
+        *_merge_arcs(state, commit_layouts, branch_color_by_name),
+    ]
+
+    # --- Build guide list ------------------------
+    occupied_lanes = sorted({b.branch_pos for b in branches})
+    guides = [LayoutGuide(branch_pos=p) for p in occupied_lanes]
+
+    # --- Compute canvas size ---------------------
+    canvas = _compute_canvas(branches, commit_layouts)
+
+    return Layout(canvas=canvas, branches=branches, commits=commit_layouts, arcs=arcs, guides=guides)
 
 
 # ==================================================================================================
-#  Internal walker
+#  Helpers — bookkeeping
 # ==================================================================================================
-@dataclass(slots=True)
-class _BranchTracker:
-    """Per-branch bookkeeping during layout computation.
+def _compute_chain_parents(state: State) -> dict[str, str | None]:
+    """Build a map of `commit_id → chain parent id` from `branch.commit_ids` order."""
+    chain_parent: dict[str, str | None] = {}
+    for branch_state in state.branches.values():
+        previous: str | None = None
+        for cid in branch_state.commit_ids:
+            chain_parent[cid] = previous
+            previous = cid
+    return chain_parent
 
-    Tracks the commit-axis position the next commit on this branch
-    will land at, and the ordered list of commit ids currently
-    attached to the branch (for tip lookup and replaces/remove
-    handling).
+
+def _ensure_branch_start(
+    branch_name: str,
+    state: State,
+    commit_layouts: dict[str, LayoutCommit],
+    branch_starts: dict[str, int],
+    branch_ends: dict[str, int],
+) -> None:
+    """Compute and cache `branch_starts[branch_name]` if not yet known.
+
+    Branch starts depend on the parent commit's `commit_pos`. The parent
+    commit is added to state before this branch is declared, so by the
+    time we hit any commit on this branch (or process empty branches at
+    the end), the parent commit is already in `commit_layouts`.
     """
+    if branch_name in branch_starts:
+        return
+    branch_state = state.branches[branch_name]
+    if branch_state.rooted_on_commit is None:
+        start = 0
+    else:
+        parent_layout = commit_layouts.get(branch_state.rooted_on_commit)
+        # Defensive fallback for a dangling reference (would have been flagged
+        # by end-of-file validation upstream).
+        start = parent_layout.commit_pos + 1 if parent_layout is not None else 0
+    branch_starts[branch_name] = start
+    branch_ends[branch_name] = start
 
-    name: str
-    branch_pos: int
-    start: int
-    next_commit_pos: int
-    commit_ids: list[str] = field(default_factory=list)
 
-    def tip_id(self) -> str | None:
-        """Return the most recently attached commit id, or None when empty."""
-        return self.commit_ids[-1] if self.commit_ids else None
+def _compute_commit_pos(
+    commit_id: str,
+    commit_state,
+    chain_parent: dict[str, str | None],
+    commit_layouts: dict[str, LayoutCommit],
+    branch_starts: dict[str, int],
+) -> int:
+    """Apply the uniform position rule: `max(effective_parents) + 1 + gap`.
 
-
-class _LayoutBuilder:
-    """Walks parsed ops, mutating a `Layout` plus per-branch trackers.
-
-    Public surface is `handle(op)` — call once per parsed op in source
-    order. After the walk, `self.layout` holds the result.
+    Effective parents = chain parent ∪ declared `parents:` list. When
+    the set is empty (first commit on a root branch with no declared
+    parents), the rule reduces to `branch.start + gap`.
     """
+    effective_parent_positions: list[int] = []
+    parent_id = chain_parent.get(commit_id)
+    if parent_id is not None and parent_id in commit_layouts:
+        effective_parent_positions.append(commit_layouts[parent_id].commit_pos)
+    for declared in commit_state.parents:
+        layout_for_declared = commit_layouts.get(declared)
+        if layout_for_declared is not None:
+            effective_parent_positions.append(layout_for_declared.commit_pos)
+    if effective_parent_positions:
+        base = max(effective_parent_positions)
+    else:
+        base = branch_starts[commit_state.branch] - 1
+    return base + 1 + commit_state.gap
 
-    def __init__(self) -> None:
-        """Initialise an empty layout and zeroed counters."""
-        self.layout = Layout()
-        self._next_branch_pos: int = 0
-        self._trackers: dict[str, _BranchTracker] = {}
-        self._commit_branch: dict[str, str] = {}
 
-    # --------------------------------------------------------------------------
-    #  Dispatch
-    # --------------------------------------------------------------------------
-    def handle(self, op: object) -> None:
-        """Dispatch a single op to its layout-aware handler."""
-        if isinstance(op, BranchOp):
-            self._handle_branch(op)
-        elif isinstance(op, CommitOp):
-            self._handle_commit(op)
-        elif isinstance(op, MergeOp):
-            self._handle_merge(op)
-        elif isinstance(op, RemoveOp):
-            self._handle_remove(op)
-        elif isinstance(op, (HighlightOp, CanvasOp, ImportOp)):
-            return  # no layout effect
+# ==================================================================================================
+#  Helpers — per-branch view fields
+# ==================================================================================================
+def _resolve_branch_color(state: State, branch_name: str, declaration_index: int) -> str:
+    """Pick the hex colour for a branch — explicit override else cycled default."""
+    branch = state.branches[branch_name]
+    if branch.color is not None:
+        return branch.color
+    if declaration_index == 0:
+        return COLORS["main"]
+    cycle_index = (declaration_index - 1) % len(DEFAULT_BRANCH_COLORS)
+    return COLORS[DEFAULT_BRANCH_COLORS[cycle_index]]
 
-    # --------------------------------------------------------------------------
-    #  Branch
-    # --------------------------------------------------------------------------
-    def _handle_branch(self, op: BranchOp) -> None:
-        """Place a new branch on the next free branch-axis slot."""
-        is_first = not self._trackers
-        start = self._resolve_branch_start(op, is_first=is_first)
 
-        branch_pos = self._next_branch_pos
-        self._next_branch_pos += 1
+def _resolve_label_side(state: State, branch_name: str) -> str:
+    """Pick the label side for a branch — explicit override else the default."""
+    branch = state.branches[branch_name]
+    return branch.label_side or _DEFAULT_LABEL_SIDE
 
-        self.layout.branches[op.name] = LayoutBranch(
-            name=op.name,
-            branch_pos=branch_pos,
-            start=start,
-            end=start,
+
+# ==================================================================================================
+#  Helpers — arcs
+# ==================================================================================================
+def _branch_off_arcs(
+    state: State,
+    branches: list[LayoutBranch],
+    commit_layouts: dict[str, LayoutCommit],
+    branch_color_by_name: dict[str, str],
+    branch_pos_by_name: dict[str, int],
+) -> list[LayoutArc]:
+    """One branch-off arc per non-root branch, in the target branch's colour."""
+    arcs: list[LayoutArc] = []
+    branch_layouts_by_name = {b.name: b for b in branches}
+    for name in state.branch_order:
+        branch_state = state.branches.get(name)
+        if branch_state is None or branch_state.rooted_on_commit is None:
+            continue
+        parent_layout = commit_layouts.get(branch_state.rooted_on_commit)
+        if parent_layout is None:
+            continue
+        branch_layout = branch_layouts_by_name[name]
+        arcs.append(
+            LayoutArc(
+                kind="branch_off",
+                from_branch_pos=parent_layout.branch_pos,
+                from_commit_pos=parent_layout.commit_pos,
+                to_branch_pos=branch_layout.branch_pos,
+                to_commit_pos=branch_layout.start,
+                color=branch_color_by_name[name],
+                vertical_first=False,
+            )
         )
-        self._trackers[op.name] = _BranchTracker(
-            name=op.name,
-            branch_pos=branch_pos,
-            start=start,
-            next_commit_pos=start,
-        )
+    return arcs
 
-    def _resolve_branch_start(self, op: BranchOp, *, is_first: bool) -> int:
-        """Compute the branch-axis-perpendicular start position for a new branch."""
-        if is_first:
-            return 0
-        if op.from_commit is not None:
-            return self.layout.commits[op.from_commit].commit_pos + 1
-        if op.from_branch is not None:
-            parent_tracker = self._trackers[op.from_branch]
-            tip = parent_tracker.tip_id()
-            if tip is not None:
-                return self.layout.commits[tip].commit_pos + 1
-            # Parent branch has no commits — root the new branch at the parent's start.
-            return self.layout.branches[op.from_branch].start + 1
-        # Defensive fallback — semantic validation rejects this case upstream.
-        return 0
 
-    # --------------------------------------------------------------------------
-    #  Commit
-    # --------------------------------------------------------------------------
-    def _handle_commit(self, op: CommitOp) -> None:
-        """Place a new commit on its branch (or a `replaces:` squash commit)."""
-        commit_id = op.id if op.id is not None else self._next_auto_commit_id()
-        gap = op.gap or 0
-        replaces = op.replaces or []
-        tracker = self._trackers[op.branch]
+def _merge_arcs(
+    state: State,
+    commit_layouts: dict[str, LayoutCommit],
+    branch_color_by_name: dict[str, str],
+) -> list[LayoutArc]:
+    """One merge arc per parent on a different lane than its child commit."""
+    arcs: list[LayoutArc] = []
+    for cid, cstate in state.commits.items():
+        commit_layout = commit_layouts.get(cid)
+        if commit_layout is None or len(cstate.parents) < 2:
+            continue
+        for parent_id in cstate.parents:
+            parent_layout = commit_layouts.get(parent_id)
+            if parent_layout is None or parent_layout.branch_pos == commit_layout.branch_pos:
+                continue
+            parent_state = state.commits.get(parent_id)
+            from_branch_name = parent_state.branch if parent_state is not None else cstate.branch
+            from_color = branch_color_by_name.get(from_branch_name, commit_layout.color)
+            arcs.append(
+                LayoutArc(
+                    kind="merge",
+                    from_branch_pos=parent_layout.branch_pos,
+                    from_commit_pos=parent_layout.commit_pos,
+                    to_branch_pos=commit_layout.branch_pos,
+                    to_commit_pos=commit_layout.commit_pos,
+                    color=from_color,
+                    vertical_first=True,
+                )
+            )
+    return arcs
 
-        if replaces:
-            commit_pos = self._handle_replaces(tracker, replaces)
-        else:
-            commit_pos = tracker.next_commit_pos + gap
 
-        tracker.next_commit_pos = commit_pos + 1
-        tracker.commit_ids.append(commit_id)
-        self._commit_branch[commit_id] = op.branch
+# ==================================================================================================
+#  Helpers — canvas
+# ==================================================================================================
+def _compute_canvas(branches: list[LayoutBranch], commit_layouts: dict[str, LayoutCommit]) -> LayoutCanvas:
+    """Auto-fit canvas dimensions from the layout extent."""
+    max_branch_pos = max((b.branch_pos for b in branches), default=0)
+    max_commit_pos_from_commits = max((c.commit_pos for c in commit_layouts.values()), default=-1)
+    max_commit_pos_from_branches = max((b.end for b in branches), default=-1)
+    max_commit_pos = max(max_commit_pos_from_commits, max_commit_pos_from_branches)
+    n_commits = max_commit_pos + 1 if max_commit_pos >= 0 else 1
 
-        self.layout.commits[commit_id] = LayoutCommit(
-            id=commit_id,
-            branch_pos=tracker.branch_pos,
-            commit_pos=commit_pos,
-        )
-        self._refresh_branch_end(op.branch)
-
-    def _handle_replaces(self, tracker: _BranchTracker, replaces: list[str]) -> int:
-        """Drop the replaced commits and return the position the new commit takes."""
-        first_replaced_pos = self.layout.commits[replaces[0]].commit_pos
-        for rid in replaces:
-            self._drop_commit(rid, tracker)
-        return first_replaced_pos
-
-    # --------------------------------------------------------------------------
-    #  Merge
-    # --------------------------------------------------------------------------
-    def _handle_merge(self, op: MergeOp) -> None:
-        """Place a merge commit above both parent tips."""
-        merge_id = op.as_ if op.as_ is not None else self._next_auto_commit_id()
-        gap = op.gap or 0
-        into_tracker = self._trackers[op.into]
-        from_tracker = self._trackers[op.from_]
-
-        into_tip_pos = self._tip_pos(into_tracker)
-        from_tip_pos = self._tip_pos(from_tracker)
-        commit_pos = max(into_tip_pos, from_tip_pos) + 1 + gap
-
-        into_tracker.next_commit_pos = commit_pos + 1
-        into_tracker.commit_ids.append(merge_id)
-        self._commit_branch[merge_id] = op.into
-
-        self.layout.commits[merge_id] = LayoutCommit(
-            id=merge_id,
-            branch_pos=into_tracker.branch_pos,
-            commit_pos=commit_pos,
-        )
-        self._refresh_branch_end(op.into)
-
-    def _tip_pos(self, tracker: _BranchTracker) -> int:
-        """Return the commit-axis position of `tracker`'s tip, or `start - 1` if empty."""
-        tip = tracker.tip_id()
-        if tip is not None:
-            return self.layout.commits[tip].commit_pos
-        return tracker.start - 1
-
-    # --------------------------------------------------------------------------
-    #  Remove
-    # --------------------------------------------------------------------------
-    def _handle_remove(self, op: RemoveOp) -> None:
-        """Remove commits or a branch (and cascade) from the layout.
-
-        Lane-reuse / branch-axis compaction is intentionally not done
-        here — the seed corpus's lane-reuse patterns are deferred to
-        v0.0.4. Removing a branch leaves its `branch_pos` slot
-        unoccupied; subsequent branches keep getting incremented
-        positions.
-        """
-        if op.commits:
-            for cid in op.commits:
-                tracker_name = self._commit_branch.get(cid)
-                if tracker_name is None:
-                    continue
-                self._drop_commit(cid, self._trackers[tracker_name])
-                self._refresh_branch_end(tracker_name)
-        elif op.branches:
-            for bname in op.branches:
-                self._drop_branch(bname)
-
-    def _drop_branch(self, name: str) -> None:
-        """Remove a branch and cascade-remove all its commits."""
-        tracker = self._trackers.pop(name, None)
-        if tracker is None:
-            return
-        for cid in list(tracker.commit_ids):
-            self.layout.commits.pop(cid, None)
-            self._commit_branch.pop(cid, None)
-        self.layout.branches.pop(name, None)
-
-    # --------------------------------------------------------------------------
-    #  Shared helpers
-    # --------------------------------------------------------------------------
-    def _drop_commit(self, commit_id: str, tracker: _BranchTracker) -> None:
-        """Remove a commit from `layout.commits` and from `tracker.commit_ids`."""
-        self.layout.commits.pop(commit_id, None)
-        self._commit_branch.pop(commit_id, None)
-        if commit_id in tracker.commit_ids:
-            tracker.commit_ids.remove(commit_id)
-
-    def _refresh_branch_end(self, branch_name: str) -> None:
-        """Recompute `LayoutBranch.end` from the branch's current commit list."""
-        tracker = self._trackers[branch_name]
-        branch = self.layout.branches[branch_name]
-        if tracker.commit_ids:
-            branch.end = max(self.layout.commits[cid].commit_pos for cid in tracker.commit_ids)
-        else:
-            branch.end = branch.start
-
-    def _next_auto_commit_id(self) -> str:
-        """Return the lowest `_c<N>` not already used by any commit in the layout.
-
-        Mirrors `gitsvg.state._apply._commit._generate_auto_commit_id` exactly:
-        we always start the search from 1 so a commit removed by `remove:` or
-        `replaces:` frees its id for reuse. State and layout walk the same op
-        stream independently, so they must produce the same id sequence at every
-        step — otherwise the renderer can't look up a layout position by the
-        commit id state has stored.
-        """
-        n = 1
-        while f"_c{n}" in self.layout.commits:
-            n += 1
-        return f"_c{n}"
+    width = MARGIN_BRANCH_AXIS_LOWER + max_branch_pos * BRANCH_SPACING + MARGIN_BRANCH_AXIS_UPPER
+    height = MARGIN_COMMIT_AXIS_UPPER + (n_commits - 1) * COMMIT_SPACING + MARGIN_COMMIT_AXIS_LOWER
+    return LayoutCanvas(width=width, height=height, n_commits=n_commits)

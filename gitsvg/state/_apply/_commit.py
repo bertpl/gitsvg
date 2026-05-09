@@ -82,6 +82,9 @@ def apply_commit_op(state: State, parsed: ParsedOp, report: ValidationReport) ->
         )
         return
 
+    # --- Resolve `gap` (with inheritance default for `replaces:` commits) ----
+    resolved_gap = _resolve_gap(state, op)
+
     # --- Apply replaces removals ----------------
     for rid in op.replaces or []:
         _remove_commit(state, rid)
@@ -95,7 +98,7 @@ def apply_commit_op(state: State, parsed: ParsedOp, report: ValidationReport) ->
         parents=list(op.parents or []),
         replaces=list(op.replaces or []),
         highlight=bool(op.highlight),
-        gap=op.gap or 0,
+        gap=resolved_gap,
         declaration_file=file,
         declaration_line=line,
     )
@@ -109,6 +112,31 @@ def apply_commit_op(state: State, parsed: ParsedOp, report: ValidationReport) ->
 # ==================================================================================================
 #  Helpers
 # ==================================================================================================
+def _resolve_gap(state: State, op: CommitOp) -> int:
+    """Resolve the `gap` value to store on a new commit.
+
+    For ordinary commits, `op.gap` (default 0). For `replaces:` commits,
+    when `op.gap` is unset, inherit the gap of the *earliest* replaced
+    commit — the one appearing earliest in the branch's `commit_ids`
+    list. This preserves whatever visual breathing room the original
+    chain had: if the replaced segment started at a position with
+    `gap=2`, the squash commit lands at the same position.
+    """
+    if op.gap is not None:
+        return op.gap
+    if not op.replaces:
+        return 0
+    branch = state.branches.get(op.branch)
+    if branch is None:
+        return 0
+    replaced_set = set(op.replaces)
+    for cid in branch.commit_ids:
+        if cid in replaced_set:
+            replaced = state.commits.get(cid)
+            return replaced.gap if replaced is not None else 0
+    return 0
+
+
 def _generate_auto_commit_id(state: State) -> str:
     """Return the lowest `_c<N>` not already used by a commit in `state`.
 
