@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Lane assignment now uses a lane-reuse heuristic instead of monotonic declaration order. A new branch rooted on a parent commit at `(K, L)` walks candidate lanes `K+1, K+2, …` and picks the first lane free of commits at row `≥ L+1`. Empty branches contribute a pseudo-commit at their start row; lines, arcs, and pills do not block. The heuristic is purely geometric — no detection of "abandoned" branches — so reclaim-after-remove (the rebase rebuild pattern) and compact-left (a new branch reusing an older sibling's freed lane) both fall out of the same rule. Authors who want a specific lane can pin `branch_pos:` to bypass the heuristic.
+
 ### Deprecated
 
 ### Removed

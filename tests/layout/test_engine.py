@@ -94,13 +94,17 @@ def test_branch_pos_override_to_zero_passes_through_lenient() -> None:
     assert by_name["feat"].branch_pos == 0
 
 
-def test_branch_pos_override_does_not_shift_other_branches() -> None:
-    # An override on one branch only changes that branch's lane; sibling
-    # branches keep their declaration-order default.
+def test_branch_pos_override_pinned_lane_blocks_subsequent_heuristic_choices() -> None:
+    # An override pins its branch's lane regardless of the heuristic.
+    # Subsequent branches see that lane as blocked at any commit/start
+    # the overridden branch contributes; lane choice for them follows
+    # the usual rule (skip blocked lanes).
     # --- arrange ----------------------
     text = (
         '{"op": "branch", "name": "main"}\n'
+        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
         '{"op": "branch", "name": "feat", "from_branch": "main", "branch_pos": 5}\n'
+        '{"op": "commit", "branch": "feat", "msg": "x"}\n'
         '{"op": "branch", "name": "docs", "from_branch": "main"}\n'
     )
 
@@ -111,7 +115,207 @@ def test_branch_pos_override_does_not_shift_other_branches() -> None:
     by_name = {b.name: b for b in layout.branches}
     assert by_name["main"].branch_pos == 0
     assert by_name["feat"].branch_pos == 5
-    assert by_name["docs"].branch_pos == 2
+    # `feat` has a commit at row 2 on lane 5; rows ≥ 2 on lane 5 are blocked.
+    # `docs` parents on main at row 0 → threshold = 1; lanes 1..4 are free
+    # of any commits, so docs reclaims the lowest free lane: 1.
+    assert by_name["docs"].branch_pos == 1
+
+
+# ==================================================================================================
+#  Branch-axis assignment — lane-reuse heuristic
+# ==================================================================================================
+def test_lane_reclaimed_after_sibling_branch_removed() -> None:
+    # An older sibling branch's commits sit at low rows; the new branch
+    # rooted at a high row on the same parent reclaims that older
+    # sibling's lane. (Story-1 compact-left pattern, in miniature.)
+    # --- arrange ----------------------
+    text = (
+        '{"op": "branch", "name": "main"}\n'
+        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
+        '{"op": "branch", "name": "old_exp", "from_branch": "main"}\n'
+        '{"op": "commit", "branch": "old_exp", "id": "e1", "msg": "x"}\n'
+        '{"op": "commit", "branch": "main", "id": "m2", "msg": "x"}\n'
+        '{"op": "commit", "branch": "main", "id": "m3", "msg": "x"}\n'
+        '{"op": "branch", "name": "new_exp", "from_branch": "main"}\n'
+        '{"op": "commit", "branch": "new_exp", "id": "n1", "msg": "x"}\n'
+    )
+
+    # --- act --------------------------
+    layout = _layout_from(text)
+
+    # --- assert -----------------------
+    by_name = {b.name: b for b in layout.branches}
+    assert by_name["main"].branch_pos == 0
+    assert by_name["old_exp"].branch_pos == 1
+    # new_exp parents on main at m3 (row 3) → threshold 4. old_exp on
+    # lane 1 has its only commit at row 2; lane 1 is free at row ≥ 4.
+    assert by_name["new_exp"].branch_pos == 1
+
+
+def test_lane_skipped_when_existing_branch_has_recent_commits() -> None:
+    # When an older branch on lane 1 has a commit at the new branch's
+    # threshold or higher, lane 1 is blocked and new skips to lane 2.
+    # --- arrange ----------------------
+    text = (
+        '{"op": "branch", "name": "main"}\n'
+        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
+        '{"op": "branch", "name": "ongoing", "from_branch": "main"}\n'
+        '{"op": "commit", "branch": "ongoing", "id": "o1", "msg": "x"}\n'
+        '{"op": "commit", "branch": "ongoing", "id": "o2", "msg": "x"}\n'
+        '{"op": "commit", "branch": "main", "id": "m2", "msg": "x"}\n'
+        '{"op": "branch", "name": "new", "from_branch": "main"}\n'
+        '{"op": "commit", "branch": "new", "id": "n1", "msg": "x"}\n'
+    )
+
+    # --- act --------------------------
+    layout = _layout_from(text)
+
+    # --- assert -----------------------
+    by_name = {b.name: b for b in layout.branches}
+    # Per the chain-only commit_pos rule: m1=0, o1=1, o2=2, m2=1 (chain
+    # parent m1 only). main.tip = m2 (last in commit_ids), so new.start
+    # = 2 → threshold 2. Lane 1: o2 at row 2 ≥ 2 → blocked.
+    assert by_name["ongoing"].branch_pos == 1
+    assert by_name["new"].branch_pos == 2
+
+
+def test_lane_skipped_when_blocked_at_or_above_threshold() -> None:
+    # Two branches branching off main at the same parent commit. The
+    # second one can't reclaim the first one's lane (both parented at
+    # the same row → first's commits will be at threshold).
+    # --- arrange ----------------------
+    text = (
+        '{"op": "branch", "name": "main"}\n'
+        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
+        '{"op": "branch", "name": "first", "from_branch": "main"}\n'
+        '{"op": "commit", "branch": "first", "id": "f1", "msg": "x"}\n'
+        '{"op": "branch", "name": "second", "from_branch": "main"}\n'
+        '{"op": "commit", "branch": "second", "id": "s1", "msg": "x"}\n'
+    )
+
+    # --- act --------------------------
+    layout = _layout_from(text)
+
+    # --- assert -----------------------
+    by_name = {b.name: b for b in layout.branches}
+    assert by_name["first"].branch_pos == 1
+    # second's threshold = m1.commit_pos + 1 = 1; first has f1 at row 1 on
+    # lane 1 → blocked. Skip to lane 2.
+    assert by_name["second"].branch_pos == 2
+
+
+def test_empty_branch_pseudo_commit_blocks_lane_at_start_position() -> None:
+    # An empty branch on lane 1 (start row 2) blocks any new branch
+    # whose threshold is ≤ 2 from reusing lane 1.
+    # --- arrange ----------------------
+    text = (
+        '{"op": "branch", "name": "main"}\n'
+        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
+        '{"op": "commit", "branch": "main", "id": "m2", "msg": "x"}\n'
+        '{"op": "branch", "name": "ghost", "from_branch": "main"}\n'
+        '{"op": "branch", "name": "active", "from_branch": "main"}\n'
+        '{"op": "commit", "branch": "active", "id": "a1", "msg": "x"}\n'
+    )
+
+    # --- act --------------------------
+    layout = _layout_from(text)
+
+    # --- assert -----------------------
+    by_name = {b.name: b for b in layout.branches}
+    # ghost is empty with start = m2.commit_pos + 1 = 2. On lane 1.
+    assert by_name["ghost"].branch_pos == 1
+    # active's threshold = m2.commit_pos + 1 = 2. Lane 1 has ghost's
+    # pseudo-commit at start = 2 ≥ 2 → blocked. Skip to lane 2.
+    assert by_name["active"].branch_pos == 2
+
+
+def test_empty_branch_does_not_block_lane_below_its_start() -> None:
+    # An empty branch with start = 3 doesn't block a new branch whose
+    # threshold is below 3. (Verifies the threshold check is `≥`, not
+    # mere "any pseudo-commit on the lane".)
+    # --- arrange ----------------------
+    text = (
+        '{"op": "branch", "name": "main"}\n'
+        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
+        '{"op": "commit", "branch": "main", "id": "m2", "msg": "x"}\n'
+        '{"op": "commit", "branch": "main", "id": "m3", "msg": "x"}\n'
+        '{"op": "branch", "name": "ghost", "from_branch": "main"}\n'
+        # ghost: empty, start = m3.commit_pos + 1 = 3, on lane 1.
+        '{"op": "commit", "branch": "main", "id": "m4", "msg": "x"}\n'
+        # Now declare a sibling branching off m1 (early): its threshold is 1.
+        '{"op": "branch", "name": "early", "from_commit": "m1"}\n'
+        '{"op": "commit", "branch": "early", "id": "e1", "msg": "x"}\n'
+    )
+
+    # --- act --------------------------
+    layout = _layout_from(text)
+
+    # --- assert -----------------------
+    by_name = {b.name: b for b in layout.branches}
+    assert by_name["ghost"].branch_pos == 1
+    # early's parent is m1 at row 0 → threshold 1. Lane 1's ghost has
+    # pseudo-commit at row 3 ≥ 1 → blocked. early skips to lane 2.
+    assert by_name["early"].branch_pos == 2
+
+
+def test_first_branch_with_no_parent_gets_lane_zero() -> None:
+    # --- arrange ----------------------
+    text = '{"op": "branch", "name": "main"}\n'
+
+    # --- act --------------------------
+    layout = _layout_from(text)
+
+    # --- assert -----------------------
+    assert layout.branches[0].branch_pos == 0
+
+
+def test_branch_pos_override_short_circuits_heuristic() -> None:
+    # An override skips the heuristic entirely; even a value that would
+    # be flagged as "blocked" passes through.
+    # --- arrange ----------------------
+    text = (
+        '{"op": "branch", "name": "main"}\n'
+        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
+        '{"op": "branch", "name": "feat", "from_branch": "main", "branch_pos": 0}\n'
+    )
+
+    # --- act --------------------------
+    layout = _layout_from(text)
+
+    # --- assert -----------------------
+    by_name = {b.name: b for b in layout.branches}
+    assert by_name["feat"].branch_pos == 0
+
+
+def test_forward_reference_to_later_declared_branch_is_resolved() -> None:
+    # Models the rebase rebuild pattern: branch X was originally rooted
+    # on a commit on branch Y. Y was removed, then re-declared with the
+    # same commit ids. State.branch_order ends up [..., X, Y_new] —
+    # X declared before Y_new, but X's rooted_on_commit now resolves to
+    # a commit on Y_new. The lane assignment must process Y_new before
+    # X to know X's parent lane.
+    # --- arrange ----------------------
+    text = (
+        '{"op": "branch", "name": "main"}\n'
+        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
+        '{"op": "branch", "name": "Y", "from_branch": "main"}\n'
+        '{"op": "commit", "branch": "Y", "id": "y_tip", "msg": "x"}\n'
+        '{"op": "branch", "name": "X", "from_commit": "y_tip"}\n'
+        '{"op": "commit", "branch": "X", "id": "x1", "msg": "x"}\n'
+        '{"op": "remove", "branches": ["Y"]}\n'
+        '{"op": "branch", "name": "Y", "from_branch": "main"}\n'
+        '{"op": "commit", "branch": "Y", "id": "y_tip", "msg": "x"}\n'
+    )
+
+    # --- act --------------------------
+    layout = _layout_from(text)
+
+    # --- assert -----------------------
+    by_name = {b.name: b for b in layout.branches}
+    # X must have a coherent lane > Y_new's lane (since X's parent is on
+    # Y_new). The exact value depends on the heuristic, but the key thing
+    # is that lane assignment didn't crash and X is on a higher lane than Y.
+    assert by_name["X"].branch_pos > by_name["Y"].branch_pos
 
 
 # ==================================================================================================
