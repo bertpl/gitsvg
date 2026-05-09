@@ -15,8 +15,8 @@ def apply_branch_op(state: State, parsed: ParsedOp, report: ValidationReport) ->
 
     1. Branch name must not already be declared (E202).
     2. Non-first branch must specify exactly one of `from_branch` / `from_commit` (E204).
-       (The mutex is shape-level — enforced by the pydantic model in `BranchOp`;
-       the at-least-one rule is state-aware and lives here.)
+       (The "at most one" half is structural — enforced by the pydantic model on
+       `BranchOp`. The "at least one" half needs runtime state, so it lives here.)
     3. `from_branch` (when set) must reference an existing branch (E200).
        Diagnostic note: when the name exists as a commit id instead, the
        message hints at using `from_commit`.
