@@ -5,7 +5,7 @@ from gitsvg.parse import parse_jsonl_text
 from gitsvg.state import State, apply_ops
 
 
-def run(jsonl: str) -> tuple[State, ValidationReport]:
+def parse_and_apply(jsonl: str) -> tuple[State, ValidationReport]:
     """Parse + apply the given JSONL text and return `(state, report)`.
 
     The report holds parser errors and semantic errors combined, so a

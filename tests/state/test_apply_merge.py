@@ -1,6 +1,6 @@
 """Tests for the `merge` op state-apply handler."""
 
-from tests.state._helpers import run
+from tests.state._helpers import parse_and_apply
 
 
 def test_merge_creates_two_parent_commit_on_into_branch() -> None:
@@ -14,7 +14,7 @@ def test_merge_creates_two_parent_commit_on_into_branch() -> None:
     )
 
     # --- act --------------------------
-    state, report = run(text)
+    state, report = parse_and_apply(text)
 
     # --- assert -----------------------
     assert report.is_clean()
@@ -29,7 +29,7 @@ def test_merge_with_unknown_from_branch_emits_e200() -> None:
     text = '{"op": "branch", "name": "main"}\n{"op": "merge", "from": "ghost", "into": "main"}\n'
 
     # --- act --------------------------
-    _, report = run(text)
+    _, report = parse_and_apply(text)
 
     # --- assert -----------------------
     assert [e.code for e in report.errors] == ["E200"]
@@ -40,7 +40,7 @@ def test_merge_with_unknown_into_branch_emits_e200() -> None:
     text = '{"op": "branch", "name": "main"}\n{"op": "merge", "from": "main", "into": "ghost"}\n'
 
     # --- act --------------------------
-    _, report = run(text)
+    _, report = parse_and_apply(text)
 
     # --- assert -----------------------
     assert [e.code for e in report.errors] == ["E200"]
@@ -57,7 +57,7 @@ def test_merge_with_explicit_as_id_already_used_emits_e203() -> None:
     )
 
     # --- act --------------------------
-    _, report = run(text)
+    _, report = parse_and_apply(text)
 
     # --- assert -----------------------
     assert [e.code for e in report.errors] == ["E203"]
@@ -74,7 +74,7 @@ def test_merge_auto_generates_id_when_as_omitted() -> None:
     )
 
     # --- act --------------------------
-    state, report = run(text)
+    state, report = parse_and_apply(text)
 
     # --- assert -----------------------
     assert report.is_clean()

@@ -1,11 +1,11 @@
 """Tests for the `branch` op state-apply handler."""
 
-from tests.state._helpers import run
+from tests.state._helpers import parse_and_apply
 
 
 def test_first_branch_no_root_is_accepted() -> None:
     # --- act --------------------------
-    state, report = run('{"op": "branch", "name": "main"}\n')
+    state, report = parse_and_apply('{"op": "branch", "name": "main"}\n')
 
     # --- assert -----------------------
     assert report.is_clean()
@@ -22,7 +22,7 @@ def test_branch_from_branch_resolves_root_to_source_tip() -> None:
     )
 
     # --- act --------------------------
-    state, report = run(text)
+    state, report = parse_and_apply(text)
 
     # --- assert -----------------------
     assert report.is_clean()
@@ -34,7 +34,7 @@ def test_branch_from_empty_source_branch_has_no_root_commit() -> None:
     text = '{"op": "branch", "name": "main"}\n{"op": "branch", "name": "feat", "from_branch": "main"}\n'
 
     # --- act --------------------------
-    state, report = run(text)
+    state, report = parse_and_apply(text)
 
     # --- assert -----------------------
     assert report.is_clean()
@@ -46,7 +46,7 @@ def test_duplicate_branch_name_emits_e202() -> None:
     text = '{"op": "branch", "name": "main"}\n{"op": "branch", "name": "main"}\n'
 
     # --- act --------------------------
-    state, report = run(text)
+    state, report = parse_and_apply(text)
 
     # --- assert -----------------------
     assert [e.code for e in report.errors] == ["E202"]
@@ -58,7 +58,7 @@ def test_non_first_branch_without_root_emits_e204() -> None:
     text = '{"op": "branch", "name": "main"}\n{"op": "branch", "name": "feat"}\n'
 
     # --- act --------------------------
-    state, report = run(text)
+    state, report = parse_and_apply(text)
 
     # --- assert -----------------------
     assert [e.code for e in report.errors] == ["E204"]
@@ -70,7 +70,7 @@ def test_from_branch_pointing_at_undeclared_branch_emits_e200() -> None:
     text = '{"op": "branch", "name": "main"}\n{"op": "branch", "name": "feat", "from_branch": "ghost"}\n'
 
     # --- act --------------------------
-    _, report = run(text)
+    _, report = parse_and_apply(text)
 
     # --- assert -----------------------
     assert [e.code for e in report.errors] == ["E200"]
@@ -81,7 +81,7 @@ def test_from_commit_pointing_at_undeclared_commit_emits_e201() -> None:
     text = '{"op": "branch", "name": "main"}\n{"op": "branch", "name": "feat", "from_commit": "ghost"}\n'
 
     # --- act --------------------------
-    _, report = run(text)
+    _, report = parse_and_apply(text)
 
     # --- assert -----------------------
     assert [e.code for e in report.errors] == ["E201"]
@@ -96,7 +96,7 @@ def test_from_branch_when_name_is_actually_a_commit_id_hints_at_from_commit() ->
     )
 
     # --- act --------------------------
-    _, report = run(text)
+    _, report = parse_and_apply(text)
 
     # --- assert -----------------------
     assert len(report.errors) == 1
