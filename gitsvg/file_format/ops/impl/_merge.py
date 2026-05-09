@@ -5,7 +5,7 @@ from typing import Literal
 from pydantic import Field
 
 from gitsvg.file_format.ops.framework._base import OpBase
-from gitsvg.file_format.ops.framework._types import IdStr, NonEmptyStr
+from gitsvg.file_format.ops.framework._types import IdStr, NonEmptyStr, NonNegativeInt
 
 
 class MergeOp(OpBase):
@@ -16,3 +16,4 @@ class MergeOp(OpBase):
     into: IdStr
     as_: IdStr | None = Field(default=None, alias="as")
     msg: NonEmptyStr | None = None
+    gap: NonNegativeInt | None = None

@@ -254,3 +254,22 @@ def test_highlight_field_propagates_to_commit_state(highlight_value: bool | None
     # --- assert -----------------------
     assert report.is_clean()
     assert state.commits["c1"].highlight is expected
+
+
+# ==================================================================================================
+#  Gap field
+# ==================================================================================================
+@pytest.mark.parametrize("gap_value, expected", [(2, 2), (0, 0), (None, 0)])
+def test_gap_field_propagates_to_commit_state(gap_value: int | None, expected: int) -> None:
+    # --- arrange ----------------------
+    gap_field = f', "gap": {gap_value}' if gap_value is not None else ""
+    text = (
+        f'{{"op": "branch", "name": "main"}}\n{{"op": "commit", "branch": "main", "id": "c1", "msg": "x"{gap_field}}}\n'
+    )
+
+    # --- act --------------------------
+    state, report = build_state_from_jsonl(text)
+
+    # --- assert -----------------------
+    assert report.is_clean()
+    assert state.commits["c1"].gap == expected

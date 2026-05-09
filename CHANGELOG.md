@@ -9,11 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `commit:` op gains a `gap:` field (non-negative integer, default `0`): leaves N empty commit-axis slots between the branch's tip and the new commit's landing position, for hand-tuned breathing room. Rejected when used together with `replaces:`, where the squash position is fixed by definition.
+- `merge:` op gains the same `gap:` field, applied above the natural anchor at `max(into.tip, from.tip) + 1`.
+- `canvas:` op gains four pixel-margin fields — `margin_commit_axis_lower`, `margin_commit_axis_upper`, `margin_branch_axis_lower`, `margin_branch_axis_upper` — one per axis end. Default is renderer auto-fit; pin them only when stable per-frame margins matter (animation series).
+
 ### Changed
 
 ### Deprecated
 
 ### Removed
+
+- `commit_pos:` and `branch_pos:` fields on `commit:` op. The commit-axis case is replaced by relative `gap:`; commit-level branch-axis overrides aren't needed in v0.0.x (commits always live on their branch's lane).
+- `branch_pos:` field on `branch:` op. Branch-axis position is now auto-assigned in declaration order; an override mechanism may return when lane-reuse heuristics land.
 
 ### Fixed
 

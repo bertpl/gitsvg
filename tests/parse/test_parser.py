@@ -113,8 +113,8 @@ def test_non_object_line_emits_e004() -> None:
     [
         ('{"op": "branch", "name": "main", "unknown": 1}', "E100", "unknown"),
         ('{"op": "branch"}', "E101", "name"),
-        ('{"op": "branch", "name": "main", "branch_pos": "x"}', "E102", "branch_pos"),
-        ('{"op": "branch", "name": "main", "branch_pos": -1}', "E103", "branch_pos"),
+        ('{"op": "commit", "branch": "main", "msg": "x", "gap": "two"}', "E102", "gap"),
+        ('{"op": "commit", "branch": "main", "msg": "x", "gap": -1}', "E103", "gap"),
         ('{"op": "branch", "name": "with space"}', "E104", "name"),
         ('{"op": "commit", "branch": "main", "msg": ""}', "E105", "msg"),
         ('{"op": "remove", "commits": []}', "E106", "commits"),
@@ -158,7 +158,7 @@ def test_parser_continues_past_errors_to_collect_full_report() -> None:
 
 def test_one_op_can_yield_multiple_shape_errors() -> None:
     # --- arrange ----------------------
-    text = '{"op": "branch", "name": "with space", "branch_pos": -1}\n'
+    text = '{"op": "commit", "branch": "with space", "msg": "x", "gap": -1}\n'
 
     # --- act --------------------------
     parsed, report = parse_jsonl_text(text, file="x.jsonl")

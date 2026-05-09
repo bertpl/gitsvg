@@ -15,13 +15,19 @@ class CanvasState:
 
     All fields are independently optional — setting one and leaving
     the others at None is meaningful (e.g. pin slot count, leave
-    spacing auto).
+    spacing auto). Margin fields default to renderer auto-fit when
+    unset; set them explicitly only when stable per-frame margins
+    matter (animation series).
     """
 
     n_commits: int | None = None
     n_branches: int | None = None
     commit_spacing: float | None = None
     branch_spacing: float | None = None
+    margin_commit_axis_lower: float | None = None
+    margin_commit_axis_upper: float | None = None
+    margin_branch_axis_lower: float | None = None
+    margin_branch_axis_upper: float | None = None
 
 
 @dataclass(slots=True)
@@ -32,7 +38,6 @@ class BranchState:
         name: Unique branch name.
         color: Optional hex color override from the declaration.
         label_side: Optional label-side hint from the declaration.
-        branch_pos: Optional explicit slot index from the declaration.
         from_branch: Source-branch name captured at declaration time
             (or None for the first branch).
         from_commit: Source-commit id captured at declaration time
@@ -48,7 +53,6 @@ class BranchState:
     name: str
     color: str | None = None
     label_side: str | None = None
-    branch_pos: int | None = None
     from_branch: str | None = None
     from_commit: str | None = None
     rooted_on_commit: str | None = None
@@ -65,12 +69,13 @@ class CommitState:
         id: Unique commit id (explicit or auto-generated).
         branch: Name of the branch the commit lives on.
         msg: Optional commit message.
-        hash: Optional hash string (literal `"auto"` allowed; resolution lands in v0.0.3).
+        hash: Optional hash string (literal `"auto"` allowed; deterministic resolution lands in v0.0.3).
         parents: Explicit parents (empty list = the commit is a normal append).
         replaces: Commit ids this commit conceptually squashes (empty list = no squash).
         highlight: True when the commit is marked for visual highlight.
-        commit_pos: Optional explicit slot index along the commit axis.
-        branch_pos: Optional explicit slot index along the branch axis.
+        gap: Number of empty commit-axis slots to leave between the branch's
+            tip and this commit's landing position. Always 0 when the op did
+            not set `gap`.
         declaration_file: Source file the op that introduced the commit was parsed from.
         declaration_line: 1-based source line of the op that introduced the commit.
     """
@@ -82,8 +87,7 @@ class CommitState:
     parents: list[str] = field(default_factory=list)
     replaces: list[str] = field(default_factory=list)
     highlight: bool = False
-    commit_pos: int | None = None
-    branch_pos: int | None = None
+    gap: int = 0
     declaration_file: str = ""
     declaration_line: int = 0
 

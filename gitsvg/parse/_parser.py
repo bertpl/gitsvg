@@ -197,7 +197,7 @@ def _normalise_field_path(loc: tuple) -> str | None:
         loc: The `loc` tuple from a pydantic error dict.
 
     Returns:
-        A dotted path like `"branch_pos"` or `"parents.0"`, or `None`
+        A dotted path like `"gap"` or `"parents.0"`, or `None`
         when the location is empty (top-level errors).
     """
     parts = list(loc)
