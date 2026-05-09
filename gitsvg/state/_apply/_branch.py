@@ -102,6 +102,7 @@ def apply_branch_op(state: State, parsed: ParsedOp, report: ValidationReport) ->
         name=op.name,
         color=op.color,
         label_side=op.label_side,
+        branch_pos=op.branch_pos,
         from_branch=op.from_branch,
         from_commit=op.from_commit,
         rooted_on_commit=rooted_on,

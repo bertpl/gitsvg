@@ -61,6 +61,60 @@ def test_branch_pos_increments_in_declaration_order() -> None:
 
 
 # ==================================================================================================
+#  Branch-axis assignment — `branch_pos:` override (lenient passthrough)
+# ==================================================================================================
+def test_branch_pos_override_pins_lane_verbatim() -> None:
+    # --- arrange ----------------------
+    text = (
+        '{"op": "branch", "name": "main"}\n{"op": "branch", "name": "feat", "from_branch": "main", "branch_pos": 7}\n'
+    )
+
+    # --- act --------------------------
+    layout = _layout_from(text)
+
+    # --- assert -----------------------
+    by_name = {b.name: b for b in layout.branches}
+    assert by_name["main"].branch_pos == 0
+    assert by_name["feat"].branch_pos == 7
+
+
+def test_branch_pos_override_to_zero_passes_through_lenient() -> None:
+    # Lenient stance: even an override that visually clashes with the
+    # parent branch's lane is taken verbatim. The author owns the layout.
+    # --- arrange ----------------------
+    text = (
+        '{"op": "branch", "name": "main"}\n{"op": "branch", "name": "feat", "from_branch": "main", "branch_pos": 0}\n'
+    )
+
+    # --- act --------------------------
+    layout = _layout_from(text)
+
+    # --- assert -----------------------
+    by_name = {b.name: b for b in layout.branches}
+    assert by_name["feat"].branch_pos == 0
+
+
+def test_branch_pos_override_does_not_shift_other_branches() -> None:
+    # An override on one branch only changes that branch's lane; sibling
+    # branches keep their declaration-order default.
+    # --- arrange ----------------------
+    text = (
+        '{"op": "branch", "name": "main"}\n'
+        '{"op": "branch", "name": "feat", "from_branch": "main", "branch_pos": 5}\n'
+        '{"op": "branch", "name": "docs", "from_branch": "main"}\n'
+    )
+
+    # --- act --------------------------
+    layout = _layout_from(text)
+
+    # --- assert -----------------------
+    by_name = {b.name: b for b in layout.branches}
+    assert by_name["main"].branch_pos == 0
+    assert by_name["feat"].branch_pos == 5
+    assert by_name["docs"].branch_pos == 2
+
+
+# ==================================================================================================
 #  Commit-axis assignment — uniform `tip + 1 + gap` rule
 # ==================================================================================================
 def test_first_commit_on_root_branch_lands_at_zero() -> None:
