@@ -5,7 +5,7 @@ from typing import Literal, Self
 from pydantic import model_validator
 
 from gitsvg.file_format.ops.framework._base import OpBase
-from gitsvg.file_format.ops.framework._types import HexColor, IdStr, NonNegativeInt
+from gitsvg.file_format.ops.framework._types import HexColor, IdStr
 
 
 class BranchOp(OpBase):
@@ -17,7 +17,6 @@ class BranchOp(OpBase):
     from_commit: IdStr | None = None
     color: HexColor | None = None
     label_side: Literal["left", "right"] | None = None
-    branch_pos: NonNegativeInt | None = None
 
     @model_validator(mode="after")
     def _validate_at_most_one_root(self) -> Self:

@@ -57,7 +57,17 @@ def test_import_path_round_trip() -> None:
 
 def test_canvas_all_optional_fields() -> None:
     # --- arrange ----------------------
-    raw = {"op": "canvas", "n_commits": 10, "n_branches": 3, "commit_spacing": 12.5, "branch_spacing": 40}
+    raw = {
+        "op": "canvas",
+        "n_commits": 10,
+        "n_branches": 3,
+        "commit_spacing": 12.5,
+        "branch_spacing": 40,
+        "margin_commit_axis_lower": 30,
+        "margin_commit_axis_upper": 30,
+        "margin_branch_axis_lower": 80,
+        "margin_branch_axis_upper": 100,
+    }
 
     # --- act --------------------------
     op = CanvasOp.model_validate(raw)
@@ -67,6 +77,10 @@ def test_canvas_all_optional_fields() -> None:
     assert op.n_branches == 3
     assert op.commit_spacing == 12.5
     assert op.branch_spacing == 40
+    assert op.margin_commit_axis_lower == 30
+    assert op.margin_commit_axis_upper == 30
+    assert op.margin_branch_axis_lower == 80
+    assert op.margin_branch_axis_upper == 100
 
 
 def test_branch_with_from_branch_and_visual_overrides() -> None:
@@ -77,7 +91,6 @@ def test_branch_with_from_branch_and_visual_overrides() -> None:
         "from_branch": "main",
         "color": "#7b8fb2",
         "label_side": "left",
-        "branch_pos": 2,
     }
 
     # --- act --------------------------
@@ -87,7 +100,6 @@ def test_branch_with_from_branch_and_visual_overrides() -> None:
     assert op.from_branch == "main"
     assert op.color == "#7b8fb2"
     assert op.label_side == "left"
-    assert op.branch_pos == 2
 
 
 def test_branch_label_side_rejects_unknown_value() -> None:
@@ -287,13 +299,16 @@ def test_branch_color_rejects_invalid_hex_forms(color: str) -> None:
 @pytest.mark.parametrize(
     "raw",
     [
-        {"op": "branch", "name": "main", "branch_pos": -1},
         {"op": "canvas", "n_commits": -1},
         {"op": "canvas", "n_branches": -1},
         {"op": "canvas", "commit_spacing": -0.1},
         {"op": "canvas", "branch_spacing": -1.0},
-        {"op": "commit", "branch": "main", "msg": "x", "commit_pos": -1},
-        {"op": "commit", "branch": "main", "msg": "x", "branch_pos": -1},
+        {"op": "canvas", "margin_commit_axis_lower": -1},
+        {"op": "canvas", "margin_commit_axis_upper": -1},
+        {"op": "canvas", "margin_branch_axis_lower": -1},
+        {"op": "canvas", "margin_branch_axis_upper": -1},
+        {"op": "commit", "branch": "main", "msg": "x", "gap": -1},
+        {"op": "merge", "from": "feat", "into": "main", "gap": -1},
     ],
 )
 def test_numeric_fields_reject_negative_values(raw: dict) -> None:
@@ -305,9 +320,10 @@ def test_numeric_fields_reject_negative_values(raw: dict) -> None:
 @pytest.mark.parametrize(
     "raw",
     [
-        {"op": "branch", "name": "main", "branch_pos": 0},
         {"op": "canvas", "n_commits": 0, "commit_spacing": 0, "branch_spacing": 0},
-        {"op": "commit", "branch": "main", "msg": "x", "commit_pos": 0, "branch_pos": 0},
+        {"op": "canvas", "margin_commit_axis_lower": 0, "margin_branch_axis_upper": 0},
+        {"op": "commit", "branch": "main", "msg": "x", "gap": 0},
+        {"op": "merge", "from": "feat", "into": "main", "gap": 0},
     ],
 )
 def test_numeric_fields_accept_zero(raw: dict) -> None:
@@ -399,3 +415,41 @@ def test_remove_rejects_both_commits_and_branches() -> None:
     # --- act / assert -----------------
     with pytest.raises(ValidationError):
         RemoveOp.model_validate(raw)
+
+
+def test_commit_gap_round_trip() -> None:
+    # --- arrange ----------------------
+    raw = {"op": "commit", "branch": "main", "msg": "x", "gap": 2}
+
+    # --- act --------------------------
+    op = CommitOp.model_validate(raw)
+
+    # --- assert -----------------------
+    assert op.gap == 2
+
+
+def test_merge_gap_round_trip() -> None:
+    # --- arrange ----------------------
+    raw = {"op": "merge", "from": "feat", "into": "main", "gap": 1}
+
+    # --- act --------------------------
+    op = MergeOp.model_validate(raw)
+
+    # --- assert -----------------------
+    assert op.gap == 1
+
+
+def test_commit_rejects_gap_with_replaces() -> None:
+    # --- arrange ----------------------
+    raw = {
+        "op": "commit",
+        "branch": "main",
+        "id": "c5",
+        "msg": "squash",
+        "replaces": ["c2", "c3"],
+        "gap": 1,
+    }
+
+    # --- act / assert -----------------
+    with pytest.raises(ValidationError):
+        CommitOp.model_validate(raw)

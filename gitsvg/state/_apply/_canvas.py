@@ -22,4 +22,8 @@ def apply_canvas_op(state: State, parsed: ParsedOp, report: ValidationReport) ->
         n_branches=op.n_branches,
         commit_spacing=op.commit_spacing,
         branch_spacing=op.branch_spacing,
+        margin_commit_axis_lower=op.margin_commit_axis_lower,
+        margin_commit_axis_upper=op.margin_commit_axis_upper,
+        margin_branch_axis_lower=op.margin_branch_axis_lower,
+        margin_branch_axis_upper=op.margin_branch_axis_upper,
     )

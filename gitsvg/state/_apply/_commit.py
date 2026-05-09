@@ -94,8 +94,7 @@ def apply_commit_op(state: State, parsed: ParsedOp, report: ValidationReport) ->
         parents=list(op.parents or []),
         replaces=list(op.replaces or []),
         highlight=bool(op.highlight),
-        commit_pos=op.commit_pos,
-        branch_pos=op.branch_pos,
+        gap=op.gap or 0,
         declaration_file=file,
         declaration_line=line,
     )
