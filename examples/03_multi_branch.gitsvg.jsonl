@@ -1,0 +1,12 @@
+{"op": "branch", "name": "main", "label_side": "left"}
+{"op": "commit", "branch": "main", "id": "c1", "msg": "initial commit", "hash": "auto"}
+{"op": "branch", "name": "feature-a", "from_branch": "main"}
+{"op": "commit", "branch": "feature-a", "id": "a1", "msg": "start feature A", "hash": "auto"}
+{"op": "branch", "name": "bugfix", "from_branch": "main"}
+{"op": "commit", "branch": "bugfix", "id": "x1", "msg": "fix #42", "hash": "auto"}
+{"op": "merge", "from": "feature-a", "into": "main", "as": "m1", "msg": "merge feature A", "hash": "auto"}
+{"op": "merge", "from": "bugfix", "into": "main", "as": "m2", "msg": "merge bugfix", "hash": "auto"}
+{"op": "commit", "branch": "main", "id": "c2", "msg": "release prep", "hash": "auto"}
+{"op": "branch", "name": "feature-b", "from_branch": "main"}
+{"op": "commit", "branch": "feature-b", "id": "b1", "msg": "feature B", "hash": "auto"}
+{"op": "merge", "from": "feature-b", "into": "main", "as": "m3", "msg": "merge feature B", "hash": "auto"}

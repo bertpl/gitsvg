@@ -1,0 +1,2 @@
+{"op": "import", "path": "05_remove_rebuild.gitsvg.jsonl"}
+{"op": "commit", "branch": "feature", "id": "f_squash", "msg": "complete feature", "hash": "auto", "replaces": ["f1", "f2"]}

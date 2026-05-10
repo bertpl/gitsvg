@@ -1,0 +1,7 @@
+{"op": "branch", "name": "main", "label_side": "left"}
+{"op": "commit", "branch": "main", "id": "c1", "msg": "initial commit", "hash": "auto"}
+{"op": "commit", "branch": "main", "id": "c2", "msg": "setup config", "hash": "auto"}
+{"op": "branch", "name": "feature", "from_branch": "main"}
+{"op": "commit", "branch": "feature", "id": "f1", "msg": "add login form", "hash": "auto"}
+{"op": "commit", "branch": "feature", "id": "f2", "msg": "wire up auth", "hash": "auto"}
+{"op": "merge", "from": "feature", "into": "main", "as": "m1", "msg": "merge feature", "hash": "auto"}
