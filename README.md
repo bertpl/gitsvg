@@ -1,6 +1,6 @@
 # gitsvg
 
-CLI that renders git tree visualizations as SVG from a small JSONL input format.
+CLI that renders git tree visualizations as SVG from JSONL input.
 
 [![CI](https://github.com/bertpl/gitsvg/actions/workflows/push_to_main.yml/badge.svg)](https://github.com/bertpl/gitsvg/actions/workflows/push_to_main.yml)
 [![PyPI](https://img.shields.io/pypi/v/gitsvg.svg)](https://pypi.org/project/gitsvg/)
