@@ -1,8 +1,6 @@
-"""Visual constants for the v0.0.3 renderer.
+"""Visual constants for the renderer.
 
-Hard-coded for v0.0.3; post-0.1.0 these become theme-able through the
-deferred `theme:` op. Names and values match
-`design/v0_0_3_seed_inventory.md` § "TL;DR".
+Hard-coded; will become theme-able when the deferred `theme:` op lands.
 """
 
 # ==================================================================================================

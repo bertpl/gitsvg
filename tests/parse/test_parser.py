@@ -122,7 +122,7 @@ def test_non_object_line_emits_e004() -> None:
         ('{"op": "branch", "name": "main", "label_side": "top"}', "E108", "label_side"),
     ],
 )
-def test_shape_errors_map_to_expected_codes(raw: str, expected_code: str, expected_field: str | None) -> None:
+def test_schema_errors_map_to_expected_codes(raw: str, expected_code: str, expected_field: str | None) -> None:
     # --- act --------------------------
     parsed, report = parse_jsonl_text(raw + "\n", file="x.jsonl")
 
@@ -156,7 +156,7 @@ def test_parser_continues_past_errors_to_collect_full_report() -> None:
     assert [(e.line, e.code) for e in report.errors] == [(2, "E001"), (4, "E101")]
 
 
-def test_one_op_can_yield_multiple_shape_errors() -> None:
+def test_one_op_can_yield_multiple_schema_errors() -> None:
     # --- arrange ----------------------
     text = '{"op": "commit", "branch": "with space", "msg": "x", "gap": -1}\n'
 

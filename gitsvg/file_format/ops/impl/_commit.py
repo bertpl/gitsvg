@@ -11,8 +11,8 @@ from gitsvg.file_format.ops.framework._types import IdStr, NonEmptyStr, NonNegat
 class CommitOp(OpBase):
     """Append a commit to a branch.
 
-    `hash:` accepts the literal sentinel `"auto"`; deterministic
-    resolution is implemented in v0.0.3.
+    `hash:` accepts the literal sentinel `"auto"`; auto-resolution is
+    deterministic.
     """
 
     op: Literal["commit"]

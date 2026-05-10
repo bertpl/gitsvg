@@ -1,9 +1,8 @@
 """Approximate text-width estimation for layout auto-fit.
 
-These are rough character-count-based estimates (matching the
-character-width factors the seed scripts and the renderer's pill
-primitive use). They're good enough to keep labels inside the canvas
-in v0.0.3 without measuring real glyph widths.
+A per-character pixel estimate matching the renderer's pill primitive
+— no real glyph measurement. Good enough to keep labels inside the
+canvas.
 """
 
 from gitsvg._visual_constants import (

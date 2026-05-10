@@ -12,10 +12,10 @@ renderer needs is pre-resolved here:
 - Pre-enumerated branch guides (one entry per occupied lane).
 - Canvas dimensions.
 
-Different layout strategies (the v0.0.3 default declaration-order
-mono-lane assignment; v0.0.4 lane reuse; future left-to-right
-orientations) all produce the same `Layout` shape, so the renderer
-stays oblivious.
+Different layout strategies (the default declaration-order
+sequential assignment, the lane-reuse strategy, future left-to-
+right orientations) all produce the same `Layout` schema, so the
+renderer stays oblivious.
 """
 
 from dataclasses import dataclass, field

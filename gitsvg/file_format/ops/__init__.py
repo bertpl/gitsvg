@@ -1,4 +1,4 @@
-"""Pydantic models for the seven v0.0.x gitsvg operations.
+"""Pydantic models for the seven gitsvg operations.
 
 Subpackage layout:
 

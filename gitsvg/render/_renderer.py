@@ -45,11 +45,11 @@ def render(layout: Layout) -> draw.Drawing:
     canvas = layout.canvas
     d = draw.Drawing(canvas.width, canvas.height)
 
-    # --- Branch guides ----------------
+    # --- Branch guides --------------------------
     for guide in layout.guides:
         draw_branch_guide(d, guide.branch_pos, canvas)
 
-    # --- Arcs (branch-off + merge) -----
+    # --- Arcs (branch-off + merge) --------------
     for arc in layout.arcs:
         draw_arc(
             d,
@@ -62,19 +62,19 @@ def render(layout: Layout) -> draw.Drawing:
             vertical_first=arc.vertical_first,
         )
 
-    # --- Branch lines -----------------
+    # --- Branch lines ---------------------------
     for branch in layout.branches:
         draw_branch_line(d, branch, branch.color, canvas)
 
-    # --- Branch-name pills ------------
+    # --- Branch-name pills ----------------------
     for branch in layout.branches:
         draw_branch_pill(d, branch, canvas)
 
-    # --- Commit dots ------------------
+    # --- Commit dots ----------------------------
     for commit in layout.commits.values():
         draw_commit_dot(d, commit, commit.color, canvas)
 
-    # --- Commit labels ----------------
+    # --- Commit labels --------------------------
     for commit in layout.commits.values():
         draw_commit_label(d, commit, canvas)
 

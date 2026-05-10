@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - README CI badge now reads `CI: passing` instead of `Push to Main: passing`. Routed via shields.io with a `label=CI` override; the underlying workflow name is unchanged.
+- `gitsvg schema commit` description no longer references a development version; the trailing clause now reads "`hash:` accepts the literal sentinel `\"auto\"`; auto-resolution is deterministic."
 
 ### Deprecated
 
