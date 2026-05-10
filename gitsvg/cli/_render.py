@@ -18,6 +18,7 @@ from gitsvg.imports import resolve_imports
 from gitsvg.layout import compute_layout
 from gitsvg.parse import parse_jsonl_file
 from gitsvg.render import render
+from gitsvg.render._minify import minify
 from gitsvg.state import apply_ops, check_end_of_file
 
 
@@ -31,7 +32,13 @@ from gitsvg.state import apply_ops, check_end_of_file
     type=click.Path(dir_okay=False, path_type=Path),
     help="Path to write the SVG output to.",
 )
-def render_command(input_path: Path, output_path: Path) -> None:
+@click.option(
+    "--small",
+    is_flag=True,
+    default=False,
+    help="Produce a more compact SVG (some loss of numeric precision).",
+)
+def render_command(input_path: Path, output_path: Path, small: bool) -> None:
     """Render a `.gitsvg.jsonl` input file to an SVG file.
 
     Runs the same validation pipeline as `gitsvg validate`, then
@@ -50,4 +57,8 @@ def render_command(input_path: Path, output_path: Path) -> None:
 
     layout = compute_layout(state)
     drawing = render(layout)
-    drawing.save_svg(str(output_path))
+    if small:
+        svg = drawing.as_svg(header="", skip_css=True, skip_js=True)
+        output_path.write_text(minify(svg, small=True))
+    else:
+        drawing.save_svg(str(output_path))

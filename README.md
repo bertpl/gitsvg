@@ -139,7 +139,7 @@ The `import` op replays another file as a prelude — here it picks up the rebas
 
 | Command | Purpose |
 |---------|---------|
-| `gitsvg render <input> -o <output>` | Render a `.gitsvg.jsonl` file to SVG. |
+| `gitsvg render <input> -o <output>` | Render a `.gitsvg.jsonl` file to SVG. Add `--small` for a more compact SVG (some loss of numeric precision). |
 | `gitsvg validate <input>` | Run the full validation pipeline; report errors with `file:line: [code] field: message`. Add `--json` for a structured report. |
 | `gitsvg schema` | Index of all input operations. `gitsvg schema <op>` prints the JSON Schema for a specific operation; `--list-ops` prints a bare op list. |
 | `gitsvg errors` | Index of all validation error codes. `gitsvg errors <code>` prints the long-form catalog entry; `--list-codes` prints a bare code list. |

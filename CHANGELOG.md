@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `gitsvg render --small` flag for compact SVG output. Round 1: numeric rounding to 3 decimal places (with trailing-zero strip — kills float-arithmetic artefacts like `37.519999999999996` while preserving values like `0.7` and `0.85` exactly) and suppression of the XML declaration. Default (non-`--small`) output is unchanged.
+
 ### Changed
 
 - README CI badge now reads `CI: passing` instead of `Push to Main: passing`. Routed via shields.io with a `label=CI` override; the underlying workflow name is unchanged.
