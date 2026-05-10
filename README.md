@@ -134,7 +134,7 @@ The `import` op replays another file as a prelude — here it picks up the rebas
 
 ```jsonl
 {"op": "import", "path": "05_remove_rebuild.gitsvg.jsonl"}
-{"op": "commit", "branch": "feature", "id": "f_squash", "msg": "complete feature", "hash": "auto", "replaces": ["f1", "f2"]}
+{"op": "commit", "branch": "feature", "replaces": ["f1", "f2"], "id": "f_squash", "msg": "complete feature", "hash": "auto"}
 ```
 
 ## CLI reference
