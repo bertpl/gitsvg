@@ -11,7 +11,7 @@ place of these passes when implemented.
 
 import re
 
-from gitsvg._visual_constants import LABEL_FONT_FAMILY
+from gitsvg._visual_constants import LABEL_FONT_FAMILY, LABEL_FONT_FAMILY_SMALL
 
 # ==================================================================================================
 #  Individual passes
@@ -83,13 +83,13 @@ def drop_empty_defs_and_unused_xlink(svg: str) -> str:
 
 
 def trim_font_family_fallback(svg: str) -> str:
-    """Replace the rendered `font-family` chain with `Inter, sans-serif`.
+    """Replace the rendered `font-family` chain with the short form.
 
-    The rendered output's full `font-family` value is `LABEL_FONT_FAMILY`
-    (`'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif`). Under
-    `--small`, drop the intermediate fallbacks — `Inter, sans-serif`
-    relies on the host's generic-`sans-serif` resolution instead, which
-    on every modern OS lands on a perfectly acceptable default.
+    The rendered output uses `LABEL_FONT_FAMILY` on every text element.
+    Under `--small`, drop the intermediate fallbacks: replace every
+    occurrence with `LABEL_FONT_FAMILY_SMALL`, which relies on the
+    host's generic-`sans-serif` resolution instead. On every modern OS
+    that resolves to a perfectly acceptable default.
 
     Args:
         svg: The full SVG markup as a string.
@@ -97,7 +97,7 @@ def trim_font_family_fallback(svg: str) -> str:
     Returns:
         The SVG with the long fallback chain replaced by the short form.
     """
-    return svg.replace(LABEL_FONT_FAMILY, "Inter, sans-serif")
+    return svg.replace(LABEL_FONT_FAMILY, LABEL_FONT_FAMILY_SMALL)
 
 
 def hoist_font_family_to_root(svg: str) -> str:
