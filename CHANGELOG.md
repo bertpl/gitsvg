@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Default-mode SVG output is byte-equivalent to v0.1.1 again. The trimmed font-family fallback chain shipped in v0.1.2 was unintentionally applied to all renders; it is now applied only under `--small`.
+
 ### Security
 
 ## 0.1.2 (2026-05-10)

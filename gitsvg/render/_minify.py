@@ -11,6 +11,8 @@ place of these passes when implemented.
 
 import re
 
+from gitsvg._visual_constants import LABEL_FONT_FAMILY, LABEL_FONT_FAMILY_SMALL
+
 # ==================================================================================================
 #  Individual passes
 # ==================================================================================================
@@ -78,6 +80,24 @@ def drop_empty_defs_and_unused_xlink(svg: str) -> str:
     if not re.search(r"xlink:[a-zA-Z]+=", svg):
         svg = re.sub(r'\s+xmlns:xlink="[^"]*"', "", svg)
     return svg
+
+
+def trim_font_family_fallback(svg: str) -> str:
+    """Replace the rendered `font-family` chain with the short form.
+
+    The rendered output uses `LABEL_FONT_FAMILY` on every text element.
+    Under `--small`, drop the intermediate fallbacks: replace every
+    occurrence with `LABEL_FONT_FAMILY_SMALL`, which relies on the
+    host's generic-`sans-serif` resolution instead. On every modern OS
+    that resolves to a perfectly acceptable default.
+
+    Args:
+        svg: The full SVG markup as a string.
+
+    Returns:
+        The SVG with the long fallback chain replaced by the short form.
+    """
+    return svg.replace(LABEL_FONT_FAMILY, LABEL_FONT_FAMILY_SMALL)
 
 
 def hoist_font_family_to_root(svg: str) -> str:
@@ -164,6 +184,7 @@ def minify(svg: str, small: bool) -> str:
         return svg
     svg = round_numbers(svg, decimals=3)
     svg = drop_default_attribute_values(svg)
+    svg = trim_font_family_fallback(svg)
     svg = hoist_font_family_to_root(svg)
     svg = drop_empty_defs_and_unused_xlink(svg)
     svg = strip_inter_element_whitespace(svg)
