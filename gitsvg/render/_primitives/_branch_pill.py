@@ -6,8 +6,7 @@ branch name in white text, positioned `BRANCH_NAME_PILL_OFFSET` pixels
 of the commit axis, where pills sit at the branch's birth).
 
 Width is approximated from the text length using a per-character pixel
-estimate — the same approach the seed scripts used; we never measure
-real glyph widths in v0.0.3.
+estimate; no real glyph measurement.
 """
 
 import drawsvg as draw

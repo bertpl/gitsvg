@@ -9,9 +9,9 @@ Public surface:
   `LayoutCanvas` — the dataclasses the renderer consumes.
 
 The renderer never imports `State`. Every field it needs is pre-resolved
-in `Layout`, so different layout strategies (the v0.0.3 default;
-v0.0.4 lane reuse; future left-to-right orientation; …) can be plugged
-in without touching the renderer.
+in `Layout`, so different layout strategies (the default sequential
+declaration-order assignment, the lane-reuse strategy, future left-to-
+right orientation, …) can be plugged in without touching the renderer.
 """
 
 from gitsvg.layout._engine import compute_layout

@@ -132,7 +132,7 @@ def test_branch_guide_count_equals_unique_lane_count() -> None:
     # --- assert -----------------------
     # 2 lanes → 2 dashed guide lines. drawsvg renders Line as a `<path>`,
     # but guides also carry the `stroke-dasharray` attribute, which is
-    # unique to them in PR5's output.
+    # unique to them.
     assert svg_text.count("stroke-dasharray") == 2
 
 

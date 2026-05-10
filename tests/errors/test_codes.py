@@ -134,7 +134,7 @@ def test_all_codes_returns_sorted_entries(populated_registry: dict) -> None:
     assert codes == ["E998", "E999"]
 
 
-def test_production_registry_includes_parser_and_shape_codes() -> None:
+def test_production_registry_includes_parser_and_schema_codes() -> None:
     """The production catalog declares the parse-phase and schema-phase codes."""
     # --- act --------------------------
     codes = {entry.code for entry in all_codes()}

@@ -73,7 +73,7 @@ class CommitState:
         id: Unique commit id (explicit or auto-generated).
         branch: Name of the branch the commit lives on.
         msg: Optional commit message.
-        hash: Optional hash string (literal `"auto"` allowed; deterministic resolution lands in v0.0.3).
+        hash: Optional hash string (literal `"auto"` allowed; auto-resolution is deterministic).
         parents: Explicit parents (empty list = the commit is a normal append).
         replaces: Commit ids this commit conceptually squashes (empty list = no squash).
         highlight: True when the commit is marked for visual highlight.

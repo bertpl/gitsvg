@@ -82,7 +82,7 @@ def apply_commit_op(state: State, parsed: ParsedOp, report: ValidationReport) ->
         )
         return
 
-    # --- Resolve `gap` (with inheritance default for `replaces:` commits) ----
+    # --- Resolve `gap` (replaces inheritance) ---
     resolved_gap = _resolve_gap(state, op)
 
     # --- Apply replaces removals ----------------

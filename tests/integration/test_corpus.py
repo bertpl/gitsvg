@@ -57,7 +57,7 @@ def test_happy_fixture_validates_clean(filename: str) -> None:
 SAD_FIXTURES: list[tuple[str, set[str]]] = [
     ("bad_parse_invalid_json.gitsvg.jsonl", {"E001"}),
     ("bad_parse_unknown_op.gitsvg.jsonl", {"E003"}),
-    ("bad_shape_violations.gitsvg.jsonl", {"E101", "E104", "E108"}),
+    ("bad_schema_violations.gitsvg.jsonl", {"E101", "E104", "E108"}),
     ("bad_semantic_undefined.gitsvg.jsonl", {"E200", "E201"}),
     ("bad_semantic_kind_mismatch.gitsvg.jsonl", {"E200"}),
     ("bad_replaces_non_contiguous.gitsvg.jsonl", {"E206"}),

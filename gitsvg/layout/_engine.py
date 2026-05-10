@@ -85,7 +85,7 @@ def compute_layout(state: State) -> Layout:
         A `Layout` with positions, resolved colours/label sides,
         pre-computed arcs and guides, and canvas dimensions.
     """
-    # --- Phase 1: commit positions (lane-independent) ------
+    # --- Phase 1: commit positions --------------
     chain_parent: dict[str, str | None] = _compute_chain_parents(state)
     commit_pos_by_id: dict[str, int] = {}
     branch_starts: dict[str, int] = {}
@@ -103,14 +103,14 @@ def compute_layout(state: State) -> Layout:
     # --- Phase 2: branch lanes ------------------
     branch_pos_by_name: dict[str, int] = _assign_branch_lanes(state, commit_pos_by_id, branch_starts)
 
-    # --- Resolve per-branch view fields ----------
+    # --- Resolve per-branch view fields ---------
     branch_color_by_name: dict[str, str] = {
         name: _resolve_branch_color(state, name, declaration_index)
         for declaration_index, name in enumerate(state.branch_order)
     }
     branch_label_side_by_name: dict[str, str] = {name: _resolve_label_side(state, name) for name in state.branch_order}
 
-    # --- Phase 3: build layout dataclasses --------
+    # --- Phase 3: build layout dataclasses ------
     commit_layouts: dict[str, LayoutCommit] = {
         cid: LayoutCommit(
             id=cid,
@@ -137,17 +137,17 @@ def compute_layout(state: State) -> Layout:
         for name in state.branch_order
     ]
 
-    # --- Build arc list --------------------------
+    # --- Build arc list -------------------------
     arcs: list[LayoutArc] = [
         *_branch_off_arcs(state, branches, commit_layouts, branch_color_by_name, branch_pos_by_name),
         *_merge_arcs(state, commit_layouts, branch_color_by_name),
     ]
 
-    # --- Build guide list ------------------------
+    # --- Build guide list -----------------------
     occupied_lanes = sorted({b.branch_pos for b in branches})
     guides = [LayoutGuide(branch_pos=p) for p in occupied_lanes]
 
-    # --- Compute canvas spec ---------------------
+    # --- Compute canvas spec --------------------
     canvas = _compute_canvas(state, branches, commit_layouts)
 
     return Layout(canvas=canvas, branches=branches, commits=commit_layouts, arcs=arcs, guides=guides)

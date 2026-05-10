@@ -57,7 +57,7 @@ def test_render_emits_expected_path_and_circle_counts() -> None:
 
 def test_empty_branch_still_emits_a_path_element() -> None:
     """A declared branch with no commits gets a zero-length path — a degenerate
-    placeholder that becomes visible once labels (PR7) are drawn at its start."""
+    placeholder that becomes visible once labels are drawn at its start."""
     # --- arrange ----------------------
     text = (
         '{"op": "branch", "name": "main"}\n'
