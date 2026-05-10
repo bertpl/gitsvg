@@ -7,8 +7,6 @@ CLI that renders git tree visualizations as SVG from JSONL input.
 [![Python](https://img.shields.io/pypi/pyversions/gitsvg.svg)](https://pypi.org/project/gitsvg/)
 [![License](https://img.shields.io/badge/license-MIT-blue)](https://github.com/bertpl/gitsvg/blob/main/LICENSE)
 
-> **Status:** alpha. The format and CLI are usable end-to-end; small breaking changes are still possible before 1.0.
-
 ## Installation
 
 ```bash
@@ -43,7 +41,7 @@ The [`examples/`](examples/) folder ships six self-contained input files demonst
 
 A single branch with a few commits. The minimum viable diagram.
 
-![Linear history](examples/01_linear.svg)
+![Linear history](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/01_linear.svg)
 
 ```jsonl
 {"op": "branch", "name": "main", "label_side": "left"}
@@ -57,7 +55,7 @@ A single branch with a few commits. The minimum viable diagram.
 
 A `feature` branch forks off `main`, accumulates a couple of commits, then merges back.
 
-![Branch and merge](examples/02_branch_merge.svg)
+![Branch and merge](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/02_branch_merge.svg)
 
 ```jsonl
 {"op": "branch", "name": "main", "label_side": "left"}
@@ -73,7 +71,7 @@ A `feature` branch forks off `main`, accumulates a couple of commits, then merge
 
 Two concurrent branches share lanes 1 and 2; after both merge, a later `feature-b` reclaims the now-free lane 1 instead of starting a new one. Lane assignment is automatic and geometry-driven.
 
-![Multiple branches with lane reuse](examples/03_multi_branch.svg)
+![Multiple branches with lane reuse](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/03_multi_branch.svg)
 
 ```jsonl
 {"op": "branch", "name": "main", "label_side": "left"}
@@ -94,7 +92,7 @@ Two concurrent branches share lanes 1 and 2; after both merge, a later `feature-
 
 The `highlight` op marks an existing commit with an enlarged dot and a bold label — useful for drawing attention to a release or a key milestone.
 
-![Highlighted release commit](examples/04_highlight.svg)
+![Highlighted release commit](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/04_highlight.svg)
 
 ```jsonl
 {"op": "branch", "name": "main", "label_side": "left"}
@@ -110,7 +108,7 @@ The `highlight` op marks an existing commit with an enlarged dot and a bold labe
 
 A `feature` branch is removed and re-declared on top of a more recent `main` commit, with the same commit IDs as before. This is the rebase-style "move my work onto the new tip" pattern, expressed as primitives.
 
-![Remove and rebuild](examples/05_remove_rebuild.svg)
+![Remove and rebuild](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/05_remove_rebuild.svg)
 
 ```jsonl
 {"op": "branch", "name": "main", "label_side": "left"}
@@ -130,7 +128,7 @@ A `feature` branch is removed and re-declared on top of a more recent `main` com
 
 The `import` op replays another file as a prelude — here it picks up the rebased state from Example 5. A single new commit then squashes `f1` and `f2` into one via `replaces:`.
 
-![Import and squash](examples/06_import_squash.svg)
+![Import and squash](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/06_import_squash.svg)
 
 ```jsonl
 {"op": "import", "path": "05_remove_rebuild.gitsvg.jsonl"}
