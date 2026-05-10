@@ -10,8 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `examples/` folder with six hand-written `.gitsvg.jsonl` files and their rendered SVGs, demonstrating the v0.0.x feature surface from a single linear branch through multi-branch lane reuse, highlight, remove-and-rebuild, and import + squash. Each file is self-contained and intended as a starting point to copy from.
+- README rewritten for first external use: quick-start, walkthrough of all six examples (rendered SVG + source), and a CLI reference table.
 
 ### Changed
+
+- PyPI development-status classifier bumped from `1 - Planning` to `3 - Alpha`. The format and CLI are usable end-to-end; small breaking changes are still possible before 1.0.
 
 ### Deprecated
 
