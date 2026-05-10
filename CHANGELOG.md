@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - README CI badge now reads `CI: passing` instead of `Push to Main: passing`. Routed via shields.io with a `label=CI` override; the underlying workflow name is unchanged.
 - `gitsvg schema commit` description no longer references a development version; the trailing clause now reads "`hash:` accepts the literal sentinel `\"auto\"`; auto-resolution is deterministic."
+- Trimmed the SVG `font-family` fallback chain from `'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif` to `Inter, sans-serif`. Viewers without Inter installed now fall back to whatever the host treats as the generic `sans-serif` rather than walking through Helvetica → Arial first.
 
 ### Deprecated
 
