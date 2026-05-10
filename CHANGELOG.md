@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `gitsvg render --small` flag for compact SVG output. Round 1 reductions: numeric rounding to 3 decimal places (with trailing-zero strip — kills float-arithmetic artefacts like `37.519999999999996` while preserving values like `0.7` and `0.85` exactly), suppression of the XML declaration, removal of empty `<defs>` blocks and unused `xmlns:xlink` declarations, hoisting of a uniform `font-family` from `<text>` elements onto the `<svg>` root, removal of explicit-default attribute values like `font-weight="400"`, and inter-element whitespace stripping. Default (non-`--small`) output is unchanged. Reduces the corpus by ~30%.
+- `gitsvg render --small` flag for compact SVG output. Reduces the size of the shipped examples by approximately 30% through numeric rounding (preserving meaningful sub-pixel values like `0.7` and `0.85` exactly), removal of unused namespace declarations and empty blocks, hoisting of repeated `font-family` attributes, and inter-element whitespace stripping. Default (non-`--small`) output is unchanged.
 
 ### Changed
 
