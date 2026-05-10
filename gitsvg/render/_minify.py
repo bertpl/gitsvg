@@ -64,5 +64,5 @@ def minify(svg: str, small: bool) -> str:
     """
     if not small:
         return svg
-    svg = round_numbers(svg, decimals=1)
+    svg = round_numbers(svg, decimals=3)
     return svg

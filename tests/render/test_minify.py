@@ -64,17 +64,18 @@ def test_minify_is_noop_when_small_is_false() -> None:
 
 def test_minify_applies_round1_rounding_when_small_is_true() -> None:
     # --- arrange ----------------------
-    svg = '<svg width="100.123"><circle cx="50.519999999999996" cy="50.5"/></svg>'
+    svg = '<svg width="100.1234"><circle cx="50.519999999999996" cy="50.5"/></svg>'
 
     # --- act --------------------------
     result = minify(svg, small=True)
 
     # --- assert -----------------------
-    assert result == '<svg width="100.1"><circle cx="50.5" cy="50.5"/></svg>'
+    # 100.1234 -> 100.123 (3 dp); 50.5199... -> 50.52; 50.5 stays.
+    assert result == '<svg width="100.123"><circle cx="50.52" cy="50.5"/></svg>'
 
 
-def test_minify_preserves_stroke_width_and_opacity() -> None:
-    """Round-1 rounding to 1 decimal must not flatten sub-pixel stroke widths or opacities."""
+def test_minify_preserves_stroke_width_and_opacity_exactly() -> None:
+    """Round-1 rounding to 3 decimals + trailing-zero strip preserves 1-2 dp values."""
     # --- arrange ----------------------
     svg = '<path stroke-width="0.7"/><rect opacity="0.85"/>'
 
@@ -83,5 +84,4 @@ def test_minify_preserves_stroke_width_and_opacity() -> None:
 
     # --- assert -----------------------
     assert 'stroke-width="0.7"' in result
-    # 0.85 → 0.8 under banker's rounding; the salient property is that it's still < 1.
-    assert 'opacity="0.8"' in result
+    assert 'opacity="0.85"' in result
