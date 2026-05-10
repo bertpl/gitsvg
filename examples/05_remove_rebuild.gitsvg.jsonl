@@ -1,0 +1,11 @@
+{"op": "branch", "name": "main", "label_side": "left"}
+{"op": "commit", "branch": "main", "id": "c1", "msg": "initial commit", "hash": "auto"}
+{"op": "branch", "name": "feature", "from_branch": "main"}
+{"op": "commit", "branch": "feature", "id": "f1", "msg": "WIP feature", "hash": "auto"}
+{"op": "commit", "branch": "feature", "id": "f2", "msg": "more WIP", "hash": "auto"}
+{"op": "commit", "branch": "main", "id": "c2", "msg": "main moves on", "hash": "auto"}
+{"op": "commit", "branch": "main", "id": "c3", "msg": "more main work", "hash": "auto"}
+{"op": "remove", "branches": ["feature"]}
+{"op": "branch", "name": "feature", "from_branch": "main"}
+{"op": "commit", "branch": "feature", "id": "f1", "msg": "WIP feature", "hash": "auto"}
+{"op": "commit", "branch": "feature", "id": "f2", "msg": "more WIP", "hash": "auto"}

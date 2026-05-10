@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `examples/` folder with six hand-written `.gitsvg.jsonl` files and their rendered SVGs, demonstrating the v0.0.x feature surface from a single linear branch through multi-branch lane reuse, highlight, remove-and-rebuild, and import + squash. Each file is self-contained and intended as a starting point to copy from.
+
 ### Changed
 
 ### Deprecated

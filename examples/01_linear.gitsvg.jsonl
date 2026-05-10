@@ -1,0 +1,5 @@
+{"op": "branch", "name": "main", "label_side": "left"}
+{"op": "commit", "branch": "main", "id": "c1", "msg": "initial commit", "hash": "auto"}
+{"op": "commit", "branch": "main", "id": "c2", "msg": "add README", "hash": "auto"}
+{"op": "commit", "branch": "main", "id": "c3", "msg": "add tests", "hash": "auto"}
+{"op": "commit", "branch": "main", "id": "c4", "msg": "fix typo", "hash": "auto"}
