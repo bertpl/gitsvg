@@ -9,6 +9,7 @@ from gitsvg.render._minify import (
     minify,
     round_numbers,
     strip_inter_element_whitespace,
+    trim_font_family_fallback,
 )
 
 
@@ -129,6 +130,31 @@ def test_keep_xlink_when_xlink_attributes_present() -> None:
 
     # --- assert -----------------------
     assert 'xmlns:xlink="xl"' in result
+
+
+# ==================================================================================================
+#  trim_font_family_fallback
+# ==================================================================================================
+def test_trim_font_family_fallback_replaces_full_chain() -> None:
+    # --- arrange ----------------------
+    svg = "<text font-family=\"'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif\">a</text>"
+
+    # --- act --------------------------
+    result = trim_font_family_fallback(svg)
+
+    # --- assert -----------------------
+    assert result == '<text font-family="Inter, sans-serif">a</text>'
+
+
+def test_trim_font_family_fallback_leaves_unrelated_strings_alone() -> None:
+    # --- arrange ----------------------
+    svg = '<text font-family="Courier, monospace">a</text>'
+
+    # --- act --------------------------
+    result = trim_font_family_fallback(svg)
+
+    # --- assert -----------------------
+    assert result == svg
 
 
 # ==================================================================================================

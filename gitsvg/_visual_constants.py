@@ -30,7 +30,7 @@ BRANCH_GUIDE_DASH = "4,4"
 # ==================================================================================================
 #  Typography
 # ==================================================================================================
-LABEL_FONT_FAMILY = "Inter, sans-serif"
+LABEL_FONT_FAMILY = "'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif"
 LABEL_FONT_SIZE = 11
 BRANCH_LABEL_FONT_SIZE = 11
 HASH_FONT_SIZE = 9
