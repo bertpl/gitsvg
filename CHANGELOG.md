@@ -5,24 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
-
-### Added
+## 0.1.1 (2026-05-10)
 
 ### Changed
 
 - Removed the inline alpha-status disclaimer from the README; the PyPI dev-status classifier already conveys this.
 
-### Deprecated
-
-### Removed
-
 ### Fixed
 
 - Example images now display on PyPI (README references switched from repo-relative paths to absolute GitHub raw URLs).
-
-### Security
-
 ## 0.1.0 (2026-05-10)
 
 ### Added
