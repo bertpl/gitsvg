@@ -21,8 +21,10 @@ def test_branch_off_emits_one_extra_path_per_non_root_branch() -> None:
     text = (
         '{"op": "branch", "name": "main"}\n'
         '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
+        '{"op": "commit", "branch": "main", "id": "m2", "msg": "x"}\n'
         '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
         '{"op": "commit", "branch": "feat", "id": "f1", "msg": "x"}\n'
+        '{"op": "commit", "branch": "feat", "id": "f2", "msg": "x"}\n'
     )
 
     # --- act --------------------------
@@ -68,8 +70,9 @@ def test_branch_off_from_explicit_commit_uses_that_commits_position() -> None:
 
     # --- assert -----------------------
     # The arc should originate at m1's y (commit_pos=0 → bottom of canvas)
-    # and target feat.start (commit_pos=1). 2 guides + 1 arc + 2 lines = 5 paths.
-    assert svg_text.count("<path") == 5
+    # and target feat.start (commit_pos=1). `feat` is empty so its line is
+    # suppressed: 2 guides + 1 arc + 1 line (main only) = 4 paths.
+    assert svg_text.count("<path") == 4
 
 
 # ==================================================================================================
@@ -89,8 +92,10 @@ def test_merge_emits_an_extra_path_for_the_merge_arc() -> None:
     svg_text = _render_from(text).as_svg()
 
     # --- assert -----------------------
-    # 2 guides + 1 branch-off arc + 1 merge arc + 2 branch lines = 6 paths.
-    assert svg_text.count("<path") == 6
+    # main has 2 commits (m1 + merge m2) so its line is drawn; feat has
+    # just f1 so its line is suppressed. 2 guides + 1 branch-off arc +
+    # 1 merge arc + 1 line (main) = 5 paths.
+    assert svg_text.count("<path") == 5
 
 
 def test_merge_arc_color_matches_source_branch() -> None:
@@ -152,7 +157,13 @@ def test_branch_guide_is_dashed_with_expected_pattern() -> None:
 # ==================================================================================================
 def test_z_order_guides_precede_lines_precede_dots() -> None:
     # --- arrange ----------------------
-    text = '{"op": "branch", "name": "main"}\n{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
+    # Two commits so the branch line is drawn (one-commit branches now
+    # suppress their line as a degenerate zero-length path).
+    text = (
+        '{"op": "branch", "name": "main"}\n'
+        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
+        '{"op": "commit", "branch": "main", "id": "c2", "msg": "x"}\n'
+    )
 
     # --- act --------------------------
     svg_text = _render_from(text).as_svg()
