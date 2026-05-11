@@ -16,9 +16,27 @@ class RemoveOp(OpBase):
     """
 
     op: Literal["remove"]
-    commits: list[IdStr] | None = Field(default=None, min_length=1)
-    branches: list[IdStr] | None = Field(default=None, min_length=1)
-    pull_requests: list[IdStr] | None = Field(default=None, min_length=1)
+    commits: list[IdStr] | None = Field(
+        default=None,
+        min_length=1,
+        description="Commit ids to drop from state. Each id is also removed from its branch's commit list.",
+    )
+    branches: list[IdStr] | None = Field(
+        default=None,
+        min_length=1,
+        description=(
+            "Branch names to drop from state; cascades to every commit on each branch. "
+            "Blocked if any open pull-request still references the branch."
+        ),
+    )
+    pull_requests: list[IdStr] | None = Field(
+        default=None,
+        min_length=1,
+        description=(
+            "Pull-request ids to close. Use this before a `merge` for the same `(from, into)` pair "
+            "or a branch removal that would otherwise orphan the PR."
+        ),
+    )
 
     @model_validator(mode="after")
     def _validate_exactly_one_kind(self) -> Self:

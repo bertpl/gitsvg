@@ -2,7 +2,7 @@
 
 from typing import Literal, Self
 
-from pydantic import model_validator
+from pydantic import Field, model_validator
 
 from gitsvg.file_format.ops.framework._base import OpBase
 from gitsvg.file_format.ops.framework._types import HexColor, IdStr, NonNegativeInt
@@ -12,12 +12,27 @@ class BranchOp(OpBase):
     """Declare a branch (optionally rooted on another branch's tip or a commit)."""
 
     op: Literal["branch"]
-    name: IdStr
-    from_branch: IdStr | None = None
-    from_commit: IdStr | None = None
-    color: HexColor | None = None
-    label_side: Literal["left", "right"] | None = None
-    branch_pos: NonNegativeInt | None = None
+    name: IdStr = Field(description="Unique branch name.")
+    from_branch: IdStr | None = Field(
+        default=None,
+        description="Source branch this branch is rooted on (mutually exclusive with `from_commit`).",
+    )
+    from_commit: IdStr | None = Field(
+        default=None,
+        description="Source commit this branch is rooted on (mutually exclusive with `from_branch`).",
+    )
+    color: HexColor | None = Field(
+        default=None,
+        description="Override hex colour for this branch; cycles through defaults when unset.",
+    )
+    label_side: Literal["left", "right"] | None = Field(
+        default=None,
+        description="Side of the branch line commit labels render on.",
+    )
+    branch_pos: NonNegativeInt | None = Field(
+        default=None,
+        description="Override lane index for this branch; bypasses the lane-reuse heuristic.",
+    )
 
     @model_validator(mode="after")
     def _validate_at_most_one_root(self) -> Self:

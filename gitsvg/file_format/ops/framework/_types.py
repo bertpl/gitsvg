@@ -16,7 +16,8 @@ IdStr = Annotated[str, Field(pattern=r"^\S+$")]
 """Non-empty string with no whitespace anywhere.
 
 Used for ids and names that act as references inside the diagram —
-commit ids, branch names, and the `auto` sentinel on `commit.hash`.
+commit ids, branch names, pull-request ids, and the `auto` sentinel
+on `commit.hash`.
 """
 
 
@@ -24,7 +25,7 @@ NonEmptyStr = Annotated[str, Field(min_length=1)]
 """Non-empty string with no other constraints.
 
 Used for free-form text fields where whitespace is meaningful — e.g.
-commit messages, file paths.
+commit messages, pull-request titles, file paths.
 """
 
 
