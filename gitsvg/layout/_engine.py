@@ -68,6 +68,7 @@ from gitsvg.layout._layout import (
     LayoutGuide,
 )
 from gitsvg.layout._metrics import commit_label_width, pill_width
+from gitsvg.layout._occupancy import Occupancy
 from gitsvg.state import State
 
 _DEFAULT_LABEL_SIDE = "right"
@@ -101,7 +102,8 @@ def compute_layout(state: State) -> Layout:
         _ensure_branch_start(name, state, commit_pos_by_id, branch_starts, branch_ends)
 
     # --- Phase 2: branch lanes ------------------
-    branch_pos_by_name: dict[str, int] = _assign_branch_lanes(state, commit_pos_by_id, branch_starts)
+    occupancy = Occupancy()
+    branch_pos_by_name: dict[str, int] = _assign_branch_lanes(state, commit_pos_by_id, branch_starts, occupancy)
 
     # --- Resolve per-branch view fields ---------
     branch_color_by_name: dict[str, str] = {
@@ -144,8 +146,7 @@ def compute_layout(state: State) -> Layout:
     ]
 
     # --- Build guide list -----------------------
-    occupied_lanes = sorted({b.branch_pos for b in branches})
-    guides = [LayoutGuide(branch_pos=p) for p in occupied_lanes]
+    guides = [LayoutGuide(branch_pos=lane) for lane in occupancy.occupied_lanes()]
 
     # --- Compute canvas spec --------------------
     canvas = _compute_canvas(state, branches, commit_layouts)
@@ -229,6 +230,7 @@ def _assign_branch_lanes(
     state: State,
     commit_pos_by_id: dict[str, int],
     branch_starts: dict[str, int],
+    occupancy: Occupancy,
 ) -> dict[str, int]:
     """Assign every branch a branch-axis lane index.
 
@@ -237,18 +239,19 @@ def _assign_branch_lanes(
     1. If the branch's `branch_pos:` override is set, use it verbatim.
     2. Else if the branch has no parent (first declared branch), lane 0.
     3. Else run the lane-reuse heuristic: walk `K+1, K+2, …` from the
-       parent commit's lane and pick the first lane free at positions
-       `≥ L+1`, where `(K, L)` is the parent commit's `(branch_pos,
-       commit_pos)`.
+       parent commit's lane and pick the first lane where
+       `occupancy.is_blocked_at_or_after(candidate, L+1)` is `False`,
+       where `(K, L)` is the parent commit's `(branch_pos, commit_pos)`.
 
-    "Free at positions ≥ T" means: among branches already lane-assigned,
-    no commit on this candidate lane has `commit_pos ≥ T`, **and** no
-    empty branch on this candidate lane has `start ≥ T`. Empty branches
-    contribute a single pseudo-commit at their `start` position.
+    Once a branch's lane is decided, the branch's points (its commits,
+    or a pseudo-point at `start` for empty branches) are registered in
+    `occupancy` so subsequent branches see the updated map.
 
     The override path is lenient — the supplied value is used even when
-    it conflicts with the heuristic's view of "blocked". Authors who set
-    an override take responsibility for the layout.
+    `occupancy` would consider that lane blocked. Authors who set an
+    override take responsibility for the layout. Override branches
+    still register their points (the consult step is skipped, not the
+    contribute step).
 
     **Forward references.** Declaration order can put a child branch
     before its parent — e.g. when the parent was removed and re-declared
@@ -256,12 +259,20 @@ def _assign_branch_lanes(
     its parent branch's lane and that parent hasn't been processed yet,
     the parent is processed on demand (depth-first), so dependencies
     flow naturally regardless of `state.branch_order` position.
+
+    Args:
+        state: The validated state to lay out.
+        commit_pos_by_id: Commit-axis positions computed in Phase 1.
+        branch_starts: Branch-start commit-axis positions from Phase 1.
+        occupancy: A fresh `Occupancy` to populate as branches are
+            assigned. Read by subsequent layout steps (e.g. guide
+            construction).
+
+    Returns:
+        Lane index (`branch_pos`) keyed by branch name.
     """
     positions: dict[str, int] = {}
     in_progress: set[str] = set()
-    commit_positions_on_branch: dict[str, list[int]] = {name: [] for name in state.branch_order}
-    for cid, cstate in state.commits.items():
-        commit_positions_on_branch[cstate.branch].append(commit_pos_by_id[cid])
 
     def assign(name: str) -> None:
         if name in positions or name in in_progress:
@@ -270,27 +281,59 @@ def _assign_branch_lanes(
         branch = state.branches[name]
         if branch.branch_pos is not None:
             positions[name] = branch.branch_pos
-            in_progress.discard(name)
-            return
-        parent_lane, parent_pos = _resolve_parent_anchor(
-            state, branch, positions, commit_pos_by_id, branch_starts, assign
-        )
-        if parent_lane is None:
-            positions[name] = 0
         else:
-            positions[name] = _pick_free_lane(
-                parent_lane=parent_lane,
-                threshold=parent_pos + 1,
-                assigned_lanes=positions,
-                commit_positions_on_branch=commit_positions_on_branch,
-                branch_starts=branch_starts,
+            parent_lane, parent_pos = _resolve_parent_anchor(
+                state, branch, positions, commit_pos_by_id, branch_starts, assign
             )
+            if parent_lane is None:
+                positions[name] = 0
+            else:
+                positions[name] = _pick_free_lane(
+                    parent_lane=parent_lane,
+                    threshold=parent_pos + 1,
+                    occupancy=occupancy,
+                )
+        _register_branch_points(name, positions[name], state, commit_pos_by_id, branch_starts, occupancy)
         in_progress.discard(name)
 
     for name in state.branch_order:
         assign(name)
 
     return positions
+
+
+def _register_branch_points(
+    branch_name: str,
+    branch_pos: int,
+    state: State,
+    commit_pos_by_id: dict[str, int],
+    branch_starts: dict[str, int],
+    occupancy: Occupancy,
+) -> None:
+    """Register `branch_name`'s occupancy footprint after its lane is decided.
+
+    Every commit on the branch contributes a point at its
+    `(branch_pos, commit_pos)`. An empty branch contributes a single
+    pseudo-point at `(branch_pos, branch.start)` — preserves the
+    long-standing rule that an empty branch still claims its lane at
+    its start row.
+
+    Args:
+        branch_name: Name of the branch being registered.
+        branch_pos: The lane index the branch was just assigned.
+        state: Validated state (provides `branch.commit_ids`).
+        commit_pos_by_id: Phase-1 commit-axis positions.
+        branch_starts: Phase-1 branch starts.
+        occupancy: The occupancy structure to write to.
+    """
+    branch_state = state.branches[branch_name]
+    if branch_state.commit_ids:
+        for cid in branch_state.commit_ids:
+            row = commit_pos_by_id.get(cid)
+            if row is not None:
+                occupancy.add(branch_pos, row)
+    else:
+        occupancy.add(branch_pos, branch_starts[branch_name])
 
 
 def _resolve_parent_anchor(
@@ -333,50 +376,18 @@ def _pick_free_lane(
     *,
     parent_lane: int,
     threshold: int,
-    assigned_lanes: dict[str, int],
-    commit_positions_on_branch: dict[str, list[int]],
-    branch_starts: dict[str, int],
+    occupancy: Occupancy,
 ) -> int:
-    """Walk `parent_lane + 1, +2, …` and return the first free lane.
+    """Walk `parent_lane + 1, +2, …` and return the first lane free at `threshold`.
 
-    A lane is free at the given `threshold` iff no already-assigned
-    branch on that lane has any commit at `commit_pos ≥ threshold`,
-    and no empty already-assigned branch on that lane has its `start
-    ≥ threshold`.
+    A lane is free iff `occupancy.is_blocked_at_or_after(candidate,
+    threshold)` is `False` — i.e. no registered point on that lane
+    sits at row `>= threshold`.
     """
     candidate = parent_lane + 1
-    while _lane_blocked(
-        candidate=candidate,
-        threshold=threshold,
-        assigned_lanes=assigned_lanes,
-        commit_positions_on_branch=commit_positions_on_branch,
-        branch_starts=branch_starts,
-    ):
+    while occupancy.is_blocked_at_or_after(candidate, threshold):
         candidate += 1
     return candidate
-
-
-def _lane_blocked(
-    *,
-    candidate: int,
-    threshold: int,
-    assigned_lanes: dict[str, int],
-    commit_positions_on_branch: dict[str, list[int]],
-    branch_starts: dict[str, int],
-) -> bool:
-    """Return True iff `candidate` lane is blocked at `commit_pos ≥ threshold`."""
-    for name, lane in assigned_lanes.items():
-        if lane != candidate:
-            continue
-        commits = commit_positions_on_branch[name]
-        if commits:
-            if any(p >= threshold for p in commits):
-                return True
-            continue
-        # Empty branch — pseudo-commit at start.
-        if branch_starts[name] >= threshold:
-            return True
-    return False
 
 
 # ==================================================================================================
