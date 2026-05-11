@@ -1,9 +1,10 @@
 """In-memory state built up by applying ops in order.
 
-State holds three namespaces — commits, branches, and (reserved) tags —
-along with branch declaration order and an optional pinned canvas. Each
-op mutates state when it applies cleanly; the state engine is the
-producer, downstream layers (layout, rendering) are consumers.
+State holds four namespaces — commits, branches, pull-requests, and
+(reserved) tags — along with branch declaration order and an optional
+pinned canvas. Each op mutates state when it applies cleanly; the
+state engine is the producer, downstream layers (layout, rendering)
+are consumers.
 """
 
 from dataclasses import dataclass, field
@@ -96,19 +97,42 @@ class CommitState:
     declaration_line: int = 0
 
 
+@dataclass(slots=True)
+class PullRequestState:
+    """One open pull-request as it currently exists in state.
+
+    Attributes:
+        id: Unique pull-request id (explicit or auto-generated).
+        from_branch: Name of the source branch the PR proposes to merge.
+        into_branch: Name of the target branch the PR proposes merging into.
+        title: Optional short headline label for the PR.
+        declaration_file: Source file the `pull_request` op was parsed from.
+        declaration_line: 1-based source line of the `pull_request` op for
+            error attribution.
+    """
+
+    id: str
+    from_branch: str
+    into_branch: str
+    title: str | None = None
+    declaration_file: str = ""
+    declaration_line: int = 0
+
+
 class State:
     """Mutable container for diagram state during op application.
 
     Each op handler mutates this in-place. Lookup helpers cover the
-    common cases (`has_branch`, `has_commit`, `branch_tip`,
-    `is_first_branch`); deeper queries inspect the public dicts
-    directly.
+    common cases (`has_branch`, `has_commit`, `has_pull_request`,
+    `branch_tip`, `is_first_branch`); deeper queries inspect the public
+    dicts directly.
     """
 
     def __init__(self) -> None:
-        """Initialise an empty state — no branches, no commits, no canvas."""
+        """Initialise an empty state — no branches, no commits, no pull-requests, no canvas."""
         self.branches: dict[str, BranchState] = {}
         self.commits: dict[str, CommitState] = {}
+        self.pull_requests: dict[str, PullRequestState] = {}
         self.branch_order: list[str] = []
         self.canvas: CanvasState | None = None
 
@@ -123,6 +147,10 @@ class State:
     def has_commit(self, commit_id: str) -> bool:
         """Return True when `commit_id` exists in current state."""
         return commit_id in self.commits
+
+    def has_pull_request(self, pr_id: str) -> bool:
+        """Return True when `pr_id` is the id of an open pull-request."""
+        return pr_id in self.pull_requests
 
     def branch_tip(self, name: str) -> str | None:
         """Return the id of the latest commit on `name`, or None when empty.

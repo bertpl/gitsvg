@@ -16,7 +16,7 @@ def test_schema_no_args_prints_index_with_all_op_names() -> None:
 
     # --- assert -----------------------
     assert result.exit_code == 0
-    for op_name in ["import", "canvas", "branch", "commit", "merge", "remove", "highlight"]:
+    for op_name in ["import", "canvas", "branch", "commit", "merge", "pull_request", "remove", "highlight"]:
         assert op_name in result.output
     assert "File-level constraints" in result.output
 
@@ -45,7 +45,7 @@ def test_schema_list_ops_prints_bare_names_one_per_line() -> None:
     # --- assert -----------------------
     assert result.exit_code == 0
     lines = [line for line in result.output.splitlines() if line]
-    assert lines == ["import", "canvas", "branch", "commit", "merge", "remove", "highlight"]
+    assert lines == ["import", "canvas", "branch", "commit", "merge", "pull_request", "remove", "highlight"]
 
 
 def test_schema_unknown_op_exits_non_zero() -> None:

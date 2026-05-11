@@ -230,6 +230,7 @@ def test_unknown_field_is_rejected_for_every_op(op_name: str) -> None:
         "branch": {"op": "branch", "name": "main"},
         "commit": {"op": "commit", "branch": "main", "msg": "x"},
         "merge": {"op": "merge", "from": "a", "into": "b"},
+        "pull_request": {"op": "pull_request", "from": "a", "into": "b"},
         "remove": {"op": "remove", "commits": ["c1"]},
         "highlight": {"op": "highlight", "commit": "c1"},
     }
@@ -264,7 +265,7 @@ def test_op_by_name_registry_matches_canonical_order() -> None:
 
     # --- assert -----------------------
     assert actual_order == OP_NAMES
-    assert actual_order == ["import", "canvas", "branch", "commit", "merge", "remove", "highlight"]
+    assert actual_order == ["import", "canvas", "branch", "commit", "merge", "pull_request", "remove", "highlight"]
 
 
 # ==================================================================================================

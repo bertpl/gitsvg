@@ -39,6 +39,7 @@ HAPPY_FIXTURES = [
     "happy_squash_and_rebuild.gitsvg.jsonl",
     "happy_import_base.gitsvg.jsonl",
     "happy_import_derived.gitsvg.jsonl",
+    "happy_pull_request_lifecycle.gitsvg.jsonl",
 ]
 
 
