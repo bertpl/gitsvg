@@ -6,7 +6,8 @@ Public surface:
   output and returns a complete `Layout` (positions, resolved colours,
   resolved label sides, pre-computed arcs and guides, canvas dimensions).
 - `Layout`, `LayoutBranch`, `LayoutCommit`, `LayoutArc`, `LayoutGuide`,
-  `LayoutCanvas` — the dataclasses the renderer consumes.
+  `LayoutPullRequest`, `LayoutCanvas` — the dataclasses the renderer
+  consumes.
 
 The renderer never imports `State`. Every field it needs is pre-resolved
 in `Layout`, so different layout strategies (the default sequential
@@ -22,6 +23,7 @@ from gitsvg.layout._layout import (
     LayoutCanvas,
     LayoutCommit,
     LayoutGuide,
+    LayoutPullRequest,
 )
 
 __all__ = [
@@ -31,5 +33,6 @@ __all__ = [
     "LayoutCanvas",
     "LayoutCommit",
     "LayoutGuide",
+    "LayoutPullRequest",
     "compute_layout",
 ]

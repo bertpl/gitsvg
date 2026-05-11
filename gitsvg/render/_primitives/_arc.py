@@ -35,6 +35,7 @@ def draw_arc(
     canvas: LayoutCanvas,
     color: str,
     vertical_first: bool,
+    stroke_dasharray: str | None = None,
 ) -> None:
     """Append a quarter-arc connector to the drawing.
 
@@ -49,18 +50,26 @@ def draw_arc(
         vertical_first: When True, the arc starts with a vertical
             segment (used for merge connectors). When False, it starts
             horizontal (used for branch-off connectors).
+        stroke_dasharray: Optional SVG `stroke-dasharray` value (e.g.
+            `"6,4"`). When set, the entire arc-and-line is rendered
+            with that dash pattern; used by pull-request connectors
+            to visually distinguish them from a real merge.
     """
     x1 = branch_axis_to_x(from_branch_pos, canvas)
     y1 = commit_axis_to_y(from_commit_pos, canvas)
     x2 = branch_axis_to_x(to_branch_pos, canvas)
     y2 = commit_axis_to_y(to_commit_pos, canvas)
 
-    p = draw.Path(
-        stroke=color,
-        stroke_width=BRANCH_LINE_WIDTH,
-        fill="none",
-        stroke_linecap="round",
-    )
+    path_kwargs: dict = {
+        "stroke": color,
+        "stroke_width": BRANCH_LINE_WIDTH,
+        "fill": "none",
+        "stroke_linecap": "round",
+    }
+    if stroke_dasharray is not None:
+        path_kwargs["stroke_dasharray"] = stroke_dasharray
+
+    p = draw.Path(**path_kwargs)
     p.M(x1, y1)
 
     # Same row → degenerate to a straight horizontal segment.

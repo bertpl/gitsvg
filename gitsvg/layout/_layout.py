@@ -158,6 +158,42 @@ class LayoutGuide:
 
 
 @dataclass(slots=True)
+class LayoutPullRequest:
+    """One open pull-request as the renderer should draw it.
+
+    Geometrically the same shape as a merge arc-and-line: a vertical
+    segment up from the source tip → a quarter arc → a horizontal
+    segment along the target lane to the projected merge point.
+    Distinguished from a real merge by its dashed stroke and the
+    optional title pill anchored at the source tip.
+
+    Endpoints are recomputed every layout cycle from the branches'
+    current tips, so as new commits land on either side the visual
+    advances ("live-tracking").
+
+    Attributes:
+        id: The PR's id (matches `PullRequestState.id`).
+        from_branch_pos: Source branch's lane (where the arc begins).
+        from_commit_pos: Source-tip row (where the arc begins).
+        to_branch_pos: Target branch's lane (where the horizontal
+            segment runs).
+        to_commit_pos: Projected merge-commit row on the target lane —
+            the position a real `merge` would land at if it ran now.
+        color: Stroke colour for the dashed arc (the source branch's
+            colour).
+        title: Optional PR title; when None no pill is rendered.
+    """
+
+    id: str
+    from_branch_pos: int
+    from_commit_pos: int
+    to_branch_pos: int
+    to_commit_pos: int
+    color: str
+    title: str | None
+
+
+@dataclass(slots=True)
 class Layout:
     """Per-diagram layout: everything the renderer needs to draw the picture.
 
@@ -170,6 +206,8 @@ class Layout:
         arcs: All connectors (branch-off + merge) in z-order
             (back-to-front).
         guides: One per occupied branch-axis lane.
+        pull_requests: One `LayoutPullRequest` per open PR, in the
+            order they were declared.
     """
 
     canvas: LayoutCanvas
@@ -177,3 +215,4 @@ class Layout:
     commits: dict[str, LayoutCommit] = field(default_factory=dict)
     arcs: list[LayoutArc] = field(default_factory=list)
     guides: list[LayoutGuide] = field(default_factory=list)
+    pull_requests: list[LayoutPullRequest] = field(default_factory=list)

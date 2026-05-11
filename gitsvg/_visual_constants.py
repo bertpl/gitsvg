@@ -39,6 +39,16 @@ BRANCH_NAME_PILL_OFFSET = 25
 
 
 # ==================================================================================================
+#  Pull-request visuals
+# ==================================================================================================
+# Folded into the theme registry in v0.1.4 alongside the rest of this module.
+PULL_REQUEST_DASH = "6,4"
+"""Stroke dash pattern for the pull-request arc-and-line — visually distinguishes it from a real merge arc."""
+PULL_REQUEST_PILL_OFFSET = 25
+"""Pixel distance from the source-tip commit to the PR title pill; pill sits *above* the source tip (mirroring branch pills, which sit below their branch's start)."""
+
+
+# ==================================================================================================
 #  Colors
 # ==================================================================================================
 COLORS: dict[str, str] = {

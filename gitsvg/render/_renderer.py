@@ -11,17 +11,21 @@ Z-order (back to front):
 1. Branch guides (faint dashed verticals at every occupied lane).
 2. Arcs (branch-off + merge), in the order produced by the layout
    engine.
-3. Branch lines (vertical, in branch colour).
-4. Branch-name pills (coloured rounded rectangles + branch name).
-5. Commit dots (in branch colour, with white outline; enlarged when
+3. Pull-request arcs (dashed mirror of merge arcs), one per open PR.
+4. Branch lines (vertical, in branch colour).
+5. Branch-name pills (coloured rounded rectangles + branch name).
+6. Pull-request title pills (anchored at source-tip commits; only
+   when the PR has a `title`).
+7. Commit dots (in branch colour, with white outline; enlarged when
    highlighted).
-6. Commit labels (`msg` primary lines + optional `hash` secondary
+8. Commit labels (`msg` primary lines + optional `hash` secondary
    line, on the side indicated by `label_side`; bold msg when
    highlighted).
 """
 
 import drawsvg as draw
 
+from gitsvg._visual_constants import PULL_REQUEST_DASH
 from gitsvg.layout import Layout
 from gitsvg.render._primitives._arc import draw_arc
 from gitsvg.render._primitives._branch_guide import draw_branch_guide
@@ -29,6 +33,7 @@ from gitsvg.render._primitives._branch_line import draw_branch_line
 from gitsvg.render._primitives._branch_pill import draw_branch_pill
 from gitsvg.render._primitives._commit_dot import draw_commit_dot
 from gitsvg.render._primitives._commit_label import draw_commit_label
+from gitsvg.render._primitives._pull_request_pill import draw_pull_request_pill
 
 
 def render(layout: Layout) -> draw.Drawing:
@@ -62,6 +67,20 @@ def render(layout: Layout) -> draw.Drawing:
             vertical_first=arc.vertical_first,
         )
 
+    # --- Pull-request arcs (dashed) -------------
+    for pr in layout.pull_requests:
+        draw_arc(
+            d,
+            from_branch_pos=pr.from_branch_pos,
+            from_commit_pos=pr.from_commit_pos,
+            to_branch_pos=pr.to_branch_pos,
+            to_commit_pos=pr.to_commit_pos,
+            canvas=canvas,
+            color=pr.color,
+            vertical_first=True,
+            stroke_dasharray=PULL_REQUEST_DASH,
+        )
+
     # --- Branch lines ---------------------------
     for branch in layout.branches:
         draw_branch_line(d, branch, branch.color, canvas)
@@ -69,6 +88,10 @@ def render(layout: Layout) -> draw.Drawing:
     # --- Branch-name pills ----------------------
     for branch in layout.branches:
         draw_branch_pill(d, branch, canvas)
+
+    # --- Pull-request title pills ---------------
+    for pr in layout.pull_requests:
+        draw_pull_request_pill(d, pr, canvas)
 
     # --- Commit dots ----------------------------
     for commit in layout.commits.values():
