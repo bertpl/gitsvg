@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## 0.1.3 (2026-05-11)
 
 ### Added
 
@@ -16,17 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Every op's `gitsvg schema` output now carries a per-field `description`.
 
-### Deprecated
-
-### Removed
-
 ### Fixed
 
 - Default-mode SVG output is byte-equivalent to v0.1.1 again; the font-family trim from v0.1.2 now applies only under `--small`.
 - Empty branches no longer emit a zero-length `<path>` element for their (invisible) branch line.
-
-### Security
-
 ## 0.1.2 (2026-05-10)
 
 ### Added
