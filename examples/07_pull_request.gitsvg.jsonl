@@ -1,0 +1,7 @@
+{"op": "branch", "name": "main", "label_side": "left"}
+{"op": "commit", "branch": "main", "id": "m1", "msg": "release"}
+{"op": "branch", "name": "feature", "from_branch": "main"}
+{"op": "commit", "branch": "feature", "id": "f1", "msg": "wip"}
+{"op": "pull_request", "id": "pr1", "from": "feature", "into": "main", "title": "PR 1: add thing"}
+{"op": "commit", "branch": "feature", "id": "f2", "msg": "polish"}
+{"op": "commit", "branch": "main", "id": "m2", "msg": "hotfix"}
