@@ -35,7 +35,7 @@ gitsvg validate diagram.gitsvg.jsonl
 
 ## Examples
 
-The [`examples/`](examples/) folder ships six self-contained input files demonstrating the format. Each subsection below shows the rendered output and the source it came from.
+The [`examples/`](examples/) folder ships seven self-contained input files demonstrating the format. Each subsection below shows the rendered output and the source it came from.
 
 ### Example 1: Linear history
 
@@ -133,6 +133,22 @@ The `import` op replays another file as a prelude — here it picks up the rebas
 ```jsonl
 {"op": "import", "path": "05_remove_rebuild.gitsvg.jsonl"}
 {"op": "commit", "branch": "feature", "replaces": ["f1", "f2"], "id": "f_squash", "msg": "complete feature", "hash": "auto"}
+```
+
+### Example 7: Open pull request
+
+The `pull_request` op declares a pending merge between two branches. Both endpoints live-track the current branch tips: as commits accumulate on either side, the dashed arc advances. The optional `title` renders as a pill anchored at the source-tip commit. The typical lifecycle closes the PR with `remove` and then runs a real `merge`; this example stops before either, so the open PR remains visible in the final state.
+
+![Open pull request](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/07_pull_request.svg)
+
+```jsonl
+{"op": "branch", "name": "main", "label_side": "left"}
+{"op": "commit", "branch": "main", "id": "m1", "msg": "release"}
+{"op": "branch", "name": "feature", "from_branch": "main"}
+{"op": "commit", "branch": "feature", "id": "f1", "msg": "wip"}
+{"op": "pull_request", "id": "pr1", "from": "feature", "into": "main", "title": "PR 1: add thing"}
+{"op": "commit", "branch": "feature", "id": "f2", "msg": "polish"}
+{"op": "commit", "branch": "main", "id": "m2", "msg": "hotfix"}
 ```
 
 ## CLI reference

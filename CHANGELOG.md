@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - New `pull_request` op for declaring a pending merge; lifecycle is `pull_request` → `remove` → `merge`.
+- New shipped example (`examples/07_pull_request.gitsvg.jsonl`) demonstrating an open pull-request with live-tracked endpoints.
 
 ### Changed
 
