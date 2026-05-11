@@ -19,7 +19,21 @@ class PullRequestOp(OpBase):
     """
 
     op: Literal["pull_request"]
-    id: IdStr | None = None
-    from_: IdStr = Field(alias="from")
-    into: IdStr
-    title: NonEmptyStr | None = None
+    id: IdStr | None = Field(
+        default=None,
+        description=(
+            "Explicit pull-request id; auto-generated as `_prN` when omitted. "
+            "Set explicitly if a later `remove` op will reference this PR."
+        ),
+    )
+    from_: IdStr = Field(
+        alias="from",
+        description="Source branch the pull-request proposes to merge.",
+    )
+    into: IdStr = Field(
+        description="Target branch the pull-request proposes merging into.",
+    )
+    title: NonEmptyStr | None = Field(
+        default=None,
+        description="Short headline label rendered next to the PR arc; omit for an unlabelled PR.",
+    )

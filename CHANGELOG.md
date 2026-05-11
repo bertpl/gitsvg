@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Every op's `gitsvg schema` output now carries a per-field `description`; `highlight`'s schema description corrected ("renders with a halo" → "renders with an enlarged dot and a bold message label").
+
 ### Deprecated
 
 ### Removed

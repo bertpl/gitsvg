@@ -16,14 +16,43 @@ class CommitOp(OpBase):
     """
 
     op: Literal["commit"]
-    branch: IdStr
-    id: IdStr | None = None
-    msg: NonEmptyStr | None = None
-    hash: IdStr | None = None
-    parents: list[IdStr] | None = Field(default=None, min_length=1)
-    replaces: list[IdStr] | None = Field(default=None, min_length=1)
-    highlight: bool | None = None
-    gap: NonNegativeInt | None = None
+    branch: IdStr = Field(description="Branch the commit lives on.")
+    id: IdStr | None = Field(
+        default=None,
+        description="Explicit commit id; auto-generated when omitted.",
+    )
+    msg: NonEmptyStr | None = Field(
+        default=None,
+        description="Commit message; at least one of `msg` or `hash` must be set.",
+    )
+    hash: IdStr | None = Field(
+        default=None,
+        description=(
+            'Commit hash string; the literal sentinel `"auto"` resolves to a deterministic 7-character hex '
+            "derived from the commit's id and parent ids."
+        ),
+    )
+    parents: list[IdStr] | None = Field(
+        default=None,
+        min_length=1,
+        description=(
+            "Explicit parent commit ids; only needed for merges or squashes that link off-chain "
+            "(the previous commit on the same branch is always an implicit parent)."
+        ),
+    )
+    replaces: list[IdStr] | None = Field(
+        default=None,
+        min_length=1,
+        description="Commit ids this commit conceptually squashes; the squashed commits are removed from state.",
+    )
+    highlight: bool | None = Field(
+        default=None,
+        description="When True, the commit renders with a highlight (enlarged dot + bold label).",
+    )
+    gap: NonNegativeInt | None = Field(
+        default=None,
+        description="Number of empty commit-axis slots between the branch's tip and this commit's landing position.",
+    )
 
     @model_validator(mode="after")
     def _validate_msg_or_hash_present(self) -> Self:
