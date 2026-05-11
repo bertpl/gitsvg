@@ -36,8 +36,9 @@ def test_render_produces_valid_svg_with_correct_root_dimensions() -> None:
 
 def test_render_emits_expected_path_and_circle_counts() -> None:
     """drawsvg renders both `Line` and `Path` as `<path>`. With two branches and
-    a fork, the SVG carries: 2 guides + 1 branch-off arc + 2 branch lines = 5
-    paths, plus one circle per commit."""
+    a fork (main has one commit so its line is suppressed; feat has two so its
+    line shows), the SVG carries: 2 guides + 1 branch-off arc + 1 branch line
+    = 4 paths, plus one circle per commit."""
     # --- arrange ----------------------
     text = (
         '{"op": "branch", "name": "main"}\n'
@@ -51,17 +52,18 @@ def test_render_emits_expected_path_and_circle_counts() -> None:
     svg_text = _render_from(text).as_svg()
 
     # --- assert -----------------------
-    assert svg_text.count("<path") == 5  # 2 guides + 1 arc + 2 lines
+    assert svg_text.count("<path") == 4  # 2 guides + 1 arc + 1 line (feat)
     assert svg_text.count("<circle") == 3  # c1 + f1 + f2
 
 
-def test_empty_branch_still_emits_a_path_element() -> None:
-    """A declared branch with no commits gets a zero-length path — a degenerate
-    placeholder that becomes visible once labels are drawn at its start."""
+def test_empty_branch_emits_no_branch_line() -> None:
+    """A declared branch with no commits gets no branch-line element — empty
+    branches are visually represented by their name pill alone."""
     # --- arrange ----------------------
     text = (
         '{"op": "branch", "name": "main"}\n'
         '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
+        '{"op": "commit", "branch": "main", "id": "c2", "msg": "x"}\n'
         '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
     )
 
@@ -69,8 +71,11 @@ def test_empty_branch_still_emits_a_path_element() -> None:
     svg_text = _render_from(text).as_svg()
 
     # --- assert -----------------------
-    # 2 guides + 1 branch-off arc (degenerate, same row) + 2 branch lines.
-    assert svg_text.count("<path") == 5
+    # 2 guides (main lane + feat lane) + 1 branch-off arc + 1 branch line
+    # (main only; feat is empty so its line is suppressed) = 4 paths. If
+    # the empty branch's line were still emitted as a degenerate path the
+    # count would be 5.
+    assert svg_text.count("<path") == 4
 
 
 def test_render_preserves_branch_colour_in_dot_fill() -> None:
