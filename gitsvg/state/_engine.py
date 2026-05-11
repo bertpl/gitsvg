@@ -20,6 +20,7 @@ from gitsvg.file_format.ops import (
     HighlightOp,
     ImportOp,
     MergeOp,
+    PullRequestOp,
     RemoveOp,
 )
 from gitsvg.parse import ParsedOp
@@ -29,6 +30,7 @@ from gitsvg.state._apply import (
     apply_commit_op,
     apply_highlight_op,
     apply_merge_op,
+    apply_pull_request_op,
     apply_remove_op,
 )
 from gitsvg.state._state import State
@@ -61,6 +63,8 @@ def _apply_one(state: State, parsed: ParsedOp, report: ValidationReport) -> None
         apply_commit_op(state, parsed, report)
     elif isinstance(op, MergeOp):
         apply_merge_op(state, parsed, report)
+    elif isinstance(op, PullRequestOp):
+        apply_pull_request_op(state, parsed, report)
     elif isinstance(op, RemoveOp):
         apply_remove_op(state, parsed, report)
     elif isinstance(op, HighlightOp):

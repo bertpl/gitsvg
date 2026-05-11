@@ -1,4 +1,4 @@
-"""Pydantic models for the seven gitsvg operations.
+"""Pydantic models for the eight gitsvg operations.
 
 Subpackage layout:
 
@@ -23,6 +23,7 @@ from gitsvg.file_format.ops.impl import (
     HighlightOp,
     ImportOp,
     MergeOp,
+    PullRequestOp,
     RemoveOp,
 )
 
@@ -39,5 +40,6 @@ __all__ = [
     "OP_NAMES",
     "OpBase",
     "OpUnion",
+    "PullRequestOp",
     "RemoveOp",
 ]

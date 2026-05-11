@@ -22,7 +22,10 @@ def apply_merge_op(state: State, parsed: ParsedOp, report: ValidationReport) -> 
 
     1. `from` must reference an existing branch (E200).
     2. `into` must reference an existing branch (E200).
-    3. When `as:` is set, the id must not already be used (E203).
+    3. No open pull-request may have the same `(from, into)` pair
+       (E213) — explicit close-before-merge keeps the lifecycle
+       legible and prevents silent PR consumption.
+    4. When `as:` is set, the id must not already be used (E203).
     """
     op = cast(MergeOp, parsed.op)
     file = parsed.file
@@ -51,6 +54,21 @@ def apply_merge_op(state: State, parsed: ParsedOp, report: ValidationReport) -> 
             )
         )
         return
+
+    for pr in state.pull_requests.values():
+        if pr.from_branch == op.from_ and pr.into_branch == op.into:
+            report.add(
+                ValidationError(
+                    file=file,
+                    line=line,
+                    code="E213",
+                    message=(
+                        f"cannot merge {op.from_!r} into {op.into!r}: open pull_request {pr.id!r} "
+                        f"matches this pair; close it via 'remove' first"
+                    ),
+                )
+            )
+            return
 
     explicit_id = op.as_
     merge_id = explicit_id if explicit_id is not None else _generate_auto_commit_id(state)

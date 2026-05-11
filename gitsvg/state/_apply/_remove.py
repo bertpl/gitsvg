@@ -1,4 +1,4 @@
-"""Apply a `remove` op to state — destructive removal of commits or branches."""
+"""Apply a `remove` op to state — destructive removal of commits, branches, or pull-requests."""
 
 from typing import cast
 
@@ -11,16 +11,20 @@ from gitsvg.state._state import State
 def apply_remove_op(state: State, parsed: ParsedOp, report: ValidationReport) -> None:
     """Apply a `remove` op.
 
-    Removes either commits or branches (the schema phase guarantees
-    exactly one of the two list fields is set). Removing a branch
-    cascades to its commits.
+    Removes either commits, branches, or pull-requests (the schema
+    phase guarantees exactly one of the three list fields is set).
+    Removing a branch cascades to its commits.
 
-    Targets that don't exist in current state produce E200/E201 errors
-    but the rest of the list still attempts to remove. This matches
-    the format spec's permissive stance on cross-references — dangling
-    references are tolerated mid-file and end-of-file validation
-    (`check_end_of_file` in `gitsvg.state._eof`) flags any that aren't
-    restored.
+    Targets that don't exist in current state produce E200/E201/E214
+    errors but the rest of the list still attempts to remove. This
+    matches the format spec's permissive stance on cross-references —
+    dangling references are tolerated mid-file and end-of-file
+    validation (`check_end_of_file` in `gitsvg.state._eof`) flags any
+    that aren't restored.
+
+    Branch removal also enforces that no open pull-request still
+    references the branch as either `from` or `into` (E214) — explicit
+    close-before-remove keeps the PR lifecycle legible.
     """
     op = cast(RemoveOp, parsed.op)
     file = parsed.file
@@ -55,7 +59,41 @@ def apply_remove_op(state: State, parsed: ParsedOp, report: ValidationReport) ->
                     )
                 )
                 continue
+            blocking_prs = [
+                pr for pr in state.pull_requests.values() if branch_name in (pr.from_branch, pr.into_branch)
+            ]
+            if blocking_prs:
+                pr_ids = ", ".join(repr(pr.id) for pr in blocking_prs)
+                report.add(
+                    ValidationError(
+                        file=file,
+                        line=line,
+                        code="E214",
+                        message=(
+                            f"cannot remove branch {branch_name!r}: open pull_request(s) {pr_ids} "
+                            f"still reference it; close them first"
+                        ),
+                        field=f"branches.{index}",
+                    )
+                )
+                continue
             _remove_branch_with_cascade(state, branch_name)
+        return
+
+    if op.pull_requests:
+        for index, pr_id in enumerate(op.pull_requests):
+            if not state.has_pull_request(pr_id):
+                report.add(
+                    ValidationError(
+                        file=file,
+                        line=line,
+                        code="E215",
+                        message=f"pull_request {pr_id!r} is not declared",
+                        field=f"pull_requests.{index}",
+                    )
+                )
+                continue
+            state.pull_requests.pop(pr_id, None)
 
 
 # ==================================================================================================

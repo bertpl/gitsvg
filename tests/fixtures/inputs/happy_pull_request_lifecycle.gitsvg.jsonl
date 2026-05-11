@@ -1,0 +1,9 @@
+{"op": "branch", "name": "main"}
+{"op": "commit", "branch": "main", "id": "m1", "msg": "initial"}
+{"op": "branch", "name": "feat", "from_branch": "main"}
+{"op": "commit", "branch": "feat", "id": "f1", "msg": "wip"}
+{"op": "pull_request", "id": "pr1", "from": "feat", "into": "main", "title": "Add the thing"}
+{"op": "commit", "branch": "feat", "id": "f2", "msg": "polish"}
+{"op": "commit", "branch": "main", "id": "m2", "msg": "side fix"}
+{"op": "remove", "pull_requests": ["pr1"]}
+{"op": "merge", "from": "feat", "into": "main", "as": "merged", "msg": "merge feat"}
