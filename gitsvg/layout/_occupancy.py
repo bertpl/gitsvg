@@ -21,6 +21,11 @@ What does **not** contribute:
   cells on them.
 - Branch-name pills, commit labels, hash labels — visual chrome, not
   layout-blocking.
+- Pull-request elements: the dashed arc-and-line, the horizontal
+  segment, and the optional title pill. Same posture as their merge
+  counterparts — visible-but-non-blocking. A PR's projected merge row
+  *does* show up in the canvas auto-fit calculation (so the diagram
+  has room to draw it) but it does not occupy a lane cell.
 
 Encapsulation contract: `Occupancy`'s storage is private. Callers only
 ever see `bool`, `frozenset[int]`, `list[int]`, or `tuple[int, int]`

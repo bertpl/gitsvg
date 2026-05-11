@@ -66,6 +66,7 @@ from gitsvg.layout._layout import (
     LayoutCanvas,
     LayoutCommit,
     LayoutGuide,
+    LayoutPullRequest,
 )
 from gitsvg.layout._metrics import commit_label_width, pill_width
 from gitsvg.layout._occupancy import Occupancy
@@ -148,10 +149,20 @@ def compute_layout(state: State) -> Layout:
     # --- Build guide list -----------------------
     guides = [LayoutGuide(branch_pos=lane) for lane in occupancy.occupied_lanes()]
 
-    # --- Compute canvas spec --------------------
-    canvas = _compute_canvas(state, branches, commit_layouts)
+    # --- Build pull-request list ----------------
+    pull_requests = _build_pull_requests(state, branches)
 
-    return Layout(canvas=canvas, branches=branches, commits=commit_layouts, arcs=arcs, guides=guides)
+    # --- Compute canvas spec --------------------
+    canvas = _compute_canvas(state, branches, commit_layouts, pull_requests)
+
+    return Layout(
+        canvas=canvas,
+        branches=branches,
+        commits=commit_layouts,
+        arcs=arcs,
+        guides=guides,
+        pull_requests=pull_requests,
+    )
 
 
 # ==================================================================================================
@@ -478,19 +489,62 @@ def _merge_arcs(
 
 
 # ==================================================================================================
+#  Helpers — pull requests
+# ==================================================================================================
+def _build_pull_requests(state: State, branches: list[LayoutBranch]) -> list[LayoutPullRequest]:
+    """Build one `LayoutPullRequest` per open PR in state.
+
+    Endpoints are resolved from the current branch tips:
+
+    - `from_commit_pos` is the source branch's `end` (latest commit
+      row, or `start` for empty branches).
+    - `to_commit_pos` is the projected merge-commit row on the target
+      lane, computed with the same anchor formula a real `merge` would
+      use: `max(from.end, into.end) + 1`.
+
+    Branches that no longer exist in `branches` (a clean state should
+    never produce this; defensive against partial-validation calls)
+    cause the PR to be skipped silently.
+    """
+    branches_by_name = {b.name: b for b in branches}
+    pull_requests: list[LayoutPullRequest] = []
+    for pr_id, pr_state in state.pull_requests.items():
+        from_branch = branches_by_name.get(pr_state.from_branch)
+        into_branch = branches_by_name.get(pr_state.into_branch)
+        if from_branch is None or into_branch is None:
+            continue
+        projected_merge_pos = max(from_branch.end, into_branch.end) + 1
+        pull_requests.append(
+            LayoutPullRequest(
+                id=pr_id,
+                from_branch_pos=from_branch.branch_pos,
+                from_commit_pos=from_branch.end,
+                to_branch_pos=into_branch.branch_pos,
+                to_commit_pos=projected_merge_pos,
+                color=from_branch.color,
+                title=pr_state.title,
+            )
+        )
+    return pull_requests
+
+
+# ==================================================================================================
 #  Helpers — canvas
 # ==================================================================================================
 def _compute_canvas(
     state: State,
     branches: list[LayoutBranch],
     commit_layouts: dict[str, LayoutCommit],
+    pull_requests: list[LayoutPullRequest],
 ) -> LayoutCanvas:
     """Compute the effective canvas spec.
 
     Honours every `canvas:` op field that's set; falls back to auto-fit
     defaults for fields that aren't pinned. Auto-fit keeps the canvas
-    just big enough to contain the longest visible labels and the
-    branch-name pills.
+    just big enough to contain the longest visible labels, the
+    branch-name pills, and any open pull-request's projected
+    merge-commit row (which can extend one row beyond the latest
+    commit).
 
     When `n_commits` / `n_branches` are pinned smaller than the actual
     content extent, the pinned values win — content past the pinned
@@ -507,7 +561,8 @@ def _compute_canvas(
     max_branch_pos = max((b.branch_pos for b in branches), default=0)
     max_commit_pos_from_commits = max((c.commit_pos for c in commit_layouts.values()), default=-1)
     max_commit_pos_from_branches = max((b.end for b in branches), default=-1)
-    max_commit_pos = max(max_commit_pos_from_commits, max_commit_pos_from_branches)
+    max_commit_pos_from_prs = max((pr.to_commit_pos for pr in pull_requests), default=-1)
+    max_commit_pos = max(max_commit_pos_from_commits, max_commit_pos_from_branches, max_commit_pos_from_prs)
     auto_n_commits = max_commit_pos + 1 if max_commit_pos >= 0 else 1
     auto_n_branches = max_branch_pos + 1 if branches else 1
     n_commits = _override(user_canvas, "n_commits", auto_n_commits)

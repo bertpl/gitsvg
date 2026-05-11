@@ -40,6 +40,7 @@ HAPPY_FIXTURES = [
     "happy_import_base.gitsvg.jsonl",
     "happy_import_derived.gitsvg.jsonl",
     "happy_pull_request_lifecycle.gitsvg.jsonl",
+    "happy_pull_request_open.gitsvg.jsonl",
 ]
 
 

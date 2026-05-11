@@ -1,0 +1,6 @@
+{"op": "branch", "name": "main"}
+{"op": "commit", "branch": "main", "id": "m1", "msg": "initial"}
+{"op": "branch", "name": "feat", "from_branch": "main"}
+{"op": "commit", "branch": "feat", "id": "f1", "msg": "wip"}
+{"op": "commit", "branch": "feat", "id": "f2", "msg": "polish"}
+{"op": "pull_request", "id": "pr1", "from": "feat", "into": "main", "title": "Add the thing"}
