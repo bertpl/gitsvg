@@ -86,5 +86,7 @@ def apply_theme_op(state: State, parsed: ParsedOp, report: ValidationReport) -> 
         state.theme = copy.deepcopy(named)
 
     # --- Step 2: explicit overrides on top ----
+    # Deep-copy each value so mutable fields (e.g. `colors` dict) on
+    # state.theme don't alias back to the op model.
     for name in explicit_fields:
-        setattr(state.theme, name, getattr(op, name))
+        setattr(state.theme, name, copy.deepcopy(getattr(op, name)))

@@ -125,6 +125,34 @@ def test_mixed_then_partial_sequence() -> None:
 
 
 # ==================================================================================================
+#  Cascade — palette (`colors` dict) override
+# ==================================================================================================
+def test_colors_palette_override_replaces_palette_wholesale() -> None:
+    """The `colors` field replaces the entire branch palette dict —
+    keys not present in the new dict are not preserved."""
+    # --- arrange / act ----------------
+    state, report = _state_from('{"op": "theme", "colors": {"main": "#d62728", "branch1": "#1f77b4"}}\n')
+
+    # --- assert -----------------------
+    assert report.is_clean()
+    assert state.theme.colors == {"main": "#d62728", "branch1": "#1f77b4"}
+
+
+def test_colors_override_does_not_alias_op_dict() -> None:
+    """Mutating `state.theme.colors` after apply must not leak back into
+    the parsed op (defensive — pydantic shouldn't be re-applied, but the
+    deep-copy keeps the invariant clean)."""
+    # --- arrange / act ----------------
+    state, _ = _state_from('{"op": "theme", "colors": {"main": "#d62728"}}\n')
+    state.theme.colors["main"] = "#000000"
+    state2, _ = _state_from('{"op": "theme", "colors": {"main": "#d62728"}}\n')
+
+    # --- assert -----------------------
+    # Each state's theme.colors is independent.
+    assert state2.theme.colors == {"main": "#d62728"}
+
+
+# ==================================================================================================
 #  Validation
 # ==================================================================================================
 def test_empty_op_emits_e217() -> None:

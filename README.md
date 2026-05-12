@@ -35,7 +35,7 @@ gitsvg validate diagram.gitsvg.jsonl
 
 ## Examples
 
-The [`examples/`](examples/) folder ships seven self-contained input files demonstrating the format. Each subsection below shows the rendered output and the source it came from.
+The [`examples/`](examples/) folder ships eight self-contained input files demonstrating the format. Each subsection below shows the rendered output and the source it came from.
 
 ### Example 1: Linear history
 
@@ -149,6 +149,17 @@ The `pull_request` op declares a pending merge between two branches. Both endpoi
 {"op": "pull_request", "id": "pr1", "from": "feature", "into": "main", "title": "PR 1: add thing"}
 {"op": "commit", "branch": "feature", "id": "f2", "msg": "polish"}
 {"op": "commit", "branch": "main", "id": "m2", "msg": "hotfix"}
+```
+
+### Example 8: Themed rendering
+
+The `theme` op patches the diagram's live theme — spacings, sizes, fonts, the branch-colour palette, the SVG background, and more. Each op only overrides the fields it lists; a `name` selects a built-in theme (today: `default`) that replaces every field first. Here we import Example 3 unchanged and apply a saturated palette with thicker strokes, larger labels, and a warm background.
+
+![Themed rendering](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/08_themed.svg)
+
+```jsonl
+{"op": "import", "path": "03_multi_branch.gitsvg.jsonl"}
+{"op": "theme", "background_color": "#fff8e7", "branch_line_width": 4, "label_font_size": 14, "branch_label_font_size": 14, "hash_font_size": 11, "commit_radius": 7, "highlight_radius": 9, "colors": {"main": "#d62728", "branch1": "#1f77b4", "branch2": "#2ca02c", "branch3": "#ff7f0e", "branch4": "#9467bd"}}
 ```
 
 ## CLI reference
