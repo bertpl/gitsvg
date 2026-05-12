@@ -1,62 +1,46 @@
-"""Layout dataclasses — the complete render-ready intermediate representation.
+"""Layout dataclasses — the integer-grid intermediate representation.
 
 Produced by `gitsvg.layout.compute_layout(state)` from a fully-built
-`State`, consumed by `gitsvg.render.render(layout)`. Every field the
-renderer needs is pre-resolved here:
+`State`, consumed by `gitsvg.render.render(layout, theme)`. The
+layout is *exclusively* about integer-grid positioning:
 
-- Resolved hex colours (no colour-cycle logic in the renderer).
+- `branch_pos` / `commit_pos` slot indices for every entity.
+- Semantic identifiers (branch `id`, commit `id`, PR `id`).
 - Resolved label sides (no `None`-fallback logic in the renderer).
-- Resolved hash strings (auto-resolved 7-char hex from state, copied
-  across).
-- Pre-computed arc connectors (one entry per branch-off + merge arc).
-- Pre-enumerated branch guides (one entry per occupied lane).
-- Canvas dimensions.
+- Resolved hash strings (auto-resolved 7-char hex from state).
+- Pre-computed arc connectors and branch guides as slot pairs.
+- Grid extent (`n_commits`, `n_branches`).
 
-Different layout strategies (the default declaration-order
-sequential assignment, the lane-reuse strategy, future left-to-
-right orientations) all produce the same `Layout` schema, so the
-renderer stays oblivious.
+Layout output carries **no** colour, pixel, font, stroke, or
+opacity data. Every presentational decision happens in the renderer
+from the resolved `Theme`.
+
+Different layout strategies (default declaration-order assignment,
+lane-reuse, future left-to-right orientations) all produce the same
+`Layout` schema, so the renderer stays oblivious.
 """
 
 from dataclasses import dataclass, field
 
 
 @dataclass(slots=True)
-class LayoutCanvas:
-    """Computed canvas dimensions and the effective spacing/margins the
-    renderer's geometry transform reads from.
+class LayoutGrid:
+    """Integer-grid extent the layout commits to — slot counts only.
 
-    Effective values come from the layout engine after merging the input's
-    `canvas:` op overrides with auto-fit defaults. The renderer never has
-    to look at constants — every value it needs to place a primitive is
-    on this object.
+    The renderer transforms `(branch_pos, commit_pos)` slot indices to
+    pixel coordinates using these counts together with the resolved
+    theme's spacings and margins.
 
     Attributes:
-        width: SVG canvas width in pixels.
-        height: SVG canvas height in pixels.
-        n_commits: Effective commit-axis slot count (pinned via `canvas.n_commits`
-            or auto-fit from content). Needed by the coordinate transform
-            because the bottom-to-top orientation places index 0 at the
-            largest y.
-        n_branches: Effective branch-axis slot count.
-        branch_spacing: Effective pixel distance between adjacent branch-axis slots.
-        commit_spacing: Effective pixel distance between adjacent commit-axis slots.
-        margin_branch_axis_lower: Effective branch-axis margin at the lower end (lane 0 side).
-        margin_branch_axis_upper: Effective branch-axis margin at the upper end (highest-lane side).
-        margin_commit_axis_lower: Effective commit-axis margin at the lower end (oldest-commit side).
-        margin_commit_axis_upper: Effective commit-axis margin at the upper end (newest-commit side).
+        n_commits: Commit-axis slot count (pinned via `canvas.n_commits`
+            or auto-fit from content extent). Needed by the coordinate
+            transform because the bottom-to-top orientation places index
+            0 at the largest y.
+        n_branches: Branch-axis slot count.
     """
 
-    width: float
-    height: float
     n_commits: int
     n_branches: int
-    branch_spacing: float
-    commit_spacing: float
-    margin_branch_axis_lower: float
-    margin_branch_axis_upper: float
-    margin_commit_axis_lower: float
-    margin_commit_axis_upper: float
 
 
 @dataclass(slots=True)
@@ -64,24 +48,25 @@ class LayoutBranch:
     """One branch as the renderer should draw it.
 
     Attributes:
-        name: Branch name (used to draw the name pill once labels land).
+        id: Stable opaque branch id matching `BranchState.id`. The
+            renderer uses this to look up per-branch presentational
+            overrides (e.g. colour) on the resolved theme.
+        name: Branch name (used to draw the name pill).
         branch_pos: Slot index along the branch axis (the lane).
         start: Commit-axis position where the branch begins (the
             branch-off point — for non-root branches this is one slot
             above the parent commit's `commit_pos`).
         end: Commit-axis position of the latest commit on this branch,
             or `start` when the branch has no commits yet.
-        color: Resolved hex colour string (explicit branch.color
-            override, or the resolved default-cycle entry).
         label_side: Resolved label side, `"left"` or `"right"` — never
             `None` in the layout.
     """
 
+    id: str
     name: str
     branch_pos: int
     start: int
     end: int
-    color: str
     label_side: str
 
 
@@ -91,10 +76,10 @@ class LayoutCommit:
 
     Attributes:
         id: The commit's id (matching `CommitState.id` in state).
+        branch_id: Id of the branch the commit lives on; the renderer
+            uses this to resolve the commit's colour.
         branch_pos: Slot index along the branch axis.
         commit_pos: Slot index along the commit axis (0 = oldest).
-        color: Resolved hex colour string (the colour of the commit's
-            branch; commits always sit on their branch's lane).
         msg: Optional commit message — drawn as the primary label line.
         hash: Optional resolved hash string — drawn as the secondary
             label line. Already resolved from any `"auto"` sentinel.
@@ -105,9 +90,9 @@ class LayoutCommit:
     """
 
     id: str
+    branch_id: str
     branch_pos: int
     commit_pos: int
-    color: str
     msg: str | None
     hash: str | None
     highlight: bool
@@ -128,9 +113,10 @@ class LayoutArc:
         from_commit_pos: Source point's commit-axis index.
         to_branch_pos: Target point's branch-axis index.
         to_commit_pos: Target point's commit-axis index.
-        color: Resolved hex colour string. Branch-off arcs take the
-            *target* (new) branch's colour; merge arcs take the
-            *source* (from) branch's colour.
+        color_branch_id: Id of the branch whose colour this arc takes.
+            Branch-off arcs use the *target* (new) branch; merge arcs
+            use the *source* (from) branch. The renderer resolves the
+            actual hex value via the theme.
         vertical_first: True for merge arcs (vertical segment → arc →
             horizontal segment); False for branch-off arcs (horizontal
             → arc → vertical).
@@ -141,7 +127,7 @@ class LayoutArc:
     from_commit_pos: int
     to_branch_pos: int
     to_commit_pos: int
-    color: str
+    color_branch_id: str
     vertical_first: bool
 
 
@@ -179,8 +165,8 @@ class LayoutPullRequest:
             segment runs).
         to_commit_pos: Projected merge-commit row on the target lane —
             the position a real `merge` would land at if it ran now.
-        color: Stroke colour for the dashed arc (the source branch's
-            colour).
+        color_branch_id: Id of the source branch — its colour drives the
+            dashed arc and the title pill.
         title: Optional PR title; when None no pill is rendered.
     """
 
@@ -189,16 +175,16 @@ class LayoutPullRequest:
     from_commit_pos: int
     to_branch_pos: int
     to_commit_pos: int
-    color: str
+    color_branch_id: str
     title: str | None
 
 
 @dataclass(slots=True)
 class Layout:
-    """Per-diagram layout: everything the renderer needs to draw the picture.
+    """Per-diagram layout: every grid-side decision the renderer needs.
 
     Attributes:
-        canvas: Canvas dimensions.
+        canvas: Integer-grid extent (slot counts).
         branches: One `LayoutBranch` per declared branch, in declaration
             order.
         commits: One `LayoutCommit` per surviving commit, keyed by id
@@ -210,7 +196,7 @@ class Layout:
             order they were declared.
     """
 
-    canvas: LayoutCanvas
+    canvas: LayoutGrid
     branches: list[LayoutBranch] = field(default_factory=list)
     commits: dict[str, LayoutCommit] = field(default_factory=dict)
     arcs: list[LayoutArc] = field(default_factory=list)

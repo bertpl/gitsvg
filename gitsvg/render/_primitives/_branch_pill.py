@@ -1,9 +1,9 @@
 """Draw a branch-name pill at the branch's start point.
 
 The pill is a filled rounded rectangle in the branch's colour with the
-branch name in white text, positioned `BRANCH_NAME_PILL_OFFSET` pixels
-*below* the branch's start point in screen y (= towards the lower end
-of the commit axis, where pills sit at the branch's birth).
+branch name in white text, positioned `theme.branch_name_pill_offset`
+pixels *below* the branch's start point in screen y (= towards the
+lower end of the commit axis, where pills sit at the branch's birth).
 
 Width is approximated from the text length using a per-character pixel
 estimate; no real glyph measurement.
@@ -11,14 +11,10 @@ estimate; no real glyph measurement.
 
 import drawsvg as draw
 
-from gitsvg._visual_constants import (
-    BRANCH_LABEL_BG_OPACITY,
-    BRANCH_LABEL_FONT_SIZE,
-    BRANCH_NAME_PILL_OFFSET,
-    LABEL_FONT_FAMILY,
-)
-from gitsvg.layout import LayoutBranch, LayoutCanvas
+from gitsvg.layout import LayoutBranch
+from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._geometry import branch_axis_to_x, commit_axis_to_y
+from gitsvg.render._theme import Theme
 
 _PILL_PADDING_X = 12  # extra width beyond the rendered text
 _PILL_PADDING_Y = 8  # extra height beyond the font size
@@ -26,13 +22,13 @@ _PILL_CORNER_RADIUS = 4
 _CHAR_WIDTH_FACTOR = 0.58  # rough char-width estimate at weight 500
 
 
-def draw_branch_pill(d: draw.Drawing, branch: LayoutBranch, canvas: LayoutCanvas) -> None:
+def draw_branch_pill(d: draw.Drawing, branch: LayoutBranch, color: str, canvas: RenderCanvas, theme: Theme) -> None:
     """Append a branch-name pill (background rectangle + text) to the drawing."""
     x = branch_axis_to_x(branch.branch_pos, canvas)
-    y = commit_axis_to_y(branch.start, canvas) + BRANCH_NAME_PILL_OFFSET
+    y = commit_axis_to_y(branch.start, canvas) + theme.branch_name_pill_offset
 
-    width = len(branch.name) * BRANCH_LABEL_FONT_SIZE * _CHAR_WIDTH_FACTOR + _PILL_PADDING_X
-    height = BRANCH_LABEL_FONT_SIZE + _PILL_PADDING_Y
+    width = len(branch.name) * theme.branch_label_font_size * _CHAR_WIDTH_FACTOR + _PILL_PADDING_X
+    height = theme.branch_label_font_size + _PILL_PADDING_Y
 
     d.append(
         draw.Rectangle(
@@ -42,20 +38,20 @@ def draw_branch_pill(d: draw.Drawing, branch: LayoutBranch, canvas: LayoutCanvas
             height,
             rx=_PILL_CORNER_RADIUS,
             ry=_PILL_CORNER_RADIUS,
-            fill=branch.color,
-            opacity=BRANCH_LABEL_BG_OPACITY,
+            fill=color,
+            opacity=theme.branch_label_bg_opacity,
         )
     )
     d.append(
         draw.Text(
             branch.name,
-            BRANCH_LABEL_FONT_SIZE,
+            theme.branch_label_font_size,
             x,
             y,
             text_anchor="middle",
             dominant_baseline="middle",
             fill="white",
-            font_family=LABEL_FONT_FAMILY,
+            font_family=theme.label_font_family,
             font_weight="500",
         )
     )

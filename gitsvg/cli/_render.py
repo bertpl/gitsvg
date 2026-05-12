@@ -19,6 +19,7 @@ from gitsvg.layout import compute_layout
 from gitsvg.parse import parse_jsonl_file
 from gitsvg.render import render
 from gitsvg.render._minify import minify
+from gitsvg.render._theme import build_theme
 from gitsvg.state import apply_ops, check_end_of_file
 
 
@@ -55,10 +56,11 @@ def render_command(input_path: Path, output_path: Path, small: bool) -> None:
             click.echo(err.format(), err=True)
         sys.exit(1)
 
+    theme = build_theme(state)
     layout = compute_layout(state)
-    drawing = render(layout)
+    drawing = render(layout, theme)
     if small:
         svg = drawing.as_svg(header="", skip_css=True, skip_js=True)
-        output_path.write_text(minify(svg, small=True))
+        output_path.write_text(minify(svg, small=True, theme=theme))
     else:
         drawing.save_svg(str(output_path))

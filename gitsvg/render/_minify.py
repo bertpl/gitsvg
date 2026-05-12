@@ -11,7 +11,7 @@ place of these passes when implemented.
 
 import re
 
-from gitsvg._visual_constants import LABEL_FONT_FAMILY, LABEL_FONT_FAMILY_SMALL
+from gitsvg.render._theme import Theme
 
 # ==================================================================================================
 #  Individual passes
@@ -82,22 +82,16 @@ def drop_empty_defs_and_unused_xlink(svg: str) -> str:
     return svg
 
 
-def trim_font_family_fallback(svg: str) -> str:
+def trim_font_family_fallback(svg: str, theme: Theme) -> str:
     """Replace the rendered `font-family` chain with the short form.
 
-    The rendered output uses `LABEL_FONT_FAMILY` on every text element.
-    Under `--small`, drop the intermediate fallbacks: replace every
-    occurrence with `LABEL_FONT_FAMILY_SMALL`, which relies on the
-    host's generic-`sans-serif` resolution instead. On every modern OS
-    that resolves to a perfectly acceptable default.
-
-    Args:
-        svg: The full SVG markup as a string.
-
-    Returns:
-        The SVG with the long fallback chain replaced by the short form.
+    The rendered output uses `theme.label_font_family` on every text
+    element. Under `--small`, drop the intermediate fallbacks: replace
+    every occurrence with `theme.label_font_family_small`, which relies
+    on the host's generic-`sans-serif` resolution instead. On every
+    modern OS that resolves to a perfectly acceptable default.
     """
-    return svg.replace(LABEL_FONT_FAMILY, LABEL_FONT_FAMILY_SMALL)
+    return svg.replace(theme.label_font_family, theme.label_font_family_small)
 
 
 def hoist_font_family_to_root(svg: str) -> str:
@@ -165,7 +159,7 @@ def drop_default_attribute_values(svg: str) -> str:
 # ==================================================================================================
 #  Entrypoint
 # ==================================================================================================
-def minify(svg: str, small: bool) -> str:
+def minify(svg: str, small: bool, theme: Theme) -> str:
     """Apply the round-1 reductions in sequence when `small` is True.
 
     When `small` is False, returns `svg` unchanged. When True, runs
@@ -176,6 +170,8 @@ def minify(svg: str, small: bool) -> str:
     Args:
         svg: The full SVG markup as a string.
         small: When True, apply the round-1 reductions.
+        theme: Resolved theme — supplies the font-family values the
+            trim pass needs.
 
     Returns:
         The (potentially) reduced SVG markup.
@@ -184,7 +180,7 @@ def minify(svg: str, small: bool) -> str:
         return svg
     svg = round_numbers(svg, decimals=3)
     svg = drop_default_attribute_values(svg)
-    svg = trim_font_family_fallback(svg)
+    svg = trim_font_family_fallback(svg, theme)
     svg = hoist_font_family_to_root(svg)
     svg = drop_empty_defs_and_unused_xlink(svg)
     svg = strip_inter_element_whitespace(svg)

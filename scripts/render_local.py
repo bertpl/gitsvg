@@ -18,6 +18,7 @@ from gitsvg.imports import resolve_imports
 from gitsvg.layout import compute_layout
 from gitsvg.parse import parse_jsonl_file
 from gitsvg.render import render
+from gitsvg.render._theme import build_theme
 from gitsvg.state import apply_ops, check_end_of_file
 
 LOCAL_DIR = Path("local/test_examples")
@@ -40,8 +41,9 @@ def render_one(input_path: Path, output_path: Path) -> ValidationReport:
     check_end_of_file(state, report)
     if not report.is_clean():
         return report
+    theme = build_theme(state)
     layout = compute_layout(state)
-    drawing = render(layout)
+    drawing = render(layout, theme)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     drawing.save_svg(str(output_path))
     return report

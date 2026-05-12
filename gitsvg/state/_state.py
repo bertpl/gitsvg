@@ -36,7 +36,16 @@ class BranchState:
     """One branch as it currently exists in state.
 
     Attributes:
-        name: Unique branch name.
+        id: Stable, opaque, internally-generated identifier for this
+            branch. Unique across the lifetime of the state object
+            (never reused), so it cleanly distinguishes a removed
+            branch from a later branch declared with the same name.
+            Format is `f"b{n}"` where `n` is a monotonic counter on
+            `State`. Internal-only: does not appear in JSONL input,
+            schema output, or user-facing error messages.
+        name: Branch name as written in the JSONL. Unique among
+            currently-live branches, but can be reused after `remove`
+            — `id` is the stable handle.
         color: Optional hex color override from the declaration.
         label_side: Optional label-side hint from the declaration.
         branch_pos: Optional explicit lane-index override from the
@@ -54,6 +63,7 @@ class BranchState:
         commit_ids: Ordered list of commit ids appended to this branch.
     """
 
+    id: str
     name: str
     color: str | None = None
     label_side: str | None = None
@@ -135,6 +145,19 @@ class State:
         self.pull_requests: dict[str, PullRequestState] = {}
         self.branch_order: list[str] = []
         self.canvas: CanvasState | None = None
+        self._next_branch_seq: int = 0
+
+    def next_branch_id(self) -> str:
+        """Return a fresh opaque branch id (`b0`, `b1`, …).
+
+        The counter is monotonic across the state's lifetime — removed
+        branches never give their id back. Callers (the `branch` op
+        apply step) take the returned id and assign it to the new
+        `BranchState`.
+        """
+        new_id = f"b{self._next_branch_seq}"
+        self._next_branch_seq += 1
+        return new_id
 
     def is_first_branch(self) -> bool:
         """Return True when no branch has been declared yet."""

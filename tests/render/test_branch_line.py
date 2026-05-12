@@ -4,19 +4,21 @@ import re
 
 import drawsvg as draw
 
-from gitsvg.layout import LayoutBranch, LayoutCanvas, compute_layout
+from gitsvg.layout import LayoutBranch, compute_layout
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.render import render
+from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._primitives._branch_line import draw_branch_line
+from gitsvg.render._theme import DEFAULT_THEME
 from gitsvg.state import apply_ops
 
 
 # ==================================================================================================
 #  Direct primitive test — empty branch (start == end) emits nothing
 # ==================================================================================================
-def _canvas() -> LayoutCanvas:
-    """Return a minimal `LayoutCanvas` sufficient for the geometry transform."""
-    return LayoutCanvas(
+def _canvas() -> RenderCanvas:
+    """Return a minimal `RenderCanvas` sufficient for the geometry transform."""
+    return RenderCanvas(
         width=200,
         height=200,
         n_commits=3,
@@ -35,16 +37,16 @@ def test_empty_branch_emits_no_line() -> None:
     # --- arrange ----------------------
     d = draw.Drawing(200, 200)
     empty_branch = LayoutBranch(
+        id="b1",
         name="lonely",
         branch_pos=1,
         start=2,
         end=2,
-        color="#000000",
         label_side="right",
     )
 
     # --- act --------------------------
-    draw_branch_line(d, empty_branch, empty_branch.color, _canvas())
+    draw_branch_line(d, empty_branch, "#000000", _canvas(), DEFAULT_THEME)
     svg = d.as_svg()
 
     # --- assert -----------------------
@@ -58,16 +60,16 @@ def test_non_empty_branch_emits_a_line() -> None:
     # --- arrange ----------------------
     d = draw.Drawing(200, 200)
     branch = LayoutBranch(
+        id="b1",
         name="b",
         branch_pos=1,
         start=0,
         end=2,
-        color="#000000",
         label_side="right",
     )
 
     # --- act --------------------------
-    draw_branch_line(d, branch, branch.color, _canvas())
+    draw_branch_line(d, branch, "#000000", _canvas(), DEFAULT_THEME)
     svg = d.as_svg()
 
     # --- assert -----------------------

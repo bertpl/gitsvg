@@ -5,17 +5,6 @@ from pathlib import Path
 
 import pytest
 
-from gitsvg._visual_constants import (
-    BRANCH_NAME_PILL_OFFSET,
-    BRANCH_SPACING,
-    COLORS,
-    COMMIT_SPACING,
-    DEFAULT_BRANCH_COLORS,
-    MARGIN_BRANCH_AXIS_LOWER,
-    MARGIN_BRANCH_AXIS_UPPER,
-    MARGIN_COMMIT_AXIS_LOWER,
-    MARGIN_COMMIT_AXIS_UPPER,
-)
 from gitsvg.errors import ValidationReport
 from gitsvg.imports import resolve_imports
 from gitsvg.layout import Layout, compute_layout
@@ -555,62 +544,32 @@ def test_replaces_compact_when_no_gap_in_chain() -> None:
 
 
 # ==================================================================================================
-#  Resolved colours
+#  Branch and commit ids flow through to the layout
 # ==================================================================================================
-def test_explicit_branch_color_used_verbatim() -> None:
+def test_each_branch_carries_an_id() -> None:
     # --- arrange ----------------------
-    layout = _layout_from('{"op": "branch", "name": "main", "color": "#abcdef"}\n')
-
-    # --- assert -----------------------
-    main = next(b for b in layout.branches if b.name == "main")
-    assert main.color == "#abcdef"
-
-
-def test_first_branch_defaults_to_main_color() -> None:
-    # --- arrange ----------------------
-    layout = _layout_from('{"op": "branch", "name": "main"}\n')
-
-    # --- assert -----------------------
-    main = next(b for b in layout.branches if b.name == "main")
-    assert main.color == COLORS["main"]
-
-
-def test_subsequent_branches_cycle_default_palette() -> None:
-    # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "branch", "name": "f1", "from_branch": "main"}\n'
-        '{"op": "branch", "name": "f2", "from_branch": "main"}\n'
-        '{"op": "branch", "name": "f3", "from_branch": "main"}\n'
-        '{"op": "branch", "name": "f4", "from_branch": "main"}\n'
-        '{"op": "branch", "name": "f5", "from_branch": "main"}\n'
-    )
+    text = '{"op": "branch", "name": "main"}\n{"op": "branch", "name": "feat", "from_branch": "main"}\n'
 
     # --- act --------------------------
     layout = _layout_from(text)
+
+    # --- assert -----------------------
     by_name = {b.name: b for b in layout.branches}
-
-    # --- assert -----------------------
-    assert by_name["f1"].color == COLORS[DEFAULT_BRANCH_COLORS[0]]
-    assert by_name["f2"].color == COLORS[DEFAULT_BRANCH_COLORS[1]]
-    assert by_name["f3"].color == COLORS[DEFAULT_BRANCH_COLORS[2]]
-    assert by_name["f4"].color == COLORS[DEFAULT_BRANCH_COLORS[3]]
-    # f5 wraps back to position 0.
-    assert by_name["f5"].color == COLORS[DEFAULT_BRANCH_COLORS[0]]
+    assert by_name["main"].id
+    assert by_name["feat"].id
+    assert by_name["main"].id != by_name["feat"].id
 
 
-def test_commit_color_matches_its_branch_color() -> None:
+def test_commit_carries_its_branch_id() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main", "color": "#aabbcc"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-    )
+    text = '{"op": "branch", "name": "main"}\n{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
 
     # --- act --------------------------
     layout = _layout_from(text)
 
     # --- assert -----------------------
-    assert layout.commits["c1"].color == "#aabbcc"
+    main = next(b for b in layout.branches if b.name == "main")
+    assert layout.commits["c1"].branch_id == main.id
 
 
 # ==================================================================================================
@@ -660,12 +619,12 @@ def test_branch_off_arc_emitted_for_each_non_root_branch() -> None:
     assert arc.vertical_first is False
 
 
-def test_branch_off_arc_color_is_target_branch_color() -> None:
+def test_branch_off_arc_tagged_with_target_branch_id() -> None:
     # --- arrange ----------------------
     text = (
-        '{"op": "branch", "name": "main", "color": "#aabbcc"}\n'
+        '{"op": "branch", "name": "main"}\n'
         '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main", "color": "#112233"}\n'
+        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
     )
 
     # --- act --------------------------
@@ -673,15 +632,16 @@ def test_branch_off_arc_color_is_target_branch_color() -> None:
 
     # --- assert -----------------------
     arc = next(a for a in layout.arcs if a.kind == "branch_off")
-    assert arc.color == "#112233"
+    feat = next(b for b in layout.branches if b.name == "feat")
+    assert arc.color_branch_id == feat.id
 
 
-def test_merge_arc_emitted_with_source_branch_color() -> None:
+def test_merge_arc_emitted_tagged_with_source_branch_id() -> None:
     # --- arrange ----------------------
     text = (
-        '{"op": "branch", "name": "main", "color": "#aabbcc"}\n'
+        '{"op": "branch", "name": "main"}\n'
         '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main", "color": "#112233"}\n'
+        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
         '{"op": "commit", "branch": "feat", "id": "f1", "msg": "x"}\n'
         '{"op": "merge", "from": "feat", "into": "main", "as": "m2"}\n'
     )
@@ -693,7 +653,8 @@ def test_merge_arc_emitted_with_source_branch_color() -> None:
     merge_arcs = [a for a in layout.arcs if a.kind == "merge"]
     assert len(merge_arcs) == 1
     arc = merge_arcs[0]
-    assert arc.color == "#112233"  # source branch's color
+    feat = next(b for b in layout.branches if b.name == "feat")
+    assert arc.color_branch_id == feat.id  # source branch
     assert arc.vertical_first is True
 
 
@@ -717,9 +678,9 @@ def test_one_guide_per_unique_branch_pos() -> None:
 
 
 # ==================================================================================================
-#  Canvas dimensions
+#  Grid extent (LayoutGrid)
 # ==================================================================================================
-def test_canvas_size_for_single_branch_three_commits() -> None:
+def test_grid_extent_for_single_branch_three_commits() -> None:
     # --- arrange ----------------------
     text = (
         '{"op": "branch", "name": "main"}\n'
@@ -732,19 +693,11 @@ def test_canvas_size_for_single_branch_three_commits() -> None:
     layout = _layout_from(text)
 
     # --- assert -----------------------
-    canvas = layout.canvas
-    # 3 commits → n_commits = 3.
-    assert canvas.n_commits == 3
-    # Width: short branch name "main" auto-fits within the default lower/upper margins.
-    assert canvas.width == MARGIN_BRANCH_AXIS_LOWER + 0 * BRANCH_SPACING + MARGIN_BRANCH_AXIS_UPPER
-    # Height: upper-margin + content + auto-fit lower margin (which extends past the
-    # default to make room for the root branch's pill below the lowest dot).
-    assert canvas.height == (MARGIN_COMMIT_AXIS_UPPER + (3 - 1) * COMMIT_SPACING + canvas.margin_commit_axis_lower)
-    # The auto-fit lower margin is at least the pill-room (PILL_OFFSET + half pill height + pad).
-    assert canvas.margin_commit_axis_lower >= BRANCH_NAME_PILL_OFFSET
+    assert layout.canvas.n_commits == 3
+    assert layout.canvas.n_branches == 1
 
 
-def test_canvas_widens_for_two_branches() -> None:
+def test_grid_widens_for_two_branches() -> None:
     # --- arrange ----------------------
     text = (
         '{"op": "branch", "name": "main"}\n'
@@ -757,11 +710,11 @@ def test_canvas_widens_for_two_branches() -> None:
     layout = _layout_from(text)
 
     # --- assert -----------------------
-    assert layout.canvas.width == MARGIN_BRANCH_AXIS_LOWER + 1 * BRANCH_SPACING + MARGIN_BRANCH_AXIS_UPPER
+    assert layout.canvas.n_branches == 2
 
 
-def test_canvas_includes_empty_branch_start_in_height() -> None:
-    """An empty fork branch with start > max(commit_pos) extends the canvas."""
+def test_grid_includes_empty_branch_start_in_height() -> None:
+    """An empty fork branch with start > max(commit_pos) extends the grid."""
     # --- arrange ----------------------
     text = (
         '{"op": "branch", "name": "main"}\n'
@@ -829,8 +782,9 @@ def test_layout_completes_for_every_corpus_file(path: Path) -> None:
         assert branch.start >= 0
         assert branch.end >= branch.start
         assert branch.branch_pos >= 0
-    assert layout.canvas.width > 0
-    assert layout.canvas.height > 0
+        assert branch.id
+    assert layout.canvas.n_commits > 0
+    assert layout.canvas.n_branches > 0
 
 
 # Defensive — the corpus walker uses ValidationReport implicitly via the parser;

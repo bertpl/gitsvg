@@ -3,14 +3,16 @@
 from gitsvg.layout import compute_layout
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.render import render
+from gitsvg.render._theme import build_theme
 from gitsvg.state import apply_ops
 
 
 def _render_from(text: str):
     parsed, report = parse_jsonl_text(text, file="x.jsonl")
     state = apply_ops(parsed, report)
+    theme = build_theme(state)
     layout = compute_layout(state)
-    return render(layout)
+    return render(layout, theme)
 
 
 # ==================================================================================================
