@@ -13,9 +13,10 @@ def _state_from(text: str):
 # ==================================================================================================
 #  Defaults
 # ==================================================================================================
-def test_default_theme_matches_pre_pr1_constants() -> None:
-    """The default theme's values reproduce v0.1.3's `_visual_constants.py`
-    exactly — the byte-identical-output gate depends on this."""
+def test_default_theme_values_pin_the_byte_identical_baseline() -> None:
+    """The default theme's values match the rendered-SVG baseline the
+    package ships against — byte-identical output depends on these
+    constants not drifting."""
     # --- arrange / act / assert -------
     assert DEFAULT_THEME.branch_spacing == 100
     assert DEFAULT_THEME.commit_spacing == 50
@@ -178,8 +179,7 @@ def test_build_theme_returns_fresh_instance_per_call() -> None:
 
 
 def test_theme_dataclass_is_constructible_with_explicit_values() -> None:
-    """Sanity check: nothing prevents constructing a custom theme directly
-    (the path PR2's `theme:` op application will use)."""
+    """Sanity check: nothing prevents constructing a custom theme directly."""
     # --- arrange / act ----------------
     theme = Theme(branch_spacing=120, background_color="#222222")
 

@@ -61,6 +61,18 @@ def compute_canvas(layout: Layout, theme: Theme) -> RenderCanvas:
     Margins auto-fit to the longest visible labels and pills; spacing /
     margin overrides from a `canvas:` op live on the resolved theme
     (folded in by `build_theme`).
+
+    Args:
+        layout: The completed layout, supplying the integer-grid extent
+            (`n_commits`, `n_branches`) and the entities (branches,
+            commits, PRs) that drive the auto-fit margin computation.
+        theme: The resolved theme, supplying default spacings / margins
+            (already overridden by any `canvas:` op fields) and font
+            sizes used in label-width estimation.
+
+    Returns:
+        A `RenderCanvas` carrying the pixel-space width / height and the
+        effective spacing / margin values the coordinate transform reads.
     """
     branches = layout.branches
     commit_layouts = layout.commits
@@ -83,7 +95,8 @@ def compute_canvas(layout: Layout, theme: Theme) -> RenderCanvas:
     margin_commit_axis_lower = _auto_fit_margin_commit_axis_lower(branches, theme)
     # `margin_commit_axis_upper` is the one margin always promoted to
     # float — the coordinate transform's `y = margin_commit_axis_upper +
-    # ...` propagates this into every y attribute. v0.1.3 did the same.
+    # ...` propagates the type into every y attribute drawsvg emits, and
+    # the rendered baseline expects float y formatting throughout.
     margin_commit_axis_upper = float(theme.margin_commit_axis_upper)
 
     width = margin_branch_axis_lower + (n_branches - 1) * branch_spacing + margin_branch_axis_upper
@@ -115,6 +128,23 @@ def _auto_fit_margin_branch_axis(
     Considers the half-pill-width of any pill on the edge lane plus the
     width of any commit label whose `label_side` points outward from
     that lane.
+
+    Args:
+        branches: All layout branches; the edge-lane filter walks this
+            list to find pills on `branch_pos_filter`.
+        commit_layouts: All layout commits, walked the same way to find
+            outward-pointing labels on the edge lane.
+        theme: Supplies the default margin for the side, the
+            `label_offset`, and the font sizes used to estimate label
+            widths.
+        branch_pos_filter: Lane index that counts as the "edge" — 0 on
+            the left, max lane on the right.
+        side: `"left"` or `"right"` — picks the matching default margin
+            and the outward label-side value.
+
+    Returns:
+        The wider of the default margin and the computed need from the
+        widest pill / outward label on the edge lane.
     """
     if side == "left":
         default = theme.margin_branch_axis_lower
@@ -140,6 +170,16 @@ def _auto_fit_margin_commit_axis_lower(branches: list[LayoutBranch], theme: Them
     The pill of any branch with `start = min(start)` sits closest to the
     canvas bottom. Reserve enough room for it: `branch_name_pill_offset`
     (centre offset) + half the pill height + a small pad.
+
+    Args:
+        branches: All layout branches; only their `start` values and the
+            theme's pill geometry feed the computation.
+        theme: Supplies the default lower margin, the pill offset, and
+            the font size used to estimate pill height.
+
+    Returns:
+        The wider of the default lower margin and the room needed to
+        keep the lowest pill inside the canvas.
     """
     if not branches:
         return theme.margin_commit_axis_lower

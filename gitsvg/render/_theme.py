@@ -22,17 +22,20 @@ class Theme:
 
     Field groups (spacing, geometry, typography, colours, pull-request
     visuals, canvas presentational overrides, branch colour overrides)
-    mirror the historical `_visual_constants.py` sections plus the two
-    state-derived sections.
+    mirror the module-level visual constants that lived in `gitsvg/`
+    before they were absorbed into this dataclass.
     """
 
-    # --- Spacing (px) -----------------------------
-    # Int defaults preserve byte-identical SVG attribute formatting
-    # against v0.1.3 — drawsvg writes `width="300"` from int and
-    # `"300.0"` from float, and v0.1.3 used the int form when the
-    # auto-fit defaults won. `compute_canvas` re-introduces a float
-    # cast on `margin_commit_axis_upper` (mirroring the v0.1.3
-    # behaviour) so coordinate transforms keep producing float y's.
+    # --------------------------------------------------------------------------
+    #  Spacing (px)
+    # --------------------------------------------------------------------------
+    # Int defaults preserve byte-identical SVG attribute formatting:
+    # drawsvg writes `width="300"` from int and `"300.0"` from float,
+    # and the previous module-level constants were ints, producing the
+    # int-formatted output that downstream consumers may be checking
+    # against. `compute_canvas` re-introduces a float cast on
+    # `margin_commit_axis_upper` so coordinate transforms keep producing
+    # float y's.
     branch_spacing: int = 100
     commit_spacing: int = 50
     margin_branch_axis_lower: int = 100
@@ -40,13 +43,11 @@ class Theme:
     margin_commit_axis_lower: int = 25
     margin_commit_axis_upper: int = 25
 
-    # --- Strokes & geometry (px) ------------------
-    # Several fields default to ints (rather than floats) to preserve
-    # byte-identical SVG attribute formatting against v0.1.3 — drawsvg
-    # writes `stroke-width="2"` from int and `"2.0"` from float, and
-    # the v0.1.3 baseline used the int form. PR2's `theme:` op will
-    # type-coerce user-supplied overrides; nothing here cares about the
-    # exact static type once that lands.
+    # --------------------------------------------------------------------------
+    #  Strokes & geometry (px)
+    # --------------------------------------------------------------------------
+    # Stroke widths and radii default to ints to match drawsvg's
+    # int-formatted attribute output.
     branch_line_width: int = 2
     commit_radius: int = 5
     commit_stroke_width: float = 1.5
@@ -56,7 +57,9 @@ class Theme:
     branch_guide_width: float = 0.7
     branch_guide_dash: str = "4,4"
 
-    # --- Typography -------------------------------
+    # --------------------------------------------------------------------------
+    #  Typography
+    # --------------------------------------------------------------------------
     label_font_family: str = "'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif"
     label_font_family_small: str = "Inter, sans-serif"
     label_font_size: int = 11
@@ -64,11 +67,15 @@ class Theme:
     hash_font_size: int = 9
     branch_name_pill_offset: int = 25
 
-    # --- Pull-request visuals ---------------------
+    # --------------------------------------------------------------------------
+    #  Pull-request visuals
+    # --------------------------------------------------------------------------
     pull_request_dash: str = "6,4"
     pull_request_pill_offset: int = 25
 
-    # --- Colours ----------------------------------
+    # --------------------------------------------------------------------------
+    #  Colours
+    # --------------------------------------------------------------------------
     colors: dict[str, str] = field(
         default_factory=lambda: {
             "main": "#5c6370",
@@ -84,11 +91,15 @@ class Theme:
     branch_guide_color: str = "#b8b8b8"
     branch_label_bg_opacity: float = 0.85
 
-    # --- SVG background ---------------------------
+    # --------------------------------------------------------------------------
+    #  SVG background
+    # --------------------------------------------------------------------------
     background_color: str | None = None
     """Optional fill for a full-canvas background rect; `None` keeps the SVG transparent."""
 
-    # --- State-derived per-branch overrides -------
+    # --------------------------------------------------------------------------
+    #  State-derived per-branch overrides
+    # --------------------------------------------------------------------------
     branch_color_overrides: dict[str, str] = field(default_factory=dict)
     """Hex colour overrides, keyed by `BranchState.id` (not name)."""
 
@@ -109,9 +120,6 @@ def build_theme(state: State) -> Theme:
       matching `theme.*` fields (only when the user pinned them; `None`
       means "keep the default").
 
-    The `theme:` op is not consumed here yet — it lands in PR2 and will
-    add one branch above the branch-colour fold.
-
     Args:
         state: The validated state to derive presentational hints from.
 
@@ -120,14 +128,14 @@ def build_theme(state: State) -> Theme:
     """
     theme = replace(DEFAULT_THEME)
 
-    # --- Per-branch colour overrides --------------
+    # --- per-branch colour overrides ------------------
     overrides: dict[str, str] = {}
     for branch in state.branches.values():
         if branch.color is not None:
             overrides[branch.id] = branch.color
     theme.branch_color_overrides = overrides
 
-    # --- Canvas presentational fields -------------
+    # --- canvas presentational fields -----------------
     canvas = state.canvas
     if canvas is not None:
         if canvas.branch_spacing is not None:
