@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="437.8" height="365.0" viewBox="0 0 437.8 365.0">
+<defs>
+</defs>
+<rect x="0" y="0" width="437.8" height="365.0" fill="#fff8e7" />
+<path d="M137.8,15.0 L137.8,335.0" stroke="#b8b8b8" stroke-width="0.7" stroke-dasharray="4,4" />
+<path d="M237.8,15.0 L237.8,335.0" stroke="#b8b8b8" stroke-width="0.7" stroke-dasharray="4,4" />
+<path d="M337.8,15.0 L337.8,335.0" stroke="#b8b8b8" stroke-width="0.7" stroke-dasharray="4,4" />
+<path d="M137.8,325.0 L217.8,325.0 A20,20,0,0,0,237.8,305.0 L237.8,275.0" stroke="#1f77b4" stroke-width="4.0" fill="none" stroke-linecap="round" />
+<path d="M137.8,325.0 L317.8,325.0 A20,20,0,0,0,337.8,305.0 L337.8,275.0" stroke="#2ca02c" stroke-width="4.0" fill="none" stroke-linecap="round" />
+<path d="M137.8,125.0 L217.8,125.0 A20,20,0,0,0,237.8,105.0 L237.8,75.0" stroke="#ff7f0e" stroke-width="4.0" fill="none" stroke-linecap="round" />
+<path d="M237.8,275.0 L237.8,245.0 A20,20,0,0,0,217.8,225.0 L137.8,225.0" stroke="#1f77b4" stroke-width="4.0" fill="none" stroke-linecap="round" />
+<path d="M337.8,275.0 L337.8,195.0 A20,20,0,0,0,317.8,175.0 L137.8,175.0" stroke="#2ca02c" stroke-width="4.0" fill="none" stroke-linecap="round" />
+<path d="M237.8,75.0 L237.8,45.0 A20,20,0,0,0,217.8,25.0 L137.8,25.0" stroke="#ff7f0e" stroke-width="4.0" fill="none" stroke-linecap="round" />
+<path d="M137.8,325.0 L137.8,25.0" stroke="#d62728" stroke-width="4.0" stroke-linecap="round" />
+<rect x="115.56000000000002" y="339.0" width="44.48" height="22" rx="4" ry="4" fill="#d62728" opacity="0.85" />
+<text x="137.8" y="350.0" font-size="14" text-anchor="middle" dominant-baseline="middle" fill="white" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="500">main</text>
+<rect x="195.26000000000002" y="289.0" width="85.08" height="22" rx="4" ry="4" fill="#1f77b4" opacity="0.85" />
+<text x="237.8" y="300.0" font-size="14" text-anchor="middle" dominant-baseline="middle" fill="white" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="500">feature-a</text>
+<rect x="307.44" y="289.0" width="60.72" height="22" rx="4" ry="4" fill="#2ca02c" opacity="0.85" />
+<text x="337.8" y="300.0" font-size="14" text-anchor="middle" dominant-baseline="middle" fill="white" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="500">bugfix</text>
+<rect x="195.26000000000002" y="89.0" width="85.08" height="22" rx="4" ry="4" fill="#ff7f0e" opacity="0.85" />
+<text x="237.8" y="100.0" font-size="14" text-anchor="middle" dominant-baseline="middle" fill="white" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="500">feature-b</text>
+<circle cx="137.8" cy="325.0" r="7.0" fill="#d62728" stroke="white" stroke-width="1.5" />
+<circle cx="237.8" cy="275.0" r="7.0" fill="#1f77b4" stroke="white" stroke-width="1.5" />
+<circle cx="337.8" cy="275.0" r="7.0" fill="#2ca02c" stroke="white" stroke-width="1.5" />
+<circle cx="137.8" cy="225.0" r="7.0" fill="#d62728" stroke="white" stroke-width="1.5" />
+<circle cx="137.8" cy="175.0" r="7.0" fill="#d62728" stroke="white" stroke-width="1.5" />
+<circle cx="137.8" cy="125.0" r="7.0" fill="#d62728" stroke="white" stroke-width="1.5" />
+<circle cx="237.8" cy="75.0" r="7.0" fill="#ff7f0e" stroke="white" stroke-width="1.5" />
+<circle cx="137.8" cy="25.0" r="7.0" fill="#d62728" stroke="white" stroke-width="1.5" />
+<text x="125.80000000000001" y="316.0" font-size="14" text-anchor="end" dominant-baseline="middle" fill="#383838" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">initial commit</text>
+<text x="125.80000000000001" y="334.0" font-size="11" text-anchor="end" dominant-baseline="middle" fill="#707070" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">1b35060</text>
+<text x="249.8" y="266.0" font-size="14" text-anchor="start" dominant-baseline="middle" fill="#383838" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">start feature A</text>
+<text x="249.8" y="284.0" font-size="11" text-anchor="start" dominant-baseline="middle" fill="#707070" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">a8ba520</text>
+<text x="349.8" y="266.0" font-size="14" text-anchor="start" dominant-baseline="middle" fill="#383838" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">fix #42</text>
+<text x="349.8" y="284.0" font-size="11" text-anchor="start" dominant-baseline="middle" fill="#707070" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">ff2bf3a</text>
+<text x="125.80000000000001" y="216.0" font-size="14" text-anchor="end" dominant-baseline="middle" fill="#383838" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">merge feature A</text>
+<text x="125.80000000000001" y="234.0" font-size="11" text-anchor="end" dominant-baseline="middle" fill="#707070" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">c521ba8</text>
+<text x="125.80000000000001" y="166.0" font-size="14" text-anchor="end" dominant-baseline="middle" fill="#383838" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">merge bugfix</text>
+<text x="125.80000000000001" y="184.0" font-size="11" text-anchor="end" dominant-baseline="middle" fill="#707070" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">dca1553</text>
+<text x="125.80000000000001" y="116.0" font-size="14" text-anchor="end" dominant-baseline="middle" fill="#383838" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">release prep</text>
+<text x="125.80000000000001" y="134.0" font-size="11" text-anchor="end" dominant-baseline="middle" fill="#707070" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">b2ed627</text>
+<text x="249.8" y="66.0" font-size="14" text-anchor="start" dominant-baseline="middle" fill="#383838" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">feature B</text>
+<text x="249.8" y="84.0" font-size="11" text-anchor="start" dominant-baseline="middle" fill="#707070" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">b8e625f</text>
+<text x="125.80000000000001" y="16.0" font-size="14" text-anchor="end" dominant-baseline="middle" fill="#383838" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">merge feature B</text>
+<text x="125.80000000000001" y="34.0" font-size="11" text-anchor="end" dominant-baseline="middle" fill="#707070" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">d193154</text>
+</svg>

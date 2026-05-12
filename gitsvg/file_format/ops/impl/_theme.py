@@ -159,3 +159,7 @@ class ThemeOp(OpBase):
         default=None,
         description="Optional full-canvas background colour; unset by default (transparent SVG).",
     )
+    colors: dict[IdStr, HexColor] | None = Field(
+        default=None,
+        description="Replacement branch-palette dict; replaces the current palette wholesale when set.",
+    )
