@@ -99,6 +99,7 @@ def apply_branch_op(state: State, parsed: ParsedOp, report: ValidationReport) ->
 
     # --- Add to state ---------------------------
     state.branches[op.name] = BranchState(
+        id=state.next_branch_id(),
         name=op.name,
         color=op.color,
         label_side=op.label_side,

@@ -16,6 +16,7 @@ from gitsvg.layout import compute_layout
 from gitsvg.parse import parse_jsonl_file
 from gitsvg.render import render
 from gitsvg.render._minify import minify
+from gitsvg.render._theme import build_theme
 from gitsvg.state import apply_ops, check_end_of_file
 
 EXAMPLES_DIR = Path(__file__).parent.parent.parent / "examples"
@@ -52,8 +53,9 @@ def test_example_validates_and_renders(path: Path) -> None:
     expanded = resolve_imports(parsed_ops, file=path, report=report)
     state = apply_ops(expanded, report)
     check_end_of_file(state, report)
+    theme = build_theme(state)
     layout = compute_layout(state)
-    drawing = render(layout)
+    drawing = render(layout, theme)
     svg_text = drawing.as_svg()
 
     # --- assert -----------------------
@@ -70,9 +72,10 @@ def test_example_renders_smaller_under_small_flag(path: Path) -> None:
     expanded = resolve_imports(parsed_ops, file=path, report=report)
     state = apply_ops(expanded, report)
     check_end_of_file(state, report)
-    drawing = render(compute_layout(state))
+    theme = build_theme(state)
+    drawing = render(compute_layout(state), theme)
     default_svg = drawing.as_svg()
-    small_svg = minify(drawing.as_svg(header="", skip_css=True, skip_js=True), small=True)
+    small_svg = minify(drawing.as_svg(header="", skip_css=True, skip_js=True), small=True, theme=theme)
 
     # --- assert -----------------------
     assert report.is_clean(), f"{path.name}: unexpected validation errors"

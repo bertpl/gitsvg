@@ -11,6 +11,7 @@ from gitsvg.render._minify import (
     strip_inter_element_whitespace,
     trim_font_family_fallback,
 )
+from gitsvg.render._theme import DEFAULT_THEME
 
 
 # ==================================================================================================
@@ -140,7 +141,7 @@ def test_trim_font_family_fallback_replaces_full_chain() -> None:
     svg = "<text font-family=\"'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif\">a</text>"
 
     # --- act --------------------------
-    result = trim_font_family_fallback(svg)
+    result = trim_font_family_fallback(svg, DEFAULT_THEME)
 
     # --- assert -----------------------
     assert result == '<text font-family="Inter, sans-serif">a</text>'
@@ -151,7 +152,7 @@ def test_trim_font_family_fallback_leaves_unrelated_strings_alone() -> None:
     svg = '<text font-family="Courier, monospace">a</text>'
 
     # --- act --------------------------
-    result = trim_font_family_fallback(svg)
+    result = trim_font_family_fallback(svg, DEFAULT_THEME)
 
     # --- assert -----------------------
     assert result == svg
@@ -237,7 +238,7 @@ def test_minify_is_noop_when_small_is_false() -> None:
     svg = '<svg width="100.123"><circle cx="50.5" cy="50.5"/></svg>'
 
     # --- act --------------------------
-    result = minify(svg, small=False)
+    result = minify(svg, small=False, theme=DEFAULT_THEME)
 
     # --- assert -----------------------
     assert result == svg
@@ -248,7 +249,7 @@ def test_minify_applies_round1_rounding_when_small_is_true() -> None:
     svg = '<svg width="100.1234"><circle cx="50.519999999999996" cy="50.5"/></svg>'
 
     # --- act --------------------------
-    result = minify(svg, small=True)
+    result = minify(svg, small=True, theme=DEFAULT_THEME)
 
     # --- assert -----------------------
     # 100.1234 -> 100.123 (3 dp); 50.5199... -> 50.52; 50.5 stays.
@@ -261,7 +262,7 @@ def test_minify_preserves_stroke_width_and_opacity_exactly() -> None:
     svg = '<path stroke-width="0.7"/><rect opacity="0.85"/>'
 
     # --- act --------------------------
-    result = minify(svg, small=True)
+    result = minify(svg, small=True, theme=DEFAULT_THEME)
 
     # --- assert -----------------------
     assert 'stroke-width="0.7"' in result
@@ -280,7 +281,7 @@ def test_minify_runs_full_round1_bundle() -> None:
     )
 
     # --- act --------------------------
-    result = minify(svg, small=True)
+    result = minify(svg, small=True, theme=DEFAULT_THEME)
 
     # --- assert -----------------------
     assert "<defs>" not in result

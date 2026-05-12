@@ -1,10 +1,10 @@
 """Layout engine — turn validated `State` into a render-ready `Layout`.
 
 `compute_layout(state)` is a pure transformation. It walks state once,
-producing a `Layout` with positions, resolved colours, resolved label
-sides, pre-computed arcs (branch-off + merge), pre-enumerated branch
-guides, and canvas dimensions. The renderer consumes the result with no
-need to peek back into state.
+producing a `Layout` with integer-grid positions, resolved label sides,
+pre-computed arcs (branch-off + merge), pre-enumerated branch guides,
+and the grid extent. The renderer consumes the result alongside a
+resolved `Theme` to make every pixel-side decision.
 
 The pipeline runs in three phases. Phase 1 walks every commit in
 chronological order and computes its `commit_pos` together with each
@@ -39,36 +39,25 @@ Heuristic notes:
 - **Branch line span**: from `start` to `max(commit_pos for commit in
   branch.commits)`, or just `start` for empty branches.
 - **Branch-off arcs**: one per non-root branch, from the parent
-  commit's position to the branch's start, in the *target* (new)
-  branch's colour.
+  commit's position to the branch's start, tagged with the *target*
+  (new) branch's id.
 - **Merge arcs**: one per cross-lane parent on any commit with
-  `len(parents) >= 2`, in the *source* (parent) branch's colour.
+  `len(parents) >= 2`, tagged with the *source* (parent) branch's id.
 - **Branch guides**: one per occupied branch-axis lane.
+- **Grid extent**: `n_commits` / `n_branches` honour pinned values on
+  `state.canvas` when set; otherwise auto-fit from the visible content
+  (including any open pull-request's projected merge row).
 """
 
-from gitsvg._visual_constants import (
-    BRANCH_LABEL_FONT_SIZE,
-    BRANCH_NAME_PILL_OFFSET,
-    BRANCH_SPACING,
-    COLORS,
-    COMMIT_SPACING,
-    DEFAULT_BRANCH_COLORS,
-    LABEL_OFFSET,
-    MARGIN_BRANCH_AXIS_LOWER,
-    MARGIN_BRANCH_AXIS_UPPER,
-    MARGIN_COMMIT_AXIS_LOWER,
-    MARGIN_COMMIT_AXIS_UPPER,
-)
 from gitsvg.layout._layout import (
     Layout,
     LayoutArc,
     LayoutBranch,
-    LayoutCanvas,
     LayoutCommit,
+    LayoutGrid,
     LayoutGuide,
     LayoutPullRequest,
 )
-from gitsvg.layout._metrics import commit_label_width, pill_width
 from gitsvg.layout._occupancy import Occupancy
 from gitsvg.state import State
 
@@ -84,8 +73,8 @@ def compute_layout(state: State) -> Layout:
             layout engine does not re-validate.
 
     Returns:
-        A `Layout` with positions, resolved colours/label sides,
-        pre-computed arcs and guides, and canvas dimensions.
+        A `Layout` with positions, resolved label sides, pre-computed
+        arcs and guides, and the grid extent.
     """
     # --- Phase 1: commit positions --------------
     chain_parent: dict[str, str | None] = _compute_chain_parents(state)
@@ -107,19 +96,15 @@ def compute_layout(state: State) -> Layout:
     branch_pos_by_name: dict[str, int] = _assign_branch_lanes(state, commit_pos_by_id, branch_starts, occupancy)
 
     # --- Resolve per-branch view fields ---------
-    branch_color_by_name: dict[str, str] = {
-        name: _resolve_branch_color(state, name, declaration_index)
-        for declaration_index, name in enumerate(state.branch_order)
-    }
     branch_label_side_by_name: dict[str, str] = {name: _resolve_label_side(state, name) for name in state.branch_order}
 
     # --- Phase 3: build layout dataclasses ------
     commit_layouts: dict[str, LayoutCommit] = {
         cid: LayoutCommit(
             id=cid,
+            branch_id=state.branches[cstate.branch].id,
             branch_pos=branch_pos_by_name[cstate.branch],
             commit_pos=commit_pos_by_id[cid],
-            color=branch_color_by_name[cstate.branch],
             msg=cstate.msg,
             hash=cstate.hash,
             highlight=cstate.highlight,
@@ -130,11 +115,11 @@ def compute_layout(state: State) -> Layout:
 
     branches: list[LayoutBranch] = [
         LayoutBranch(
+            id=state.branches[name].id,
             name=name,
             branch_pos=branch_pos_by_name[name],
             start=branch_starts[name],
             end=branch_ends[name],
-            color=branch_color_by_name[name],
             label_side=branch_label_side_by_name[name],
         )
         for name in state.branch_order
@@ -142,8 +127,8 @@ def compute_layout(state: State) -> Layout:
 
     # --- Build arc list -------------------------
     arcs: list[LayoutArc] = [
-        *_branch_off_arcs(state, branches, commit_layouts, branch_color_by_name, branch_pos_by_name),
-        *_merge_arcs(state, commit_layouts, branch_color_by_name),
+        *_branch_off_arcs(state, branches, commit_layouts),
+        *_merge_arcs(state, commit_layouts),
     ]
 
     # --- Build guide list -----------------------
@@ -152,11 +137,11 @@ def compute_layout(state: State) -> Layout:
     # --- Build pull-request list ----------------
     pull_requests = _build_pull_requests(state, branches)
 
-    # --- Compute canvas spec --------------------
-    canvas = _compute_canvas(state, branches, commit_layouts, pull_requests)
+    # --- Compute grid extent --------------------
+    grid = _compute_grid(state, branches, commit_layouts, pull_requests)
 
     return Layout(
-        canvas=canvas,
+        canvas=grid,
         branches=branches,
         commits=commit_layouts,
         arcs=arcs,
@@ -404,17 +389,6 @@ def _pick_free_lane(
 # ==================================================================================================
 #  Helpers — per-branch view fields
 # ==================================================================================================
-def _resolve_branch_color(state: State, branch_name: str, declaration_index: int) -> str:
-    """Pick the hex colour for a branch — explicit override else cycled default."""
-    branch = state.branches[branch_name]
-    if branch.color is not None:
-        return branch.color
-    if declaration_index == 0:
-        return COLORS["main"]
-    cycle_index = (declaration_index - 1) % len(DEFAULT_BRANCH_COLORS)
-    return COLORS[DEFAULT_BRANCH_COLORS[cycle_index]]
-
-
 def _resolve_label_side(state: State, branch_name: str) -> str:
     """Pick the label side for a branch — explicit override else the default."""
     branch = state.branches[branch_name]
@@ -428,10 +402,8 @@ def _branch_off_arcs(
     state: State,
     branches: list[LayoutBranch],
     commit_layouts: dict[str, LayoutCommit],
-    branch_color_by_name: dict[str, str],
-    branch_pos_by_name: dict[str, int],
 ) -> list[LayoutArc]:
-    """One branch-off arc per non-root branch, in the target branch's colour."""
+    """One branch-off arc per non-root branch, tagged with the target branch's id."""
     arcs: list[LayoutArc] = []
     branch_layouts_by_name = {b.name: b for b in branches}
     for name in state.branch_order:
@@ -449,7 +421,7 @@ def _branch_off_arcs(
                 from_commit_pos=parent_layout.commit_pos,
                 to_branch_pos=branch_layout.branch_pos,
                 to_commit_pos=branch_layout.start,
-                color=branch_color_by_name[name],
+                color_branch_id=branch_layout.id,
                 vertical_first=False,
             )
         )
@@ -459,7 +431,6 @@ def _branch_off_arcs(
 def _merge_arcs(
     state: State,
     commit_layouts: dict[str, LayoutCommit],
-    branch_color_by_name: dict[str, str],
 ) -> list[LayoutArc]:
     """One merge arc per parent on a different lane than its child commit."""
     arcs: list[LayoutArc] = []
@@ -473,7 +444,9 @@ def _merge_arcs(
                 continue
             parent_state = state.commits.get(parent_id)
             from_branch_name = parent_state.branch if parent_state is not None else cstate.branch
-            from_color = branch_color_by_name.get(from_branch_name, commit_layout.color)
+            from_branch_id = (
+                state.branches[from_branch_name].id if from_branch_name in state.branches else commit_layout.branch_id
+            )
             arcs.append(
                 LayoutArc(
                     kind="merge",
@@ -481,7 +454,7 @@ def _merge_arcs(
                     from_commit_pos=parent_layout.commit_pos,
                     to_branch_pos=commit_layout.branch_pos,
                     to_commit_pos=commit_layout.commit_pos,
-                    color=from_color,
+                    color_branch_id=from_branch_id,
                     vertical_first=True,
                 )
             )
@@ -521,7 +494,7 @@ def _build_pull_requests(state: State, branches: list[LayoutBranch]) -> list[Lay
                 from_commit_pos=from_branch.end,
                 to_branch_pos=into_branch.branch_pos,
                 to_commit_pos=projected_merge_pos,
-                color=from_branch.color,
+                color_branch_id=from_branch.id,
                 title=pr_state.title,
             )
         )
@@ -529,35 +502,22 @@ def _build_pull_requests(state: State, branches: list[LayoutBranch]) -> list[Lay
 
 
 # ==================================================================================================
-#  Helpers — canvas
+#  Helpers — grid extent
 # ==================================================================================================
-def _compute_canvas(
+def _compute_grid(
     state: State,
     branches: list[LayoutBranch],
     commit_layouts: dict[str, LayoutCommit],
     pull_requests: list[LayoutPullRequest],
-) -> LayoutCanvas:
-    """Compute the effective canvas spec.
+) -> LayoutGrid:
+    """Compute the integer-grid extent.
 
-    Honours every `canvas:` op field that's set; falls back to auto-fit
-    defaults for fields that aren't pinned. Auto-fit keeps the canvas
-    just big enough to contain the longest visible labels, the
-    branch-name pills, and any open pull-request's projected
-    merge-commit row (which can extend one row beyond the latest
-    commit).
-
-    When `n_commits` / `n_branches` are pinned smaller than the actual
-    content extent, the pinned values win — content past the pinned
-    bounds is clipped by SVG's default overflow behaviour at render
-    time.
+    Honours pinned `n_commits` / `n_branches` on `state.canvas` when
+    set; otherwise auto-fits to the visible content (commits, branch
+    spans, and any open pull-request's projected merge row).
     """
     user_canvas = state.canvas
 
-    # Effective spacing — pinned wins, otherwise default constants.
-    branch_spacing = _override(user_canvas, "branch_spacing", BRANCH_SPACING)
-    commit_spacing = _override(user_canvas, "commit_spacing", COMMIT_SPACING)
-
-    # Effective slot counts — pinned wins, otherwise auto-fit from extent.
     max_branch_pos = max((b.branch_pos for b in branches), default=0)
     max_commit_pos_from_commits = max((c.commit_pos for c in commit_layouts.values()), default=-1)
     max_commit_pos_from_branches = max((b.end for b in branches), default=-1)
@@ -565,41 +525,11 @@ def _compute_canvas(
     max_commit_pos = max(max_commit_pos_from_commits, max_commit_pos_from_branches, max_commit_pos_from_prs)
     auto_n_commits = max_commit_pos + 1 if max_commit_pos >= 0 else 1
     auto_n_branches = max_branch_pos + 1 if branches else 1
+
     n_commits = _override(user_canvas, "n_commits", auto_n_commits)
     n_branches = _override(user_canvas, "n_branches", auto_n_branches)
 
-    # Effective margins — pinned wins, otherwise auto-fit each side.
-    margin_branch_axis_lower = _override(
-        user_canvas,
-        "margin_branch_axis_lower",
-        _auto_fit_margin_branch_axis(branches, commit_layouts, branch_pos_filter=0, side="left"),
-    )
-    margin_branch_axis_upper = _override(
-        user_canvas,
-        "margin_branch_axis_upper",
-        _auto_fit_margin_branch_axis(branches, commit_layouts, branch_pos_filter=max_branch_pos, side="right"),
-    )
-    margin_commit_axis_lower = _override(
-        user_canvas,
-        "margin_commit_axis_lower",
-        _auto_fit_margin_commit_axis_lower(branches),
-    )
-    margin_commit_axis_upper = _override(user_canvas, "margin_commit_axis_upper", float(MARGIN_COMMIT_AXIS_UPPER))
-
-    width = margin_branch_axis_lower + (n_branches - 1) * branch_spacing + margin_branch_axis_upper
-    height = margin_commit_axis_upper + (n_commits - 1) * commit_spacing + margin_commit_axis_lower
-    return LayoutCanvas(
-        width=width,
-        height=height,
-        n_commits=n_commits,
-        n_branches=n_branches,
-        branch_spacing=branch_spacing,
-        commit_spacing=commit_spacing,
-        margin_branch_axis_lower=margin_branch_axis_lower,
-        margin_branch_axis_upper=margin_branch_axis_upper,
-        margin_commit_axis_lower=margin_commit_axis_lower,
-        margin_commit_axis_upper=margin_commit_axis_upper,
-    )
+    return LayoutGrid(n_commits=n_commits, n_branches=n_branches)
 
 
 def _override(user_canvas, attr: str, default):
@@ -608,48 +538,3 @@ def _override(user_canvas, attr: str, default):
         return default
     pinned = getattr(user_canvas, attr, None)
     return pinned if pinned is not None else default
-
-
-def _auto_fit_margin_branch_axis(
-    branches: list[LayoutBranch],
-    commit_layouts: dict[str, LayoutCommit],
-    *,
-    branch_pos_filter: int,
-    side: str,
-) -> float:
-    """Compute the auto-fit margin for one branch-axis end (left or right).
-
-    Considers the half-pill-width of any pill on the edge lane plus the
-    width of any commit label whose `label_side` points outward from
-    that lane.
-    """
-    if side == "left":
-        default = MARGIN_BRANCH_AXIS_LOWER
-        outward_label_side = "left"
-    else:
-        default = MARGIN_BRANCH_AXIS_UPPER
-        outward_label_side = "right"
-
-    needed: float = 0.0
-    pad = 4.0
-    for branch in branches:
-        if branch.branch_pos == branch_pos_filter:
-            needed = max(needed, pill_width(branch.name) / 2 + pad)
-    for commit in commit_layouts.values():
-        if commit.branch_pos == branch_pos_filter and commit.label_side == outward_label_side:
-            needed = max(needed, LABEL_OFFSET + commit_label_width(commit) + pad)
-    return max(default, needed)
-
-
-def _auto_fit_margin_commit_axis_lower(branches: list[LayoutBranch]) -> float:
-    """Compute the auto-fit lower margin on the commit axis.
-
-    The pill of any branch with `start = min(start)` sits closest to the
-    canvas bottom. Reserve enough room for it: `BRANCH_NAME_PILL_OFFSET`
-    (centre offset) + half the pill height + a small pad.
-    """
-    if not branches:
-        return float(MARGIN_COMMIT_AXIS_LOWER)
-    pill_height = BRANCH_LABEL_FONT_SIZE + 8  # matches `_branch_pill._PILL_PADDING_Y`
-    pill_room = BRANCH_NAME_PILL_OFFSET + pill_height / 2 + 4.0
-    return max(float(MARGIN_COMMIT_AXIS_LOWER), pill_room)

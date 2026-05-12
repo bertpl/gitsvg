@@ -13,16 +13,16 @@ commit-axis positions, with a single 90° corner. Two modes:
   straight segment along the branch axis to the target. Used for
   **merge** connectors.
 
-The arc's corner radius is the smaller of `ARC_CORNER_RADIUS` and the
-two segment lengths — the corner stays a true quarter circle even when
-the two endpoints are very close.
+The arc's corner radius is the smaller of `theme.arc_corner_radius`
+and the two segment lengths — the corner stays a true quarter circle
+even when the two endpoints are very close.
 """
 
 import drawsvg as draw
 
-from gitsvg._visual_constants import ARC_CORNER_RADIUS, BRANCH_LINE_WIDTH
-from gitsvg.layout import LayoutCanvas
+from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._geometry import branch_axis_to_x, commit_axis_to_y
+from gitsvg.render._theme import Theme
 
 
 def draw_arc(
@@ -32,7 +32,8 @@ def draw_arc(
     from_commit_pos: int,
     to_branch_pos: int,
     to_commit_pos: int,
-    canvas: LayoutCanvas,
+    canvas: RenderCanvas,
+    theme: Theme,
     color: str,
     vertical_first: bool,
     stroke_dasharray: str | None = None,
@@ -46,7 +47,8 @@ def draw_arc(
         to_branch_pos: Target point's branch-axis index.
         to_commit_pos: Target point's commit-axis index.
         canvas: Effective canvas spec, used for the geometry transform.
-        color: Stroke colour for the arc.
+        theme: Resolved theme; supplies corner radius and stroke width.
+        color: Stroke colour for the arc (resolved from the theme upstream).
         vertical_first: When True, the arc starts with a vertical
             segment (used for merge connectors). When False, it starts
             horizontal (used for branch-off connectors).
@@ -62,7 +64,7 @@ def draw_arc(
 
     path_kwargs: dict = {
         "stroke": color,
-        "stroke_width": BRANCH_LINE_WIDTH,
+        "stroke_width": theme.branch_line_width,
         "fill": "none",
         "stroke_linecap": "round",
     }
@@ -80,7 +82,7 @@ def draw_arc(
 
     dx = 1 if x2 > x1 else -1
     dy = -1 if y2 < y1 else 1  # SVG y-down: negative = up the screen
-    r = min(ARC_CORNER_RADIUS, abs(x2 - x1), abs(y2 - y1))
+    r = min(theme.arc_corner_radius, abs(x2 - x1), abs(y2 - y1))
 
     if vertical_first:
         # Vertical segment from source toward the target's row.
