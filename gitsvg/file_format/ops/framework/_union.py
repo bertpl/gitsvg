@@ -18,6 +18,7 @@ from gitsvg.file_format.ops.impl._import import ImportOp
 from gitsvg.file_format.ops.impl._merge import MergeOp
 from gitsvg.file_format.ops.impl._pull_request import PullRequestOp
 from gitsvg.file_format.ops.impl._remove import RemoveOp
+from gitsvg.file_format.ops.impl._theme import ThemeOp
 
 # ==================================================================================================
 #  Op type registry — single source of truth for the op set
@@ -25,6 +26,7 @@ from gitsvg.file_format.ops.impl._remove import RemoveOp
 ALL_OP_TYPES: list[type[BaseModel]] = [
     ImportOp,
     CanvasOp,
+    ThemeOp,
     BranchOp,
     CommitOp,
     MergeOp,
@@ -60,6 +62,7 @@ OpUnion = Annotated[
     Union[
         ImportOp,
         CanvasOp,
+        ThemeOp,
         BranchOp,
         CommitOp,
         MergeOp,

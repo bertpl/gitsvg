@@ -5,8 +5,8 @@ factor — no real glyph measurement. Good enough to keep labels inside
 the canvas. Reads font sizes from the resolved theme.
 """
 
+from gitsvg._theme import Theme
 from gitsvg.layout import LayoutCommit
-from gitsvg.render._theme import Theme
 
 _NORMAL_CHAR_WIDTH_FACTOR = 0.58
 _BOLD_CHAR_WIDTH_FACTOR = 0.64

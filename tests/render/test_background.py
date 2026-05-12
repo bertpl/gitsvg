@@ -1,9 +1,9 @@
 """Tests for the canvas-background rendering (introduced with the `Theme`)."""
 
+from gitsvg._theme import DEFAULT_THEME, Theme
 from gitsvg.layout import compute_layout
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.render import render
-from gitsvg.render._theme import DEFAULT_THEME, Theme
 from gitsvg.state import apply_ops
 
 

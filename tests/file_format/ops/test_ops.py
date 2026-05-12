@@ -227,6 +227,7 @@ def test_unknown_field_is_rejected_for_every_op(op_name: str) -> None:
     minimal_inputs = {
         "import": {"op": "import", "path": "./x.jsonl"},
         "canvas": {"op": "canvas"},
+        "theme": {"op": "theme"},
         "branch": {"op": "branch", "name": "main"},
         "commit": {"op": "commit", "branch": "main", "msg": "x"},
         "merge": {"op": "merge", "from": "a", "into": "b"},
@@ -265,7 +266,17 @@ def test_op_by_name_registry_matches_canonical_order() -> None:
 
     # --- assert -----------------------
     assert actual_order == OP_NAMES
-    assert actual_order == ["import", "canvas", "branch", "commit", "merge", "pull_request", "remove", "highlight"]
+    assert actual_order == [
+        "import",
+        "canvas",
+        "theme",
+        "branch",
+        "commit",
+        "merge",
+        "pull_request",
+        "remove",
+        "highlight",
+    ]
 
 
 # ==================================================================================================

@@ -10,7 +10,17 @@ def test_list_op_names_returns_canonical_order() -> None:
     names = list_op_names()
 
     # --- assert -----------------------
-    assert names == ["import", "canvas", "branch", "commit", "merge", "pull_request", "remove", "highlight"]
+    assert names == [
+        "import",
+        "canvas",
+        "theme",
+        "branch",
+        "commit",
+        "merge",
+        "pull_request",
+        "remove",
+        "highlight",
+    ]
 
 
 def test_op_schema_returns_json_schema_dict_for_known_op() -> None:

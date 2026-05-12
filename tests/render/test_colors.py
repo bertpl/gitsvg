@@ -1,8 +1,9 @@
 """Tests for the renderer-side branch-colour resolver."""
 
+from gitsvg._theme import DEFAULT_THEME, Theme
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.render._colors import resolve_branch_color
-from gitsvg.render._theme import DEFAULT_THEME, Theme, build_theme
+from gitsvg.render._theme import build_theme
 from gitsvg.state import apply_ops
 
 

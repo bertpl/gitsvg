@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- New `theme` op for applying presentational overrides (spacings, margins, font sizes, colours, stroke widths, background) from JSONL. Each op patches the live theme; `"name": "default"` resets every field to the package defaults.
+- Optional full-canvas background colour via `theme.background_color` (default unset = transparent).
+
 ### Changed
 
 ### Deprecated

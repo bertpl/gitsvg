@@ -15,9 +15,9 @@ layout engine never reads it.
 
 from dataclasses import dataclass
 
+from gitsvg._theme import Theme
 from gitsvg.layout import Layout, LayoutBranch, LayoutCommit
 from gitsvg.render._metrics import commit_label_width, pill_width
-from gitsvg.render._theme import Theme
 
 
 @dataclass(slots=True)

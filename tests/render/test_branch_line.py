@@ -4,12 +4,12 @@ import re
 
 import drawsvg as draw
 
+from gitsvg._theme import DEFAULT_THEME
 from gitsvg.layout import LayoutBranch, compute_layout
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.render import render
 from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._primitives._branch_line import draw_branch_line
-from gitsvg.render._theme import DEFAULT_THEME
 from gitsvg.state import apply_ops
 
 

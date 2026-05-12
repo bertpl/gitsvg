@@ -25,6 +25,7 @@ from gitsvg.file_format.ops.impl import (
     MergeOp,
     PullRequestOp,
     RemoveOp,
+    ThemeOp,
 )
 
 __all__ = [
@@ -42,4 +43,5 @@ __all__ = [
     "OpUnion",
     "PullRequestOp",
     "RemoveOp",
+    "ThemeOp",
 ]

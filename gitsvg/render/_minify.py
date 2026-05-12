@@ -11,7 +11,7 @@ place of these passes when implemented.
 
 import re
 
-from gitsvg.render._theme import Theme
+from gitsvg._theme import Theme
 
 # ==================================================================================================
 #  Individual passes
