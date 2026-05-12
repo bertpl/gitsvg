@@ -8,9 +8,9 @@ rect); everything else draws on top.
 
 import drawsvg as draw
 
+from gitsvg._theme import Theme
 from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._geometry import branch_axis_to_x
-from gitsvg.render._theme import Theme
 
 _OVERSHOOT_PX = 10
 

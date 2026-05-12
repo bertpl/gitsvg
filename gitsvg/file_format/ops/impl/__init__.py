@@ -8,6 +8,7 @@ from gitsvg.file_format.ops.impl._import import ImportOp
 from gitsvg.file_format.ops.impl._merge import MergeOp
 from gitsvg.file_format.ops.impl._pull_request import PullRequestOp
 from gitsvg.file_format.ops.impl._remove import RemoveOp
+from gitsvg.file_format.ops.impl._theme import ThemeOp
 
 __all__ = [
     "BranchOp",
@@ -18,4 +19,5 @@ __all__ = [
     "MergeOp",
     "PullRequestOp",
     "RemoveOp",
+    "ThemeOp",
 ]

@@ -45,7 +45,17 @@ def test_schema_list_ops_prints_bare_names_one_per_line() -> None:
     # --- assert -----------------------
     assert result.exit_code == 0
     lines = [line for line in result.output.splitlines() if line]
-    assert lines == ["import", "canvas", "branch", "commit", "merge", "pull_request", "remove", "highlight"]
+    assert lines == [
+        "import",
+        "canvas",
+        "theme",
+        "branch",
+        "commit",
+        "merge",
+        "pull_request",
+        "remove",
+        "highlight",
+    ]
 
 
 def test_schema_unknown_op_exits_non_zero() -> None:

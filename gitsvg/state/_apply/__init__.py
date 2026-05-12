@@ -13,6 +13,7 @@ from gitsvg.state._apply._highlight import apply_highlight_op
 from gitsvg.state._apply._merge import apply_merge_op
 from gitsvg.state._apply._pull_request import apply_pull_request_op
 from gitsvg.state._apply._remove import apply_remove_op
+from gitsvg.state._apply._theme import apply_theme_op
 
 __all__ = [
     "apply_branch_op",
@@ -22,4 +23,5 @@ __all__ = [
     "apply_merge_op",
     "apply_pull_request_op",
     "apply_remove_op",
+    "apply_theme_op",
 ]

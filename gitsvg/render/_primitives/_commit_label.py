@@ -16,10 +16,10 @@ Layout:
 
 import drawsvg as draw
 
+from gitsvg._theme import Theme
 from gitsvg.layout import LayoutCommit
 from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._geometry import branch_axis_to_x, commit_axis_to_y
-from gitsvg.render._theme import Theme
 
 
 def draw_commit_label(d: draw.Drawing, commit: LayoutCommit, canvas: RenderCanvas, theme: Theme) -> None:

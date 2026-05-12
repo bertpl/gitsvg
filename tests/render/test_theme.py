@@ -1,7 +1,8 @@
 """Tests for the renderer-side `Theme` and `build_theme(state)` adapter."""
 
+from gitsvg._theme import DEFAULT_THEME, Theme
 from gitsvg.parse import parse_jsonl_text
-from gitsvg.render._theme import DEFAULT_THEME, Theme, build_theme
+from gitsvg.render._theme import build_theme
 from gitsvg.state import apply_ops
 
 
@@ -186,5 +187,34 @@ def test_theme_dataclass_is_constructible_with_explicit_values() -> None:
     # --- assert -----------------------
     assert theme.branch_spacing == 120
     assert theme.background_color == "#222222"
+
+
+def test_build_theme_starts_from_state_theme_not_default() -> None:
+    """When a `theme:` op has mutated `state.theme`, `build_theme` uses
+    the mutated values — not `DEFAULT_THEME` — as its base."""
+    # --- arrange ----------------------
+    state = _state_from('{"op": "theme", "background_color": "#deadbe"}\n{"op": "branch", "name": "main"}\n')
+
+    # --- act --------------------------
+    theme = build_theme(state)
+
+    # --- assert -----------------------
+    assert theme.background_color == "#deadbe"
+    # DEFAULT_THEME is unchanged.
+    assert DEFAULT_THEME.background_color is None
+
+
+def test_build_theme_does_not_alias_state_theme() -> None:
+    """The returned `Theme` is a fresh copy — mutating it must not bleed
+    back into `state.theme`."""
+    # --- arrange ----------------------
+    state = _state_from('{"op": "theme", "background_color": "#abcdef"}\n{"op": "branch", "name": "main"}\n')
+
+    # --- act --------------------------
+    theme = build_theme(state)
+    theme.background_color = "#000000"
+
+    # --- assert -----------------------
+    assert state.theme.background_color == "#abcdef"
     # Unspecified fields fall back to defaults.
     assert theme.commit_spacing == DEFAULT_THEME.commit_spacing

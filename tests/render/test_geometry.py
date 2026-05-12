@@ -1,8 +1,8 @@
 """Tests for coordinate transforms — branch axis → x, commit axis → y."""
 
+from gitsvg._theme import DEFAULT_THEME
 from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._geometry import branch_axis_to_x, commit_axis_to_y
-from gitsvg.render._theme import DEFAULT_THEME
 
 
 def _canvas(n_commits: int = 3) -> RenderCanvas:

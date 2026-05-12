@@ -22,6 +22,7 @@ from gitsvg.file_format.ops import (
     MergeOp,
     PullRequestOp,
     RemoveOp,
+    ThemeOp,
 )
 from gitsvg.parse import ParsedOp
 from gitsvg.state._apply import (
@@ -32,6 +33,7 @@ from gitsvg.state._apply import (
     apply_merge_op,
     apply_pull_request_op,
     apply_remove_op,
+    apply_theme_op,
 )
 from gitsvg.state._state import State
 
@@ -71,6 +73,8 @@ def _apply_one(state: State, parsed: ParsedOp, report: ValidationReport) -> None
         apply_highlight_op(state, parsed, report)
     elif isinstance(op, CanvasOp):
         apply_canvas_op(state, parsed, report)
+    elif isinstance(op, ThemeOp):
+        apply_theme_op(state, parsed, report)
     elif isinstance(op, ImportOp):
         # Import ops are normally expanded away by gitsvg.imports.resolve_imports
         # before apply_ops runs; treat any leftover as a no-op.

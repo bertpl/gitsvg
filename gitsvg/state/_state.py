@@ -1,13 +1,17 @@
 """In-memory state built up by applying ops in order.
 
 State holds four namespaces — commits, branches, pull-requests, and
-(reserved) tags — along with branch declaration order and an optional
-pinned canvas. Each op mutates state when it applies cleanly; the
-state engine is the producer, downstream layers (layout, rendering)
-are consumers.
+(reserved) tags — along with branch declaration order, an optional
+pinned canvas, and a live `Theme` that accumulates `theme:` op
+patches. Each op mutates state when it applies cleanly; the state
+engine is the producer, downstream layers (layout, rendering) are
+consumers.
 """
 
+import copy
 from dataclasses import dataclass, field
+
+from gitsvg._theme import DEFAULT_THEME, Theme
 
 
 @dataclass(slots=True)
@@ -139,12 +143,13 @@ class State:
     """
 
     def __init__(self) -> None:
-        """Initialise an empty state — no branches, no commits, no pull-requests, no canvas."""
+        """Initialise an empty state — no branches, no commits, no pull-requests, no canvas, theme = defaults."""
         self.branches: dict[str, BranchState] = {}
         self.commits: dict[str, CommitState] = {}
         self.pull_requests: dict[str, PullRequestState] = {}
         self.branch_order: list[str] = []
         self.canvas: CanvasState | None = None
+        self.theme: Theme = copy.deepcopy(DEFAULT_THEME)
         self._next_branch_seq: int = 0
 
     def next_branch_id(self) -> str:

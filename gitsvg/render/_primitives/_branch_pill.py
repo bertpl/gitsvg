@@ -11,10 +11,10 @@ estimate; no real glyph measurement.
 
 import drawsvg as draw
 
+from gitsvg._theme import Theme
 from gitsvg.layout import LayoutBranch
 from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._geometry import branch_axis_to_x, commit_axis_to_y
-from gitsvg.render._theme import Theme
 
 _PILL_PADDING_X = 12  # extra width beyond the rendered text
 _PILL_PADDING_Y = 8  # extra height beyond the font size
