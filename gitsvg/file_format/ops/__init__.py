@@ -18,8 +18,8 @@ from gitsvg.file_format.ops.framework import (
 )
 from gitsvg.file_format.ops.impl import (
     BranchOp,
-    CanvasOp,
     CommitOp,
+    GridOp,
     HighlightOp,
     ImportOp,
     MergeOp,
@@ -31,8 +31,8 @@ from gitsvg.file_format.ops.impl import (
 __all__ = [
     "ALL_OP_TYPES",
     "BranchOp",
-    "CanvasOp",
     "CommitOp",
+    "GridOp",
     "HighlightOp",
     "ImportOp",
     "MergeOp",

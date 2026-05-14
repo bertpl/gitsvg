@@ -1,4 +1,4 @@
-{"op": "canvas", "n_commits": 10, "n_branches": 3}
+{"op": "grid", "n_commits": 10, "n_branches": 3}
 {"op": "branch", "name": "main", "color": "#0066cc"}
 {"op": "commit", "branch": "main", "id": "c1", "msg": "initial"}
 {"op": "commit", "branch": "main", "id": "c2", "msg": "fix"}

@@ -12,7 +12,7 @@ def test_list_op_names_returns_canonical_order() -> None:
     # --- assert -----------------------
     assert names == [
         "import",
-        "canvas",
+        "grid",
         "theme",
         "branch",
         "commit",
@@ -73,7 +73,7 @@ def test_schema_index_maps_every_op_to_a_non_empty_one_liner() -> None:
 #  Descriptions pipeline — class docstring + per-field Field(description=...)
 # ==================================================================================================
 @pytest.mark.parametrize(
-    "op_name", ["import", "canvas", "branch", "commit", "merge", "pull_request", "remove", "highlight"]
+    "op_name", ["import", "grid", "branch", "commit", "merge", "pull_request", "remove", "highlight"]
 )
 def test_op_schema_carries_class_docstring_as_description(op_name: str) -> None:
     """Every op's class docstring surfaces as the schema's top-level `description`."""

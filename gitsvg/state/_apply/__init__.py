@@ -7,8 +7,8 @@ semantic errors to the report otherwise.
 """
 
 from gitsvg.state._apply._branch import apply_branch_op
-from gitsvg.state._apply._canvas import apply_canvas_op
 from gitsvg.state._apply._commit import apply_commit_op
+from gitsvg.state._apply._grid import apply_grid_op
 from gitsvg.state._apply._highlight import apply_highlight_op
 from gitsvg.state._apply._merge import apply_merge_op
 from gitsvg.state._apply._pull_request import apply_pull_request_op
@@ -17,8 +17,8 @@ from gitsvg.state._apply._theme import apply_theme_op
 
 __all__ = [
     "apply_branch_op",
-    "apply_canvas_op",
     "apply_commit_op",
+    "apply_grid_op",
     "apply_highlight_op",
     "apply_merge_op",
     "apply_pull_request_op",

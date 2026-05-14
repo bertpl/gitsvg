@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Breaking:** the `canvas:` op is renamed `grid:` and trimmed to its two slot-count fields (`n_commits`, `n_branches`). Spacings and margins (`branch_spacing`, `commit_spacing`, `margin_branch_axis_*`, `margin_commit_axis_*`) move exclusively to `theme:`, where they already lived in parallel. Migration: rename `"op": "canvas"` to `"op": "grid"`, and move any spacing/margin fields off the op onto a `theme:` op (the same field names work as-is).
+
 ### Deprecated
 
 ### Removed

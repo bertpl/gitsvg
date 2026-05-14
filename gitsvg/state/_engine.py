@@ -15,8 +15,8 @@ as a no-op here.
 from gitsvg.errors import ValidationReport
 from gitsvg.file_format.ops import (
     BranchOp,
-    CanvasOp,
     CommitOp,
+    GridOp,
     HighlightOp,
     ImportOp,
     MergeOp,
@@ -27,8 +27,8 @@ from gitsvg.file_format.ops import (
 from gitsvg.parse import ParsedOp
 from gitsvg.state._apply import (
     apply_branch_op,
-    apply_canvas_op,
     apply_commit_op,
+    apply_grid_op,
     apply_highlight_op,
     apply_merge_op,
     apply_pull_request_op,
@@ -71,8 +71,8 @@ def _apply_one(state: State, parsed: ParsedOp, report: ValidationReport) -> None
         apply_remove_op(state, parsed, report)
     elif isinstance(op, HighlightOp):
         apply_highlight_op(state, parsed, report)
-    elif isinstance(op, CanvasOp):
-        apply_canvas_op(state, parsed, report)
+    elif isinstance(op, GridOp):
+        apply_grid_op(state, parsed, report)
     elif isinstance(op, ThemeOp):
         apply_theme_op(state, parsed, report)
     elif isinstance(op, ImportOp):

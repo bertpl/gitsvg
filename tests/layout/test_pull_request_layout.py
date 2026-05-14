@@ -123,17 +123,17 @@ def test_pr_projected_merge_row_extends_canvas_auto_fit() -> None:
     layout_with = _layout_from(text_with_pr)
 
     # --- assert -----------------------
-    assert layout_with.canvas.n_commits > layout_without.canvas.n_commits
+    assert layout_with.grid.n_commits > layout_without.grid.n_commits
 
 
 # ==================================================================================================
-#  Pinned canvas — declared n_commits wins even if the PR endpoint exceeds it
+#  Pinned grid — declared n_commits wins even if the PR endpoint exceeds it
 # ==================================================================================================
 def test_pinned_n_commits_wins_over_pr_endpoint() -> None:
-    """When `canvas.n_commits` is pinned, the PR's projected merge row does not extend it."""
+    """When `grid.n_commits` is pinned, the PR's projected merge row does not extend it."""
     # --- arrange / act ----------------
     layout = _layout_from(
-        '{"op": "canvas", "n_commits": 3}\n'
+        '{"op": "grid", "n_commits": 3}\n'
         '{"op": "branch", "name": "main"}\n'
         '{"op": "commit", "branch": "main", "id": "m1", "msg": "first"}\n'
         '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
@@ -142,7 +142,7 @@ def test_pinned_n_commits_wins_over_pr_endpoint() -> None:
     )
 
     # --- assert -----------------------
-    assert layout.canvas.n_commits == 3
+    assert layout.grid.n_commits == 3
 
 
 # ==================================================================================================

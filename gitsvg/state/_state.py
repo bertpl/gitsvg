@@ -2,7 +2,7 @@
 
 State holds four namespaces — commits, branches, pull-requests, and
 (reserved) tags — along with branch declaration order, an optional
-pinned canvas, and a live `Theme` that accumulates `theme:` op
+pinned grid extent, and a live `Theme` that accumulates `theme:` op
 patches. Each op mutates state when it applies cleanly; the state
 engine is the producer, downstream layers (layout, rendering) are
 consumers.
@@ -15,24 +15,16 @@ from gitsvg._theme import DEFAULT_THEME, Theme
 
 
 @dataclass(slots=True)
-class CanvasState:
-    """Pinned canvas dimensions captured from a `canvas` op.
+class GridState:
+    """Pinned grid extent captured from a `grid` op.
 
-    All fields are independently optional — setting one and leaving
-    the others at None is meaningful (e.g. pin slot count, leave
-    spacing auto). Margin fields default to renderer auto-fit when
-    unset; set them explicitly only when stable per-frame margins
-    matter (animation series).
+    Both fields are independently optional — pinning only one is
+    meaningful (e.g. fix the lane count while letting the commit-axis
+    auto-fit).
     """
 
     n_commits: int | None = None
     n_branches: int | None = None
-    commit_spacing: float | None = None
-    branch_spacing: float | None = None
-    margin_commit_axis_lower: float | None = None
-    margin_commit_axis_upper: float | None = None
-    margin_branch_axis_lower: float | None = None
-    margin_branch_axis_upper: float | None = None
 
 
 @dataclass(slots=True)
@@ -143,12 +135,12 @@ class State:
     """
 
     def __init__(self) -> None:
-        """Initialise an empty state — no branches, no commits, no pull-requests, no canvas, theme = defaults."""
+        """Initialise an empty state — no branches, no commits, no pull-requests, no grid pin, theme = defaults."""
         self.branches: dict[str, BranchState] = {}
         self.commits: dict[str, CommitState] = {}
         self.pull_requests: dict[str, PullRequestState] = {}
         self.branch_order: list[str] = []
-        self.canvas: CanvasState | None = None
+        self.grid: GridState | None = None
         self.theme: Theme = copy.deepcopy(DEFAULT_THEME)
         self._next_branch_seq: int = 0
 

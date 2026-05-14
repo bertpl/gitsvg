@@ -3,7 +3,7 @@
 The renderer needs concrete pixel dimensions for the SVG it emits:
 canvas `width` / `height` and the effective spacings / margins the
 coordinate transform multiplies into grid indices. `compute_canvas`
-takes the grid extent (from `Layout.canvas`, i.e. `LayoutGrid`) plus
+takes the grid extent (from `Layout.grid`, i.e. `LayoutGrid`) plus
 the resolved theme, and walks the same auto-fit rule the layout engine
 used to: keep the canvas just big enough to contain the longest visible
 labels, the branch-name pills, and any open pull-request's projected
@@ -24,13 +24,14 @@ from gitsvg.render._metrics import commit_label_width, pill_width
 class RenderCanvas:
     """Computed pixel-space canvas the renderer's coordinate transform reads from.
 
-    Effective values come from theme defaults; user pins on the
-    `canvas:` op already flowed into `theme` via `build_theme`.
+    Spacings and margins flow from the resolved theme; slot counts
+    flow from `Layout.grid` (the `LayoutGrid`, populated from
+    `state.grid` if pinned, otherwise auto-fit).
 
     Attributes:
         width: SVG canvas width in pixels.
         height: SVG canvas height in pixels.
-        n_commits: Effective commit-axis slot count (pinned via `canvas.n_commits`
+        n_commits: Effective commit-axis slot count (pinned via `grid.n_commits`
             or auto-fit from content). Needed by the coordinate transform
             because the bottom-to-top orientation places index 0 at the
             largest y.
@@ -58,17 +59,16 @@ class RenderCanvas:
 def compute_canvas(layout: Layout, theme: Theme) -> RenderCanvas:
     """Compute the effective `RenderCanvas` for `layout` under `theme`.
 
-    Margins auto-fit to the longest visible labels and pills; spacing /
-    margin overrides from a `canvas:` op live on the resolved theme
-    (folded in by `build_theme`).
+    Margins auto-fit to the longest visible labels and pills; spacings
+    and default margins come from the resolved theme (the `theme:` op
+    is the only source for those, per invariant #6).
 
     Args:
         layout: The completed layout, supplying the integer-grid extent
             (`n_commits`, `n_branches`) and the entities (branches,
             commits, PRs) that drive the auto-fit margin computation.
-        theme: The resolved theme, supplying default spacings / margins
-            (already overridden by any `canvas:` op fields) and font
-            sizes used in label-width estimation.
+        theme: The resolved theme, supplying spacings and default
+            margins plus the font sizes used in label-width estimation.
 
     Returns:
         A `RenderCanvas` carrying the pixel-space width / height and the
@@ -77,7 +77,7 @@ def compute_canvas(layout: Layout, theme: Theme) -> RenderCanvas:
     branches = layout.branches
     commit_layouts = layout.commits
     pull_requests = layout.pull_requests
-    grid = layout.canvas
+    grid = layout.grid
 
     branch_spacing = theme.branch_spacing
     commit_spacing = theme.commit_spacing

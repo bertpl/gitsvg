@@ -106,30 +106,30 @@ def test_highlight_unknown_commit_emits_e201() -> None:
 
 
 # ==================================================================================================
-#  canvas
+#  grid
 # ==================================================================================================
-def test_canvas_op_pins_dimensions_in_state() -> None:
+def test_grid_op_pins_dimensions_in_state() -> None:
     # --- arrange ----------------------
-    text = '{"op": "canvas", "n_commits": 5, "branch_spacing": 40}\n'
+    text = '{"op": "grid", "n_commits": 5, "n_branches": 2}\n'
 
     # --- act --------------------------
     state, report = build_state_from_jsonl(text)
 
     # --- assert -----------------------
     assert report.is_clean()
-    assert state.canvas is not None
-    assert state.canvas.n_commits == 5
-    assert state.canvas.branch_spacing == 40
+    assert state.grid is not None
+    assert state.grid.n_commits == 5
+    assert state.grid.n_branches == 2
 
 
-def test_canvas_last_op_wins() -> None:
+def test_grid_last_op_wins() -> None:
     # --- arrange ----------------------
-    text = '{"op": "canvas", "n_commits": 5}\n{"op": "canvas", "n_commits": 10}\n'
+    text = '{"op": "grid", "n_commits": 5}\n{"op": "grid", "n_commits": 10}\n'
 
     # --- act --------------------------
     state, report = build_state_from_jsonl(text)
 
     # --- assert -----------------------
     assert report.is_clean()
-    assert state.canvas is not None
-    assert state.canvas.n_commits == 10
+    assert state.grid is not None
+    assert state.grid.n_commits == 10
