@@ -25,7 +25,7 @@ Heuristic notes:
   Branch lines, branch-off arcs, merge arcs, and pills do not block.
 - **Branch axis (override).** When `BranchState.branch_pos` is set, the
   layout engine takes the value verbatim — no overlap check, no
-  leftward-branching rejection. Same posture as `canvas:` overrides.
+  leftward-branching rejection. Same posture as `grid:` overrides.
 - **Branch start (commit axis).** `start = parent_commit.commit_pos + 1`
   for non-root branches; `0` for the root branch.
 - **Commit positions** follow a single uniform rule:
@@ -45,7 +45,7 @@ Heuristic notes:
   `len(parents) >= 2`, tagged with the *source* (parent) branch's id.
 - **Branch guides**: one per occupied branch-axis lane.
 - **Grid extent**: `n_commits` / `n_branches` honour pinned values on
-  `state.canvas` when set; otherwise auto-fit from the visible content
+  `state.grid` when set; otherwise auto-fit from the visible content
   (including any open pull-request's projected merge row).
 """
 
@@ -141,7 +141,7 @@ def compute_layout(state: State) -> Layout:
     grid = _compute_grid(state, branches, commit_layouts, pull_requests)
 
     return Layout(
-        canvas=grid,
+        grid=grid,
         branches=branches,
         commits=commit_layouts,
         arcs=arcs,
@@ -512,11 +512,11 @@ def _compute_grid(
 ) -> LayoutGrid:
     """Compute the integer-grid extent.
 
-    Honours pinned `n_commits` / `n_branches` on `state.canvas` when
+    Honours pinned `n_commits` / `n_branches` on `state.grid` when
     set; otherwise auto-fits to the visible content (commits, branch
     spans, and any open pull-request's projected merge row).
     """
-    user_canvas = state.canvas
+    user_grid = state.grid
 
     max_branch_pos = max((b.branch_pos for b in branches), default=0)
     max_commit_pos_from_commits = max((c.commit_pos for c in commit_layouts.values()), default=-1)
@@ -526,15 +526,15 @@ def _compute_grid(
     auto_n_commits = max_commit_pos + 1 if max_commit_pos >= 0 else 1
     auto_n_branches = max_branch_pos + 1 if branches else 1
 
-    n_commits = _override(user_canvas, "n_commits", auto_n_commits)
-    n_branches = _override(user_canvas, "n_branches", auto_n_branches)
+    n_commits = _override(user_grid, "n_commits", auto_n_commits)
+    n_branches = _override(user_grid, "n_branches", auto_n_branches)
 
     return LayoutGrid(n_commits=n_commits, n_branches=n_branches)
 
 
-def _override(user_canvas, attr: str, default):
+def _override(user_grid, attr: str, default):
     """Return the user's pinned value for `attr` if set, else the default."""
-    if user_canvas is None:
+    if user_grid is None:
         return default
-    pinned = getattr(user_canvas, attr, None)
+    pinned = getattr(user_grid, attr, None)
     return pinned if pinned is not None else default

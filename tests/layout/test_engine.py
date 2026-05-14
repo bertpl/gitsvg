@@ -693,8 +693,8 @@ def test_grid_extent_for_single_branch_three_commits() -> None:
     layout = _layout_from(text)
 
     # --- assert -----------------------
-    assert layout.canvas.n_commits == 3
-    assert layout.canvas.n_branches == 1
+    assert layout.grid.n_commits == 3
+    assert layout.grid.n_branches == 1
 
 
 def test_grid_widens_for_two_branches() -> None:
@@ -710,7 +710,7 @@ def test_grid_widens_for_two_branches() -> None:
     layout = _layout_from(text)
 
     # --- assert -----------------------
-    assert layout.canvas.n_branches == 2
+    assert layout.grid.n_branches == 2
 
 
 def test_grid_includes_empty_branch_start_in_height() -> None:
@@ -727,7 +727,7 @@ def test_grid_includes_empty_branch_start_in_height() -> None:
     layout = _layout_from(text)
 
     # --- assert -----------------------
-    assert layout.canvas.n_commits == 3
+    assert layout.grid.n_commits == 3
 
 
 # ==================================================================================================
@@ -783,8 +783,8 @@ def test_layout_completes_for_every_corpus_file(path: Path) -> None:
         assert branch.end >= branch.start
         assert branch.branch_pos >= 0
         assert branch.id
-    assert layout.canvas.n_commits > 0
-    assert layout.canvas.n_branches > 0
+    assert layout.grid.n_commits > 0
+    assert layout.grid.n_branches > 0
 
 
 # Defensive — the corpus walker uses ValidationReport implicitly via the parser;

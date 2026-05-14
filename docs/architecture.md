@@ -8,6 +8,7 @@ mechanism, and the version it locked in.
 |---|---|---|
 | 1 | Layout↔render boundary | v0.1.4 |
 | 2 | Position/size field axis classification | v0.1.5 |
+| 6 | Op-to-consumer boundary | v0.1.5 |
 
 ## 1. Layout↔render boundary
 
@@ -55,5 +56,31 @@ or running the code.
 **Enforcement.** Best-effort convention, code-review discipline.
 No test enforces presence — a missing classification on a new
 position/size field is a review nit, not a build break.
+
+**Locked in:** v0.1.5.
+
+## 6. Op-to-consumer boundary
+
+**Rule.** Layout-engine inputs and renderer inputs live on distinct
+ops. The `grid:` op carries the layout extent (`n_commits`,
+`n_branches`); the `theme:` op carries every pixel-side concern
+(spacings, margins, fonts, colours, strokes, opacities). No field
+appears on both ops, and no field on `state.grid` flows into the
+resolved theme.
+
+**Rationale.** Spacing and margin had previously lived on both
+the `canvas:` op and the `theme:` op, with the canvas op winning
+(specific over general). The duplication leaked the layout↔render
+boundary back into the JSONL surface and forced renderers and
+authors alike to know the precedence rule. Splitting the
+`canvas:` op into a slot-counts-only `grid:` op + a theme-only
+spacing/margin surface restores invariant #1 at the user-visible
+op level: each op feeds exactly one consumer.
+
+**Enforcement.** Code-review discipline. The `GridOp` model
+(`gitsvg/file_format/ops/impl/_grid.py`) carries only the two
+slot-count fields; adding a spacing/margin field there is the
+trigger for review pushback. The `build_theme` adapter
+(`gitsvg/render/_theme.py`) does not import `state.grid` at all.
 
 **Locked in:** v0.1.5.

@@ -184,7 +184,7 @@ class Layout:
     """Per-diagram layout: every grid-side decision the renderer needs.
 
     Attributes:
-        canvas: Integer-grid extent (slot counts).
+        grid: Integer-grid extent (slot counts).
         branches: One `LayoutBranch` per declared branch, in declaration
             order.
         commits: One `LayoutCommit` per surviving commit, keyed by id
@@ -196,7 +196,7 @@ class Layout:
             order they were declared.
     """
 
-    canvas: LayoutGrid
+    grid: LayoutGrid
     branches: list[LayoutBranch] = field(default_factory=list)
     commits: dict[str, LayoutCommit] = field(default_factory=dict)
     arcs: list[LayoutArc] = field(default_factory=list)

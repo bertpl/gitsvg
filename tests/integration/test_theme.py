@@ -64,24 +64,3 @@ def test_happy_theme_renders_with_background_rect() -> None:
     bg_pos = svg.index('fill="#fffaf0"')
     first_branch_pos = svg.index("<path")
     assert bg_pos < first_branch_pos
-
-
-def test_theme_op_then_canvas_op_canvas_wins_for_spacing() -> None:
-    """A `canvas:` op specifying spacing wins over a theme op — the
-    `build_theme` adapter folds `state.canvas` on top of `state.theme`."""
-    # --- arrange ----------------------
-    text = (
-        '{"op": "theme", "branch_spacing": 80}\n'
-        '{"op": "canvas", "branch_spacing": 60}\n'
-        '{"op": "branch", "name": "main"}\n'
-    )
-    parsed, report = parse_jsonl_text(text, file="x.jsonl")
-    state = apply_ops(parsed, report)
-
-    # --- act --------------------------
-    assert report.is_clean()
-    theme = build_theme(state)
-
-    # --- assert -----------------------
-    # canvas op (specific) beats theme op (general).
-    assert theme.branch_spacing == 60

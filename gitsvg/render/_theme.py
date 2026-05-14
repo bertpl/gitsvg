@@ -9,13 +9,13 @@ fully-resolved theme the renderer reads.
 The resolution order, lowest → highest precedence:
 
 1. `state.theme` — the live `Theme` accumulated by `theme:` ops.
-2. `state.canvas` — `branch_spacing` / `commit_spacing` / `margin_*`
-   fields from a `canvas:` op overlay matching theme fields.
-3. `state.branches[*].color` — explicit per-branch colour overrides
+2. `state.branches[*].color` — explicit per-branch colour overrides
    write to `theme.branch_color_overrides[branch.id]`.
 
-Steps 2 and 3 are *specific-over-general*: a `canvas:` spacing pin and
-a per-branch colour beat anything the theme palette set.
+Per invariant #6 in `docs/architecture.md`, the `grid:` op is a
+layout-only input; spacings, margins, and every other pixel-side
+concern live exclusively on `theme:`. Nothing on `state.grid` flows
+into the resolved theme.
 """
 
 import copy
@@ -40,21 +40,5 @@ def build_theme(state: State) -> Theme:
     for branch in state.branches.values():
         if branch.color is not None:
             theme.branch_color_overrides[branch.id] = branch.color
-
-    # --- canvas presentational fields -----------------
-    canvas = state.canvas
-    if canvas is not None:
-        if canvas.branch_spacing is not None:
-            theme.branch_spacing = canvas.branch_spacing
-        if canvas.commit_spacing is not None:
-            theme.commit_spacing = canvas.commit_spacing
-        if canvas.margin_branch_axis_lower is not None:
-            theme.margin_branch_axis_lower = canvas.margin_branch_axis_lower
-        if canvas.margin_branch_axis_upper is not None:
-            theme.margin_branch_axis_upper = canvas.margin_branch_axis_upper
-        if canvas.margin_commit_axis_lower is not None:
-            theme.margin_commit_axis_lower = canvas.margin_commit_axis_lower
-        if canvas.margin_commit_axis_upper is not None:
-            theme.margin_commit_axis_upper = canvas.margin_commit_axis_upper
 
     return theme

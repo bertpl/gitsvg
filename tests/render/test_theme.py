@@ -101,57 +101,10 @@ def test_build_theme_keys_by_id_distinguishes_removed_and_redeclared_branch() ->
 
 
 # ==================================================================================================
-#  build_theme — canvas presentational fields
+#  build_theme — defaults
 # ==================================================================================================
-def test_build_theme_applies_canvas_spacing_overrides() -> None:
-    # --- arrange ----------------------
-    state = _state_from(
-        '{"op": "canvas", "branch_spacing": 80, "commit_spacing": 40}\n{"op": "branch", "name": "main"}\n'
-    )
-
-    # --- act --------------------------
-    theme = build_theme(state)
-
-    # --- assert -----------------------
-    assert theme.branch_spacing == 80
-    assert theme.commit_spacing == 40
-
-
-def test_build_theme_applies_canvas_margin_overrides() -> None:
-    # --- arrange ----------------------
-    state = _state_from(
-        '{"op": "canvas", "margin_branch_axis_lower": 30, "margin_branch_axis_upper": 40, '
-        '"margin_commit_axis_lower": 50, "margin_commit_axis_upper": 60}\n'
-        '{"op": "branch", "name": "main"}\n'
-    )
-
-    # --- act --------------------------
-    theme = build_theme(state)
-
-    # --- assert -----------------------
-    assert theme.margin_branch_axis_lower == 30
-    assert theme.margin_branch_axis_upper == 40
-    assert theme.margin_commit_axis_lower == 50
-    assert theme.margin_commit_axis_upper == 60
-
-
-def test_build_theme_keeps_defaults_when_canvas_fields_unset() -> None:
-    """Only fields the user pinned on the canvas op flow into the theme;
-    unset fields preserve the package default."""
-    # --- arrange ----------------------
-    state = _state_from('{"op": "canvas", "branch_spacing": 80}\n{"op": "branch", "name": "main"}\n')
-
-    # --- act --------------------------
-    theme = build_theme(state)
-
-    # --- assert -----------------------
-    assert theme.branch_spacing == 80
-    assert theme.commit_spacing == DEFAULT_THEME.commit_spacing
-    assert theme.margin_branch_axis_lower == DEFAULT_THEME.margin_branch_axis_lower
-
-
-def test_build_theme_with_no_canvas_op_returns_defaults() -> None:
-    """No `canvas:` op → theme matches `DEFAULT_THEME` field-for-field."""
+def test_build_theme_with_no_theme_op_returns_defaults() -> None:
+    """No `theme:` op → resolved theme matches `DEFAULT_THEME` field-for-field."""
     # --- arrange ----------------------
     state = _state_from('{"op": "branch", "name": "main"}\n')
 

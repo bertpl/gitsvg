@@ -11,7 +11,7 @@ def test_new_state_is_empty() -> None:
     assert state.branches == {}
     assert state.commits == {}
     assert state.branch_order == []
-    assert state.canvas is None
+    assert state.grid is None
     assert state.is_first_branch() is True
 
 
