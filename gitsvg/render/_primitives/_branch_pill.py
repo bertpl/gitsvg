@@ -3,7 +3,7 @@
 The pill is a filled rounded rectangle in the branch's colour with the
 branch name in white text, positioned at the signed two-axis offset
 declared on the theme — `branch_name_pill_offset_commit_axis_in_rows`
-(default `-0.5`, putting the pill below the branch's start row in BT)
+(default `-0.5`, putting the pill below the branch's start row in bottom-to-top orientation)
 and `branch_name_pill_offset_branch_axis_in_lanes` (default `0`,
 keeping the pill centred on the branch's lane).
 

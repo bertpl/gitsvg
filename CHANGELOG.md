@@ -34,14 +34,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   | `label_offset`              | `label_offset_branch_axis_in_lanes`      | `branch_spacing`                        |
 
   Defaults at the default spacings reproduce the previous pixel values exactly (no visual change for diagrams using default spacings).
-- **Breaking:** the two pill-offset `theme:` op fields each split into a signed two-axis pair (one ratio along the commit axis, one along the branch axis). The signed-axis convention: positive = toward higher index along the named axis. Migration: replace the single unsigned pixel field with the matching pair; the default values reproduce today's BT positioning exactly.
+- **Breaking:** the two pill-offset `theme:` op fields each split into a signed two-axis pair (one ratio along the commit axis, one along the branch axis). The signed-axis convention: positive = toward higher index along the named axis. Migration: replace the single unsigned pixel field with the matching pair; the default values reproduce today's bottom-to-top positioning exactly.
 
-  | Old field (px, unsigned)     | New fields (ratio, signed)                              | Default                                  |
-  |------------------------------|---------------------------------------------------------|------------------------------------------|
-  | `branch_name_pill_offset`    | `branch_name_pill_offset_commit_axis_in_rows`           | `-0.5` (below start row in BT)           |
-  |                              | `branch_name_pill_offset_branch_axis_in_lanes`          | `0.0` (centred on the branch's lane)     |
-  | `pull_request_pill_offset`   | `pull_request_pill_offset_commit_axis_in_rows`          | `+0.5` (above source-tip commit in BT)   |
-  |                              | `pull_request_pill_offset_branch_axis_in_lanes`         | `0.0` (centred on the source-tip's lane) |
+  | Old field (px, unsigned)     | New fields (ratio, signed)                              | Default                                                          |
+  |------------------------------|---------------------------------------------------------|------------------------------------------------------------------|
+  | `branch_name_pill_offset`    | `branch_name_pill_offset_commit_axis_in_rows`           | `-0.5` (below start row in bottom-to-top orientation)            |
+  |                              | `branch_name_pill_offset_branch_axis_in_lanes`          | `0.0` (centred on the branch's lane)                             |
+  | `pull_request_pill_offset`   | `pull_request_pill_offset_commit_axis_in_rows`          | `+0.5` (above source-tip commit in bottom-to-top orientation)    |
+  |                              | `pull_request_pill_offset_branch_axis_in_lanes`         | `0.0` (centred on the source-tip's lane)                         |
 
 ### Deprecated
 

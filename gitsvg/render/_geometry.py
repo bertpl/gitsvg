@@ -40,8 +40,8 @@ def offset_position(
     toward higher index along the named axis (see invariant #3 in
     `docs/architecture.md`). The helper multiplies each offset by the
     matching canvas spacing to get the pixel magnitude, then maps grid
-    direction to screen direction (BT-only in v0.1.5: positive
-    branch-axis = `+x`; positive commit-axis = `-y`).
+    direction to screen direction. Currently supports only bottom-to-top
+    orientation: positive branch-axis = `+x`; positive commit-axis = `-y`.
 
     Args:
         anchor_branch_pos: Slot index along the branch axis the
@@ -62,7 +62,7 @@ def offset_position(
     branch_offset_px = _resolve_int_or_float(branch_axis_offset_in_lanes * canvas.branch_spacing)
     commit_offset_px = _resolve_int_or_float(commit_axis_offset_in_rows * canvas.commit_spacing)
     x = branch_axis_to_x(anchor_branch_pos, canvas) + branch_offset_px
-    # BT: positive commit-axis index sits at lower screen y → subtract.
+    # Bottom-to-top: positive commit-axis index sits at lower screen y → subtract.
     y = commit_axis_to_y(anchor_commit_pos, canvas) - commit_offset_px
     return (x, y)
 

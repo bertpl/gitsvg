@@ -105,7 +105,7 @@ exactly one place.
 
 **Rationale.** Inline `y + theme.<offset>` and `canvas.height -
 canvas.margin_… ± const` arithmetic at the call site couples
-every primitive to the BT screen-direction convention. Routing
+every primitive to the bottom-to-top screen-direction convention. Routing
 through helpers means a future orientation rotation lives entirely
 inside the geometry module — primitives only know about slot
 indices and axis-relative offsets.

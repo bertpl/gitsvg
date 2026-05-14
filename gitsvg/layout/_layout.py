@@ -70,7 +70,7 @@ class LayoutBranch:
     branch_pos: int  # axis-bound: branch-axis (slot index)
     start: int  # axis-bound: commit-axis (slot index)
     end: int  # axis-bound: commit-axis (slot index)
-    label_side: str  # direction-bound: branch-axis (grid-side relative to BT)
+    label_side: str  # direction-bound: branch-axis (grid-side relative to bottom-to-top orientation)
 
 
 @dataclass(slots=True)
@@ -103,7 +103,7 @@ class LayoutCommit:
     msg: str | None
     hash: str | None
     highlight: bool
-    label_side: str  # direction-bound: branch-axis (grid-side relative to BT)
+    label_side: str  # direction-bound: branch-axis (grid-side relative to bottom-to-top orientation)
 
 
 @dataclass(slots=True)

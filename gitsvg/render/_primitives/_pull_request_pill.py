@@ -4,7 +4,8 @@ Mirrors `_branch_pill.py` in shape and styling, but anchored at the
 *live* source-tip end of a branch rather than the static birth end.
 Position comes from the signed two-axis offset declared on the
 theme — `pull_request_pill_offset_commit_axis_in_rows` (default
-`+0.5`, putting the pill above the source-tip commit in BT) and
+`+0.5`, putting the pill above the source-tip commit in bottom-to-top
+orientation) and
 `pull_request_pill_offset_branch_axis_in_lanes` (default `0`,
 keeping the pill centred on the source-tip's lane). The text is
 the PR's `title`.

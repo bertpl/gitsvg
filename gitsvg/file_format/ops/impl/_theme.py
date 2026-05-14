@@ -129,11 +129,11 @@ class ThemeOp(OpBase):
     )
     branch_name_pill_offset_commit_axis_in_rows: float | None = Field(
         default=None,
-        description="Branch-name pill offset along the commit axis, expressed as a signed multiple of `commit_spacing`. Positive = toward higher commit-axis index. Default is `-0.5` (pill sits below the branch's start row in BT).",
+        description="Branch-name pill offset along the commit axis, expressed as a signed multiple of `commit_spacing`. Positive = toward higher commit-axis index. Default is `-0.5` (pill sits below the branch's start row in bottom-to-top orientation).",
     )
     branch_name_pill_offset_branch_axis_in_lanes: float | None = Field(
         default=None,
-        description="Branch-name pill offset along the branch axis, expressed as a signed multiple of `branch_spacing`. Positive = toward higher branch-axis index. Default is `0` (pill is centred on the branch lane in BT).",
+        description="Branch-name pill offset along the branch axis, expressed as a signed multiple of `branch_spacing`. Positive = toward higher branch-axis index. Default is `0` (pill is centred on the branch lane in bottom-to-top orientation).",
     )
     pill_padding_x_in_font_sizes: NonNegativeFloat | None = Field(
         default=None,
@@ -159,11 +159,11 @@ class ThemeOp(OpBase):
     )
     pull_request_pill_offset_commit_axis_in_rows: float | None = Field(
         default=None,
-        description="PR title-pill offset along the commit axis, expressed as a signed multiple of `commit_spacing`. Positive = toward higher commit-axis index. Default is `+0.5` (pill sits above the source-tip commit in BT).",
+        description="PR title-pill offset along the commit axis, expressed as a signed multiple of `commit_spacing`. Positive = toward higher commit-axis index. Default is `+0.5` (pill sits above the source-tip commit in bottom-to-top orientation).",
     )
     pull_request_pill_offset_branch_axis_in_lanes: float | None = Field(
         default=None,
-        description="PR title-pill offset along the branch axis, expressed as a signed multiple of `branch_spacing`. Positive = toward higher branch-axis index. Default is `0` (pill is centred on the source branch's lane in BT).",
+        description="PR title-pill offset along the branch axis, expressed as a signed multiple of `branch_spacing`. Positive = toward higher branch-axis index. Default is `0` (pill is centred on the source branch's lane in bottom-to-top orientation).",
     )
 
     # --- Colours ----------------------------------------
