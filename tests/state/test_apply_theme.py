@@ -220,3 +220,43 @@ def test_branch_color_overrides_survive_explicit_theme_patch() -> None:
     main_id = state.branches["main"].id
     assert theme.branch_color_overrides[main_id] == "#aabbcc"
     assert theme.background_color == "#111111"
+
+
+# ==================================================================================================
+#  Theme-field semantic validation
+# ==================================================================================================
+import pytest
+
+
+@pytest.mark.parametrize("field", ["branch_spacing", "commit_spacing"])
+def test_spacing_must_be_positive_emits_e218(field: str) -> None:
+    # --- arrange / act ----------------
+    _, report = _state_from(f'{{"op": "theme", "{field}": 0}}\n')
+
+    # --- assert -----------------------
+    codes = [e.code for e in report.errors]
+    assert codes == ["E218"]
+    assert field in report.errors[0].message
+
+
+def test_spacing_violation_does_not_block_other_fields_in_same_op() -> None:
+    """An invalid spacing emits an error but other valid fields still apply."""
+    # --- arrange / act ----------------
+    state, report = _state_from('{"op": "theme", "branch_spacing": 0, "background_color": "#abcdef"}\n')
+
+    # --- assert -----------------------
+    assert [e.code for e in report.errors] == ["E218"]
+    # Background color from the same op applied; branch_spacing kept its default.
+    assert state.theme.background_color == "#abcdef"
+    assert state.theme.branch_spacing == DEFAULT_THEME.branch_spacing
+
+
+@pytest.mark.parametrize("field", ["label_font_size", "branch_label_font_size", "hash_font_size"])
+def test_font_size_must_be_positive_emits_e219(field: str) -> None:
+    # --- arrange / act ----------------
+    _, report = _state_from(f'{{"op": "theme", "{field}": 0}}\n')
+
+    # --- assert -----------------------
+    codes = [e.code for e in report.errors]
+    assert codes == ["E219"]
+    assert field in report.errors[0].message

@@ -29,6 +29,21 @@ NAMED_THEMES = {
 # when copying the op onto state.theme.
 _NON_THEME_FIELDS = frozenset({"op", "name"})
 
+# Fields with constraints beyond what `NonNegativeFloat` / `NonNegativeInt`
+# already enforce. Each entry maps a field name to a (predicate, error_code,
+# message_suffix) triple. The predicate returns True when the value is
+# *acceptable*; failure emits the error code with a message of the form
+# `{field} {message_suffix} (got {value})`.
+_FIELD_CONSTRAINTS: dict[str, tuple] = {
+    # Spacings — zero collapses lanes / rows onto themselves.
+    "branch_spacing": (lambda v: v > 0, "E218", "must be > 0"),
+    "commit_spacing": (lambda v: v > 0, "E218", "must be > 0"),
+    # Font sizes — zero makes text invisible.
+    "label_font_size": (lambda v: v > 0, "E219", "must be > 0"),
+    "branch_label_font_size": (lambda v: v > 0, "E219", "must be > 0"),
+    "hash_font_size": (lambda v: v > 0, "E219", "must be > 0"),
+}
+
 
 def apply_theme_op(state: State, parsed: ParsedOp, report: ValidationReport) -> None:
     """Apply a `theme` op.
@@ -87,6 +102,23 @@ def apply_theme_op(state: State, parsed: ParsedOp, report: ValidationReport) -> 
 
     # --- Step 2: explicit overrides on top ----
     # Deep-copy each value so mutable fields (e.g. `colors` dict) on
-    # state.theme don't alias back to the op model.
+    # state.theme don't alias back to the op model. Fields that fail
+    # their semantic constraint emit an error but don't block the
+    # other fields from applying.
     for name in explicit_fields:
-        setattr(state.theme, name, copy.deepcopy(getattr(op, name)))
+        value = getattr(op, name)
+        constraint = _FIELD_CONSTRAINTS.get(name)
+        if constraint is not None:
+            predicate, code, message_suffix = constraint
+            if not predicate(value):
+                report.add(
+                    ValidationError(
+                        file=file,
+                        line=line,
+                        code=code,
+                        message=f"{name} {message_suffix} (got {value})",
+                        field=name,
+                    )
+                )
+                continue
+        setattr(state.theme, name, copy.deepcopy(value))
