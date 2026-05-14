@@ -31,12 +31,12 @@ appearing on a `Layout*` type are the trigger for review pushback.
 
 ## 2. Position/size field axis classification
 
-**Rule.** Every field on the architectural dataclasses (`Theme`,
-every `Layout*` dataclass, `RenderCanvas`) carries a
-`Classification:` line in its per-field docstring. Four classes:
+**Rule.** Every position/size field on `Theme`, on any `Layout*`
+dataclass, and on `RenderCanvas` carries a trailing comment
+naming its axis classification. Three classes:
 
 - **`axis-symmetric`** — magnitude with no axis preference
-  (radii, stroke widths, font sizes, char-width factors, paddings).
+  (radii, stroke widths, font sizes, paddings).
 - **`axis-bound: <axis>`** — magnitude bound to a specific grid
   axis (`branch-axis` or `commit-axis`). Slot indices, slot
   counts, spacings, margins.
@@ -44,17 +44,16 @@ every `Layout*` dataclass, `RenderCanvas`) carries a
   baked-in direction along an axis. These are the orientation-leaky
   fields: they survive the bottom-to-top default but break under
   any rotation.
-- **`not-applicable`** — field has no axis semantic (colours,
-  fonts, IDs, names, message text, boolean flags).
 
-**Rationale.** Classification surfaces orientation-leaky fields
-at the docstring level rather than at rotation-bug time, and gives
-downstream changes a checkable surface to reason against.
+Non-position/size fields (colours, fonts, IDs, names, booleans)
+carry no comment.
 
-**Enforcement.** Meta-test in `tests/architecture/`. The test
-walks the in-scope dataclasses and asserts every field has a
-valid classification — adding a new field without one fails the
-test. The test docstring is the canonical source for the
-docstring grammar.
+**Rationale.** Surfaces orientation-leaky fields at the field
+declaration so a reader spots them without rendering at rotation
+or running the code.
+
+**Enforcement.** Best-effort convention, code-review discipline.
+No test enforces presence — a missing classification on a new
+position/size field is a review nit, not a build break.
 
 **Locked in:** v0.1.5.

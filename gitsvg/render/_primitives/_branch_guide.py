@@ -12,8 +12,7 @@ from gitsvg._theme import Theme
 from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._geometry import branch_axis_to_x
 
-# Classification: axis-bound: commit-axis (applied symmetrically at both ends).
-_OVERSHOOT_PX = 10
+_OVERSHOOT_PX = 10  # axis-bound: commit-axis (applied symmetrically at both ends)
 
 
 def draw_branch_guide(d: draw.Drawing, branch_pos: int, canvas: RenderCanvas, theme: Theme) -> None:

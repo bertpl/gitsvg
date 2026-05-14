@@ -16,7 +16,6 @@ from gitsvg.layout import LayoutBranch
 from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._geometry import branch_axis_to_x, commit_axis_to_y
 
-# Classification (all four constants below): axis-symmetric — perceptual pill geometry, no grid-axis bias.
 _PILL_PADDING_X = 12  # extra width beyond the rendered text
 _PILL_PADDING_Y = 8  # extra height beyond the font size
 _PILL_CORNER_RADIUS = 4
