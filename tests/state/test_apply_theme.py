@@ -220,3 +220,83 @@ def test_branch_color_overrides_survive_explicit_theme_patch() -> None:
     main_id = state.branches["main"].id
     assert theme.branch_color_overrides[main_id] == "#aabbcc"
     assert theme.background_color == "#111111"
+
+
+# ==================================================================================================
+#  Theme-field semantic validation (E218-E221)
+# ==================================================================================================
+import pytest
+
+
+@pytest.mark.parametrize("field", ["branch_spacing", "commit_spacing"])
+def test_spacing_must_be_positive_emits_e218(field: str) -> None:
+    # --- arrange / act ----------------
+    _, report = _state_from(f'{{"op": "theme", "{field}": 0}}\n')
+
+    # --- assert -----------------------
+    codes = [e.code for e in report.errors]
+    assert codes == ["E218"]
+    assert field in report.errors[0].message
+
+
+def test_spacing_violation_does_not_block_other_fields_in_same_op() -> None:
+    """An invalid spacing emits an error but other valid fields still apply."""
+    # --- arrange / act ----------------
+    state, report = _state_from('{"op": "theme", "branch_spacing": 0, "background_color": "#abcdef"}\n')
+
+    # --- assert -----------------------
+    assert [e.code for e in report.errors] == ["E218"]
+    # Background color from the same op applied; branch_spacing kept its default.
+    assert state.theme.background_color == "#abcdef"
+    assert state.theme.branch_spacing == DEFAULT_THEME.branch_spacing
+
+
+@pytest.mark.parametrize("field", ["label_font_size", "branch_label_font_size", "hash_font_size"])
+def test_font_size_must_be_positive_emits_e219(field: str) -> None:
+    # --- arrange / act ----------------
+    _, report = _state_from(f'{{"op": "theme", "{field}": 0}}\n')
+
+    # --- assert -----------------------
+    codes = [e.code for e in report.errors]
+    assert codes == ["E219"]
+    assert field in report.errors[0].message
+
+
+@pytest.mark.parametrize("value", [1.5, 2.0, 10])
+def test_guide_overshoot_above_one_emits_e220(value: float) -> None:
+    # --- arrange / act ----------------
+    _, report = _state_from(f'{{"op": "theme", "guide_overshoot_in_rows": {value}}}\n')
+
+    # --- assert -----------------------
+    codes = [e.code for e in report.errors]
+    assert codes == ["E220"]
+
+
+@pytest.mark.parametrize("value", [0.0, 0.5, 1.0])
+def test_guide_overshoot_within_range_accepted(value: float) -> None:
+    # --- arrange / act ----------------
+    state, report = _state_from(f'{{"op": "theme", "guide_overshoot_in_rows": {value}}}\n')
+
+    # --- assert -----------------------
+    assert report.is_clean()
+    assert state.theme.guide_overshoot_in_rows == value
+
+
+@pytest.mark.parametrize("value", [0.51, 0.7, 1.0, 5.0])
+def test_arc_corner_above_half_emits_e221(value: float) -> None:
+    # --- arrange / act ----------------
+    _, report = _state_from(f'{{"op": "theme", "arc_corner_radius_in_grid_units": {value}}}\n')
+
+    # --- assert -----------------------
+    codes = [e.code for e in report.errors]
+    assert codes == ["E221"]
+
+
+@pytest.mark.parametrize("value", [0.0, 0.25, 0.5])
+def test_arc_corner_within_range_accepted(value: float) -> None:
+    # --- arrange / act ----------------
+    state, report = _state_from(f'{{"op": "theme", "arc_corner_radius_in_grid_units": {value}}}\n')
+
+    # --- assert -----------------------
+    assert report.is_clean()
+    assert state.theme.arc_corner_radius_in_grid_units == value
