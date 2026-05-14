@@ -87,7 +87,7 @@ class ThemeOp(OpBase):
     )
     arc_corner_radius_in_grid_units: NonNegativeFloat | None = Field(
         default=None,
-        description="Corner radius for branch-off and merge arcs, expressed as a multiple of `min(branch_spacing, commit_spacing)`.",
+        description="Corner radius for branch-off and merge arcs, expressed as a multiple of `min(branch_spacing, commit_spacing)`. Per-arc clamped at render time to fit the arc's segment lengths, so values larger than 1.0 produce no further effect.",
     )
     label_offset_branch_axis_in_lanes: NonNegativeFloat | None = Field(
         default=None,
