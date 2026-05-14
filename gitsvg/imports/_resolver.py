@@ -17,6 +17,9 @@ from gitsvg.errors import ValidationError, ValidationReport
 from gitsvg.file_format.ops import ImportOp
 from gitsvg.parse import ParsedOp, parse_jsonl_text
 
+# Maximum depth of an import chain — guards against pathological inputs
+# (cycles are caught separately and earlier). Documented as a user-facing
+# limit in the `import` section of the format spec.
 DEFAULT_DEPTH_LIMIT = 1000
 
 

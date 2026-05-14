@@ -17,7 +17,12 @@ from dataclasses import dataclass
 
 from gitsvg._theme import Theme
 from gitsvg.layout import Layout, LayoutBranch, LayoutCommit
-from gitsvg.render._metrics import commit_label_width, pill_width
+from gitsvg.render._metrics import commit_label_width, pill_padding_y, pill_width
+
+# Auto-fit safety margin between content (pill / outward label) and the canvas
+# edge — keeps the rendered geometry from butting right up against the SVG
+# bounding box.
+_AUTO_FIT_EDGE_PAD_PX = 4.0  # axis-symmetric (perceptual)
 
 
 @dataclass(slots=True)
@@ -154,13 +159,12 @@ def _auto_fit_margin_branch_axis(
         outward_label_side = "right"
 
     needed: float = 0.0
-    pad = 4.0
     for branch in branches:
         if branch.branch_pos == branch_pos_filter:
-            needed = max(needed, pill_width(branch.name, theme) / 2 + pad)
+            needed = max(needed, pill_width(branch.name, theme) / 2 + _AUTO_FIT_EDGE_PAD_PX)
     for commit in commit_layouts.values():
         if commit.branch_pos == branch_pos_filter and commit.label_side == outward_label_side:
-            needed = max(needed, theme.label_offset + commit_label_width(commit, theme) + pad)
+            needed = max(needed, theme.label_offset + commit_label_width(commit, theme) + _AUTO_FIT_EDGE_PAD_PX)
     return max(default, needed)
 
 
@@ -183,6 +187,6 @@ def _auto_fit_margin_commit_axis_lower(branches: list[LayoutBranch], theme: Them
     """
     if not branches:
         return theme.margin_commit_axis_lower
-    pill_height = theme.branch_label_font_size + 8  # matches `_branch_pill._PILL_PADDING_Y`
-    pill_room = theme.branch_name_pill_offset + pill_height / 2 + 4.0
+    pill_height = theme.branch_label_font_size + pill_padding_y(theme)
+    pill_room = theme.branch_name_pill_offset + pill_height / 2 + _AUTO_FIT_EDGE_PAD_PX
     return max(theme.margin_commit_axis_lower, pill_room)
