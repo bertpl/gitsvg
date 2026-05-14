@@ -14,20 +14,26 @@ import drawsvg as draw
 from gitsvg._theme import Theme
 from gitsvg.layout import LayoutBranch
 from gitsvg.render._canvas import RenderCanvas
-from gitsvg.render._geometry import branch_axis_to_x, commit_axis_to_y
-
-_PILL_PADDING_X = 12  # extra width beyond the rendered text
-_PILL_PADDING_Y = 8  # extra height beyond the font size
-_PILL_CORNER_RADIUS = 4
-_CHAR_WIDTH_FACTOR = 0.58  # rough char-width estimate at weight 500
+from gitsvg.render._geometry import offset_position
+from gitsvg.render._metrics import (
+    _CHAR_WIDTH_FACTOR_NORMAL,
+    _PILL_CORNER_RADIUS,
+    _PILL_PADDING_X,
+    _PILL_PADDING_Y,
+)
 
 
 def draw_branch_pill(d: draw.Drawing, branch: LayoutBranch, color: str, canvas: RenderCanvas, theme: Theme) -> None:
     """Append a branch-name pill (background rectangle + text) to the drawing."""
-    x = branch_axis_to_x(branch.branch_pos, canvas)
-    y = commit_axis_to_y(branch.start, canvas) + theme.branch_name_pill_offset
+    x, y = offset_position(
+        anchor_branch_pos=branch.branch_pos,
+        anchor_commit_pos=branch.start,
+        branch_axis_offset_px=0,
+        commit_axis_offset_px=theme.branch_name_pill_offset,
+        canvas=canvas,
+    )
 
-    width = len(branch.name) * theme.branch_label_font_size * _CHAR_WIDTH_FACTOR + _PILL_PADDING_X
+    width = len(branch.name) * theme.branch_label_font_size * _CHAR_WIDTH_FACTOR_NORMAL + _PILL_PADDING_X
     height = theme.branch_label_font_size + _PILL_PADDING_Y
 
     d.append(

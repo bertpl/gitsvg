@@ -8,6 +8,7 @@ mechanism, and the version it locked in.
 |---|---|---|
 | 1 | Layout↔render boundary | v0.1.4 |
 | 2 | Position/size field axis classification | v0.1.5 |
+| 5 | Geometry-module routing for coordinate math | v0.1.5 |
 | 6 | Op-to-consumer boundary | v0.1.5 |
 
 ## 1. Layout↔render boundary
@@ -56,6 +57,32 @@ or running the code.
 **Enforcement.** Best-effort convention, code-review discipline.
 No test enforces presence — a missing classification on a new
 position/size field is a review nit, not a build break.
+
+**Locked in:** v0.1.5.
+
+## 5. Geometry-module routing for coordinate math
+
+**Rule.** Every coordinate computation in render-side code routes
+through the geometry module (`gitsvg/render/_geometry.py`).
+Primitives never assemble coordinates inline — they call
+`branch_axis_to_x`, `commit_axis_to_y`, `offset_position`,
+`branch_guide_endpoints`, etc. The arithmetic that turns slot
+indices and theme offsets into SVG pixel coordinates lives in
+exactly one place.
+
+**Rationale.** Inline `y + theme.<offset>` and `canvas.height -
+canvas.margin_… ± const` arithmetic at the call site couples
+every primitive to the BT screen-direction convention. Routing
+through helpers means a future orientation rotation lives entirely
+inside the geometry module — primitives only know about slot
+indices and axis-relative offsets.
+
+**Enforcement.** Code-review discipline. Pixel arithmetic on
+`canvas.*` or theme spacing/margin fields appearing inside a
+`_primitives/*.py` module is the trigger for review pushback.
+Local primitive geometry (pill width/height + centring on the
+anchor; label-stack vertical centring; arc segment + sweep math)
+stays in the primitives — those are not coordinate transforms.
 
 **Locked in:** v0.1.5.
 
