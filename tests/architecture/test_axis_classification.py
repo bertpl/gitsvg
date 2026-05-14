@@ -8,7 +8,7 @@ the author is then forced to declare whether the new field is
 <direction>`, or genuinely `not-applicable`.
 
 Backs invariant #2 in `docs/architecture.md` (position/size field axis
-classification, locked in v0.1.5 PR1).
+classification, locked in v0.1.5).
 """
 
 import ast
