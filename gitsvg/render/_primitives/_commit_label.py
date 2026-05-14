@@ -9,7 +9,8 @@ Layout:
 - When `hash` is set, a smaller secondary line follows in
   `theme.hash_font_size` / `theme.hash_color`.
 - All lines stack vertically with one consistent line height
-  (`theme.label_font_size + 4`), centred on the dot's y.
+  (`theme.label_font_size + _LABEL_LINE_PADDING_PX`), centred on
+  the dot's y.
 - Highlighted commits get bold weight (700) on the `msg` lines; the
   hash line stays at regular weight regardless.
 """
@@ -19,7 +20,8 @@ import drawsvg as draw
 from gitsvg._theme import Theme
 from gitsvg.layout import LayoutCommit
 from gitsvg.render._canvas import RenderCanvas
-from gitsvg.render._geometry import branch_axis_to_x, commit_axis_to_y
+from gitsvg.render._geometry import offset_position
+from gitsvg.render._metrics import _LABEL_LINE_PADDING_PX
 
 
 def draw_commit_label(d: draw.Drawing, commit: LayoutCommit, canvas: RenderCanvas, theme: Theme) -> None:
@@ -32,17 +34,22 @@ def draw_commit_label(d: draw.Drawing, commit: LayoutCommit, canvas: RenderCanva
     if not lines:
         return
 
-    cx = branch_axis_to_x(commit.branch_pos, canvas)
-    cy = commit_axis_to_y(commit.commit_pos, canvas)
-
     if commit.label_side == "left":
         anchor = "end"
-        x = cx - theme.label_offset
+        branch_axis_offset_px = -theme.label_offset
     else:
         anchor = "start"
-        x = cx + theme.label_offset
+        branch_axis_offset_px = theme.label_offset
 
-    line_height = theme.label_font_size + 4
+    x, cy = offset_position(
+        anchor_branch_pos=commit.branch_pos,
+        anchor_commit_pos=commit.commit_pos,
+        branch_axis_offset_px=branch_axis_offset_px,
+        commit_axis_offset_px=0,
+        canvas=canvas,
+    )
+
+    line_height = theme.label_font_size + _LABEL_LINE_PADDING_PX
 
     # Vertically centre the stack on the dot's y. Lines are drawn with
     # `dominant_baseline="middle"`, so a single line's y is the dot's y;
