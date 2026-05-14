@@ -8,6 +8,7 @@ the canvas. Reads font sizes from the resolved theme.
 from gitsvg._theme import Theme
 from gitsvg.layout import LayoutCommit
 
+# Classification (all three constants below): axis-symmetric — perceptual text-geometry, no grid-axis bias.
 _NORMAL_CHAR_WIDTH_FACTOR = 0.58
 _BOLD_CHAR_WIDTH_FACTOR = 0.64
 _PILL_PADDING_X = 12  # matches the value in `gitsvg.render._primitives._branch_pill`

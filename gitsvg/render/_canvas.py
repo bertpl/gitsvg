@@ -26,33 +26,37 @@ class RenderCanvas:
 
     Effective values come from theme defaults; user pins on the
     `canvas:` op already flowed into `theme` via `build_theme`.
-
-    Attributes:
-        width: SVG canvas width in pixels.
-        height: SVG canvas height in pixels.
-        n_commits: Effective commit-axis slot count (pinned via `canvas.n_commits`
-            or auto-fit from content). Needed by the coordinate transform
-            because the bottom-to-top orientation places index 0 at the
-            largest y.
-        n_branches: Effective branch-axis slot count.
-        branch_spacing: Effective pixel distance between adjacent branch-axis slots.
-        commit_spacing: Effective pixel distance between adjacent commit-axis slots.
-        margin_branch_axis_lower: Effective branch-axis margin at the lower end (lane 0 side).
-        margin_branch_axis_upper: Effective branch-axis margin at the upper end (highest-lane side).
-        margin_commit_axis_lower: Effective commit-axis margin at the lower end (oldest-commit side).
-        margin_commit_axis_upper: Effective commit-axis margin at the upper end (newest-commit side).
     """
 
     width: float
+    """SVG canvas width in pixels. Classification: axis-bound: branch-axis."""
+
     height: float
+    """SVG canvas height in pixels. Classification: axis-bound: commit-axis."""
+
     n_commits: int
+    """Effective commit-axis slot count (pinned via `canvas.n_commits` or auto-fit from content). Needed by the coordinate transform because the bottom-to-top orientation places index 0 at the largest y. Classification: axis-bound: commit-axis (slot count)."""
+
     n_branches: int
+    """Effective branch-axis slot count. Classification: axis-bound: branch-axis (slot count)."""
+
     branch_spacing: float
+    """Effective pixel distance between adjacent branch-axis slots. Classification: axis-bound: branch-axis."""
+
     commit_spacing: float
+    """Effective pixel distance between adjacent commit-axis slots. Classification: axis-bound: commit-axis."""
+
     margin_branch_axis_lower: float
+    """Effective branch-axis margin at the lower end (lane 0 side). Classification: axis-bound: branch-axis."""
+
     margin_branch_axis_upper: float
+    """Effective branch-axis margin at the upper end (highest-lane side). Classification: axis-bound: branch-axis."""
+
     margin_commit_axis_lower: float
+    """Effective commit-axis margin at the lower end (oldest-commit side). Classification: axis-bound: commit-axis."""
+
     margin_commit_axis_upper: float
+    """Effective commit-axis margin at the upper end (newest-commit side). Classification: axis-bound: commit-axis."""
 
 
 def compute_canvas(layout: Layout, theme: Theme) -> RenderCanvas:
