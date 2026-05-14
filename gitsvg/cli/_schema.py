@@ -12,7 +12,7 @@ import sys
 
 import click
 
-from gitsvg.file_format._schema import list_op_names, op_one_liner, op_schema
+from gitsvg.file_format import list_op_names, op_one_liner, op_schema
 from gitsvg.file_format.ops import OP_BY_NAME
 
 

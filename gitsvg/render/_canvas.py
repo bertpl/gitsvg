@@ -17,7 +17,7 @@ from dataclasses import dataclass
 
 from gitsvg._theme import Theme
 from gitsvg.layout import Layout, LayoutBranch, LayoutCommit
-from gitsvg.render._metrics import commit_label_width, pill_width
+from gitsvg.render._label_widths import commit_label_width, pill_width
 
 # Auto-fit safety margin between content (pill / outward label) and the canvas
 # edge — keeps the rendered geometry from butting right up against the SVG

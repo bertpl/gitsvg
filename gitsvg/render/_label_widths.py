@@ -1,8 +1,9 @@
-"""Approximate text-width estimation used by the auto-fit margin code.
+"""Approximate label-width estimation used by the auto-fit margin
+code and by the label primitives that need a pixel width before drawing.
 
-A per-character pixel estimate matching the pill primitive's per-char
-factor — no real glyph measurement. Good enough to keep labels inside
-the canvas. Reads font sizes and pill geometry off the resolved theme.
+A per-character pixel estimate — no real glyph measurement. Good
+enough to keep labels inside the canvas. Reads font sizes and pill
+geometry off the resolved theme.
 """
 
 from gitsvg._theme import Theme
@@ -14,9 +15,9 @@ _CHAR_WIDTH_FACTOR_NORMAL = 0.58  # rough char-width estimate at weight 500
 _CHAR_WIDTH_FACTOR_BOLD = 0.64  # rough char-width estimate at weight 700
 
 
-def pill_width(name: str, theme: Theme) -> float:
-    """Return the estimated pixel width of a branch-name pill rectangle."""
-    return len(name) * theme.branch_label_font_size * _CHAR_WIDTH_FACTOR_NORMAL + theme.pill_padding_x
+def pill_width(text: str, theme: Theme) -> float:
+    """Return the estimated pixel width of a pill rectangle for `text`."""
+    return len(text) * theme.branch_label_font_size * _CHAR_WIDTH_FACTOR_NORMAL + theme.pill_padding_x
 
 
 def commit_label_width(commit: LayoutCommit, theme: Theme) -> float:
