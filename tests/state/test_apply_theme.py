@@ -223,7 +223,7 @@ def test_branch_color_overrides_survive_explicit_theme_patch() -> None:
 
 
 # ==================================================================================================
-#  Theme-field semantic validation (E218-E221)
+#  Theme-field semantic validation
 # ==================================================================================================
 import pytest
 
@@ -260,43 +260,3 @@ def test_font_size_must_be_positive_emits_e219(field: str) -> None:
     codes = [e.code for e in report.errors]
     assert codes == ["E219"]
     assert field in report.errors[0].message
-
-
-@pytest.mark.parametrize("value", [1.5, 2.0, 10])
-def test_guide_overshoot_above_one_emits_e220(value: float) -> None:
-    # --- arrange / act ----------------
-    _, report = _state_from(f'{{"op": "theme", "guide_overshoot_in_rows": {value}}}\n')
-
-    # --- assert -----------------------
-    codes = [e.code for e in report.errors]
-    assert codes == ["E220"]
-
-
-@pytest.mark.parametrize("value", [0.0, 0.5, 1.0])
-def test_guide_overshoot_within_range_accepted(value: float) -> None:
-    # --- arrange / act ----------------
-    state, report = _state_from(f'{{"op": "theme", "guide_overshoot_in_rows": {value}}}\n')
-
-    # --- assert -----------------------
-    assert report.is_clean()
-    assert state.theme.guide_overshoot_in_rows == value
-
-
-@pytest.mark.parametrize("value", [0.51, 0.7, 1.0, 5.0])
-def test_arc_corner_above_half_emits_e221(value: float) -> None:
-    # --- arrange / act ----------------
-    _, report = _state_from(f'{{"op": "theme", "arc_corner_radius_in_grid_units": {value}}}\n')
-
-    # --- assert -----------------------
-    codes = [e.code for e in report.errors]
-    assert codes == ["E221"]
-
-
-@pytest.mark.parametrize("value", [0.0, 0.25, 0.5])
-def test_arc_corner_within_range_accepted(value: float) -> None:
-    # --- arrange / act ----------------
-    state, report = _state_from(f'{{"op": "theme", "arc_corner_radius_in_grid_units": {value}}}\n')
-
-    # --- assert -----------------------
-    assert report.is_clean()
-    assert state.theme.arc_corner_radius_in_grid_units == value

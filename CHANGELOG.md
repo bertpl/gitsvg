@@ -9,11 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Four new semantic validation error codes on the `theme:` op surface — values that were previously accepted but render absurdly are now rejected at parse time:
+- Two new semantic validation error codes on the `theme:` op surface — values that were previously accepted but render absurdly are now rejected at parse time:
   - `E218` — `branch_spacing` / `commit_spacing` must be `> 0` (zero collapses lanes / rows onto themselves).
   - `E219` — `label_font_size` / `branch_label_font_size` / `hash_font_size` must be `> 0` (zero makes text invisible).
-  - `E220` — `guide_overshoot_in_rows` must be `≤ 1` (values past a single row push guide endpoints into the canvas margins without visual justification).
-  - `E221` — `arc_corner_radius_in_grid_units` must be `≤ 0.5` (values past half a grid unit produce self-intersecting arcs).
 - Five new `theme:` op fields expose previously-internal visual constants for user customisation. All resolve to their previous hard-coded pixel values at the default spacings and font sizes (no visual change to existing diagrams):
   - `guide_overshoot_in_rows` — how far each branch guide extends past the commit-axis margin edges, as a multiple of `commit_spacing` (default `0.2`, resolves to 10 px).
   - `pill_padding_x_in_font_sizes` — extra pill width beyond the rendered text, as a multiple of `branch_label_font_size` (default `12/11`, resolves to 12 px).

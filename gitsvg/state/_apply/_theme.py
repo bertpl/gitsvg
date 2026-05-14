@@ -42,10 +42,6 @@ _FIELD_CONSTRAINTS: dict[str, tuple] = {
     "label_font_size": (lambda v: v > 0, "E219", "must be > 0"),
     "branch_label_font_size": (lambda v: v > 0, "E219", "must be > 0"),
     "hash_font_size": (lambda v: v > 0, "E219", "must be > 0"),
-    # Guide overshoot — values past one row are pathological.
-    "guide_overshoot_in_rows": (lambda v: v <= 1, "E220", "must be <= 1"),
-    # Arc corner — values past half a grid unit produce self-intersecting arcs.
-    "arc_corner_radius_in_grid_units": (lambda v: v <= 0.5, "E221", "must be <= 0.5"),
 }
 
 
