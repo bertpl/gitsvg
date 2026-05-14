@@ -101,6 +101,10 @@ class ThemeOp(OpBase):
         default=None,
         description='SVG stroke-dasharray for the branch guides (e.g. `"4,4"`).',
     )
+    guide_overshoot_in_rows: NonNegativeFloat | None = Field(
+        default=None,
+        description="How far each branch guide extends past the commit-axis margin edges, expressed as a multiple of `commit_spacing` (applied symmetrically at both ends).",
+    )
 
     # --- Typography -------------------------------------
     label_font_family: NonEmptyStr | None = Field(
@@ -126,6 +130,22 @@ class ThemeOp(OpBase):
     branch_name_pill_offset: NonNegativeFloat | None = Field(
         default=None,
         description="Pixel offset from a branch's start row to its name pill.",
+    )
+    pill_padding_x_in_font_sizes: NonNegativeFloat | None = Field(
+        default=None,
+        description="Extra pill width beyond the rendered text, expressed as a multiple of `branch_label_font_size`.",
+    )
+    pill_padding_y_in_font_sizes: NonNegativeFloat | None = Field(
+        default=None,
+        description="Extra pill height beyond the font size, expressed as a multiple of `branch_label_font_size`.",
+    )
+    pill_corner_radius_in_font_sizes: NonNegativeFloat | None = Field(
+        default=None,
+        description="Pill rounded-corner radius (`rx` / `ry`), expressed as a multiple of `branch_label_font_size`.",
+    )
+    label_line_padding_in_font_sizes: NonNegativeFloat | None = Field(
+        default=None,
+        description="Extra height per line in a multi-line commit-label stack, expressed as a multiple of `label_font_size`.",
     )
 
     # --- Pull-request visuals ---------------------------

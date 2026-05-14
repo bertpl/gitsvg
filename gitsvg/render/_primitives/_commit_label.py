@@ -9,7 +9,7 @@ Layout:
 - When `hash` is set, a smaller secondary line follows in
   `theme.hash_font_size` / `theme.hash_color`.
 - All lines stack vertically with one consistent line height
-  (`theme.label_font_size + label_line_padding(theme)`), centred on
+  (`theme.label_font_size + theme.label_line_padding`), centred on
   the dot's y.
 - Highlighted commits get bold weight (700) on the `msg` lines; the
   hash line stays at regular weight regardless.
@@ -21,7 +21,6 @@ from gitsvg._theme import Theme
 from gitsvg.layout import LayoutCommit
 from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._geometry import offset_position
-from gitsvg.render._metrics import label_line_padding
 
 
 def draw_commit_label(d: draw.Drawing, commit: LayoutCommit, canvas: RenderCanvas, theme: Theme) -> None:
@@ -49,7 +48,7 @@ def draw_commit_label(d: draw.Drawing, commit: LayoutCommit, canvas: RenderCanva
         canvas=canvas,
     )
 
-    line_height = theme.label_font_size + label_line_padding(theme)
+    line_height = theme.label_font_size + theme.label_line_padding
 
     # Vertically centre the stack on the dot's y. Lines are drawn with
     # `dominant_baseline="middle"`, so a single line's y is the dot's y;

@@ -13,9 +13,8 @@ coordinate computation routes through this module's helpers.
 Primitives never assemble coordinates inline.
 """
 
+from gitsvg._theme import Theme
 from gitsvg.render._canvas import RenderCanvas
-
-_GUIDE_OVERSHOOT_PX = 10  # axis-bound: commit-axis (applied symmetrically at both ends)
 
 
 def branch_axis_to_x(pos: int, canvas: RenderCanvas) -> float:
@@ -60,22 +59,25 @@ def offset_position(
     return (x, y)
 
 
-def branch_guide_endpoints(canvas: RenderCanvas) -> tuple[float, float]:
+def branch_guide_endpoints(canvas: RenderCanvas, theme: Theme) -> tuple[float, float]:
     """Return the `(y_top, y_bottom)` span for branch guides on this canvas.
 
     Guides span the full canvas content area along the commit axis,
-    with a small overshoot above and below the margin edges.
+    with a small overshoot above and below the margin edges. The
+    overshoot is `theme.guide_overshoot` — a resolved pixel value
+    derived from `theme.guide_overshoot_in_rows × commit_spacing`.
 
     Args:
         canvas: Effective canvas spec — the guide span depends on
             the commit-axis margins (which set the content edges)
             and the canvas height.
+        theme: Resolved theme; supplies the overshoot value.
 
     Returns:
         A `(y_top, y_bottom)` pair in SVG pixel coordinates. `y_top`
-        sits above the upper-margin edge; `y_bottom` sits below the
-        lower-margin edge; both extend by `_GUIDE_OVERSHOOT_PX`.
+        sits `theme.guide_overshoot` px above the upper-margin edge;
+        `y_bottom` sits the same distance below the lower-margin edge.
     """
-    y_top = canvas.margin_commit_axis_upper - _GUIDE_OVERSHOOT_PX
-    y_bottom = canvas.height - canvas.margin_commit_axis_lower + _GUIDE_OVERSHOOT_PX
+    y_top = canvas.margin_commit_axis_upper - theme.guide_overshoot
+    y_bottom = canvas.height - canvas.margin_commit_axis_lower + theme.guide_overshoot
     return (y_top, y_bottom)

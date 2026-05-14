@@ -7,12 +7,13 @@ Per-branch colour overrides flow in via `build_theme(state)` from
 `branch.color` declarations.
 
 Position/size fields with a natural anchor are stored as ratios
-(suffixed `_in_lanes` / `_in_rows` / `_in_grid_units`) anchored to
-the relevant grid spacing. Pixel-valued accessors with the old
-unsuffixed names live as properties below the field block —
-read-only resolved values that downstream consumers (renderer,
-canvas auto-fit, primitives) read just as before. See
-`docs/architecture.md` invariant #4 for the rule.
+(suffixed `_in_lanes` / `_in_rows` / `_in_grid_units` /
+`_in_font_sizes`) anchored to the relevant spacing or font size.
+Pixel-valued accessors with the corresponding unsuffixed names
+live as properties below the field block — read-only resolved
+values that downstream consumers (renderer, canvas auto-fit,
+primitives) read just as before. See `docs/architecture.md`
+invariant #4 for the rule.
 
 `Theme` lives at the package root because both state and render
 depend on it. State holds a live `Theme` that accumulates `theme:`
@@ -67,6 +68,7 @@ class Theme:
     label_offset_branch_axis_in_lanes: float = 0.12  # direction-bound: branch-axis, sign from `label_side`
     branch_guide_width: float = 0.7  # axis-symmetric
     branch_guide_dash: str = "4,4"
+    guide_overshoot_in_rows: float = 0.2  # axis-bound: commit-axis (applied symmetrically at both ends)
 
     # --------------------------------------------------------------------------
     #  Typography
@@ -77,6 +79,10 @@ class Theme:
     branch_label_font_size: int = 11  # axis-symmetric
     hash_font_size: int = 9  # axis-symmetric
     branch_name_pill_offset: int = 25  # direction-bound: commit-axis, toward lower index
+    pill_padding_x_in_font_sizes: float = 12 / 11  # axis-symmetric (extra pill width beyond text)
+    pill_padding_y_in_font_sizes: float = 8 / 11  # axis-symmetric (extra pill height beyond font size)
+    pill_corner_radius_in_font_sizes: float = 4 / 11  # axis-symmetric (rounded pill corners)
+    label_line_padding_in_font_sizes: float = 4 / 11  # axis-symmetric (extra height per line in a multi-line stack)
 
     # --------------------------------------------------------------------------
     #  Pull-request visuals
@@ -157,6 +163,31 @@ class Theme:
     def label_offset(self) -> int | float:
         """Resolved pixel offset between a commit dot and its label, along the branch axis."""
         return _resolve_int_or_float(self.label_offset_branch_axis_in_lanes * self.branch_spacing)
+
+    @property
+    def guide_overshoot(self) -> int | float:
+        """Resolved pixel overshoot — how far a branch guide extends past the commit-axis margin edges."""
+        return _resolve_int_or_float(self.guide_overshoot_in_rows * self.commit_spacing)
+
+    @property
+    def pill_padding_x(self) -> int | float:
+        """Resolved pill-padding-x (px) — extra width beyond the rendered text."""
+        return _resolve_int_or_float(self.pill_padding_x_in_font_sizes * self.branch_label_font_size)
+
+    @property
+    def pill_padding_y(self) -> int | float:
+        """Resolved pill-padding-y (px) — extra height beyond the font size."""
+        return _resolve_int_or_float(self.pill_padding_y_in_font_sizes * self.branch_label_font_size)
+
+    @property
+    def pill_corner_radius(self) -> int | float:
+        """Resolved pill corner radius (px) for `rx` / `ry`."""
+        return _resolve_int_or_float(self.pill_corner_radius_in_font_sizes * self.branch_label_font_size)
+
+    @property
+    def label_line_padding(self) -> int | float:
+        """Resolved extra height per line (px) in a multi-line label stack."""
+        return _resolve_int_or_float(self.label_line_padding_in_font_sizes * self.label_font_size)
 
 
 def _resolve_int_or_float(value: float) -> int | float:
