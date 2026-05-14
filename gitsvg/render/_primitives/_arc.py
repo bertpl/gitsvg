@@ -24,6 +24,11 @@ from gitsvg._theme import Theme
 from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._geometry import branch_axis_to_x, commit_axis_to_y
 
+# Sub-pixel tolerance below which arc segments degenerate (collapse to a
+# straight line, or skip an emit entirely). Pure numerical-precision guard;
+# never scales with anything else.
+_ARC_DEGENERATE_TOLERANCE_PX = 0.5  # axis-symmetric (perceptual)
+
 
 def draw_arc(
     d: draw.Drawing,
@@ -75,7 +80,7 @@ def draw_arc(
     p.M(x1, y1)
 
     # Same row → degenerate to a straight horizontal segment.
-    if abs(y2 - y1) < 0.5:
+    if abs(y2 - y1) < _ARC_DEGENERATE_TOLERANCE_PX:
         p.L(x2, y1)
         d.append(p)
         return
@@ -92,7 +97,7 @@ def draw_arc(
         sweep = 1 if (dx > 0) != (dy > 0) else 0
         p.A(r, r, 0, 0, sweep, x1 + dx * r, y2)
         # Horizontal segment to target.
-        if abs(x2 - (x1 + dx * r)) > 0.5:
+        if abs(x2 - (x1 + dx * r)) > _ARC_DEGENERATE_TOLERANCE_PX:
             p.L(x2, y2)
     else:
         # Horizontal segment from source toward the target's lane.
@@ -101,7 +106,7 @@ def draw_arc(
         sweep = 0 if (dx > 0) != (dy > 0) else 1
         p.A(r, r, 0, 0, sweep, x2, y1 + dy * r)
         # Vertical segment to target.
-        if abs(y2 - (y1 + dy * r)) > 0.5:
+        if abs(y2 - (y1 + dy * r)) > _ARC_DEGENERATE_TOLERANCE_PX:
             p.L(x2, y2)
 
     d.append(p)

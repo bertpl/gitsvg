@@ -63,29 +63,16 @@ position/size field is a review nit, not a build break.
 
 ## 4. Structural-vs-perceptual cleavage
 
-**Rule.** Position/size fields with a natural anchor are
-parameterised as ratios of that anchor (suffixed `_in_lanes` /
-`_in_rows` / `_in_grid_units` for grid-scale anchors —
-`branch_spacing` / `commit_spacing` / their min, respectively).
-Absolute pixels remain for fields with no natural anchor: stroke
-widths, the font sizes themselves, and char-width factors.
+**Rule.** Fields with a natural anchor are stored as ratios of that
+anchor. The field name carries a suffix naming the anchor:
 
-**Rationale.** Hard-coded pixel margins and offsets stop looking
-right the moment a user changes `branch_spacing` or
-`commit_spacing` — a 100 px margin against a 50 px lane is
-proportionally wider than against a 200 px lane. Anchoring those
-values as ratios of the spacing they relate to means a single
-spacing tweak rescales everything proportionally. Absolute pixels
-stay only where they genuinely belong (text rendering, where the
-font size IS the natural scale).
+- `_in_lanes` → `branch_spacing`
+- `_in_rows` → `commit_spacing`
+- `_in_grid_units` → `min(branch_spacing, commit_spacing)`
+- `_in_font_sizes` → the relevant font_size field
 
-**Enforcement.** Code-review discipline. New theme fields with a
-natural grid anchor follow the suffix convention. The Theme
-dataclass exposes resolved-pixel accessors (e.g.
-`theme.margin_branch_axis_lower`) as properties so downstream
-consumers (renderer, canvas auto-fit, primitives) read pixels
-without knowing about the ratio storage; the user-facing JSONL
-surface uses the suffixed names.
+**Rationale.** Tweaking a spacing or font size then rescales
+everything anchored to it proportionally.
 
 **Locked in:** v0.1.5.
 

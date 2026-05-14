@@ -61,7 +61,9 @@ from gitsvg.layout._layout import (
 from gitsvg.layout._occupancy import Occupancy
 from gitsvg.state import State
 
-_DEFAULT_LABEL_SIDE = "right"
+_DEFAULT_LABEL_SIDE = (
+    "right"  # fallback when a `branch` op omits `label_side`; commits inherit their branch's resolved side
+)
 
 
 def compute_layout(state: State) -> Layout:

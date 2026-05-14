@@ -19,9 +19,9 @@ from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._geometry import offset_position
 from gitsvg.render._metrics import (
     _CHAR_WIDTH_FACTOR_NORMAL,
-    _PILL_CORNER_RADIUS,
-    _PILL_PADDING_X,
-    _PILL_PADDING_Y,
+    pill_corner_radius,
+    pill_padding_x,
+    pill_padding_y,
 )
 
 
@@ -44,8 +44,9 @@ def draw_pull_request_pill(
         canvas=canvas,
     )
 
-    width = len(pr.title) * theme.branch_label_font_size * _CHAR_WIDTH_FACTOR_NORMAL + _PILL_PADDING_X
-    height = theme.branch_label_font_size + _PILL_PADDING_Y
+    width = len(pr.title) * theme.branch_label_font_size * _CHAR_WIDTH_FACTOR_NORMAL + pill_padding_x(theme)
+    height = theme.branch_label_font_size + pill_padding_y(theme)
+    corner = pill_corner_radius(theme)
 
     d.append(
         draw.Rectangle(
@@ -53,8 +54,8 @@ def draw_pull_request_pill(
             y - height / 2,
             width,
             height,
-            rx=_PILL_CORNER_RADIUS,
-            ry=_PILL_CORNER_RADIUS,
+            rx=corner,
+            ry=corner,
             fill=color,
             opacity=theme.branch_label_bg_opacity,
         )
