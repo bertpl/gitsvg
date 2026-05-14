@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Five new `theme:` op fields expose previously-internal visual constants for user customisation. All resolve to their previous hard-coded pixel values at the default spacings and font sizes (no visual change to existing diagrams):
+  - `guide_overshoot_in_rows` — how far each branch guide extends past the commit-axis margin edges, as a multiple of `commit_spacing` (default `0.2`, resolves to 10 px).
+  - `pill_padding_x_in_font_sizes` — extra pill width beyond the rendered text, as a multiple of `branch_label_font_size` (default `12/11`, resolves to 12 px).
+  - `pill_padding_y_in_font_sizes` — extra pill height beyond the font size, same anchor (default `8/11`, resolves to 8 px).
+  - `pill_corner_radius_in_font_sizes` — pill rounded-corner radius, same anchor (default `4/11`, resolves to 4 px).
+  - `label_line_padding_in_font_sizes` — extra height per line in a multi-line commit-label stack, as a multiple of `label_font_size` (default `4/11`, resolves to 4 px).
+
 ### Changed
 
 - **Breaking:** the `canvas:` op is renamed `grid:` and trimmed to its two slot-count fields (`n_commits`, `n_branches`). Spacings and margins (`branch_spacing`, `commit_spacing`, `margin_branch_axis_*`, `margin_commit_axis_*`) move exclusively to `theme:`, where they already lived in parallel. Migration: rename `"op": "canvas"` to `"op": "grid"`, and move any spacing/margin fields off the op onto a `theme:` op (the same field names work as-is).

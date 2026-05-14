@@ -17,12 +17,7 @@ from gitsvg._theme import Theme
 from gitsvg.layout import LayoutPullRequest
 from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._geometry import offset_position
-from gitsvg.render._metrics import (
-    _CHAR_WIDTH_FACTOR_NORMAL,
-    pill_corner_radius,
-    pill_padding_x,
-    pill_padding_y,
-)
+from gitsvg.render._metrics import _CHAR_WIDTH_FACTOR_NORMAL
 
 
 def draw_pull_request_pill(
@@ -44,9 +39,9 @@ def draw_pull_request_pill(
         canvas=canvas,
     )
 
-    width = len(pr.title) * theme.branch_label_font_size * _CHAR_WIDTH_FACTOR_NORMAL + pill_padding_x(theme)
-    height = theme.branch_label_font_size + pill_padding_y(theme)
-    corner = pill_corner_radius(theme)
+    width = len(pr.title) * theme.branch_label_font_size * _CHAR_WIDTH_FACTOR_NORMAL + theme.pill_padding_x
+    height = theme.branch_label_font_size + theme.pill_padding_y
+    corner = theme.pill_corner_radius
 
     d.append(
         draw.Rectangle(

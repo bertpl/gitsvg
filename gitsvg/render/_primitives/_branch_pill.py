@@ -15,12 +15,7 @@ from gitsvg._theme import Theme
 from gitsvg.layout import LayoutBranch
 from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._geometry import offset_position
-from gitsvg.render._metrics import (
-    _CHAR_WIDTH_FACTOR_NORMAL,
-    pill_corner_radius,
-    pill_padding_x,
-    pill_padding_y,
-)
+from gitsvg.render._metrics import _CHAR_WIDTH_FACTOR_NORMAL
 
 
 def draw_branch_pill(d: draw.Drawing, branch: LayoutBranch, color: str, canvas: RenderCanvas, theme: Theme) -> None:
@@ -33,9 +28,9 @@ def draw_branch_pill(d: draw.Drawing, branch: LayoutBranch, color: str, canvas: 
         canvas=canvas,
     )
 
-    width = len(branch.name) * theme.branch_label_font_size * _CHAR_WIDTH_FACTOR_NORMAL + pill_padding_x(theme)
-    height = theme.branch_label_font_size + pill_padding_y(theme)
-    corner = pill_corner_radius(theme)
+    width = len(branch.name) * theme.branch_label_font_size * _CHAR_WIDTH_FACTOR_NORMAL + theme.pill_padding_x
+    height = theme.branch_label_font_size + theme.pill_padding_y
+    corner = theme.pill_corner_radius
 
     d.append(
         draw.Rectangle(

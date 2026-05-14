@@ -16,7 +16,7 @@ from gitsvg.render._geometry import branch_axis_to_x, branch_guide_endpoints
 def draw_branch_guide(d: draw.Drawing, branch_pos: int, canvas: RenderCanvas, theme: Theme) -> None:
     """Append a dashed vertical guide for a single lane to the drawing."""
     x = branch_axis_to_x(branch_pos, canvas)
-    y_top, y_bottom = branch_guide_endpoints(canvas)
+    y_top, y_bottom = branch_guide_endpoints(canvas, theme)
     d.append(
         draw.Line(
             x,
