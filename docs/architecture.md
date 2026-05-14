@@ -1,8 +1,38 @@
-# Architecture invariants
+# Architecture
 
-The canonical record of architectural invariants that bind the
-codebase. Each entry states the rule, the rationale, the enforcement
-mechanism, and the version it locked in.
+The canonical record of the package's pipeline shape and the
+architectural invariants that bind the codebase. The pipeline section
+captures the validate-and-render flow that gives the package its
+spine; each invariant entry below states the rule, the rationale,
+the enforcement mechanism, and the version it locked in.
+
+## Pipeline
+
+**Rule.** Input JSONL flows through five stages in fixed order:
+
+```
+parse → imports → state → layout → render
+```
+
+Each stage's output is the next stage's only input; no stage reaches
+back into a prior stage's data structures. Cross-cutting subpackages
+(`file_format/`, `errors/`, `cli/`, plus `_theme.py` at the root) are
+consumed by pipeline stages without being part of the flow.
+
+**Rationale.** Pipeline shape is the package's load-bearing
+architecture. Locking the five-stage flow as an explicit rule
+prevents drift toward "this stage also peeks at that one's earlier
+state" coupling, and keeps each stage replaceable in isolation
+(alternative parse formats, alternative layout strategies,
+alternative renderers).
+
+**Enforcement.** Code-review discipline. Import direction is the
+trigger: a pipeline subpackage importing from a later stage, or any
+stage reaching into a prior stage's internals beyond its declared
+output type, is the trigger for review pushback.
+
+**Locked in:** foundational — predates the per-invariant numbering
+below.
 
 | # | Invariant | Locked in |
 |---|---|---|

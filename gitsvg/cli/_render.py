@@ -17,9 +17,7 @@ import click
 from gitsvg.imports import resolve_imports
 from gitsvg.layout import compute_layout
 from gitsvg.parse import parse_jsonl_file
-from gitsvg.render import render
-from gitsvg.render._minify import minify
-from gitsvg.render._theme import build_theme
+from gitsvg.render import build_theme, minify, render
 from gitsvg.state import apply_ops, check_end_of_file
 
 
