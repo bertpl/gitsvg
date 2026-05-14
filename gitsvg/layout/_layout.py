@@ -58,8 +58,11 @@ class LayoutBranch:
             above the parent commit's `commit_pos`).
         end: Commit-axis position of the latest commit on this branch,
             or `start` when the branch has no commits yet.
-        label_side: Resolved label side, `"left"` or `"right"` — never
-            `None` in the layout.
+        label_side: Resolved grid-side for the branch's commit labels,
+            relative to canonical bottom-to-top orientation. `"left"` =
+            lower-branch-axis side; `"right"` = higher-branch-axis
+            side. Never `None` in the layout — the layout engine fills
+            in the default when the branch op omits it.
     """
 
     id: str
@@ -67,7 +70,7 @@ class LayoutBranch:
     branch_pos: int  # axis-bound: branch-axis (slot index)
     start: int  # axis-bound: commit-axis (slot index)
     end: int  # axis-bound: commit-axis (slot index)
-    label_side: str  # direction-bound: branch-axis (side hint)
+    label_side: str  # direction-bound: branch-axis (grid-side relative to BT)
 
 
 @dataclass(slots=True)
@@ -85,8 +88,12 @@ class LayoutCommit:
             label line. Already resolved from any `"auto"` sentinel.
         highlight: True when the commit should render with the highlight
             visual (enlarged dot + bold label).
-        label_side: Resolved label side for this commit (inherited from
-            its branch).
+        label_side: Resolved grid-side for this commit's label,
+            relative to canonical bottom-to-top orientation.
+            `"left"` = lower-branch-axis side; `"right"` =
+            higher-branch-axis side. Inherited from the commit's
+            branch. The renderer maps grid-side to pixel-side per
+            the current orientation.
     """
 
     id: str
@@ -96,7 +103,7 @@ class LayoutCommit:
     msg: str | None
     hash: str | None
     highlight: bool
-    label_side: str  # direction-bound: branch-axis (side hint)
+    label_side: str  # direction-bound: branch-axis (grid-side relative to BT)
 
 
 @dataclass(slots=True)

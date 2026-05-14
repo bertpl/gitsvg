@@ -36,9 +36,11 @@ def test_default_theme_values_pin_the_byte_identical_baseline() -> None:
     assert DEFAULT_THEME.label_font_size == 11
     assert DEFAULT_THEME.branch_label_font_size == 11
     assert DEFAULT_THEME.hash_font_size == 9
-    assert DEFAULT_THEME.branch_name_pill_offset == 25
+    assert DEFAULT_THEME.branch_name_pill_offset_commit_axis_in_rows == -0.5
+    assert DEFAULT_THEME.branch_name_pill_offset_branch_axis_in_lanes == 0.0
     assert DEFAULT_THEME.pull_request_dash == "6,4"
-    assert DEFAULT_THEME.pull_request_pill_offset == 25
+    assert DEFAULT_THEME.pull_request_pill_offset_commit_axis_in_rows == 0.5
+    assert DEFAULT_THEME.pull_request_pill_offset_branch_axis_in_lanes == 0.0
     assert DEFAULT_THEME.background_color is None
     assert DEFAULT_THEME.colors["main"] == "#5c6370"
     assert DEFAULT_THEME.default_branch_color_cycle == ["branch1", "branch2", "branch3", "branch4"]

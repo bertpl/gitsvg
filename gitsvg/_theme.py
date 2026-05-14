@@ -78,7 +78,8 @@ class Theme:
     label_font_size: int = 11  # axis-symmetric
     branch_label_font_size: int = 11  # axis-symmetric
     hash_font_size: int = 9  # axis-symmetric
-    branch_name_pill_offset: int = 25  # direction-bound: commit-axis, toward lower index
+    branch_name_pill_offset_commit_axis_in_rows: float = -0.5  # axis-bound: commit-axis (signed)
+    branch_name_pill_offset_branch_axis_in_lanes: float = 0.0  # axis-bound: branch-axis (signed)
     pill_padding_x_in_font_sizes: float = 12 / 11  # axis-symmetric (extra pill width beyond text)
     pill_padding_y_in_font_sizes: float = 8 / 11  # axis-symmetric (extra pill height beyond font size)
     pill_corner_radius_in_font_sizes: float = 4 / 11  # axis-symmetric (rounded pill corners)
@@ -88,7 +89,8 @@ class Theme:
     #  Pull-request visuals
     # --------------------------------------------------------------------------
     pull_request_dash: str = "6,4"
-    pull_request_pill_offset: int = 25  # direction-bound: commit-axis, toward upper index
+    pull_request_pill_offset_commit_axis_in_rows: float = 0.5  # axis-bound: commit-axis (signed)
+    pull_request_pill_offset_branch_axis_in_lanes: float = 0.0  # axis-bound: branch-axis (signed)
 
     # --------------------------------------------------------------------------
     #  Colours

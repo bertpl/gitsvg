@@ -8,6 +8,7 @@ mechanism, and the version it locked in.
 |---|---|---|
 | 1 | Layout↔render boundary | v0.1.4 |
 | 2 | Position/size field axis classification | v0.1.5 |
+| 3 | Signed math convention for offsets | v0.1.5 |
 | 4 | Structural-vs-perceptual cleavage | v0.1.5 |
 | 5 | Geometry-module routing for coordinate math | v0.1.5 |
 | 6 | Op-to-consumer boundary | v0.1.5 |
@@ -58,6 +59,22 @@ or running the code.
 **Enforcement.** Best-effort convention, code-review discipline.
 No test enforces presence — a missing classification on a new
 position/size field is a review nit, not a build break.
+
+**Locked in:** v0.1.5.
+
+## 3. Signed math convention for offsets
+
+**Rule.** Signed axis-bound fields use the same sign convention:
+positive = toward higher index along the named axis. The sign is
+the direction; there are no separate `_lower` / `_upper` variants
+for offset fields (margins, which represent two genuine distances,
+are the exception).
+
+**Rationale.** Lets one field carry both magnitude and direction,
+keeps offset semantics orientation-agnostic, and lines the
+JSONL surface up with how `gitsvg/render/_geometry.py`'s
+`offset_position` resolves the axis-relative offset to a pixel
+position.
 
 **Locked in:** v0.1.5.
 

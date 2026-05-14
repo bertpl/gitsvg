@@ -127,9 +127,13 @@ class ThemeOp(OpBase):
         default=None,
         description="Font size for the secondary hash line on commit labels.",
     )
-    branch_name_pill_offset: NonNegativeFloat | None = Field(
+    branch_name_pill_offset_commit_axis_in_rows: float | None = Field(
         default=None,
-        description="Pixel offset from a branch's start row to its name pill.",
+        description="Branch-name pill offset along the commit axis, expressed as a signed multiple of `commit_spacing`. Positive = toward higher commit-axis index. Default is `-0.5` (pill sits below the branch's start row in BT).",
+    )
+    branch_name_pill_offset_branch_axis_in_lanes: float | None = Field(
+        default=None,
+        description="Branch-name pill offset along the branch axis, expressed as a signed multiple of `branch_spacing`. Positive = toward higher branch-axis index. Default is `0` (pill is centred on the branch lane in BT).",
     )
     pill_padding_x_in_font_sizes: NonNegativeFloat | None = Field(
         default=None,
@@ -153,9 +157,13 @@ class ThemeOp(OpBase):
         default=None,
         description='SVG stroke-dasharray for pull-request arcs (e.g. `"6,4"`).',
     )
-    pull_request_pill_offset: NonNegativeFloat | None = Field(
+    pull_request_pill_offset_commit_axis_in_rows: float | None = Field(
         default=None,
-        description="Pixel offset from a PR's source-tip commit to its title pill.",
+        description="PR title-pill offset along the commit axis, expressed as a signed multiple of `commit_spacing`. Positive = toward higher commit-axis index. Default is `+0.5` (pill sits above the source-tip commit in BT).",
+    )
+    pull_request_pill_offset_branch_axis_in_lanes: float | None = Field(
+        default=None,
+        description="PR title-pill offset along the branch axis, expressed as a signed multiple of `branch_spacing`. Positive = toward higher branch-axis index. Default is `0` (pill is centred on the source branch's lane in BT).",
     )
 
     # --- Colours ----------------------------------------
