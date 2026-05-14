@@ -1,11 +1,14 @@
 """Draw a pull-request title pill anchored at the source-tip commit.
 
 Mirrors `_branch_pill.py` in shape and styling, but anchored at the
-*live* source-tip end of a branch rather than the static birth end:
-the pill sits `theme.pull_request_pill_offset` pixels *above* the
-source-tip commit in screen y (= towards the upper end of the commit
-axis, opposite of where branch pills sit). The text is the PR's
-`title`.
+*live* source-tip end of a branch rather than the static birth end.
+Position comes from the signed two-axis offset declared on the
+theme — `pull_request_pill_offset_commit_axis_in_rows` (default
+`+0.5`, putting the pill above the source-tip commit in bottom-to-top
+orientation) and
+`pull_request_pill_offset_branch_axis_in_lanes` (default `0`,
+keeping the pill centred on the source-tip's lane). The text is
+the PR's `title`.
 
 Width is approximated from the text length using a per-character pixel
 estimate; no real glyph measurement.
@@ -34,8 +37,8 @@ def draw_pull_request_pill(
     x, y = offset_position(
         anchor_branch_pos=pr.from_branch_pos,
         anchor_commit_pos=pr.from_commit_pos,
-        branch_axis_offset_px=0,
-        commit_axis_offset_px=-theme.pull_request_pill_offset,
+        branch_axis_offset_in_lanes=theme.pull_request_pill_offset_branch_axis_in_lanes,
+        commit_axis_offset_in_rows=theme.pull_request_pill_offset_commit_axis_in_rows,
         canvas=canvas,
     )
 

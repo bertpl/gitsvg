@@ -1,9 +1,11 @@
 """Draw a branch-name pill at the branch's start point.
 
 The pill is a filled rounded rectangle in the branch's colour with the
-branch name in white text, positioned `theme.branch_name_pill_offset`
-pixels *below* the branch's start point in screen y (= towards the
-lower end of the commit axis, where pills sit at the branch's birth).
+branch name in white text, positioned at the signed two-axis offset
+declared on the theme — `branch_name_pill_offset_commit_axis_in_rows`
+(default `-0.5`, putting the pill below the branch's start row in bottom-to-top orientation)
+and `branch_name_pill_offset_branch_axis_in_lanes` (default `0`,
+keeping the pill centred on the branch's lane).
 
 Width is approximated from the text length using a per-character pixel
 estimate; no real glyph measurement.
@@ -23,8 +25,8 @@ def draw_branch_pill(d: draw.Drawing, branch: LayoutBranch, color: str, canvas: 
     x, y = offset_position(
         anchor_branch_pos=branch.branch_pos,
         anchor_commit_pos=branch.start,
-        branch_axis_offset_px=0,
-        commit_axis_offset_px=theme.branch_name_pill_offset,
+        branch_axis_offset_in_lanes=theme.branch_name_pill_offset_branch_axis_in_lanes,
+        commit_axis_offset_in_rows=theme.branch_name_pill_offset_commit_axis_in_rows,
         canvas=canvas,
     )
 

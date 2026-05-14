@@ -9,31 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Two new semantic validation error codes on the `theme:` op surface — values that were previously accepted but render absurdly are now rejected at parse time:
-  - `E218` — `branch_spacing` / `commit_spacing` must be `> 0` (zero collapses lanes / rows onto themselves).
-  - `E219` — `label_font_size` / `branch_label_font_size` / `hash_font_size` must be `> 0` (zero makes text invisible).
-- Five new `theme:` op fields expose previously-internal visual constants for user customisation. All resolve to their previous hard-coded pixel values at the default spacings and font sizes (no visual change to existing diagrams):
-  - `guide_overshoot_in_rows` — how far each branch guide extends past the commit-axis margin edges, as a multiple of `commit_spacing` (default `0.2`, resolves to 10 px).
-  - `pill_padding_x_in_font_sizes` — extra pill width beyond the rendered text, as a multiple of `branch_label_font_size` (default `12/11`, resolves to 12 px).
-  - `pill_padding_y_in_font_sizes` — extra pill height beyond the font size, same anchor (default `8/11`, resolves to 8 px).
-  - `pill_corner_radius_in_font_sizes` — pill rounded-corner radius, same anchor (default `4/11`, resolves to 4 px).
-  - `label_line_padding_in_font_sizes` — extra height per line in a multi-line commit-label stack, as a multiple of `label_font_size` (default `4/11`, resolves to 4 px).
+- Five new `theme:` op fields expose previously-internal visual constants for user customisation: `guide_overshoot_in_rows`, `pill_padding_x_in_font_sizes`, `pill_padding_y_in_font_sizes`, `pill_corner_radius_in_font_sizes`, `label_line_padding_in_font_sizes`. Defaults reproduce today's pixel values; see the format spec for anchors.
+- Two new validation error codes on the `theme:` op surface: `E218` (`branch_spacing` / `commit_spacing` must be `> 0`), `E219` (font sizes must be `> 0`).
 
 ### Changed
 
-- **Breaking:** the `canvas:` op is renamed `grid:` and trimmed to its two slot-count fields (`n_commits`, `n_branches`). Spacings and margins (`branch_spacing`, `commit_spacing`, `margin_branch_axis_*`, `margin_commit_axis_*`) move exclusively to `theme:`, where they already lived in parallel. Migration: rename `"op": "canvas"` to `"op": "grid"`, and move any spacing/margin fields off the op onto a `theme:` op (the same field names work as-is).
-- **Breaking:** six `theme:` op fields are renamed and reparametrised as ratios of their natural grid anchor — they now scale automatically with `branch_spacing` / `commit_spacing` instead of being hard-coded pixels. Migration: rename and divide each value by the relevant spacing.
-
-  | Old field (px)              | New field                                | Anchor                                  |
-  |-----------------------------|------------------------------------------|-----------------------------------------|
-  | `margin_branch_axis_lower`  | `margin_branch_axis_lower_in_lanes`      | `branch_spacing`                        |
-  | `margin_branch_axis_upper`  | `margin_branch_axis_upper_in_lanes`      | `branch_spacing`                        |
-  | `margin_commit_axis_lower`  | `margin_commit_axis_lower_in_rows`       | `commit_spacing`                        |
-  | `margin_commit_axis_upper`  | `margin_commit_axis_upper_in_rows`       | `commit_spacing`                        |
-  | `arc_corner_radius`         | `arc_corner_radius_in_grid_units`        | `min(branch_spacing, commit_spacing)`   |
-  | `label_offset`              | `label_offset_branch_axis_in_lanes`      | `branch_spacing`                        |
-
-  Defaults at the default spacings reproduce the previous pixel values exactly (no visual change for diagrams using default spacings).
+- **Breaking:** the `canvas:` op is renamed `grid:` and trimmed to its two slot-count fields (`n_commits`, `n_branches`); spacings and margins move exclusively to `theme:`. Migration: rename `"op": "canvas"` to `"op": "grid"`, and move any spacing/margin fields onto a `theme:` op (same field names).
+- **Breaking:** six `theme:` op fields renamed and reparametrised as ratios of their grid anchor. The four margins (`margin_branch_axis_lower`, `margin_branch_axis_upper`, `margin_commit_axis_lower`, `margin_commit_axis_upper`) gain an `_in_lanes` (branch-axis) or `_in_rows` (commit-axis) suffix; `arc_corner_radius` → `arc_corner_radius_in_grid_units`; `label_offset` → `label_offset_branch_axis_in_lanes`. Migration: rename, then divide each value by its anchor — `branch_spacing` for `_in_lanes`, `commit_spacing` for `_in_rows`, or `min(branch_spacing, commit_spacing)` for `_in_grid_units`.
+- **Breaking:** the two pill-offset fields each split into a signed two-axis ratio pair (positive = toward higher index on the named axis): `branch_name_pill_offset` → `branch_name_pill_offset_commit_axis_in_rows` (default `-0.5`) + `branch_name_pill_offset_branch_axis_in_lanes` (default `0.0`); same shape for `pull_request_pill_offset` (defaults `+0.5` and `0.0`).
 
 ### Deprecated
 

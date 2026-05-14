@@ -172,8 +172,9 @@ def _auto_fit_margin_commit_axis_lower(branches: list[LayoutBranch], theme: Them
     """Compute the auto-fit lower margin on the commit axis.
 
     The pill of any branch with `start = min(start)` sits closest to the
-    canvas bottom. Reserve enough room for it: `branch_name_pill_offset`
-    (centre offset) + half the pill height + a small pad.
+    canvas bottom. Reserve enough room for it: the absolute pixel
+    distance from the branch's start row to the pill centre, plus half
+    the pill height, plus a small edge pad.
 
     Args:
         branches: All layout branches; only their `start` values and the
@@ -188,5 +189,11 @@ def _auto_fit_margin_commit_axis_lower(branches: list[LayoutBranch], theme: Them
     if not branches:
         return theme.margin_commit_axis_lower
     pill_height = theme.branch_label_font_size + theme.pill_padding_y
-    pill_room = theme.branch_name_pill_offset + pill_height / 2 + _AUTO_FIT_EDGE_PAD_PX
+    # Bottom-to-top-orientation-only: the branch-name pill sits at a negative
+    # commit-axis offset by default — i.e. below the anchor in screen y. The
+    # lower-margin auto-fit asks how far below the anchor the pill extends;
+    # that's the absolute screen-y offset (= negation of the signed offset
+    # converted to pixels).
+    pill_screen_y_offset = -theme.branch_name_pill_offset_commit_axis_in_rows * theme.commit_spacing
+    pill_room = pill_screen_y_offset + pill_height / 2 + _AUTO_FIT_EDGE_PAD_PX
     return max(theme.margin_commit_axis_lower, pill_room)

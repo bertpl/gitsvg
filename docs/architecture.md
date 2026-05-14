@@ -8,6 +8,7 @@ mechanism, and the version it locked in.
 |---|---|---|
 | 1 | Layout↔render boundary | v0.1.4 |
 | 2 | Position/size field axis classification | v0.1.5 |
+| 3 | Signed math convention for offsets | v0.1.5 |
 | 4 | Structural-vs-perceptual cleavage | v0.1.5 |
 | 5 | Geometry-module routing for coordinate math | v0.1.5 |
 | 6 | Op-to-consumer boundary | v0.1.5 |
@@ -61,6 +62,22 @@ position/size field is a review nit, not a build break.
 
 **Locked in:** v0.1.5.
 
+## 3. Signed math convention for offsets
+
+**Rule.** Signed axis-bound fields use the same sign convention:
+positive = toward higher index along the named axis. The sign is
+the direction; there are no separate `_lower` / `_upper` variants
+for offset fields (margins, which represent two genuine distances,
+are the exception).
+
+**Rationale.** Lets one field carry both magnitude and direction,
+keeps offset semantics orientation-agnostic, and lines the
+JSONL surface up with how `gitsvg/render/_geometry.py`'s
+`offset_position` resolves the axis-relative offset to a pixel
+position.
+
+**Locked in:** v0.1.5.
+
 ## 4. Structural-vs-perceptual cleavage
 
 **Rule.** Fields with a natural anchor are stored as ratios of that
@@ -88,7 +105,7 @@ exactly one place.
 
 **Rationale.** Inline `y + theme.<offset>` and `canvas.height -
 canvas.margin_… ± const` arithmetic at the call site couples
-every primitive to the BT screen-direction convention. Routing
+every primitive to the bottom-to-top screen-direction convention. Routing
 through helpers means a future orientation rotation lives entirely
 inside the geometry module — primitives only know about slot
 indices and axis-relative offsets.

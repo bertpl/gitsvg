@@ -35,16 +35,16 @@ def draw_commit_label(d: draw.Drawing, commit: LayoutCommit, canvas: RenderCanva
 
     if commit.label_side == "left":
         anchor = "end"
-        branch_axis_offset_px = -theme.label_offset
+        branch_axis_offset_in_lanes = -theme.label_offset_branch_axis_in_lanes
     else:
         anchor = "start"
-        branch_axis_offset_px = theme.label_offset
+        branch_axis_offset_in_lanes = theme.label_offset_branch_axis_in_lanes
 
     x, cy = offset_position(
         anchor_branch_pos=commit.branch_pos,
         anchor_commit_pos=commit.commit_pos,
-        branch_axis_offset_px=branch_axis_offset_px,
-        commit_axis_offset_px=0,
+        branch_axis_offset_in_lanes=branch_axis_offset_in_lanes,
+        commit_axis_offset_in_rows=0,
         canvas=canvas,
     )
 
