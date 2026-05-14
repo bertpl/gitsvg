@@ -63,42 +63,16 @@ position/size field is a review nit, not a build break.
 
 ## 4. Structural-vs-perceptual cleavage
 
-**Rule.** Position/size fields with a natural anchor are
-parameterised as ratios of that anchor. Two flavours:
+**Rule.** Fields with a natural anchor are stored as ratios of that
+anchor. The field name carries a suffix naming the anchor:
 
-- **Grid-scale ratios** — suffixed `_in_lanes` / `_in_rows` /
-  `_in_grid_units`, anchored to `branch_spacing` / `commit_spacing`
-  / their min, respectively. Used for margins, the arc corner, and
-  axis offsets.
-- **Font-scale ratios** — suffixed `_in_font_sizes`, anchored to
-  the relevant font_size field (`branch_label_font_size` for pill
-  geometry; `label_font_size` for the label-line stack). Used for
-  pill paddings, the pill corner, and label-line padding.
+- `_in_lanes` → `branch_spacing`
+- `_in_rows` → `commit_spacing`
+- `_in_grid_units` → `min(branch_spacing, commit_spacing)`
+- `_in_font_sizes` → the relevant font_size field
 
-Absolute pixels remain for fields with no natural anchor: stroke
-widths, the font sizes themselves, and char-width factors.
-
-**Rationale.** Hard-coded pixel margins and offsets stop looking
-right the moment a user changes `branch_spacing`,
-`commit_spacing`, or the font sizes — a 100 px margin against a
-50 px lane is proportionally wider than against a 200 px lane;
-a 12 px pill-padding around 11 px text looks cramped if the user
-pumps the font to 22 px. Anchoring those values as ratios of the
-quantity they relate to means a single spacing or font-size tweak
-rescales everything proportionally. Absolute pixels stay only
-where they genuinely belong (the font sizes themselves, stroke
-widths, char-width factors).
-
-**Enforcement.** Code-review discipline. New fields with a
-natural anchor follow the suffix convention. The Theme dataclass
-exposes resolved-pixel accessors (e.g.
-`theme.margin_branch_axis_lower`) as properties for the grid-scale
-ratios it stores; pill / label geometry constants live in
-`gitsvg/render/_metrics.py` and are resolved via small helpers
-(`pill_padding_x(theme)`, `pill_corner_radius(theme)`, etc.).
-Downstream consumers (renderer, canvas auto-fit, primitives) read
-the resolved pixel values without knowing about the ratio
-storage; the user-facing JSONL surface uses the suffixed names.
+**Rationale.** Tweaking a spacing or font size then rescales
+everything anchored to it proportionally.
 
 **Locked in:** v0.1.5.
 
