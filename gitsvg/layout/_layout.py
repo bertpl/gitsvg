@@ -39,8 +39,8 @@ class LayoutGrid:
         n_branches: Branch-axis slot count.
     """
 
-    n_commits: int
-    n_branches: int
+    n_commits: int  # axis-bound: commit-axis (slot count)
+    n_branches: int  # axis-bound: branch-axis (slot count)
 
 
 @dataclass(slots=True)
@@ -64,10 +64,10 @@ class LayoutBranch:
 
     id: str
     name: str
-    branch_pos: int
-    start: int
-    end: int
-    label_side: str
+    branch_pos: int  # axis-bound: branch-axis (slot index)
+    start: int  # axis-bound: commit-axis (slot index)
+    end: int  # axis-bound: commit-axis (slot index)
+    label_side: str  # direction-bound: branch-axis (side hint)
 
 
 @dataclass(slots=True)
@@ -91,12 +91,12 @@ class LayoutCommit:
 
     id: str
     branch_id: str
-    branch_pos: int
-    commit_pos: int
+    branch_pos: int  # axis-bound: branch-axis (slot index)
+    commit_pos: int  # axis-bound: commit-axis (slot index)
     msg: str | None
     hash: str | None
     highlight: bool
-    label_side: str
+    label_side: str  # direction-bound: branch-axis (side hint)
 
 
 @dataclass(slots=True)
@@ -123,10 +123,10 @@ class LayoutArc:
     """
 
     kind: str
-    from_branch_pos: int
-    from_commit_pos: int
-    to_branch_pos: int
-    to_commit_pos: int
+    from_branch_pos: int  # axis-bound: branch-axis (slot index)
+    from_commit_pos: int  # axis-bound: commit-axis (slot index)
+    to_branch_pos: int  # axis-bound: branch-axis (slot index)
+    to_commit_pos: int  # axis-bound: commit-axis (slot index)
     color_branch_id: str
     vertical_first: bool
 
@@ -140,7 +140,7 @@ class LayoutGuide:
             drawn.
     """
 
-    branch_pos: int
+    branch_pos: int  # axis-bound: branch-axis (slot index)
 
 
 @dataclass(slots=True)
@@ -171,10 +171,10 @@ class LayoutPullRequest:
     """
 
     id: str
-    from_branch_pos: int
-    from_commit_pos: int
-    to_branch_pos: int
-    to_commit_pos: int
+    from_branch_pos: int  # axis-bound: branch-axis (slot index)
+    from_commit_pos: int  # axis-bound: commit-axis (slot index)
+    to_branch_pos: int  # axis-bound: branch-axis (slot index)
+    to_commit_pos: int  # axis-bound: commit-axis (slot index)
     color_branch_id: str
     title: str | None
 

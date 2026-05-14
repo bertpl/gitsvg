@@ -37,25 +37,25 @@ class Theme:
     # against. `compute_canvas` re-introduces a float cast on
     # `margin_commit_axis_upper` so coordinate transforms keep producing
     # float y's.
-    branch_spacing: int = 100
-    commit_spacing: int = 50
-    margin_branch_axis_lower: int = 100
-    margin_branch_axis_upper: int = 100
-    margin_commit_axis_lower: int = 25
-    margin_commit_axis_upper: int = 25
+    branch_spacing: int = 100  # axis-bound: branch-axis
+    commit_spacing: int = 50  # axis-bound: commit-axis
+    margin_branch_axis_lower: int = 100  # axis-bound: branch-axis
+    margin_branch_axis_upper: int = 100  # axis-bound: branch-axis
+    margin_commit_axis_lower: int = 25  # axis-bound: commit-axis
+    margin_commit_axis_upper: int = 25  # axis-bound: commit-axis
 
     # --------------------------------------------------------------------------
     #  Strokes & geometry (px)
     # --------------------------------------------------------------------------
     # Stroke widths and radii default to ints to match drawsvg's
     # int-formatted attribute output.
-    branch_line_width: int = 2
-    commit_radius: int = 5
-    commit_stroke_width: float = 1.5
-    highlight_radius: int = 7
-    arc_corner_radius: int = 20
-    label_offset: int = 12
-    branch_guide_width: float = 0.7
+    branch_line_width: int = 2  # axis-symmetric
+    commit_radius: int = 5  # axis-symmetric
+    commit_stroke_width: float = 1.5  # axis-symmetric
+    highlight_radius: int = 7  # axis-symmetric
+    arc_corner_radius: int = 20  # axis-symmetric
+    label_offset: int = 12  # direction-bound: branch-axis, sign from `label_side`
+    branch_guide_width: float = 0.7  # axis-symmetric
     branch_guide_dash: str = "4,4"
 
     # --------------------------------------------------------------------------
@@ -63,16 +63,16 @@ class Theme:
     # --------------------------------------------------------------------------
     label_font_family: str = "'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif"
     label_font_family_small: str = "Inter, sans-serif"
-    label_font_size: int = 11
-    branch_label_font_size: int = 11
-    hash_font_size: int = 9
-    branch_name_pill_offset: int = 25
+    label_font_size: int = 11  # axis-symmetric
+    branch_label_font_size: int = 11  # axis-symmetric
+    hash_font_size: int = 9  # axis-symmetric
+    branch_name_pill_offset: int = 25  # direction-bound: commit-axis, toward lower index
 
     # --------------------------------------------------------------------------
     #  Pull-request visuals
     # --------------------------------------------------------------------------
     pull_request_dash: str = "6,4"
-    pull_request_pill_offset: int = 25
+    pull_request_pill_offset: int = 25  # direction-bound: commit-axis, toward upper index
 
     # --------------------------------------------------------------------------
     #  Colours

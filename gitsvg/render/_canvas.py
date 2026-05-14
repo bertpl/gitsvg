@@ -43,16 +43,16 @@ class RenderCanvas:
         margin_commit_axis_upper: Effective commit-axis margin at the upper end (newest-commit side).
     """
 
-    width: float
-    height: float
-    n_commits: int
-    n_branches: int
-    branch_spacing: float
-    commit_spacing: float
-    margin_branch_axis_lower: float
-    margin_branch_axis_upper: float
-    margin_commit_axis_lower: float
-    margin_commit_axis_upper: float
+    width: float  # axis-bound: branch-axis
+    height: float  # axis-bound: commit-axis
+    n_commits: int  # axis-bound: commit-axis (slot count)
+    n_branches: int  # axis-bound: branch-axis (slot count)
+    branch_spacing: float  # axis-bound: branch-axis
+    commit_spacing: float  # axis-bound: commit-axis
+    margin_branch_axis_lower: float  # axis-bound: branch-axis
+    margin_branch_axis_upper: float  # axis-bound: branch-axis
+    margin_commit_axis_lower: float  # axis-bound: commit-axis
+    margin_commit_axis_upper: float  # axis-bound: commit-axis
 
 
 def compute_canvas(layout: Layout, theme: Theme) -> RenderCanvas:
