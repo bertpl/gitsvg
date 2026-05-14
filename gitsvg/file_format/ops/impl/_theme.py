@@ -51,21 +51,21 @@ class ThemeOp(OpBase):
         default=None,
         description="Pixel distance between adjacent commit-axis slots.",
     )
-    margin_branch_axis_lower: NonNegativeFloat | None = Field(
+    margin_branch_axis_lower_in_lanes: NonNegativeFloat | None = Field(
         default=None,
-        description="Branch-axis margin at the lane-0 end.",
+        description="Branch-axis margin at the lane-0 end, expressed as a multiple of `branch_spacing`.",
     )
-    margin_branch_axis_upper: NonNegativeFloat | None = Field(
+    margin_branch_axis_upper_in_lanes: NonNegativeFloat | None = Field(
         default=None,
-        description="Branch-axis margin at the highest-lane end.",
+        description="Branch-axis margin at the highest-lane end, expressed as a multiple of `branch_spacing`.",
     )
-    margin_commit_axis_lower: NonNegativeFloat | None = Field(
+    margin_commit_axis_lower_in_rows: NonNegativeFloat | None = Field(
         default=None,
-        description="Commit-axis margin at the oldest-commit end.",
+        description="Commit-axis margin at the oldest-commit end, expressed as a multiple of `commit_spacing`.",
     )
-    margin_commit_axis_upper: NonNegativeFloat | None = Field(
+    margin_commit_axis_upper_in_rows: NonNegativeFloat | None = Field(
         default=None,
-        description="Commit-axis margin at the newest-commit end.",
+        description="Commit-axis margin at the newest-commit end, expressed as a multiple of `commit_spacing`.",
     )
 
     # --- Strokes & geometry (px) ------------------------
@@ -85,13 +85,13 @@ class ThemeOp(OpBase):
         default=None,
         description="Radius of a highlighted commit dot.",
     )
-    arc_corner_radius: NonNegativeFloat | None = Field(
+    arc_corner_radius_in_grid_units: NonNegativeFloat | None = Field(
         default=None,
-        description="Corner radius used by branch-off and merge arcs.",
+        description="Corner radius for branch-off and merge arcs, expressed as a multiple of `min(branch_spacing, commit_spacing)`.",
     )
-    label_offset: NonNegativeFloat | None = Field(
+    label_offset_branch_axis_in_lanes: NonNegativeFloat | None = Field(
         default=None,
-        description="Pixel offset between a commit dot and the start of its label.",
+        description="Offset between a commit dot and the start of its label along the branch axis, expressed as a multiple of `branch_spacing`.",
     )
     branch_guide_width: NonNegativeFloat | None = Field(
         default=None,

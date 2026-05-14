@@ -12,6 +12,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - **Breaking:** the `canvas:` op is renamed `grid:` and trimmed to its two slot-count fields (`n_commits`, `n_branches`). Spacings and margins (`branch_spacing`, `commit_spacing`, `margin_branch_axis_*`, `margin_commit_axis_*`) move exclusively to `theme:`, where they already lived in parallel. Migration: rename `"op": "canvas"` to `"op": "grid"`, and move any spacing/margin fields off the op onto a `theme:` op (the same field names work as-is).
+- **Breaking:** six `theme:` op fields are renamed and reparametrised as ratios of their natural grid anchor — they now scale automatically with `branch_spacing` / `commit_spacing` instead of being hard-coded pixels. Migration: rename and divide each value by the relevant spacing.
+
+  | Old field (px)              | New field                                | Anchor                                  |
+  |-----------------------------|------------------------------------------|-----------------------------------------|
+  | `margin_branch_axis_lower`  | `margin_branch_axis_lower_in_lanes`      | `branch_spacing`                        |
+  | `margin_branch_axis_upper`  | `margin_branch_axis_upper_in_lanes`      | `branch_spacing`                        |
+  | `margin_commit_axis_lower`  | `margin_commit_axis_lower_in_rows`       | `commit_spacing`                        |
+  | `margin_commit_axis_upper`  | `margin_commit_axis_upper_in_rows`       | `commit_spacing`                        |
+  | `arc_corner_radius`         | `arc_corner_radius_in_grid_units`        | `min(branch_spacing, commit_spacing)`   |
+  | `label_offset`              | `label_offset_branch_axis_in_lanes`      | `branch_spacing`                        |
+
+  Defaults at the default spacings reproduce the previous pixel values exactly (no visual change for diagrams using default spacings).
 
 ### Deprecated
 

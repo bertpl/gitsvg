@@ -8,6 +8,7 @@ mechanism, and the version it locked in.
 |---|---|---|
 | 1 | Layout↔render boundary | v0.1.4 |
 | 2 | Position/size field axis classification | v0.1.5 |
+| 4 | Structural-vs-perceptual cleavage | v0.1.5 |
 | 5 | Geometry-module routing for coordinate math | v0.1.5 |
 | 6 | Op-to-consumer boundary | v0.1.5 |
 
@@ -57,6 +58,34 @@ or running the code.
 **Enforcement.** Best-effort convention, code-review discipline.
 No test enforces presence — a missing classification on a new
 position/size field is a review nit, not a build break.
+
+**Locked in:** v0.1.5.
+
+## 4. Structural-vs-perceptual cleavage
+
+**Rule.** Position/size fields with a natural anchor are
+parameterised as ratios of that anchor (suffixed `_in_lanes` /
+`_in_rows` / `_in_grid_units` for grid-scale anchors —
+`branch_spacing` / `commit_spacing` / their min, respectively).
+Absolute pixels remain for fields with no natural anchor: stroke
+widths, the font sizes themselves, and char-width factors.
+
+**Rationale.** Hard-coded pixel margins and offsets stop looking
+right the moment a user changes `branch_spacing` or
+`commit_spacing` — a 100 px margin against a 50 px lane is
+proportionally wider than against a 200 px lane. Anchoring those
+values as ratios of the spacing they relate to means a single
+spacing tweak rescales everything proportionally. Absolute pixels
+stay only where they genuinely belong (text rendering, where the
+font size IS the natural scale).
+
+**Enforcement.** Code-review discipline. New theme fields with a
+natural grid anchor follow the suffix convention. The Theme
+dataclass exposes resolved-pixel accessors (e.g.
+`theme.margin_branch_axis_lower`) as properties so downstream
+consumers (renderer, canvas auto-fit, primitives) read pixels
+without knowing about the ratio storage; the user-facing JSONL
+surface uses the suffixed names.
 
 **Locked in:** v0.1.5.
 

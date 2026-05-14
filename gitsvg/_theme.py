@@ -2,16 +2,22 @@
 
 A `Theme` is the single object the renderer reads, and the single
 object state mutates as `theme:` ops apply. It holds every visual
-constant (spacing, sizes, colours, fonts, dashes, opacities) plus
-two presentational sections that flow in from state ops: per-branch
-colour overrides keyed by branch id, and canvas presentational fields
-(spacing, margins) sourced from a `canvas:` op.
+constant (spacings, sizes, colours, fonts, dashes, opacities).
+Per-branch colour overrides flow in via `build_theme(state)` from
+`branch.color` declarations.
 
-`Theme` lives at the package root because both state and render depend
-on it. State holds a live `Theme` that accumulates `theme:` op
-patches; the renderer reads the resolved value. The bridging adapter
-`build_theme(state)` lives in `gitsvg/render/_theme.py` (which is the
-layer that knows about both halves).
+Position/size fields with a natural anchor are stored as ratios
+(suffixed `_in_lanes` / `_in_rows` / `_in_grid_units`) anchored to
+the relevant grid spacing. Pixel-valued accessors with the old
+unsuffixed names live as properties below the field block —
+read-only resolved values that downstream consumers (renderer,
+canvas auto-fit, primitives) read just as before. See
+`docs/architecture.md` invariant #4 for the rule.
+
+`Theme` lives at the package root because both state and render
+depend on it. State holds a live `Theme` that accumulates `theme:`
+op patches; the renderer reads the resolved value via the bridging
+adapter `build_theme(state)` in `gitsvg/render/_theme.py`.
 """
 
 from dataclasses import dataclass, field
@@ -22,9 +28,9 @@ class Theme:
     """Every presentational value the renderer reads.
 
     Field groups (spacing, geometry, typography, colours, pull-request
-    visuals, canvas presentational overrides, branch colour overrides)
-    mirror the module-level visual constants that lived in `gitsvg/`
-    before they were absorbed into this dataclass.
+    visuals, branch colour overrides) mirror the module-level visual
+    constants that lived in `gitsvg/` before they were absorbed into
+    this dataclass.
     """
 
     # --------------------------------------------------------------------------
@@ -39,22 +45,26 @@ class Theme:
     # float y's.
     branch_spacing: int = 100  # axis-bound: branch-axis
     commit_spacing: int = 50  # axis-bound: commit-axis
-    margin_branch_axis_lower: int = 100  # axis-bound: branch-axis
-    margin_branch_axis_upper: int = 100  # axis-bound: branch-axis
-    margin_commit_axis_lower: int = 25  # axis-bound: commit-axis
-    margin_commit_axis_upper: int = 25  # axis-bound: commit-axis
 
     # --------------------------------------------------------------------------
-    #  Strokes & geometry (px)
+    #  Margins (ratios; resolved via the unsuffixed-name properties below)
     # --------------------------------------------------------------------------
-    # Stroke widths and radii default to ints to match drawsvg's
-    # int-formatted attribute output.
+    margin_branch_axis_lower_in_lanes: float = 1.0  # axis-bound: branch-axis
+    margin_branch_axis_upper_in_lanes: float = 1.0  # axis-bound: branch-axis
+    margin_commit_axis_lower_in_rows: float = 0.5  # axis-bound: commit-axis
+    margin_commit_axis_upper_in_rows: float = 0.5  # axis-bound: commit-axis
+
+    # --------------------------------------------------------------------------
+    #  Strokes & geometry (px, except where noted)
+    # --------------------------------------------------------------------------
+    # Stroke widths and pixel-valued radii default to ints to match
+    # drawsvg's int-formatted attribute output.
     branch_line_width: int = 2  # axis-symmetric
     commit_radius: int = 5  # axis-symmetric
     commit_stroke_width: float = 1.5  # axis-symmetric
     highlight_radius: int = 7  # axis-symmetric
-    arc_corner_radius: int = 20  # axis-symmetric
-    label_offset: int = 12  # direction-bound: branch-axis, sign from `label_side`
+    arc_corner_radius_in_grid_units: float = 0.4  # axis-symmetric
+    label_offset_branch_axis_in_lanes: float = 0.12  # direction-bound: branch-axis, sign from `label_side`
     branch_guide_width: float = 0.7  # axis-symmetric
     branch_guide_dash: str = "4,4"
 
@@ -104,6 +114,60 @@ class Theme:
     branch_color_overrides: dict[str, str] = field(default_factory=dict)
     """Hex colour overrides, keyed by `BranchState.id` (not name)."""
 
+    # --------------------------------------------------------------------------
+    #  Resolved-pixel accessors for ratio-stored fields
+    # --------------------------------------------------------------------------
+    # Read-only: the renderer / canvas auto-fit / primitives read these
+    # (e.g. `theme.margin_branch_axis_lower`) and get the resolved pixel
+    # value, computed lazily from the stored ratio × the relevant
+    # spacing. Storage is the user-facing ratio; reads are pixels.
+    # `_resolve_int_or_float` casts whole-number results back to int so
+    # the SVG attribute formatting matches the pre-ratio defaults exactly
+    # (drawsvg writes `width="100"` from int and `width="100.0"` from
+    # float; the byte-identical SVG output gate depends on this).
+
+    @property
+    def margin_branch_axis_lower(self) -> int | float:
+        """Resolved pixel margin at the lower branch-axis end."""
+        return _resolve_int_or_float(self.margin_branch_axis_lower_in_lanes * self.branch_spacing)
+
+    @property
+    def margin_branch_axis_upper(self) -> int | float:
+        """Resolved pixel margin at the upper branch-axis end."""
+        return _resolve_int_or_float(self.margin_branch_axis_upper_in_lanes * self.branch_spacing)
+
+    @property
+    def margin_commit_axis_lower(self) -> int | float:
+        """Resolved pixel margin at the lower commit-axis end."""
+        return _resolve_int_or_float(self.margin_commit_axis_lower_in_rows * self.commit_spacing)
+
+    @property
+    def margin_commit_axis_upper(self) -> int | float:
+        """Resolved pixel margin at the upper commit-axis end."""
+        return _resolve_int_or_float(self.margin_commit_axis_upper_in_rows * self.commit_spacing)
+
+    @property
+    def arc_corner_radius(self) -> int | float:
+        """Resolved pixel corner radius for branch-off / merge arcs."""
+        return _resolve_int_or_float(
+            self.arc_corner_radius_in_grid_units * min(self.branch_spacing, self.commit_spacing)
+        )
+
+    @property
+    def label_offset(self) -> int | float:
+        """Resolved pixel offset between a commit dot and its label, along the branch axis."""
+        return _resolve_int_or_float(self.label_offset_branch_axis_in_lanes * self.branch_spacing)
+
+
+def _resolve_int_or_float(value: float) -> int | float:
+    """Cast a whole-number float to int; return float otherwise.
+
+    Used by `Theme`'s resolved-pixel properties so the SVG attribute
+    formatting matches the pre-ratio defaults exactly (drawsvg writes
+    integer values without a decimal point and float values with one).
+    """
+    return int(value) if value == int(value) else value
+
 
 DEFAULT_THEME = Theme()
-"""Frozen reference for the package-default theme. Use `dataclasses.replace(DEFAULT_THEME, ...)` rather than mutating."""
+"""Frozen reference for the package-default theme. Use `dataclasses.replace(DEFAULT_THEME, ...)` rather than mutating; ratio fields use the `_in_*` suffixed names."""
