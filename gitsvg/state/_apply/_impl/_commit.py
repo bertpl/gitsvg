@@ -8,9 +8,10 @@ from gitsvg.parse import ParsedOp
 from gitsvg.state._apply._checks import check_replaces_rules
 from gitsvg.state._auto_hash import compute_auto_hash, effective_parent_ids
 from gitsvg.state._state import CommitState, State
+from gitsvg.theme import Theme
 
 
-def apply_commit_op(state: State, parsed: ParsedOp, report: ValidationReport) -> None:
+def apply_commit_op(state: State, theme: Theme, parsed: ParsedOp, report: ValidationReport) -> None:
     """Apply a `commit` op.
 
     Validation order (no state mutation until everything passes):

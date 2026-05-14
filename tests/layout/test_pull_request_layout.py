@@ -8,7 +8,7 @@ from gitsvg.state import apply_ops
 def _layout_from(text: str) -> Layout:
     """Parse JSONL → state → layout, asserting clean validation."""
     parsed, report = parse_jsonl_text(text, file="x.jsonl")
-    state = apply_ops(parsed, report)
+    state, _theme = apply_ops(parsed, report)
     assert report.is_clean(), f"unexpected errors: {[e.format() for e in report.errors]}"
     return compute_layout(state)
 

@@ -17,10 +17,10 @@ Layout:
 
 import drawsvg as draw
 
-from gitsvg._theme import Theme
 from gitsvg.layout import LayoutCommit
 from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._geometry import offset_position
+from gitsvg.theme import Theme
 
 
 def draw_commit_label(d: draw.Drawing, commit: LayoutCommit, canvas: RenderCanvas, theme: Theme) -> None:

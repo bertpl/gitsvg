@@ -17,7 +17,7 @@ import click
 from gitsvg.imports import resolve_imports
 from gitsvg.layout import compute_layout
 from gitsvg.parse import parse_jsonl_file
-from gitsvg.render import build_theme, minify, render
+from gitsvg.render import minify, render
 from gitsvg.state import apply_ops, check_end_of_file
 
 
@@ -46,7 +46,7 @@ def render_command(input_path: Path, output_path: Path, small: bool) -> None:
     """
     parsed_ops, report = parse_jsonl_file(input_path)
     expanded_ops = resolve_imports(parsed_ops, file=input_path, report=report)
-    state = apply_ops(expanded_ops, report)
+    state, theme = apply_ops(expanded_ops, report)
     check_end_of_file(state, report)
 
     if not report.is_clean():
@@ -54,7 +54,6 @@ def render_command(input_path: Path, output_path: Path, small: bool) -> None:
             click.echo(err.format(), err=True)
         sys.exit(1)
 
-    theme = build_theme(state)
     layout = compute_layout(state)
     drawing = render(layout, theme)
     if small:

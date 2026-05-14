@@ -6,9 +6,10 @@ from gitsvg.errors import ValidationReport
 from gitsvg.file_format.ops import GridOp
 from gitsvg.parse import ParsedOp
 from gitsvg.state._state import GridState, State
+from gitsvg.theme import Theme
 
 
-def apply_grid_op(state: State, parsed: ParsedOp, report: ValidationReport) -> None:
+def apply_grid_op(state: State, theme: Theme, parsed: ParsedOp, report: ValidationReport) -> None:
     """Apply a `grid` op — overwrite any prior grid pin.
 
     Passive at this layer — no semantic checks beyond the schema phase

@@ -40,7 +40,7 @@ def validate_command(path: Path, json_output: bool) -> None:
     """
     parsed_ops, report = parse_jsonl_file(path)
     expanded_ops = resolve_imports(parsed_ops, file=path, report=report)
-    state = apply_ops(expanded_ops, report)
+    state, _theme = apply_ops(expanded_ops, report)
     check_end_of_file(state, report)
     if json_output:
         click.echo(_render_json(report))

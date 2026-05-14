@@ -6,8 +6,8 @@ enough to keep labels inside the canvas. Reads font sizes and pill
 geometry off the resolved theme.
 """
 
-from gitsvg._theme import Theme
 from gitsvg.layout import LayoutCommit
+from gitsvg.theme import Theme
 
 # Classification (both factors): axis-symmetric — perceptual char-width
 # estimates, no grid-axis bias.

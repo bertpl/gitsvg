@@ -1,13 +1,12 @@
 """Tests for the renderer-side branch-colour resolver."""
 
-from gitsvg._theme import DEFAULT_THEME, Theme
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.render._colors import resolve_branch_color
-from gitsvg.render._theme import build_theme
 from gitsvg.state import apply_ops
+from gitsvg.theme import DEFAULT_THEME, Theme
 
 
-def _state_from(text: str):
+def _state_theme_from(text: str):
     parsed, report = parse_jsonl_text(text, file="x.jsonl")
     return apply_ops(parsed, report)
 
@@ -49,13 +48,12 @@ def test_override_uses_branch_id_not_name() -> None:
     """The resolver keys on `branch_id`, never on the branch name —
     important for the rebase-rebuild pattern (same name, fresh id)."""
     # --- arrange ----------------------
-    state = _state_from(
+    state, theme = _state_theme_from(
         '{"op": "branch", "name": "main"}\n'
         '{"op": "branch", "name": "feat", "from_branch": "main", "color": "#111111"}\n'
         '{"op": "remove", "branches": ["feat"]}\n'
         '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
     )
-    theme = build_theme(state)
 
     # --- act --------------------------
     live_feat = state.branches["feat"]

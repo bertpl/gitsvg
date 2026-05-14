@@ -8,9 +8,9 @@ rect); everything else draws on top.
 
 import drawsvg as draw
 
-from gitsvg._theme import Theme
 from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._geometry import branch_axis_to_x, branch_guide_endpoints
+from gitsvg.theme import Theme
 
 
 def draw_branch_guide(d: draw.Drawing, branch_pos: int, canvas: RenderCanvas, theme: Theme) -> None:

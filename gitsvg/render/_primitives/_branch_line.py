@@ -2,10 +2,10 @@
 
 import drawsvg as draw
 
-from gitsvg._theme import Theme
 from gitsvg.layout import LayoutBranch
 from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._geometry import branch_axis_to_x, commit_axis_to_y
+from gitsvg.theme import Theme
 
 
 def draw_branch_line(d: draw.Drawing, branch: LayoutBranch, color: str, canvas: RenderCanvas, theme: Theme) -> None:

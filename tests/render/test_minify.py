@@ -2,7 +2,6 @@
 
 import pytest
 
-from gitsvg._theme import DEFAULT_THEME
 from gitsvg.render._minify import (
     drop_default_attribute_values,
     drop_empty_defs_and_unused_xlink,
@@ -12,6 +11,7 @@ from gitsvg.render._minify import (
     strip_inter_element_whitespace,
     trim_font_family_fallback,
 )
+from gitsvg.theme import DEFAULT_THEME
 
 
 # ==================================================================================================

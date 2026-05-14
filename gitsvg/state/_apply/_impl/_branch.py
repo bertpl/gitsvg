@@ -1,4 +1,4 @@
-"""Apply a `branch` op to state — root resolution + uniqueness check."""
+"""Apply a `branch` op — root resolution, uniqueness check, optional theme colour."""
 
 from typing import cast
 
@@ -6,10 +6,16 @@ from gitsvg.errors import ValidationError, ValidationReport
 from gitsvg.file_format.ops import BranchOp
 from gitsvg.parse import ParsedOp
 from gitsvg.state._state import BranchState, State
+from gitsvg.theme import Theme
 
 
-def apply_branch_op(state: State, parsed: ParsedOp, report: ValidationReport) -> None:
+def apply_branch_op(state: State, theme: Theme, parsed: ParsedOp, report: ValidationReport) -> None:
     """Apply a `branch` op.
+
+    Mutates `state` for the structural side (new `BranchState`,
+    branch-order append) and `theme` for the presentational side
+    (writes `op.color`, when set, to `theme.branch_color_overrides`
+    keyed by the new branch's id).
 
     Validation order:
 
@@ -23,7 +29,7 @@ def apply_branch_op(state: State, parsed: ParsedOp, report: ValidationReport) ->
     4. `from_commit` (when set) must reference an existing commit (E201).
        Same kind-typed hint applies.
 
-    On any failure the branch is not added to state.
+    On any failure neither state nor theme is mutated.
     """
     op = cast(BranchOp, parsed.op)
     file = parsed.file
@@ -98,10 +104,10 @@ def apply_branch_op(state: State, parsed: ParsedOp, report: ValidationReport) ->
         rooted_on = op.from_commit
 
     # --- Add to state ---------------------------
+    branch_id = state.next_branch_id()
     state.branches[op.name] = BranchState(
-        id=state.next_branch_id(),
+        id=branch_id,
         name=op.name,
-        color=op.color,
         label_side=op.label_side,
         branch_pos=op.branch_pos,
         from_branch=op.from_branch,
@@ -111,3 +117,7 @@ def apply_branch_op(state: State, parsed: ParsedOp, report: ValidationReport) ->
         declaration_line=line,
     )
     state.branch_order.append(op.name)
+
+    # --- Theme: per-branch colour override ------
+    if op.color is not None:
+        theme.branch_color_overrides[branch_id] = op.color

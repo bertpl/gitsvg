@@ -20,9 +20,9 @@ even when the two endpoints are very close.
 
 import drawsvg as draw
 
-from gitsvg._theme import Theme
 from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._geometry import branch_axis_to_x, commit_axis_to_y
+from gitsvg.theme import Theme
 
 # Sub-pixel tolerance below which arc segments degenerate (collapse to a
 # straight line, or skip an emit entirely). Pure numerical-precision guard;
