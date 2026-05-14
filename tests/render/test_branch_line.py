@@ -4,13 +4,13 @@ import re
 
 import drawsvg as draw
 
-from gitsvg._theme import DEFAULT_THEME
 from gitsvg.layout import LayoutBranch, compute_layout
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.render import render
 from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._primitives._branch_line import draw_branch_line
 from gitsvg.state import apply_ops
+from gitsvg.theme import DEFAULT_THEME
 
 
 # ==================================================================================================
@@ -83,7 +83,7 @@ def test_non_empty_branch_emits_a_line() -> None:
 def _render(text: str) -> str:
     """Parse → state → layout → render → SVG string."""
     parsed, report = parse_jsonl_text(text, file="x.jsonl")
-    state = apply_ops(parsed, report)
+    state, _theme = apply_ops(parsed, report)
     return render(compute_layout(state)).as_svg()
 
 

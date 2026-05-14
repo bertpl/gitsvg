@@ -1,15 +1,15 @@
 """Tests for the canvas-background rendering (introduced with the `Theme`)."""
 
-from gitsvg._theme import DEFAULT_THEME, Theme
 from gitsvg.layout import compute_layout
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.render import render
 from gitsvg.state import apply_ops
+from gitsvg.theme import DEFAULT_THEME, Theme
 
 
 def _layout(text: str):
     parsed, report = parse_jsonl_text(text, file="x.jsonl")
-    state = apply_ops(parsed, report)
+    state, _theme = apply_ops(parsed, report)
     return compute_layout(state)
 
 

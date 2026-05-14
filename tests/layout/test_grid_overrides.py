@@ -8,20 +8,18 @@ Spacing and margin pins live on `theme:` (per invariant #6 — see
 from gitsvg.layout import compute_layout
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.render._canvas import compute_canvas
-from gitsvg.render._theme import build_theme
 from gitsvg.state import apply_ops
 
 
 def _layout_and_canvas(text: str):
-    """Run the validate → state → layout → theme → render-canvas pipeline.
+    """Run the validate → (state, theme) → layout → render-canvas pipeline.
 
     Returns the `(layout, theme, render_canvas)` triple so individual tests
     can assert against the right surface.
     """
     parsed, report = parse_jsonl_text(text, file="x.jsonl")
-    state = apply_ops(parsed, report)
+    state, theme = apply_ops(parsed, report)
     layout = compute_layout(state)
-    theme = build_theme(state)
     return layout, theme, compute_canvas(layout, theme)
 
 

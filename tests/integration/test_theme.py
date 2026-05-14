@@ -10,7 +10,6 @@ from pathlib import Path
 from gitsvg.layout import compute_layout
 from gitsvg.parse import parse_jsonl_file, parse_jsonl_text
 from gitsvg.render import render
-from gitsvg.render._theme import build_theme
 from gitsvg.state import apply_ops, check_end_of_file
 
 _FIXTURE = Path(__file__).parent.parent / "fixtures" / "inputs" / "happy_theme.gitsvg.jsonl"
@@ -21,7 +20,7 @@ def test_happy_theme_fixture_validates_cleanly() -> None:
     parsed, report = parse_jsonl_file(_FIXTURE)
 
     # --- act --------------------------
-    state = apply_ops(parsed, report)
+    state, _theme = apply_ops(parsed, report)
     check_end_of_file(state, report)
 
     # --- assert -----------------------
@@ -32,14 +31,11 @@ def test_happy_theme_resolved_theme_carries_overrides_and_cascade() -> None:
     """The fixture sets background to #f5f5f0 first, then patches it to
     #fffaf0 — final state should hold the latter; the earlier
     label_font_size override should survive (different field)."""
-    # --- arrange ----------------------
+    # --- arrange / act ----------------
     parsed, report = parse_jsonl_file(_FIXTURE)
-    state = apply_ops(parsed, report)
+    state, theme = apply_ops(parsed, report)
     check_end_of_file(state, report)
     assert report.is_clean()
-
-    # --- act --------------------------
-    theme = build_theme(state)
 
     # --- assert -----------------------
     assert theme.background_color == "#fffaf0"
@@ -50,11 +46,10 @@ def test_happy_theme_resolved_theme_carries_overrides_and_cascade() -> None:
 def test_happy_theme_renders_with_background_rect() -> None:
     # --- arrange ----------------------
     parsed, report = parse_jsonl_file(_FIXTURE)
-    state = apply_ops(parsed, report)
+    state, theme = apply_ops(parsed, report)
     check_end_of_file(state, report)
 
     # --- act --------------------------
-    theme = build_theme(state)
     svg = render(compute_layout(state), theme).as_svg()
 
     # --- assert -----------------------

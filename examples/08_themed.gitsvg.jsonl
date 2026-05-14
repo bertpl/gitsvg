@@ -1,2 +1,2 @@
 {"op": "import", "path": "03_multi_branch.gitsvg.jsonl"}
-{"op": "theme", "background_color": "#fff8e7", "branch_line_width": 4, "label_font_size": 14, "branch_label_font_size": 14, "hash_font_size": 11, "commit_radius": 7, "highlight_radius": 9, "colors": {"main": "#d62728", "branch1": "#1f77b4", "branch2": "#2ca02c", "branch3": "#ff7f0e", "branch4": "#9467bd"}}
+{"op": "theme", "background_color": "#fff8e7", "branch_spacing": 110, "branch_line_width": 4, "label_font_size": 14, "branch_label_font_size": 14, "hash_font_size": 11, "commit_radius": 7, "highlight_radius": 9, "branch_name_pill_offset_commit_axis_in_rows": -0.56, "colors": {"main": "#d62728", "branch1": "#1f77b4", "branch2": "#2ca02c", "branch3": "#ff7f0e", "branch4": "#9467bd"}}

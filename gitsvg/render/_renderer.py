@@ -27,7 +27,6 @@ Z-order (back to front):
 
 import drawsvg as draw
 
-from gitsvg._theme import DEFAULT_THEME, Theme
 from gitsvg.layout import Layout
 from gitsvg.render._canvas import compute_canvas
 from gitsvg.render._colors import resolve_branch_color
@@ -38,6 +37,7 @@ from gitsvg.render._primitives._branch_pill import draw_branch_pill
 from gitsvg.render._primitives._commit_dot import draw_commit_dot
 from gitsvg.render._primitives._commit_label import draw_commit_label
 from gitsvg.render._primitives._pull_request_pill import draw_pull_request_pill
+from gitsvg.theme import DEFAULT_THEME, Theme
 
 
 def render(layout: Layout, theme: Theme | None = None) -> draw.Drawing:

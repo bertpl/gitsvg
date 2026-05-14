@@ -13,7 +13,7 @@ from gitsvg.state import apply_ops, check_end_of_file
 def _validate(jsonl: str) -> tuple[ValidationReport, object]:
     """Run parse + apply + EOF check on `jsonl` and return `(report, state)`."""
     parsed, report = parse_jsonl_text(jsonl, file="x.jsonl")
-    state = apply_ops(parsed, report)
+    state, _theme = apply_ops(parsed, report)
     check_end_of_file(state, report)
     return report, state
 

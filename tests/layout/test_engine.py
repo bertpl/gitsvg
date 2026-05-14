@@ -15,7 +15,7 @@ from gitsvg.state import apply_ops
 def _layout_from(text: str) -> Layout:
     """Parse JSONL → state → layout."""
     parsed, report = parse_jsonl_text(text, file="x.jsonl")
-    state = apply_ops(parsed, report)
+    state, _theme = apply_ops(parsed, report)
     return compute_layout(state)
 
 
@@ -768,7 +768,7 @@ def test_layout_completes_for_every_corpus_file(path: Path) -> None:
     # --- arrange ----------------------
     parsed, report = parse_jsonl_file(path)
     expanded = resolve_imports(parsed, file=path, report=report)
-    state = apply_ops(expanded, report)
+    state, _theme = apply_ops(expanded, report)
     assert report.is_clean(), f"{path} parse/import/apply errors: {report.errors}"
 
     # --- act --------------------------

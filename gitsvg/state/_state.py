@@ -1,17 +1,15 @@
 """In-memory state built up by applying ops in order.
 
-State holds four namespaces — commits, branches, pull-requests, and
-(reserved) tags — along with branch declaration order, an optional
-pinned grid extent, and a live `Theme` that accumulates `theme:` op
-patches. Each op mutates state when it applies cleanly; the state
-engine is the producer, downstream layers (layout, rendering) are
-consumers.
+State holds the structural model — commits, branches, pull-requests,
+branch declaration order, and the optional pinned grid extent — plus
+per-entity layout hints (branch lane overrides, label-side hints,
+commit gap). Presentational data lives in a separate `Theme`,
+produced alongside `State` by the apply stage. Each op mutates
+state when it applies cleanly; the state engine is the producer,
+downstream layers (layout, rendering) are consumers.
 """
 
-import copy
 from dataclasses import dataclass, field
-
-from gitsvg._theme import DEFAULT_THEME, Theme
 
 
 @dataclass(slots=True)
@@ -42,7 +40,6 @@ class BranchState:
         name: Branch name as written in the JSONL. Unique among
             currently-live branches, but can be reused after `remove`
             — `id` is the stable handle.
-        color: Optional hex color override from the declaration.
         label_side: Optional label-side hint from the declaration.
         branch_pos: Optional explicit lane-index override from the
             declaration. Stored verbatim; the layout engine consumes it
@@ -61,7 +58,6 @@ class BranchState:
 
     id: str
     name: str
-    color: str | None = None
     label_side: str | None = None
     branch_pos: int | None = None
     from_branch: str | None = None
@@ -135,13 +131,12 @@ class State:
     """
 
     def __init__(self) -> None:
-        """Initialise an empty state — no branches, no commits, no pull-requests, no grid pin, theme = defaults."""
+        """Initialise an empty state — no branches, no commits, no pull-requests, no grid pin."""
         self.branches: dict[str, BranchState] = {}
         self.commits: dict[str, CommitState] = {}
         self.pull_requests: dict[str, PullRequestState] = {}
         self.branch_order: list[str] = []
         self.grid: GridState | None = None
-        self.theme: Theme = copy.deepcopy(DEFAULT_THEME)
         self._next_branch_seq: int = 0
 
     def next_branch_id(self) -> str:

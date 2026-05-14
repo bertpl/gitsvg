@@ -1,13 +1,13 @@
-"""Apply a `theme` op to state — patch the live theme per the cascade rule."""
+"""Apply a `theme` op to a `Theme` — patch live theme values per the cascade rule."""
 
 import copy
 from typing import cast
 
-from gitsvg._theme import DEFAULT_THEME
 from gitsvg.errors import ValidationError, ValidationReport
 from gitsvg.file_format.ops import ThemeOp
 from gitsvg.parse import ParsedOp
 from gitsvg.state._state import State
+from gitsvg.theme._theme import DEFAULT_THEME, Theme
 
 # ==================================================================================================
 #  Named-theme registry
@@ -26,7 +26,7 @@ NAMED_THEMES = {
 #  Apply
 # ==================================================================================================
 # Fields a `theme:` op carries that aren't theme fields themselves; excluded
-# when copying the op onto state.theme.
+# when copying the op onto the live theme.
 _NON_THEME_FIELDS = frozenset({"op", "name"})
 
 # Fields with constraints beyond what `NonNegativeFloat` / `NonNegativeInt`
@@ -45,25 +45,27 @@ _FIELD_CONSTRAINTS: dict[str, tuple] = {
 }
 
 
-def apply_theme_op(state: State, parsed: ParsedOp, report: ValidationReport) -> None:
-    """Apply a `theme` op.
+def apply_theme_op(state: State, theme: Theme, parsed: ParsedOp, report: ValidationReport) -> None:
+    """Apply a `theme` op to the live theme.
 
     Cascade:
 
-    1. If `name` is set, replace every field on `state.theme` with the
-       named theme's values. Unknown name → E216, no other change.
+    1. If `name` is set, replace every field on `theme` with the named
+       theme's values. Unknown name → E216, no other change.
     2. For every explicit field present in the op (other than `name`),
-       assign it onto `state.theme` — overrides any prior value
-       (including any set by step 1).
+       assign it onto `theme` — overrides any prior value (including
+       any set by step 1).
 
     An op carrying neither `name` nor any explicit override is rejected
     with E217.
 
     Args:
-        state: The state to mutate.
+        state: Unused. Included for the shared apply-handler signature.
+        theme: The live theme to mutate.
         parsed: The validated parsed op record.
         report: Receives semantic errors.
     """
+    del state  # signature uniformity; theme ops don't read or write state
     op = cast(ThemeOp, parsed.op)
     file = parsed.file
     line = parsed.line
@@ -98,11 +100,11 @@ def apply_theme_op(state: State, parsed: ParsedOp, report: ValidationReport) -> 
                 )
             )
             return
-        state.theme = copy.deepcopy(named)
+        _replace_theme_fields(theme, named)
 
     # --- Step 2: explicit overrides on top ----
     # Deep-copy each value so mutable fields (e.g. `colors` dict) on
-    # state.theme don't alias back to the op model. Fields that fail
+    # the live theme don't alias back to the op model. Fields that fail
     # their semantic constraint emit an error but don't block the
     # other fields from applying.
     for name in explicit_fields:
@@ -121,4 +123,16 @@ def apply_theme_op(state: State, parsed: ParsedOp, report: ValidationReport) -> 
                     )
                 )
                 continue
-        setattr(state.theme, name, copy.deepcopy(value))
+        setattr(theme, name, copy.deepcopy(value))
+
+
+def _replace_theme_fields(theme: Theme, source: Theme) -> None:
+    """Replace every field on `theme` with the corresponding value from `source`.
+
+    Mutates in place so callers holding a reference to `theme` see the
+    new values. Mutable fields are deep-copied so the live theme does
+    not alias the source.
+    """
+    source_copy = copy.deepcopy(source)
+    for field_name in theme.__dataclass_fields__:
+        setattr(theme, field_name, getattr(source_copy, field_name))

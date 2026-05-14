@@ -16,11 +16,11 @@ estimate; no real glyph measurement.
 
 import drawsvg as draw
 
-from gitsvg._theme import Theme
 from gitsvg.layout import LayoutPullRequest
 from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._geometry import offset_position
 from gitsvg.render._label_widths import pill_width
+from gitsvg.theme import Theme
 
 
 def draw_pull_request_pill(

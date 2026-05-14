@@ -1,10 +1,11 @@
 """Theme — every presentational constant for the SVG output.
 
-A `Theme` is the single object the renderer reads, and the single
-object state mutates as `theme:` ops apply. It holds every visual
-constant (spacings, sizes, colours, fonts, dashes, opacities).
-Per-branch colour overrides flow in via `build_theme(state)` from
-`branch.color` declarations.
+A `Theme` is a first-class pipeline output alongside `State`. It
+accumulates as the input file's `theme:` ops apply and as `branch:`
+ops carry colour overrides, then flows to the renderer as the
+resolved set of visual constants (spacings, sizes, colours, fonts,
+dashes, opacities). Per-branch colour overrides live on
+`branch_color_overrides`, keyed by `BranchState.id`.
 
 Position/size fields with a natural anchor are stored as ratios
 (suffixed `_in_lanes` / `_in_rows` / `_in_grid_units` /
@@ -14,11 +15,6 @@ live as properties below the field block — read-only resolved
 values that downstream consumers (renderer, canvas auto-fit,
 primitives) read just as before. See `docs/architecture.md`
 invariant #4 for the rule.
-
-`Theme` lives at the package root because both state and render
-depend on it. State holds a live `Theme` that accumulates `theme:`
-op patches; the renderer reads the resolved value via the bridging
-adapter `build_theme(state)` in `gitsvg/render/_theme.py`.
 """
 
 from dataclasses import dataclass, field

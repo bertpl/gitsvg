@@ -15,9 +15,12 @@ parse → imports → state → layout → render
 ```
 
 Each stage's output is the next stage's only input; no stage reaches
-back into a prior stage's data structures. Cross-cutting subpackages
-(`file_format/`, `errors/`, `cli/`, plus `_theme.py` at the root) are
-consumed by pipeline stages without being part of the flow.
+back into a prior stage's data structures. The `state` stage emits
+two parallel outputs — `State` (structural model + per-entity layout
+hints) and `Theme` (resolved presentational constants) — consumed
+respectively by `layout` and `render`. Cross-cutting subpackages
+(`file_format/`, `errors/`, `theme/`, `cli/`) are consumed by
+pipeline stages without being part of the flow.
 
 **Rationale.** Pipeline shape is the package's load-bearing
 architecture. Locking the five-stage flow as an explicit rule

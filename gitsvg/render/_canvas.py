@@ -15,13 +15,16 @@ layout engine never reads it.
 
 from dataclasses import dataclass
 
-from gitsvg._theme import Theme
 from gitsvg.layout import Layout, LayoutBranch, LayoutCommit
 from gitsvg.render._label_widths import commit_label_width, pill_width
+from gitsvg.theme import Theme
 
 # Auto-fit safety margin between content (pill / outward label) and the canvas
 # edge — keeps the rendered geometry from butting right up against the SVG
-# bounding box.
+# bounding box. Deliberately not a `Theme` field: when a user wants more
+# breathing room, the relevant `margin_*` theme field is the right knob to
+# turn — this internal perceptual pad just prevents zero-margin clipping in
+# the auto-fit path, and never needs per-diagram tuning.
 _AUTO_FIT_EDGE_PAD_PX = 4.0  # axis-symmetric (perceptual)
 
 

@@ -15,5 +15,5 @@ def build_state_from_jsonl(jsonl: str) -> tuple[State, ValidationReport]:
     without juggling two reports.
     """
     parsed, report = parse_jsonl_text(jsonl, file="x.jsonl")
-    state = apply_ops(parsed, report)
+    state, _theme = apply_ops(parsed, report)
     return state, report

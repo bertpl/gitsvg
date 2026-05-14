@@ -13,8 +13,8 @@ coordinate computation routes through this module's helpers.
 Primitives never assemble coordinates inline.
 """
 
-from gitsvg._theme import Theme, _resolve_int_or_float
 from gitsvg.render._canvas import RenderCanvas
+from gitsvg.theme import Theme, _resolve_int_or_float
 
 
 def branch_axis_to_x(pos: int, canvas: RenderCanvas) -> float:
