@@ -33,9 +33,9 @@ Validate without rendering:
 gitsvg validate diagram.gitsvg.jsonl
 ```
 
-## Examples
+## Diagrams
 
-The [`examples/`](examples/) folder ships eight self-contained input files demonstrating the format. Each subsection below shows the rendered output and the source it came from.
+The [`examples/`](examples/) folder ships nine self-contained input files demonstrating the format. The first seven examples cover the diagram operations; the [Theming](#theming) section below covers visual customisation. Each subsection shows the rendered output and the source it came from.
 
 ### Example 1: Linear history
 
@@ -151,15 +151,40 @@ The `pull_request` op declares a pending merge between two branches. Both endpoi
 {"op": "commit", "branch": "main", "id": "m2", "msg": "hotfix"}
 ```
 
-### Example 8: Themed rendering
+## Theming
 
-The `theme` op patches the diagram's live theme — spacings, sizes, fonts, the branch-colour palette, the SVG background, and more. Each op only overrides the fields it lists; a `name` selects a built-in theme (today: `default`) that replaces every field first. Here we import Example 3 unchanged and apply a saturated palette with thicker strokes, larger labels, and a warm background.
+The `theme` op patches the diagram's live theme — spacings, sizes, fonts, the branch-colour palette, the SVG background, the orientation, and more. Each op only overrides the fields it lists; a `name` selects a built-in theme (today: `default`) that replaces every field first.
 
-![Themed rendering](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/08_themed.svg)
+### Example 8: Recoloured palette
+
+Here we import Example 3 unchanged and apply a saturated palette with thicker strokes, larger labels, and a warm background.
+
+![Recoloured palette](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/08_themed.svg)
 
 ```jsonl
 {"op": "import", "path": "03_multi_branch.gitsvg.jsonl"}
 {"op": "theme", "background_color": "#fff8e7", "branch_line_width": 4, "label_font_size": 14, "branch_label_font_size": 14, "hash_font_size": 11, "commit_radius": 7, "highlight_radius": 9, "colors": {"main": "#d62728", "branch1": "#1f77b4", "branch2": "#2ca02c", "branch3": "#ff7f0e", "branch4": "#9467bd"}}
+```
+
+### Example 9: Horizontal orientation
+
+A `theme.orientation` of `lr` flips the diagram left-to-right: the commit axis grows rightward and branches stack downward. The same input renders identically in `bt` (default, bottom-to-top), `tb` (top-to-bottom), and `rl` (right-to-left); pill placement, margin defaults, and label-side mapping all adjust per orientation. Accepted values include the canonical short codes (`bt`, `tb`, `lr`, `rl`) and common aliases (Mermaid's `TD`, CSS's `ltr` / `rtl`, long forms like `bottom_to_top`, and `top_down` / `bottom_up`).
+
+![Horizontal orientation](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/09_horizontal.svg)
+
+```jsonl
+{"op": "branch", "name": "main", "label_side": "before"}
+{"op": "commit", "branch": "main", "id": "m1", "msg": "init", "hash": "auto"}
+{"op": "commit", "branch": "main", "id": "m2", "msg": "release v1", "hash": "auto", "highlight": true}
+{"op": "branch", "name": "feature", "from_branch": "main"}
+{"op": "commit", "branch": "feature", "id": "f1", "msg": "wip", "hash": "auto"}
+{"op": "commit", "branch": "feature", "id": "f2", "msg": "polish", "hash": "auto"}
+{"op": "branch", "name": "docs", "from_branch": "main"}
+{"op": "commit", "branch": "docs", "id": "d1", "msg": "readme", "hash": "auto"}
+{"op": "merge", "into": "main", "from": "feature", "msg": "merge feature", "hash": "auto"}
+{"op": "commit", "branch": "main", "id": "m3", "msg": "hotfix", "hash": "auto"}
+{"op": "pull_request", "id": "pr1", "from": "docs", "into": "main", "title": "PR 1: docs update"}
+{"op": "theme", "orientation": "lr"}
 ```
 
 ## CLI reference

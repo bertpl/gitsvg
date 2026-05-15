@@ -1,0 +1,12 @@
+{"op": "branch", "name": "main", "label_side": "before"}
+{"op": "commit", "branch": "main", "id": "m1", "msg": "init", "hash": "auto"}
+{"op": "commit", "branch": "main", "id": "m2", "msg": "release v1", "hash": "auto", "highlight": true}
+{"op": "branch", "name": "feature", "from_branch": "main"}
+{"op": "commit", "branch": "feature", "id": "f1", "msg": "wip", "hash": "auto"}
+{"op": "commit", "branch": "feature", "id": "f2", "msg": "polish", "hash": "auto"}
+{"op": "branch", "name": "docs", "from_branch": "main"}
+{"op": "commit", "branch": "docs", "id": "d1", "msg": "readme", "hash": "auto"}
+{"op": "merge", "into": "main", "from": "feature", "msg": "merge feature", "hash": "auto"}
+{"op": "commit", "branch": "main", "id": "m3", "msg": "hotfix", "hash": "auto"}
+{"op": "pull_request", "id": "pr1", "from": "docs", "into": "main", "title": "PR 1: docs update"}
+{"op": "theme", "orientation": "lr"}
