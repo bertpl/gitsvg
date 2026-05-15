@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## 0.1.6 (2026-05-15)
 
 ### Added
 
@@ -17,15 +17,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Breaking:** the four `theme:` margin fields rename from axis-relative ratios to visual-side pixels: `margin_branch_axis_lower_in_lanes` → `margin_left`, `margin_branch_axis_upper_in_lanes` → `margin_right`, `margin_commit_axis_upper_in_rows` → `margin_top`, `margin_commit_axis_lower_in_rows` → `margin_bottom`. Migration: rename and convert each value to absolute pixels (multiply by the original anchor — `branch_spacing` for the lane fields, `commit_spacing` for the row fields). When left unset, defaults resolve per `theme.orientation`.
 - Default `pull_request_dash` changed from `"6,4"` to `"2,6"` — airier distinction from solid arcs. Affects every diagram with an open pull request.
 - Default `guide_overshoot_in_rows` (vertical orientations) changed from `0.2` to `0.25` — slightly longer guide tails. Affects every existing diagram. Horizontal orientations resolve to `0.5` to cover the asymmetric start-side margin.
-
-### Deprecated
-
-### Removed
-
-### Fixed
-
-### Security
-
 ## 0.1.5 (2026-05-14)
 
 ### Added
