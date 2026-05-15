@@ -10,14 +10,14 @@ start in BT, above in TB); horizontal orientations route it along the
 commit axis with `-0.75 × commit_spacing` (pill alongside the branch
 line, before the start commit in `lr` / after in `rl`).
 
-In horizontal orientations the pill is anchored on the **edge nearest
-the start commit** instead of being centred on the offset point — so
-the offset becomes a minimum gap between the start commit and the pill,
-regardless of pill width. Long branch names extend further into the
-margin without ever overlapping the start commit dot.
-
-Width is approximated from the text length using a per-character pixel
-estimate; no real glyph measurement.
+In horizontal orientations the pill rect is anchored on the **edge
+nearest the start commit** instead of being centred on the offset
+point — so the offset becomes a minimum gap between the start commit
+and the pill, regardless of pill width. Long branch names extend
+further into the margin without ever overlapping the start commit
+dot. The text itself is always centred inside the pill rect (via
+``text_anchor="middle"`` at the rect's centre), independent of the
+rect's anchoring strategy.
 """
 
 import drawsvg as draw
@@ -43,26 +43,23 @@ def draw_branch_pill(d: draw.Drawing, branch: LayoutBranch, color: str, canvas: 
     height = theme.branch_label_font_size + theme.pill_padding_y
     corner = theme.pill_corner_radius
 
-    # Anchor strategy:
-    # - BT/TB: pill centred on (x, y). Branch line is vertical, pill is
-    #   above/below it — the pill rect's horizontal extent doesn't fight
-    #   the branch line.
-    # - LR: pill's right edge anchored at (x, y); pill extends leftward.
-    #   Branch line is horizontal; without edge-anchoring, long pills
-    #   would overlap the start commit dot to the right.
-    # - RL: mirror of LR — left edge anchored at (x, y); extends rightward.
+    # Rect anchoring (orientation-dependent) and text positioning
+    # (always centred in the rect) are decoupled:
+    # - BT/TB: rect centred on (x, y).
+    # - LR: rect's right edge at (x, y); rect extends leftward so a
+    #   long pill never overlaps the start commit to the right.
+    # - RL: mirror of LR — left edge at (x, y); extends rightward.
+    # In every orientation the text sits at the rect's centre via
+    # `text_anchor="middle"`, so the visible text stays centred inside
+    # the pill regardless of any drift between predicted and actual
+    # rendered text width.
     if canvas.orientation == "lr":
-        text_anchor = "end"
         rect_left = x - width
-        text_x = x - theme.pill_padding_x / 2
     elif canvas.orientation == "rl":
-        text_anchor = "start"
         rect_left = x
-        text_x = x + theme.pill_padding_x / 2
     else:
-        text_anchor = "middle"
         rect_left = x - width / 2
-        text_x = x
+    text_x = rect_left + width / 2
 
     d.append(
         draw.Rectangle(
@@ -82,7 +79,7 @@ def draw_branch_pill(d: draw.Drawing, branch: LayoutBranch, color: str, canvas: 
             theme.branch_label_font_size,
             text_x,
             y,
-            text_anchor=text_anchor,
+            text_anchor="middle",
             dominant_baseline="middle",
             fill="white",
             font_family=theme.label_font_family,
