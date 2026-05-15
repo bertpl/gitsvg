@@ -19,12 +19,12 @@ from gitsvg.theme import Theme, _resolve_int_or_float
 
 def branch_axis_to_x(pos: int, canvas: RenderCanvas) -> float:
     """Return the x pixel coordinate for a branch-axis index."""
-    return canvas.margin_branch_axis_lower + pos * canvas.branch_spacing
+    return canvas.margin_left + pos * canvas.branch_spacing
 
 
 def commit_axis_to_y(pos: int, canvas: RenderCanvas) -> float:
     """Return the y pixel coordinate for a commit-axis index."""
-    return canvas.margin_commit_axis_upper + (canvas.n_commits - 1 - pos) * canvas.commit_spacing
+    return canvas.margin_top + (canvas.n_commits - 1 - pos) * canvas.commit_spacing
 
 
 def offset_position(
@@ -86,6 +86,6 @@ def branch_guide_endpoints(canvas: RenderCanvas, theme: Theme) -> tuple[float, f
         sits `theme.guide_overshoot` px above the upper-margin edge;
         `y_bottom` sits the same distance below the lower-margin edge.
     """
-    y_top = canvas.margin_commit_axis_upper - theme.guide_overshoot
-    y_bottom = canvas.height - canvas.margin_commit_axis_lower + theme.guide_overshoot
+    y_top = canvas.margin_top - theme.guide_overshoot
+    y_bottom = canvas.height - canvas.margin_bottom + theme.guide_overshoot
     return (y_top, y_bottom)

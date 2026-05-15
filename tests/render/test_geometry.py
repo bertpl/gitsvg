@@ -7,9 +7,9 @@ from gitsvg.theme import DEFAULT_THEME
 
 def _canvas(n_commits: int = 3) -> RenderCanvas:
     """Build a minimal `RenderCanvas` matching the default-theme constants."""
-    theme = DEFAULT_THEME
-    width = theme.margin_branch_axis_lower + theme.margin_branch_axis_upper
-    height = theme.margin_commit_axis_upper + (n_commits - 1) * theme.commit_spacing + theme.margin_commit_axis_lower
+    theme = _resolved_default_theme()
+    width = theme.margin_left + theme.margin_right
+    height = theme.margin_top + (n_commits - 1) * theme.commit_spacing + theme.margin_bottom
     return RenderCanvas(
         width=width,
         height=height,
@@ -17,33 +17,46 @@ def _canvas(n_commits: int = 3) -> RenderCanvas:
         n_branches=1,
         branch_spacing=theme.branch_spacing,
         commit_spacing=theme.commit_spacing,
-        margin_branch_axis_lower=theme.margin_branch_axis_lower,
-        margin_branch_axis_upper=theme.margin_branch_axis_upper,
-        margin_commit_axis_lower=theme.margin_commit_axis_lower,
-        margin_commit_axis_upper=theme.margin_commit_axis_upper,
+        margin_left=theme.margin_left,
+        margin_right=theme.margin_right,
+        margin_bottom=theme.margin_bottom,
+        margin_top=theme.margin_top,
     )
+
+
+def _resolved_default_theme():
+    """Return a deep copy of `DEFAULT_THEME` with `None` margins resolved to BT defaults."""
+    import copy
+
+    from gitsvg.theme import resolve_defaults
+
+    theme = copy.deepcopy(DEFAULT_THEME)
+    resolve_defaults(theme)
+    return theme
 
 
 def test_branch_axis_index_zero_lands_at_lower_margin() -> None:
     # --- act / assert -----------------
-    assert branch_axis_to_x(0, _canvas()) == DEFAULT_THEME.margin_branch_axis_lower
+    assert branch_axis_to_x(0, _canvas()) == _resolved_default_theme().margin_left
 
 
 def test_branch_axis_increments_by_branch_spacing() -> None:
     # --- act / assert -----------------
-    assert branch_axis_to_x(2, _canvas()) == DEFAULT_THEME.margin_branch_axis_lower + 2 * DEFAULT_THEME.branch_spacing
+    theme = _resolved_default_theme()
+    assert branch_axis_to_x(2, _canvas()) == theme.margin_left + 2 * theme.branch_spacing
 
 
 def test_commit_axis_top_index_lands_at_upper_margin() -> None:
     """The newest commit (highest index) sits at the top of the canvas."""
     # --- act / assert -----------------
-    assert commit_axis_to_y(2, _canvas(3)) == DEFAULT_THEME.margin_commit_axis_upper
+    assert commit_axis_to_y(2, _canvas(3)) == _resolved_default_theme().margin_top
 
 
 def test_commit_axis_index_zero_is_at_bottom_of_canvas() -> None:
     """Index 0 is the oldest commit; bottom-to-top puts it at the largest y."""
     # --- act / assert -----------------
-    assert commit_axis_to_y(0, _canvas(3)) == DEFAULT_THEME.margin_commit_axis_upper + 2 * DEFAULT_THEME.commit_spacing
+    theme = _resolved_default_theme()
+    assert commit_axis_to_y(0, _canvas(3)) == theme.margin_top + 2 * theme.commit_spacing
 
 
 def test_commit_axis_step_size_equals_commit_spacing() -> None:
@@ -67,14 +80,14 @@ def test_geometry_uses_canvas_overrides_when_set() -> None:
         n_branches=2,
         branch_spacing=80,  # custom override
         commit_spacing=40,  # custom override
-        margin_branch_axis_lower=50,  # custom override
-        margin_branch_axis_upper=50,
-        margin_commit_axis_lower=30,
-        margin_commit_axis_upper=30,
+        margin_left=50,  # custom override
+        margin_right=50,
+        margin_bottom=30,
+        margin_top=30,
     )
 
     # --- act / assert -----------------
     assert branch_axis_to_x(1, canvas) == 50 + 1 * 80
-    # Commit-axis: y = margin_upper + (n_commits - 1 - pos) * commit_spacing.
+    # Commit-axis: y = margin_top + (n_commits - 1 - pos) * commit_spacing.
     assert commit_axis_to_y(0, canvas) == 30 + (4 - 1) * 40
     assert commit_axis_to_y(3, canvas) == 30

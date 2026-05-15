@@ -1,4 +1,4 @@
-{"op": "branch", "name": "main", "label_side": "left"}
+{"op": "branch", "name": "main", "label_side": "before"}
 {"op": "commit", "branch": "main", "id": "c1", "msg": "initial commit", "hash": "auto"}
 {"op": "commit", "branch": "main", "id": "c2", "msg": "setup config", "hash": "auto"}
 {"op": "branch", "name": "feature", "from_branch": "main"}

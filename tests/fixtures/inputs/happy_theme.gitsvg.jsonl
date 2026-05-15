@@ -1,5 +1,5 @@
 {"op": "theme", "background_color": "#f5f5f0", "label_font_size": 13, "branch_spacing": 120}
-{"op": "branch", "name": "main", "label_side": "left"}
+{"op": "branch", "name": "main", "label_side": "before"}
 {"op": "commit", "branch": "main", "id": "c1", "msg": "initial"}
 {"op": "branch", "name": "feature", "from_branch": "main"}
 {"op": "commit", "branch": "feature", "id": "f1", "msg": "feature work"}
