@@ -29,6 +29,7 @@ def _canvas() -> RenderCanvas:
         margin_right=100,
         margin_bottom=25,
         margin_top=25,
+        orientation="bt",
     )
 
 

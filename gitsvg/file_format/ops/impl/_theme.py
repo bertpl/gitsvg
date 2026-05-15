@@ -2,7 +2,7 @@
 
 from typing import Annotated, Literal
 
-from pydantic import Field
+from pydantic import BeforeValidator, Field
 
 from gitsvg.file_format.ops.framework._base import OpBase
 from gitsvg.file_format.ops.framework._types import (
@@ -12,9 +12,13 @@ from gitsvg.file_format.ops.framework._types import (
     NonNegativeFloat,
     NonNegativeInt,
 )
+from gitsvg.theme import OrientationLiteral, normalize_orientation
 
 Opacity = Annotated[float, Field(ge=0, le=1)]
 """Float in `[0, 1]` — for opacity fields where SVG semantics are bounded."""
+
+OrientationInput = Annotated[OrientationLiteral, BeforeValidator(normalize_orientation)]
+"""Annotated orientation type that normalises permissive input forms (case-insensitive, `-`/`_` interchangeable, Mermaid `TD`, CSS `ltr`/`rtl`, vernacular `top_down`/`bottom_up`) to the canonical short code before the `Literal` validator runs."""
 
 
 class ThemeOp(OpBase):
@@ -40,6 +44,18 @@ class ThemeOp(OpBase):
     name: IdStr | None = Field(
         default=None,
         description="Optional named theme; replaces every theme field with that theme's values before explicit overrides apply.",
+    )
+
+    # --- Orientation ------------------------------------
+    orientation: OrientationInput | None = Field(
+        default=None,
+        description=(
+            "Diagram orientation. Canonical short codes: `bt` (bottom-to-top, default), "
+            "`tb` (top-to-bottom), `lr` (left-to-right), `rl` (right-to-left). "
+            "Aliases accepted (case-insensitive, `-`/`_` interchangeable): Mermaid's `TD` (≡ `tb`), "
+            "CSS-style `ltr` (≡ `lr`) and `rtl` (≡ `rl`), the four explicit `<dir>_to_<dir>` "
+            "long forms (e.g. `bottom_to_top`), and the vernacular `top_down` / `bottom_up`."
+        ),
     )
 
     # --- Spacing (px) -----------------------------------

@@ -45,6 +45,7 @@ below.
 | 4 | Structural-vs-perceptual cleavage | v0.1.5 |
 | 5 | Geometry-module routing for coordinate math | v0.1.5 |
 | 6 | Op-to-consumer boundary | v0.1.5 |
+| 7 | Orientation as renderer-only concern | v0.1.6 |
 
 ## 1. Layout↔render boundary
 
@@ -150,7 +151,7 @@ in v0.1.6.
 **Rule.** Every coordinate computation in render-side code routes
 through the geometry module (`gitsvg/render/_geometry.py`).
 Primitives never assemble coordinates inline — they call
-`branch_axis_to_x`, `commit_axis_to_y`, `offset_position`,
+`grid_to_pixel`, `offset_position`, `branch_line_endpoints`,
 `branch_guide_endpoints`, etc. The arithmetic that turns slot
 indices and theme offsets into SVG pixel coordinates lives in
 exactly one place.
@@ -196,3 +197,49 @@ trigger for review pushback. The `build_theme` adapter
 (`gitsvg/render/_theme.py`) does not import `state.grid` at all.
 
 **Locked in:** v0.1.5.
+
+## 7. Orientation as renderer-only concern
+
+**Rule.** The layout engine is orientation-blind: it emits canonical
+grid positions and side hints (axis indices, `before` / `after`
+markers) with no notion of screen direction. The renderer reads
+`theme.orientation` and maps the canonical grid to screen pixels.
+No layout-side type carries an orientation field; no pixel-side
+code outside the geometry module branches on grid-vs-screen mapping.
+
+**Axis-direction conventions.** The four orientations follow a single
+rule: branches stack in the default-positive screen direction (right
+for vertical orientations, down for horizontal orientations).
+
+| Orientation | Commit-axis grows | Branch-axis grows | Origin (screen corner) |
+|---|---|---|---|
+| `bt` | up    | right | bottom-left  |
+| `tb` | down  | right | top-left     |
+| `lr` | right | down  | top-left     |
+| `rl` | left  | down  | top-right    |
+
+**Axis-index terminology vs visual direction.** `before` / `after`
+(in `label_side` field values) refer to **branch-axis index**, never
+to visual screen position. `before` = lower-index side of the axis;
+`after` = higher-index side. The renderer maps to a pixel side per
+orientation:
+
+| Orientation | `before` side appears... |
+|---|---|
+| `bt`, `tb` | pixel-left of the branch line |
+| `lr`, `rl` | pixel-above the branch line   |
+
+**Rationale.** A single 4-valued enum with the "branches stack in
+default-positive screen direction" rule keeps the API tiny.
+Confining all orientation-specific code to the renderer means future
+orientations or per-orientation fine-tuning add no surface area to
+layout, state, or theme application.
+
+**Enforcement.** Code-review discipline. References to screen
+direction (`x`, `y`, "above", "below", "left", "right") inside
+`gitsvg/layout/` or `gitsvg/state/` are the trigger for review
+pushback. Inside `gitsvg/render/`, only the geometry module
+(`_geometry.py`) and the canvas-dimension code (`_canvas.py`) may
+branch on `theme.orientation`.
+
+**Locked in:** v0.1.6.

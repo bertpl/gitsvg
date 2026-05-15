@@ -19,28 +19,42 @@ invariant #4 for the rule.
 
 from dataclasses import dataclass, field
 
+from gitsvg.theme._orientation import OrientationLiteral
+
 
 @dataclass(slots=True)
 class Theme:
     """Every presentational value the renderer reads.
 
-    Field groups (spacing, geometry, typography, colours, pull-request
-    visuals, branch colour overrides) mirror the module-level visual
-    constants that lived in `gitsvg/` before they were absorbed into
-    this dataclass.
+    Field groups (orientation, spacing, geometry, typography, colours,
+    pull-request visuals, branch colour overrides) mirror the
+    module-level visual constants that lived in `gitsvg/` before they
+    were absorbed into this dataclass.
     """
 
     # --------------------------------------------------------------------------
-    #  Spacing (px)
+    #  Orientation
     # --------------------------------------------------------------------------
-    # Int defaults preserve byte-identical SVG attribute formatting:
-    # drawsvg writes `width="300"` from int and `"300.0"` from float,
-    # and the previous module-level constants were ints, producing the
-    # int-formatted output that downstream consumers may be checking
-    # against. `compute_canvas` re-introduces a float cast on
-    # `margin_top` so coordinate transforms keep producing float y's.
-    branch_spacing: int = 100  # axis-bound: branch-axis
-    commit_spacing: int = 50  # axis-bound: commit-axis
+    # Drives the renderer's grid → pixel mapping and the per-orientation
+    # default values for spacings, margins, and pill offsets resolved by
+    # `gitsvg/theme/_resolve.py`. Always concrete (never `None`); default
+    # `"bt"` preserves byte-identical output for inputs that don't set
+    # `theme.orientation` explicitly.
+    orientation: OrientationLiteral = "bt"  # axis-symmetric (input-side selector)
+
+    # --------------------------------------------------------------------------
+    #  Spacing (px; `None` = use the orientation-resolved default)
+    # --------------------------------------------------------------------------
+    # `None` means "still default": the resolver in
+    # `gitsvg/theme/_resolve.py` fills the value at end of state stage
+    # per orientation. Defaults: vertical orientations (`bt`, `tb`)
+    # → `branch_spacing=100, commit_spacing=50`; horizontal orientations
+    # (`lr`, `rl`) → swapped to `branch_spacing=50, commit_spacing=100`.
+    # Stored as int when whole-number so SVG attribute formatting matches
+    # the byte-identical baseline (drawsvg writes `width="100"` from int
+    # and `width="100.0"` from float).
+    branch_spacing: int | None = None  # axis-bound: branch-axis
+    commit_spacing: int | None = None  # axis-bound: commit-axis
 
     # --------------------------------------------------------------------------
     #  Margins (visual-side, px; `None` = use the orientation-resolved default)
@@ -65,10 +79,19 @@ class Theme:
     commit_stroke_width: float = 1.5  # axis-symmetric
     highlight_radius: int = 7  # axis-symmetric
     arc_corner_radius_in_grid_units: float = 0.4  # axis-symmetric
-    label_offset_branch_axis_in_lanes: float = 0.12  # direction-bound: branch-axis, sign from `label_side`
+    # Per-orientation default fills via `_resolve.py`: vertical
+    # orientations (`bt`, `tb`) use `0.12` (the historical default);
+    # horizontal orientations (`lr`, `rl`) use `0.24` so the resolved
+    # pixel offset stays at ~12 px (matches BT) instead of halving with
+    # the swapped branch_spacing.
+    label_offset_branch_axis_in_lanes: float | None = None  # axis-bound: branch-axis, sign from `label_side`
     branch_guide_width: float = 0.7  # axis-symmetric
     branch_guide_dash: str = "4,4"
-    guide_overshoot_in_rows: float = 0.2  # axis-bound: commit-axis (applied symmetrically at both ends)
+    # Per-orientation default fills via `_resolve.py`: vertical
+    # orientations (`bt`, `tb`) use `0.25`; horizontal orientations
+    # (`lr`, `rl`) use `0.5` to give guides enough reach to cover the
+    # branch-pill area in the wider start-side margin.
+    guide_overshoot_in_rows: float | None = None  # axis-bound: commit-axis (applied symmetrically at both ends)
 
     # --------------------------------------------------------------------------
     #  Typography
@@ -78,8 +101,13 @@ class Theme:
     label_font_size: int = 11  # axis-symmetric
     branch_label_font_size: int = 11  # axis-symmetric
     hash_font_size: int = 9  # axis-symmetric
-    branch_name_pill_offset_commit_axis_in_rows: float = -0.5  # axis-bound: commit-axis (signed)
-    branch_name_pill_offset_branch_axis_in_lanes: float = 0.0  # axis-bound: branch-axis (signed)
+    # Pill-offset defaults flip with orientation (resolver fills `None`):
+    # vertical orientations use the commit-axis component (`-0.5` rows below
+    # the branch start), horizontal orientations use the branch-axis component
+    # (`-0.5` lanes above the branch start). Keeps the pill's text always
+    # perpendicular to the offset direction, regardless of orientation.
+    branch_name_pill_offset_commit_axis_in_rows: float | None = None  # axis-bound: commit-axis (signed)
+    branch_name_pill_offset_branch_axis_in_lanes: float | None = None  # axis-bound: branch-axis (signed)
     pill_padding_x_in_font_sizes: float = 12 / 11  # axis-symmetric (extra pill width beyond text)
     pill_padding_y_in_font_sizes: float = 8 / 11  # axis-symmetric (extra pill height beyond font size)
     pill_corner_radius_in_font_sizes: float = 4 / 11  # axis-symmetric (rounded pill corners)
@@ -88,9 +116,12 @@ class Theme:
     # --------------------------------------------------------------------------
     #  Pull-request visuals
     # --------------------------------------------------------------------------
-    pull_request_dash: str = "6,4"
-    pull_request_pill_offset_commit_axis_in_rows: float = 0.5  # axis-bound: commit-axis (signed)
-    pull_request_pill_offset_branch_axis_in_lanes: float = 0.0  # axis-bound: branch-axis (signed)
+    pull_request_dash: str = "2,6"
+    # Same pattern as the branch-name pill, mirrored: vertical orientations
+    # use commit-axis (`+0.5` rows above the tip), horizontal orientations
+    # use branch-axis (`+0.5` lanes below the tip).
+    pull_request_pill_offset_commit_axis_in_rows: float | None = None  # axis-bound: commit-axis (signed)
+    pull_request_pill_offset_branch_axis_in_lanes: float | None = None  # axis-bound: branch-axis (signed)
 
     # --------------------------------------------------------------------------
     #  Colours

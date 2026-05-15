@@ -18,12 +18,15 @@ therefore imported via its leaf path from the state engine to avoid
 a package-load cycle. Same pattern as `file_format/ops/framework/`.
 """
 
+from gitsvg.theme._orientation import OrientationLiteral, normalize_orientation
 from gitsvg.theme._resolve import resolve_defaults
 from gitsvg.theme._theme import DEFAULT_THEME, Theme, _resolve_int_or_float
 
 __all__ = [
     "DEFAULT_THEME",
+    "OrientationLiteral",
     "Theme",
     "_resolve_int_or_float",
+    "normalize_orientation",
     "resolve_defaults",
 ]

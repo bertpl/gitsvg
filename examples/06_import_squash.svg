@@ -3,8 +3,8 @@
      width="323.4" height="213.5" viewBox="0 0 323.4 213.5">
 <defs>
 </defs>
-<path d="M105.32,15.0 L105.32,185.0" stroke="#b8b8b8" stroke-width="0.7" stroke-dasharray="4,4" />
-<path d="M205.32,15.0 L205.32,185.0" stroke="#b8b8b8" stroke-width="0.7" stroke-dasharray="4,4" />
+<path d="M105.32,12.5 L105.32,187.5" stroke="#b8b8b8" stroke-width="0.7" stroke-dasharray="4,4" />
+<path d="M205.32,12.5 L205.32,187.5" stroke="#b8b8b8" stroke-width="0.7" stroke-dasharray="4,4" />
 <path d="M105.32,75.0 L185.32,75.0 A20,20,0,0,0,205.32,55.0 L205.32,25.0" stroke="#7b8fb2" stroke-width="2" fill="none" stroke-linecap="round" />
 <path d="M105.32,175.0 L105.32,75.0" stroke="#5c6370" stroke-width="2" stroke-linecap="round" />
 <rect x="86.56" y="190.5" width="37.519999999999996" height="19" rx="4" ry="4" fill="#5c6370" opacity="0.85" />

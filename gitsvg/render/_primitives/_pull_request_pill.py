@@ -1,14 +1,21 @@
-"""Draw a pull-request title pill anchored at the source-tip commit.
+"""Draw a pull-request title pill anchored at the projected merge corner.
 
-Mirrors `_branch_pill.py` in shape and styling, but anchored at the
-*live* source-tip end of a branch rather than the static birth end.
-Position comes from the signed two-axis offset declared on the
-theme — `pull_request_pill_offset_commit_axis_in_rows` (default
-`+0.5`, putting the pill above the source-tip commit in bottom-to-top
-orientation) and
-`pull_request_pill_offset_branch_axis_in_lanes` (default `0`,
-keeping the pill centred on the source-tip's lane). The text is
-the PR's `title`.
+The anchor is the **phantom point on the source branch's lane at the
+projected merge target's commit-axis position** — `(branch_pos =
+pr.from_branch_pos, commit_pos = pr.to_commit_pos)`. Conceptually:
+the corner where the PR arc starts curving from the source branch
+toward the target branch's lane. Tracks the merge target row, so
+when the target branch progresses past the source tip, the pill
+follows.
+
+Position from the signed two-axis offset on the theme —
+`pull_request_pill_offset_commit_axis_in_rows` (default `-0.5` in
+vertical orientations: pill sits half a row back toward the source
+tip from the merge row, on the source branch line) and
+`pull_request_pill_offset_branch_axis_in_lanes` (default `-0.5` in
+horizontal orientations: pill sits half a lane up from the source
+branch line, at the merge column). The pill is centred on the
+resolved `(x, y)` (`text_anchor="middle"`).
 
 Width is approximated from the text length using a per-character pixel
 estimate; no real glyph measurement.
@@ -36,7 +43,7 @@ def draw_pull_request_pill(
 
     x, y = offset_position(
         anchor_branch_pos=pr.from_branch_pos,
-        anchor_commit_pos=pr.from_commit_pos,
+        anchor_commit_pos=pr.to_commit_pos,
         branch_axis_offset_in_lanes=theme.pull_request_pill_offset_branch_axis_in_lanes,
         commit_axis_offset_in_rows=theme.pull_request_pill_offset_commit_axis_in_rows,
         canvas=canvas,

@@ -9,7 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- New `theme.orientation` field for diagram orientation: `bt` (bottom-to-top, default), `tb` (top-to-bottom), `lr` (left-to-right), or `rl` (right-to-left). Accepts case-insensitive short codes (including Mermaid's `TD` and CSS `ltr` / `rtl`), `_`- or `-`-separated long forms (e.g. `bottom_to_top`, `top-to-bottom`), and vernacular `top_down` / `bottom_up`. Per-orientation defaults resolve at theme-build time for spacings, margins, pill offsets, label offset, and guide overshoot.
+
 ### Changed
+
+- **Breaking:** `branch.label_side` values rename from `"left"` / `"right"` to `"before"` / `"after"` — axis-index-relative, orientation-invariant on the layout side; the renderer maps to a pixel side per orientation. Migration: rename `"left"` → `"before"`, `"right"` → `"after"`.
+- **Breaking:** the four `theme:` margin fields rename from axis-relative ratios to visual-side pixels: `margin_branch_axis_lower_in_lanes` → `margin_left`, `margin_branch_axis_upper_in_lanes` → `margin_right`, `margin_commit_axis_upper_in_rows` → `margin_top`, `margin_commit_axis_lower_in_rows` → `margin_bottom`. Migration: rename and convert each value to absolute pixels (multiply by the original anchor — `branch_spacing` for the lane fields, `commit_spacing` for the row fields). When left unset, defaults resolve per `theme.orientation`.
+- Default `pull_request_dash` changed from `"6,4"` to `"2,6"` — airier distinction from solid arcs. Affects every diagram with an open pull request.
+- Default `guide_overshoot_in_rows` (vertical orientations) changed from `0.2` to `0.25` — slightly longer guide tails. Affects every existing diagram. Horizontal orientations resolve to `0.5` to cover the asymmetric start-side margin.
 
 ### Deprecated
 

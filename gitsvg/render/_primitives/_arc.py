@@ -1,17 +1,22 @@
 """Quarter-arc primitive — used for branch-off and merge connectors.
 
 The arc connects two points on different branch-axis lanes at different
-commit-axis positions, with a single 90° corner. Two modes:
+commit-axis positions, with a single 90° corner. Two modes (parameter
+name is screen-direction in BT-canonical terms; the renderer maps to
+the active orientation):
 
-- **Horizontal-first** (`vertical_first=False`, the default): straight
-  segment along the branch axis from the source point, then a quarter
-  arc, then a straight segment along the commit axis to the target.
-  Used for **branch-off** connectors.
+- **Horizontal-first** (`vertical_first=False`): the arc starts with a
+  segment along the branch axis (BT: horizontal), then turns to the
+  commit axis (BT: vertical). Used for **branch-off** connectors.
 
-- **Vertical-first** (`vertical_first=True`): straight segment along
-  the commit axis from the source point, then a quarter arc, then a
-  straight segment along the branch axis to the target. Used for
-  **merge** connectors.
+- **Vertical-first** (`vertical_first=True`): the arc starts with a
+  segment along the commit axis (BT: vertical), then turns to the
+  branch axis (BT: horizontal). Used for **merge** connectors.
+
+In horizontal orientations (`lr`, `rl`) the screen-direction of "first
+segment" flips because the branch axis becomes vertical on screen, but
+the layout-side meaning of "branch-axis-first vs commit-axis-first"
+stays the same.
 
 The arc's corner radius is the smaller of `theme.arc_corner_radius`
 and the two segment lengths — the corner stays a true quarter circle
@@ -21,7 +26,7 @@ even when the two endpoints are very close.
 import drawsvg as draw
 
 from gitsvg.render._canvas import RenderCanvas
-from gitsvg.render._geometry import branch_axis_to_x, commit_axis_to_y
+from gitsvg.render._geometry import grid_to_pixel
 from gitsvg.theme import Theme
 
 # Sub-pixel tolerance below which arc segments degenerate (collapse to a
@@ -54,18 +59,31 @@ def draw_arc(
         canvas: Effective canvas spec, used for the geometry transform.
         theme: Resolved theme; supplies corner radius and stroke width.
         color: Stroke colour for the arc (resolved from the theme upstream).
-        vertical_first: When True, the arc starts with a vertical
-            segment (used for merge connectors). When False, it starts
-            horizontal (used for branch-off connectors).
+        vertical_first: BT-canonical screen direction of the first
+            segment. `True` = first segment along the commit axis
+            (vertical in BT, horizontal in LR/RL). Used for merge
+            connectors. `False` = first segment along the branch axis
+            (horizontal in BT, vertical in LR/RL). Used for branch-off
+            connectors. The renderer maps this layout-side intent to
+            the active orientation's screen direction.
         stroke_dasharray: Optional SVG `stroke-dasharray` value (e.g.
             `"6,4"`). When set, the entire arc-and-line is rendered
             with that dash pattern; used by pull-request connectors
             to visually distinguish them from a real merge.
     """
-    x1 = branch_axis_to_x(from_branch_pos, canvas)
-    y1 = commit_axis_to_y(from_commit_pos, canvas)
-    x2 = branch_axis_to_x(to_branch_pos, canvas)
-    y2 = commit_axis_to_y(to_commit_pos, canvas)
+    x1, y1 = grid_to_pixel(from_branch_pos, from_commit_pos, canvas)
+    x2, y2 = grid_to_pixel(to_branch_pos, to_commit_pos, canvas)
+
+    # Map the layout-side `vertical_first` (BT-canonical screen direction)
+    # to the active orientation's first-segment screen axis. In vertical
+    # orientations (`bt`, `tb`) the commit axis is screen-vertical and
+    # the branch axis is screen-horizontal; in horizontal orientations
+    # (`lr`, `rl`) those swap. So `vertical_first` (= "commit-axis-first
+    # in BT terms") becomes `screen_y_first` only in vertical
+    # orientations; in horizontal orientations it becomes
+    # `screen_x_first`.
+    is_vertical_orientation = canvas.orientation in ("bt", "tb")
+    screen_y_first = vertical_first if is_vertical_orientation else not vertical_first
 
     path_kwargs: dict = {
         "stroke": color,
@@ -79,33 +97,38 @@ def draw_arc(
     p = draw.Path(**path_kwargs)
     p.M(x1, y1)
 
-    # Same row → degenerate to a straight horizontal segment.
+    # Same row OR same column → degenerate to a straight segment along
+    # the differing axis.
     if abs(y2 - y1) < _ARC_DEGENERATE_TOLERANCE_PX:
         p.L(x2, y1)
         d.append(p)
         return
+    if abs(x2 - x1) < _ARC_DEGENERATE_TOLERANCE_PX:
+        p.L(x1, y2)
+        d.append(p)
+        return
 
     dx = 1 if x2 > x1 else -1
-    dy = -1 if y2 < y1 else 1  # SVG y-down: negative = up the screen
+    dy = 1 if y2 > y1 else -1  # SVG y-down: positive = down the screen
     r = min(theme.arc_corner_radius, abs(x2 - x1), abs(y2 - y1))
 
-    if vertical_first:
-        # Vertical segment from source toward the target's row.
+    if screen_y_first:
+        # First segment along screen-y axis from source toward target row.
         p.L(x1, y2 - dy * r)
-        # Quarter-circle arc turning horizontal. Sweep flips compared to
-        # horizontal-first because the curve bends the other way.
+        # Quarter-circle arc turning toward x. Sweep depends on the
+        # direction quadrant: when dx and dy have the same sign, the
+        # corner curves one way; opposite signs curve the other way.
         sweep = 1 if (dx > 0) != (dy > 0) else 0
         p.A(r, r, 0, 0, sweep, x1 + dx * r, y2)
-        # Horizontal segment to target.
         if abs(x2 - (x1 + dx * r)) > _ARC_DEGENERATE_TOLERANCE_PX:
             p.L(x2, y2)
     else:
-        # Horizontal segment from source toward the target's lane.
+        # First segment along screen-x axis from source toward target lane.
         p.L(x2 - dx * r, y1)
-        # Quarter-circle arc turning vertical.
+        # Quarter-circle arc turning toward y. Sweep flips relative to
+        # screen_y_first because the curve bends the other way.
         sweep = 0 if (dx > 0) != (dy > 0) else 1
         p.A(r, r, 0, 0, sweep, x2, y1 + dy * r)
-        # Vertical segment to target.
         if abs(y2 - (y1 + dy * r)) > _ARC_DEGENERATE_TOLERANCE_PX:
             p.L(x2, y2)
 

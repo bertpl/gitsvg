@@ -35,17 +35,17 @@ def test_open_pr_renders_a_dashed_path() -> None:
 
     # --- assert -----------------------
     # `stroke-dasharray` appears in the branch-guide primitive too, so
-    # we check for the PR-specific dash value `6,4` (not `4,4`).
-    assert 'stroke-dasharray="6,4"' in svg
+    # we check for the PR-specific dash value `2,6` (not the guide's `4,4`).
+    assert 'stroke-dasharray="2,6"' in svg
 
 
 def test_no_pr_renders_no_pr_dash() -> None:
-    """No PR ops → no `6,4` dash anywhere in the output."""
+    """No PR ops → no `2,6` dash anywhere in the output."""
     # --- arrange / act ----------------
     svg = _render('{"op": "branch", "name": "main"}\n{"op": "commit", "branch": "main", "id": "m1", "msg": "first"}\n')
 
     # --- assert -----------------------
-    assert "6,4" not in svg
+    assert "2,6" not in svg
 
 
 # ==================================================================================================

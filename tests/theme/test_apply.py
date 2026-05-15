@@ -24,8 +24,8 @@ def test_explicit_field_override_assigns_only_that_field() -> None:
     assert report.is_clean()
     assert theme.background_color == "#abcdef"
     # Other fields keep their defaults.
-    assert theme.branch_spacing == DEFAULT_THEME.branch_spacing
-    assert theme.commit_spacing == DEFAULT_THEME.commit_spacing
+    assert theme.branch_spacing == 100  # bottom-to-top default
+    assert theme.commit_spacing == 50  # bottom-to-top default
 
 
 def test_multiple_explicit_fields_in_one_op_all_apply() -> None:
@@ -40,7 +40,7 @@ def test_multiple_explicit_fields_in_one_op_all_apply() -> None:
     assert theme.background_color == "#101010"
     assert theme.label_font_size == 13
     # Untouched field stays at the default.
-    assert theme.commit_spacing == DEFAULT_THEME.commit_spacing
+    assert theme.commit_spacing == 50  # bottom-to-top default
 
 
 def test_sequential_explicit_overrides_accumulate() -> None:
@@ -76,7 +76,7 @@ def test_named_default_theme_keeps_defaults() -> None:
 
     # --- assert -----------------------
     assert report.is_clean()
-    assert theme.branch_spacing == DEFAULT_THEME.branch_spacing
+    assert theme.branch_spacing == 100  # bottom-to-top default
     assert theme.background_color == DEFAULT_THEME.background_color
 
 
@@ -123,7 +123,7 @@ def test_mixed_then_partial_sequence() -> None:
     assert report.is_clean()
     assert theme.label_font_size == 17  # from the mixed op
     assert theme.branch_spacing == 80  # from the partial op
-    assert theme.commit_spacing == DEFAULT_THEME.commit_spacing  # never touched
+    assert theme.commit_spacing == 50  # bottom-to-top default  # never touched
 
 
 # ==================================================================================================
@@ -244,7 +244,7 @@ def test_spacing_violation_does_not_block_other_fields_in_same_op() -> None:
     assert [e.code for e in report.errors] == ["E218"]
     # Background color from the same op applied; branch_spacing kept its default.
     assert theme.background_color == "#abcdef"
-    assert theme.branch_spacing == DEFAULT_THEME.branch_spacing
+    assert theme.branch_spacing == 100  # bottom-to-top default
 
 
 @pytest.mark.parametrize("field", ["label_font_size", "branch_label_font_size", "hash_font_size"])
