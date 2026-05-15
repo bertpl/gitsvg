@@ -107,8 +107,15 @@ def apply_theme_op(state: State, theme: Theme, parsed: ParsedOp, report: Validat
     # the live theme don't alias back to the op model. Fields that fail
     # their semantic constraint emit an error but don't block the
     # other fields from applying.
+    #
+    # Explicit `null` on `orientation` resets to the package default
+    # `"bt"` (the field is always concrete on `Theme`, so `None` is
+    # not a valid stored value — this preserves the "null = reset to
+    # default" sentinel semantic uniformly across all fields).
     for name in explicit_fields:
         value = getattr(op, name)
+        if name == "orientation" and value is None:
+            value = "bt"
         constraint = _FIELD_CONSTRAINTS.get(name)
         if constraint is not None:
             predicate, code, message_suffix = constraint

@@ -1,30 +1,70 @@
 """Coordinate transforms — slot indices to SVG pixel coordinates.
 
-The transforms read effective spacing and margins from a
-`RenderCanvas`, so per-frame `theme:` op overrides flow through
-naturally.
+The transforms read effective spacing, margins, and orientation from
+a `RenderCanvas`. Per `docs/architecture.md` invariant #5 every
+render-side coordinate computation routes through this module's
+helpers; per invariant #7 every orientation-dependent decision lives
+here too — primitives never branch on orientation directly.
 
-Hard-coded bottom-to-top orientation: commit-axis index 0 sits at the
-bottom of the canvas (oldest); higher indices sit higher (newer);
-branch-axis index 0 sits at the left.
+Orientation table (mirrors invariant #7):
 
-Per invariant #5 in `docs/architecture.md`, every render-side
-coordinate computation routes through this module's helpers.
-Primitives never assemble coordinates inline.
+| Orientation | Origin (screen corner) | Commit-axis grows | Branch-axis grows |
+|---|---|---|---|
+| `bt` | bottom-left  | up    | right |
+| `tb` | top-left     | down  | right |
+| `lr` | top-left     | right | down  |
+| `rl` | top-right    | left  | down  |
+
+`grid_to_pixel` is the canonical paired transform. `offset_position`
+applies a signed two-axis grid offset (positive = toward higher
+index along the named axis) on top of an anchor.
+`branch_line_endpoints` and `branch_guide_endpoints` return
+orientation-aware screen endpoints for the two line-shaped
+primitives.
 """
 
 from gitsvg.render._canvas import RenderCanvas
 from gitsvg.theme import Theme, _resolve_int_or_float
 
 
-def branch_axis_to_x(pos: int, canvas: RenderCanvas) -> float:
-    """Return the x pixel coordinate for a branch-axis index."""
-    return canvas.margin_left + pos * canvas.branch_spacing
+def grid_to_pixel(branch_pos: int, commit_pos: int, canvas: RenderCanvas) -> tuple[float, float]:
+    """Map a `(branch_pos, commit_pos)` grid position to its `(x, y)` pixel coordinates.
 
+    The mapping depends on `canvas.orientation`. Bottom-to-top (`bt`)
+    places commit-axis index 0 at the largest y; the other three
+    orientations follow the table in this module's docstring.
 
-def commit_axis_to_y(pos: int, canvas: RenderCanvas) -> float:
-    """Return the y pixel coordinate for a commit-axis index."""
-    return canvas.margin_top + (canvas.n_commits - 1 - pos) * canvas.commit_spacing
+    Returned types are the natural Python arithmetic types: x is `int`
+    when both anchor margin and the spacing-multiplied offset are int
+    (whole-number-input case in vertical orientations); y is always
+    `float` because `compute_canvas` force-casts `margin_top` to float
+    so the SVG y-attribute formatting stays consistent with the
+    byte-identical baseline. Callers that apply pixel offsets after
+    this transform (`offset_position`) cast each offset to int when
+    whole independently.
+
+    Args:
+        branch_pos: Branch-axis index (integer slot position).
+        commit_pos: Commit-axis index (integer slot position).
+        canvas: Effective canvas spec — supplies margins, spacings,
+            slot counts, and the active orientation.
+
+    Returns:
+        The `(x, y)` pixel coordinates.
+    """
+    if canvas.orientation == "bt":
+        x = canvas.margin_left + branch_pos * canvas.branch_spacing
+        y = canvas.margin_top + (canvas.n_commits - 1 - commit_pos) * canvas.commit_spacing
+    elif canvas.orientation == "tb":
+        x = canvas.margin_left + branch_pos * canvas.branch_spacing
+        y = canvas.margin_top + commit_pos * canvas.commit_spacing
+    elif canvas.orientation == "lr":
+        x = canvas.margin_left + commit_pos * canvas.commit_spacing
+        y = canvas.margin_top + branch_pos * canvas.branch_spacing
+    else:  # rl
+        x = canvas.margin_left + (canvas.n_commits - 1 - commit_pos) * canvas.commit_spacing
+        y = canvas.margin_top + branch_pos * canvas.branch_spacing
+    return (x, y)
 
 
 def offset_position(
@@ -38,10 +78,15 @@ def offset_position(
 
     Both offsets follow the **signed grid-axis convention**: positive =
     toward higher index along the named axis (see invariant #3 in
-    `docs/architecture.md`). The helper multiplies each offset by the
-    matching canvas spacing to get the pixel magnitude, then maps grid
-    direction to screen direction. Currently supports only bottom-to-top
-    orientation: positive branch-axis = `+x`; positive commit-axis = `-y`.
+    `docs/architecture.md`). The helper resolves each offset to a
+    pixel offset along the matching grid axis, then maps the
+    grid-direction offset to a screen-direction offset per the active
+    orientation.
+
+    Resolving the grid offsets to integer pixels (via
+    `_resolve_int_or_float`) before adding to the anchor preserves
+    int formatting in the SVG attribute output for whole-number
+    offsets.
 
     Args:
         anchor_branch_pos: Slot index along the branch axis the
@@ -57,35 +102,111 @@ def offset_position(
     Returns:
         The resulting `(x, y)` in SVG pixel coordinates.
     """
-    # Cast whole-number offsets back to int so the SVG attribute formatting
-    # matches the byte-identical baseline (int → `x="100"`, float → `x="100.0"`).
     branch_offset_px = _resolve_int_or_float(branch_axis_offset_in_lanes * canvas.branch_spacing)
     commit_offset_px = _resolve_int_or_float(commit_axis_offset_in_rows * canvas.commit_spacing)
-    x = branch_axis_to_x(anchor_branch_pos, canvas) + branch_offset_px
-    # Bottom-to-top: positive commit-axis index sits at lower screen y → subtract.
-    y = commit_axis_to_y(anchor_commit_pos, canvas) - commit_offset_px
-    return (x, y)
+    anchor_x, anchor_y = grid_to_pixel(anchor_branch_pos, anchor_commit_pos, canvas)
+    return _apply_pixel_offset(anchor_x, anchor_y, branch_offset_px, commit_offset_px, canvas.orientation)
 
 
-def branch_guide_endpoints(canvas: RenderCanvas, theme: Theme) -> tuple[float, float]:
-    """Return the `(y_top, y_bottom)` span for branch guides on this canvas.
+def branch_line_endpoints(
+    branch_pos: int,
+    start_commit_pos: int,
+    end_commit_pos: int,
+    canvas: RenderCanvas,
+) -> tuple[tuple[float, float], tuple[float, float]]:
+    """Return the two screen endpoints of a branch line.
 
-    Guides span the full canvas content area along the commit axis,
-    with a small overshoot above and below the margin edges. The
-    overshoot is `theme.guide_overshoot` — a resolved pixel value
-    derived from `theme.guide_overshoot_in_rows × commit_spacing`.
+    The line spans the branch's commit-axis extent at a constant
+    branch-axis position (the lane). In vertical orientations
+    (`bt`, `tb`) the line is screen-vertical (constant x); in
+    horizontal orientations (`lr`, `rl`) it is screen-horizontal
+    (constant y).
 
     Args:
-        canvas: Effective canvas spec — the guide span depends on
-            the commit-axis margins (which set the content edges)
-            and the canvas height.
+        branch_pos: The branch's lane index.
+        start_commit_pos: Commit-axis index where the branch begins.
+        end_commit_pos: Commit-axis index of the branch's tip.
+        canvas: Effective canvas spec.
+
+    Returns:
+        `((x_start, y_start), (x_end, y_end))` — the two endpoints
+        for `draw.Line`.
+    """
+    p_start = grid_to_pixel(branch_pos, start_commit_pos, canvas)
+    p_end = grid_to_pixel(branch_pos, end_commit_pos, canvas)
+    return (p_start, p_end)
+
+
+def branch_guide_endpoints(
+    branch_pos: int,
+    canvas: RenderCanvas,
+    theme: Theme,
+) -> tuple[tuple[float, float], tuple[float, float]]:
+    """Return the two screen endpoints of a branch guide line for a single lane.
+
+    The guide spans the full canvas content area along the commit
+    axis with a small `theme.guide_overshoot` past the canvas
+    margins on each end. Orientation determines whether the guide
+    is screen-vertical (vertical orientations) or screen-horizontal
+    (horizontal orientations).
+
+    Args:
+        branch_pos: The lane index the guide sits on.
+        canvas: Effective canvas spec.
         theme: Resolved theme; supplies the overshoot value.
 
     Returns:
-        A `(y_top, y_bottom)` pair in SVG pixel coordinates. `y_top`
-        sits `theme.guide_overshoot` px above the upper-margin edge;
-        `y_bottom` sits the same distance below the lower-margin edge.
+        `((x1, y1), (x2, y2))` — the two endpoints for the dashed
+        guide line.
     """
-    y_top = canvas.margin_top - theme.guide_overshoot
-    y_bottom = canvas.height - canvas.margin_bottom + theme.guide_overshoot
-    return (y_top, y_bottom)
+    overshoot = theme.guide_overshoot
+    if canvas.orientation in ("bt", "tb"):
+        x = grid_to_pixel(branch_pos, 0, canvas)[0]
+        y_top = canvas.margin_top - overshoot
+        y_bottom = canvas.height - canvas.margin_bottom + overshoot
+        return ((x, y_top), (x, y_bottom))
+    # Horizontal orientations: guide is a horizontal line at the lane's y.
+    y = grid_to_pixel(branch_pos, 0, canvas)[1]
+    x_left = canvas.margin_left - overshoot
+    x_right = canvas.width - canvas.margin_right + overshoot
+    return ((x_left, y), (x_right, y))
+
+
+# ==================================================================================================
+#  Internals
+# ==================================================================================================
+def _apply_pixel_offset(
+    x: float,
+    y: float,
+    branch_axis_offset_px: float,
+    commit_axis_offset_px: float,
+    orientation: str,
+) -> tuple[float, float]:
+    """Add signed grid-axis offsets (in pixels) to an anchor position.
+
+    Maps the (branch-axis, commit-axis) signed offset pair to a
+    (dx, dy) screen offset per orientation. The mapping follows the
+    table in this module's docstring: positive branch-axis offset
+    moves toward higher branch-axis index (right in `bt`/`tb`, down
+    in `lr`/`rl`); positive commit-axis offset moves toward higher
+    commit-axis index (up in `bt`, down in `tb`, right in `lr`,
+    left in `rl`).
+
+    Args:
+        x: Anchor x in pixels.
+        y: Anchor y in pixels.
+        branch_axis_offset_px: Signed pixel offset along branch axis.
+        commit_axis_offset_px: Signed pixel offset along commit axis.
+        orientation: Active orientation (`bt`, `tb`, `lr`, `rl`).
+
+    Returns:
+        The offset `(x, y)` position.
+    """
+    if orientation == "bt":
+        return (x + branch_axis_offset_px, y - commit_axis_offset_px)
+    if orientation == "tb":
+        return (x + branch_axis_offset_px, y + commit_axis_offset_px)
+    if orientation == "lr":
+        return (x + commit_axis_offset_px, y + branch_axis_offset_px)
+    # rl
+    return (x - commit_axis_offset_px, y + branch_axis_offset_px)

@@ -3,9 +3,18 @@
 The pill is a filled rounded rectangle in the branch's colour with the
 branch name in white text, positioned at the signed two-axis offset
 declared on the theme — `branch_name_pill_offset_commit_axis_in_rows`
-(default `-0.5`, putting the pill below the branch's start row in bottom-to-top orientation)
-and `branch_name_pill_offset_branch_axis_in_lanes` (default `0`,
-keeping the pill centred on the branch's lane).
+and `branch_name_pill_offset_branch_axis_in_lanes`. The resolver in
+`gitsvg/theme/_resolve.py` picks per-orientation defaults: vertical
+orientations route the offset along the commit axis (pill below the
+start in BT, above in TB); horizontal orientations route it along the
+commit axis with `-0.75 × commit_spacing` (pill alongside the branch
+line, before the start commit in `lr` / after in `rl`).
+
+In horizontal orientations the pill is anchored on the **edge nearest
+the start commit** instead of being centred on the offset point — so
+the offset becomes a minimum gap between the start commit and the pill,
+regardless of pill width. Long branch names extend further into the
+margin without ever overlapping the start commit dot.
 
 Width is approximated from the text length using a per-character pixel
 estimate; no real glyph measurement.
@@ -34,9 +43,30 @@ def draw_branch_pill(d: draw.Drawing, branch: LayoutBranch, color: str, canvas: 
     height = theme.branch_label_font_size + theme.pill_padding_y
     corner = theme.pill_corner_radius
 
+    # Anchor strategy:
+    # - BT/TB: pill centred on (x, y). Branch line is vertical, pill is
+    #   above/below it — the pill rect's horizontal extent doesn't fight
+    #   the branch line.
+    # - LR: pill's right edge anchored at (x, y); pill extends leftward.
+    #   Branch line is horizontal; without edge-anchoring, long pills
+    #   would overlap the start commit dot to the right.
+    # - RL: mirror of LR — left edge anchored at (x, y); extends rightward.
+    if canvas.orientation == "lr":
+        text_anchor = "end"
+        rect_left = x - width
+        text_x = x - theme.pill_padding_x / 2
+    elif canvas.orientation == "rl":
+        text_anchor = "start"
+        rect_left = x
+        text_x = x + theme.pill_padding_x / 2
+    else:
+        text_anchor = "middle"
+        rect_left = x - width / 2
+        text_x = x
+
     d.append(
         draw.Rectangle(
-            x - width / 2,
+            rect_left,
             y - height / 2,
             width,
             height,
@@ -50,9 +80,9 @@ def draw_branch_pill(d: draw.Drawing, branch: LayoutBranch, color: str, canvas: 
         draw.Text(
             branch.name,
             theme.branch_label_font_size,
-            x,
+            text_x,
             y,
-            text_anchor="middle",
+            text_anchor=text_anchor,
             dominant_baseline="middle",
             fill="white",
             font_family=theme.label_font_family,

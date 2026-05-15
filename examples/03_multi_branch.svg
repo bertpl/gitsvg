@@ -3,9 +3,9 @@
      width="411.7" height="363.5" viewBox="0 0 411.7 363.5">
 <defs>
 </defs>
-<path d="M111.69999999999999,15.0 L111.69999999999999,335.0" stroke="#b8b8b8" stroke-width="0.7" stroke-dasharray="4,4" />
-<path d="M211.7,15.0 L211.7,335.0" stroke="#b8b8b8" stroke-width="0.7" stroke-dasharray="4,4" />
-<path d="M311.7,15.0 L311.7,335.0" stroke="#b8b8b8" stroke-width="0.7" stroke-dasharray="4,4" />
+<path d="M111.69999999999999,12.5 L111.69999999999999,337.5" stroke="#b8b8b8" stroke-width="0.7" stroke-dasharray="4,4" />
+<path d="M211.7,12.5 L211.7,337.5" stroke="#b8b8b8" stroke-width="0.7" stroke-dasharray="4,4" />
+<path d="M311.7,12.5 L311.7,337.5" stroke="#b8b8b8" stroke-width="0.7" stroke-dasharray="4,4" />
 <path d="M111.69999999999999,325.0 L191.7,325.0 A20,20,0,0,0,211.7,305.0 L211.7,275.0" stroke="#7b8fb2" stroke-width="2" fill="none" stroke-linecap="round" />
 <path d="M111.69999999999999,325.0 L291.7,325.0 A20,20,0,0,0,311.7,305.0 L311.7,275.0" stroke="#6a9f8d" stroke-width="2" fill="none" stroke-linecap="round" />
 <path d="M111.69999999999999,125.0 L191.7,125.0 A20,20,0,0,0,211.7,105.0 L211.7,75.0" stroke="#b07b8f" stroke-width="2" fill="none" stroke-linecap="round" />

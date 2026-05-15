@@ -4,9 +4,9 @@
 <defs>
 </defs>
 <rect x="0" y="0" width="469.0" height="369.0909090909091" fill="#fff8e7" />
-<path d="M139.0,15.0 L139.0,335.0" stroke="#b8b8b8" stroke-width="0.7" stroke-dasharray="4,4" />
-<path d="M249.0,15.0 L249.0,335.0" stroke="#b8b8b8" stroke-width="0.7" stroke-dasharray="4,4" />
-<path d="M359.0,15.0 L359.0,335.0" stroke="#b8b8b8" stroke-width="0.7" stroke-dasharray="4,4" />
+<path d="M139.0,12.5 L139.0,337.5" stroke="#b8b8b8" stroke-width="0.7" stroke-dasharray="4,4" />
+<path d="M249.0,12.5 L249.0,337.5" stroke="#b8b8b8" stroke-width="0.7" stroke-dasharray="4,4" />
+<path d="M359.0,12.5 L359.0,337.5" stroke="#b8b8b8" stroke-width="0.7" stroke-dasharray="4,4" />
 <path d="M139.0,325.0 L229.0,325.0 A20,20,0,0,0,249.0,305.0 L249.0,275.0" stroke="#1f77b4" stroke-width="4.0" fill="none" stroke-linecap="round" />
 <path d="M139.0,325.0 L339.0,325.0 A20,20,0,0,0,359.0,305.0 L359.0,275.0" stroke="#2ca02c" stroke-width="4.0" fill="none" stroke-linecap="round" />
 <path d="M139.0,125.0 L229.0,125.0 A20,20,0,0,0,249.0,105.0 L249.0,75.0" stroke="#ff7f0e" stroke-width="4.0" fill="none" stroke-linecap="round" />

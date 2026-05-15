@@ -1,10 +1,10 @@
-"""Draw a single branch line as a vertical line in the branch's lane."""
+"""Draw a single branch line — screen direction follows orientation."""
 
 import drawsvg as draw
 
 from gitsvg.layout import LayoutBranch
 from gitsvg.render._canvas import RenderCanvas
-from gitsvg.render._geometry import branch_axis_to_x, commit_axis_to_y
+from gitsvg.render._geometry import branch_line_endpoints
 from gitsvg.theme import Theme
 
 
@@ -16,18 +16,17 @@ def draw_branch_line(d: draw.Drawing, branch: LayoutBranch, color: str, canvas: 
     (`start == end`): the line would collapse to an invisible
     zero-length path, so emission is suppressed to keep the output
     free of degenerate elements. The branch's name pill is still
-    drawn beside it.
+    drawn beside it. Screen direction (vertical vs horizontal) is
+    decided by the geometry helper based on `theme.orientation`.
     """
     if branch.start == branch.end:
         return
-    x = branch_axis_to_x(branch.branch_pos, canvas)
-    y_start = commit_axis_to_y(branch.start, canvas)
-    y_end = commit_axis_to_y(branch.end, canvas)
+    (x_start, y_start), (x_end, y_end) = branch_line_endpoints(branch.branch_pos, branch.start, branch.end, canvas)
     d.append(
         draw.Line(
-            x,
+            x_start,
             y_start,
-            x,
+            x_end,
             y_end,
             stroke=color,
             stroke_width=theme.branch_line_width,

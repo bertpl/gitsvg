@@ -35,12 +35,30 @@ def draw_commit_label(d: draw.Drawing, commit: LayoutCommit, canvas: RenderCanva
     if not lines:
         return
 
+    # Branch-axis offset: signed along the branch axis. Positive = toward
+    # higher branch-axis index ("after" side); negative = toward lower
+    # ("before" side).
     if commit.label_side == "before":
-        anchor = "end"
         branch_axis_offset_in_lanes = -theme.label_offset_branch_axis_in_lanes
     else:
-        anchor = "start"
         branch_axis_offset_in_lanes = theme.label_offset_branch_axis_in_lanes
+
+    # Text-anchor depends on orientation. In vertical orientations
+    # (`bt`, `tb`) the branch axis is screen-x, so the anchor sits left or
+    # right of the dot and the text flows outward horizontally — `text-
+    # anchor="end"` aligns the text's right edge to a `before`-side
+    # anchor (text extends leftward), `start` aligns the left edge to an
+    # `after`-side anchor (text extends rightward). In horizontal
+    # orientations (`lr`, `rl`) the branch axis is screen-y, so the
+    # anchor sits above or below the dot and the text should be centred
+    # horizontally on the dot's x — `text-anchor="middle"` is the right
+    # choice. (`text_anchor` is always horizontal alignment in SVG; it
+    # doesn't rotate with our notion of branch axis.)
+    is_vertical = canvas.orientation in ("bt", "tb")
+    if is_vertical:
+        anchor = "end" if commit.label_side == "before" else "start"
+    else:
+        anchor = "middle"
 
     x, cy = offset_position(
         anchor_branch_pos=commit.branch_pos,
@@ -52,10 +70,34 @@ def draw_commit_label(d: draw.Drawing, commit: LayoutCommit, canvas: RenderCanva
 
     line_height = theme.label_font_size + theme.label_line_padding
 
-    # Vertically centre the stack on the dot's y. Lines are drawn with
-    # `dominant_baseline="middle"`, so a single line's y is the dot's y;
-    # a stack of N lines spans (N-1) * line_height between centres.
-    top_y = cy - (len(lines) - 1) * line_height / 2
+    # Stack-vertical anchor:
+    #
+    # - **Vertical orientations** (`bt`, `tb`): the branch line is also
+    #   vertical and the stack extends horizontally outward (left/right
+    #   of the dot via `text_anchor=end/start`), so the stack's vertical
+    #   extent never crosses the line. Centre the stack on the dot's y
+    #   — `top_y = cy - (N-1) * line_height / 2`. (Lines use
+    #   `dominant_baseline="middle"`, so each line's y is its vertical
+    #   centre; a stack of N lines spans `(N-1) * line_height` between
+    #   the outermost line centres.)
+    #
+    # - **Horizontal orientations** (`lr`, `rl`): the branch line is
+    #   horizontal and the stack also extends vertically — centring the
+    #   stack on `cy` would push half the lines across the branch line.
+    #   Anchor the stack edge nearest the line at `cy` instead, so
+    #   `theme.label_offset_branch_axis_in_lanes` becomes the minimum
+    #   gap between the line and the nearest text edge regardless of
+    #   line count. `before` → stack extends *upward* from `cy` (bottom-
+    #   line bottom edge sits at `cy`); `after` → stack extends
+    #   *downward* (top-line top edge sits at `cy`).
+    if is_vertical:
+        top_y = cy - (len(lines) - 1) * line_height / 2
+    else:
+        max_font_size = max(font_size for _, font_size, _, _ in lines)
+        if commit.label_side == "before":
+            top_y = cy - max_font_size / 2 - (len(lines) - 1) * line_height
+        else:
+            top_y = cy + max_font_size / 2
 
     for index, (text, font_size, color, weight) in enumerate(lines):
         d.append(
