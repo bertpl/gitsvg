@@ -1,40 +1,53 @@
-"""Approximate label-width estimation used by the auto-fit margin
-code and by the label primitives that need a pixel width before drawing.
+"""Pixel-width helpers used by the auto-fit margin code and by the
+label primitives that need a width before drawing.
 
-A per-character pixel estimate — no real glyph measurement. Good
-enough to keep labels inside the canvas. Reads font sizes and pill
-geometry off the resolved theme.
+Both functions delegate to :func:`gitsvg.render._glyph_metrics.text_width`,
+which sizes geometry safely against every font in
+``theme.label_font_family``'s fallback chain.
 """
 
 from gitsvg.layout import LayoutCommit
+from gitsvg.render._glyph_metrics import text_width
 from gitsvg.theme import Theme
-
-# Classification (both factors): axis-symmetric — perceptual char-width
-# estimates, no grid-axis bias.
-_CHAR_WIDTH_FACTOR_NORMAL = 0.58  # rough char-width estimate at weight 500
-_CHAR_WIDTH_FACTOR_BOLD = 0.64  # rough char-width estimate at weight 700
 
 
 def pill_width(text: str, theme: Theme) -> float:
-    """Return the estimated pixel width of a pill rectangle for `text`."""
-    return len(text) * theme.branch_label_font_size * _CHAR_WIDTH_FACTOR_NORMAL + theme.pill_padding_x
+    """Return the estimated pixel width of a pill rectangle for `text`.
+
+    Args:
+        text: The pill's text content.
+        theme: Supplies the font family, font size, and pill padding.
+
+    Returns:
+        Pixel width covering text plus padding on the leading edge.
+    """
+    return text_width(text, theme.label_font_family, theme.branch_label_font_size) + theme.pill_padding_x
 
 
 def commit_label_width(commit: LayoutCommit, theme: Theme) -> float:
     """Return the widest line's pixel width across a commit's label stack.
 
-    Considers each `msg` line (split on `"\\n"`) at
-    `theme.label_font_size`, plus the optional `hash` line at
-    `theme.hash_font_size`. Bold weight (used when the commit is
-    highlighted) widens characters by the bold factor.
+    Considers each ``msg`` line (split on ``"\\n"``) at
+    ``theme.label_font_size``, plus the optional ``hash`` line at
+    ``theme.hash_font_size``. Bold weight (used when the commit is
+    highlighted) routes through the bold-weight glyph metrics.
+
+    Args:
+        commit: The commit whose label stack is being measured.
+        theme: Supplies font family and per-line font sizes.
+
+    Returns:
+        Pixel width of the widest line, or ``0`` if the commit has
+        neither ``msg`` nor ``hash``.
     """
     if commit.msg is None and commit.hash is None:
         return 0.0
-    msg_factor = _CHAR_WIDTH_FACTOR_BOLD if commit.highlight else _CHAR_WIDTH_FACTOR_NORMAL
     widest = 0.0
     if commit.msg is not None:
         for line in commit.msg.split("\n"):
-            widest = max(widest, len(line) * theme.label_font_size * msg_factor)
+            widest = max(
+                widest, text_width(line, theme.label_font_family, theme.label_font_size, bold=commit.highlight)
+            )
     if commit.hash is not None:
-        widest = max(widest, len(commit.hash) * theme.hash_font_size * _CHAR_WIDTH_FACTOR_NORMAL)
+        widest = max(widest, text_width(commit.hash, theme.label_font_family, theme.hash_font_size))
     return widest

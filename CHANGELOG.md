@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Pill and commit-label widths now derive from bundled per-character glyph metrics for the fonts the renderer recognises in `theme.label_font_family` (Inter, plus the `sans-serif` and `monospace` generic keywords, each in regular and bold weights). Width is the per-character maximum across every recognised entry in the chain, so SVG geometry stays safe whichever font the viewer actually picks; unrecognised chains fall back to the previous per-character heuristic. Existing diagrams may show small pixel shifts in pill widths as a consequence.
+
 ### Deprecated
 
 ### Removed

@@ -1,4 +1,4 @@
-.PHONY: help dev-setup build test format lint update-deps install release validate-local render-local
+.PHONY: help dev-setup build test format lint update-deps install release validate-local render-local rebuild-glyph-widths
 
 help:
 	@echo 'Commands:'
@@ -11,6 +11,7 @@ help:
 	@echo '  install        Re-install gitsvg stand-alone tool'
 	@echo '  validate-local Validate every .gitsvg.jsonl under local/test_examples/'
 	@echo '  render-local   Render every .gitsvg.jsonl under local/test_examples/ to SVG'
+	@echo '  rebuild-glyph-widths  Regenerate glyph-width LUTs from scripts/font_sources/'
 	@echo '  release        Bump version, validate, tag, push (VERSION=X.Y.Z)'
 
 dev-setup:
@@ -41,6 +42,9 @@ validate-local:
 
 render-local:
 	uv run python scripts/render_local.py
+
+rebuild-glyph-widths:
+	uv run python scripts/build_glyph_widths.py
 
 release:
 	@test -n "$(VERSION)" || (echo "Usage: make release VERSION=X.Y.Z" && exit 1)

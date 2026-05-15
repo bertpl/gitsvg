@@ -9,11 +9,11 @@
 <path d="M200,75.0 L200,45.0 A20,20,0,0,0,180,25.0 L100,25.0" stroke="#7b8fb2" stroke-width="2" fill="none" stroke-linecap="round" stroke-dasharray="2,6" />
 <path d="M100,175.0 L100,125.0" stroke="#5c6370" stroke-width="2" stroke-linecap="round" />
 <path d="M200,125.0 L200,75.0" stroke="#7b8fb2" stroke-width="2" stroke-linecap="round" />
-<rect x="81.24000000000001" y="190.5" width="37.519999999999996" height="19" rx="4" ry="4" fill="#5c6370" opacity="0.85" />
-<text x="100" y="200.0" font-size="11" text-anchor="middle" dominant-baseline="middle" fill="white" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="500">main</text>
-<rect x="171.67000000000002" y="140.5" width="56.66" height="19" rx="4" ry="4" fill="#7b8fb2" opacity="0.85" />
-<text x="200" y="150.0" font-size="11" text-anchor="middle" dominant-baseline="middle" fill="white" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="500">feature</text>
-<rect x="146.15" y="40.5" width="107.69999999999999" height="19" rx="4" ry="4" fill="#7b8fb2" opacity="0.85" />
+<rect x="80.2580575" y="190.5" width="39.483885" height="19" rx="4" ry="4" fill="#5c6370" opacity="0.85" />
+<text x="100.0" y="200.0" font-size="11" text-anchor="middle" dominant-baseline="middle" fill="white" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="500">main</text>
+<rect x="173.922855" y="140.5" width="52.15429" height="19" rx="4" ry="4" fill="#7b8fb2" opacity="0.85" />
+<text x="200.0" y="150.0" font-size="11" text-anchor="middle" dominant-baseline="middle" fill="white" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="500">feature</text>
+<rect x="151.568358" y="40.5" width="96.86328400000001" height="19" rx="4" ry="4" fill="#7b8fb2" opacity="0.85" />
 <text x="200" y="50.0" font-size="11" text-anchor="middle" dominant-baseline="middle" fill="white" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="500">PR 1: add thing</text>
 <circle cx="100" cy="175.0" r="5" fill="#5c6370" stroke="white" stroke-width="1.5" />
 <circle cx="200" cy="125.0" r="5" fill="#7b8fb2" stroke="white" stroke-width="1.5" />
