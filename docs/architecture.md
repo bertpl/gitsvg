@@ -121,10 +121,29 @@ anchor. The field name carries a suffix naming the anchor:
 - `_in_grid_units` → `min(branch_spacing, commit_spacing)`
 - `_in_font_sizes` → the relevant font_size field
 
-**Rationale.** Tweaking a spacing or font size then rescales
-everything anchored to it proportionally.
+**Pixel exception.** A field is stored as an absolute pixel value
+(no ratio suffix) when no single anchor cleanly fits. The exception
+list:
 
-**Locked in:** v0.1.5.
+- Stroke widths and the font sizes themselves — perceptual constants
+  with no structural anchor.
+- Char-width factors used by label-width estimation — pure ratios
+  with no spacing anchor.
+- The four visual-side margins (`margin_left`, `margin_right`,
+  `margin_top`, `margin_bottom`) — the natural anchor flips with
+  orientation, so a single ratio field can't carry it; the
+  default-resolution helper in `gitsvg/theme/_resolve.py` computes
+  the right pixel value from spacings + orientation at end of state
+  stage when the user leaves the field as `None`.
+
+**Rationale.** Tweaking a spacing or font size then rescales
+everything anchored to it proportionally; pixel-exception fields
+either have no natural anchor, or have an anchor that depends on
+orientation and so resolves at theme-build time rather than at
+field-storage time.
+
+**Locked in:** v0.1.5; pixel-exception list widened with margins
+in v0.1.6.
 
 ## 5. Geometry-module routing for coordinate math
 

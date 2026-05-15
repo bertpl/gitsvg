@@ -25,9 +25,9 @@ class BranchOp(OpBase):
         default=None,
         description="Override hex colour for this branch; cycles through defaults when unset.",
     )
-    label_side: Literal["left", "right"] | None = Field(
+    label_side: Literal["before", "after"] | None = Field(
         default=None,
-        description="Side of the branch line commit labels render on.",
+        description="Branch-axis-index side commit labels render on (`before` = lower-index side; `after` = higher-index side). Orientation-invariant; the renderer maps to a pixel side per `theme.orientation`.",
     )
     branch_pos: NonNegativeInt | None = Field(
         default=None,

@@ -58,15 +58,15 @@ def test_pinned_grid_and_theme_spacing_govern_canvas_size() -> None:
     _, _, canvas = _layout_and_canvas(
         '{"op": "grid", "n_commits": 12, "n_branches": 4}\n'
         '{"op": "theme", "commit_spacing": 50, "branch_spacing": 100, '
-        '"margin_branch_axis_lower_in_lanes": 0.8, "margin_branch_axis_upper_in_lanes": 1.0, '
-        '"margin_commit_axis_lower_in_rows": 1.2, "margin_commit_axis_upper_in_rows": 0.6}\n'
+        '"margin_left": 80, "margin_right": 100, '
+        '"margin_bottom": 60, "margin_top": 30}\n'
         '{"op": "branch", "name": "main"}\n'
         '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
     )
 
     # --- assert -----------------------
-    # width = 0.8*100 + (4-1)*100 + 1.0*100 = 80 + 300 + 100 = 480.
-    # height = 0.6*50 + (12-1)*50 + 1.2*50 = 30 + 550 + 60 = 640.
+    # width = 80 + (4-1)*100 + 100 = 80 + 300 + 100 = 480.
+    # height = 30 + (12-1)*50 + 60 = 30 + 550 + 60 = 640.
     assert canvas.width == 480
     assert canvas.height == 640
 
@@ -87,7 +87,7 @@ def test_long_branch_name_auto_fits_lower_margin_when_default_too_small() -> Non
     _, _, canvas = _layout_and_canvas(text)
 
     # --- assert -----------------------
-    assert canvas.margin_branch_axis_lower > 100
+    assert canvas.margin_left > 100
 
 
 def test_long_right_label_auto_fits_upper_margin() -> None:
@@ -103,6 +103,6 @@ def test_long_right_label_auto_fits_upper_margin() -> None:
     _, _, canvas = _layout_and_canvas(text)
 
     # --- assert -----------------------
-    # main is on lane 0 with default label_side="right", so the long label extends
-    # into the *upper* margin (right side).
-    assert canvas.margin_branch_axis_upper > 100
+    # main is on lane 0 with default label_side="after", so the long label extends
+    # into the right margin (= upper branch-axis side in bottom-to-top).
+    assert canvas.margin_right > 100

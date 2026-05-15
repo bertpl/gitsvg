@@ -25,6 +25,8 @@ Z-order (back to front):
    highlighted).
 """
 
+import copy
+
 import drawsvg as draw
 
 from gitsvg.layout import Layout
@@ -37,24 +39,31 @@ from gitsvg.render._primitives._branch_pill import draw_branch_pill
 from gitsvg.render._primitives._commit_dot import draw_commit_dot
 from gitsvg.render._primitives._commit_label import draw_commit_label
 from gitsvg.render._primitives._pull_request_pill import draw_pull_request_pill
-from gitsvg.theme import DEFAULT_THEME, Theme
+from gitsvg.theme import DEFAULT_THEME, Theme, resolve_defaults
 
 
 def render(layout: Layout, theme: Theme | None = None) -> draw.Drawing:
     """Render a `Layout` to an SVG drawing.
 
+    Defensively runs `resolve_defaults` so direct callers (e.g. tests
+    that pass `DEFAULT_THEME` or a fresh `Theme()`) get the same
+    resolved values the production pipeline produces. The pipeline
+    already resolves at end of state stage, so this second call is a
+    no-op there. Defensive deep copy keeps the caller's theme
+    unmutated.
+
     Args:
         layout: A complete render-ready intermediate representation —
             produced by `gitsvg.layout.compute_layout(state)`.
-        theme: The resolved theme that drives every pixel/colour/font
-            decision. Defaults to `DEFAULT_THEME` when omitted (useful
-            for tests).
+        theme: The theme that drives every pixel/colour/font decision.
+            Defaults to `DEFAULT_THEME` when omitted (useful for tests).
 
     Returns:
         A `drawsvg.Drawing`. Callers persist with `.save_svg(path)` or
         convert with `.as_svg()`.
     """
-    theme = theme if theme is not None else DEFAULT_THEME
+    theme = copy.deepcopy(theme if theme is not None else DEFAULT_THEME)
+    resolve_defaults(theme)
     canvas = compute_canvas(layout, theme)
     d = draw.Drawing(canvas.width, canvas.height)
 

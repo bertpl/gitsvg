@@ -62,7 +62,7 @@ from gitsvg.layout._occupancy import Occupancy
 from gitsvg.state import State
 
 _DEFAULT_LABEL_SIDE = (
-    "right"  # fallback when a `branch` op omits `label_side`; commits inherit their branch's resolved side
+    "after"  # fallback when a `branch` op omits `label_side`; commits inherit their branch's resolved side
 )
 
 

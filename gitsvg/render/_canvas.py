@@ -36,6 +36,12 @@ class RenderCanvas:
     flow from `Layout.grid` (the `LayoutGrid`, populated from
     `state.grid` if pinned, otherwise auto-fit).
 
+    Margin attributes name visual sides of the canvas, not axis-index
+    sides. The renderer's coordinate transform maps grid indices to
+    pixel coordinates per `theme.orientation` (currently bottom-to-top
+    only); the four margins always refer to the same screen edge
+    regardless of orientation.
+
     Attributes:
         width: SVG canvas width in pixels.
         height: SVG canvas height in pixels.
@@ -46,10 +52,10 @@ class RenderCanvas:
         n_branches: Effective branch-axis slot count.
         branch_spacing: Effective pixel distance between adjacent branch-axis slots.
         commit_spacing: Effective pixel distance between adjacent commit-axis slots.
-        margin_branch_axis_lower: Effective branch-axis margin at the lower end (lane 0 side).
-        margin_branch_axis_upper: Effective branch-axis margin at the upper end (highest-lane side).
-        margin_commit_axis_lower: Effective commit-axis margin at the lower end (oldest-commit side).
-        margin_commit_axis_upper: Effective commit-axis margin at the upper end (newest-commit side).
+        margin_left: Effective pixel margin at the visually-left canvas edge.
+        margin_right: Effective pixel margin at the visually-right canvas edge.
+        margin_bottom: Effective pixel margin at the visually-bottom canvas edge.
+        margin_top: Effective pixel margin at the visually-top canvas edge.
     """
 
     width: float  # axis-bound: branch-axis
@@ -58,10 +64,10 @@ class RenderCanvas:
     n_branches: int  # axis-bound: branch-axis (slot count)
     branch_spacing: float  # axis-bound: branch-axis
     commit_spacing: float  # axis-bound: commit-axis
-    margin_branch_axis_lower: float  # axis-bound: branch-axis
-    margin_branch_axis_upper: float  # axis-bound: branch-axis
-    margin_commit_axis_lower: float  # axis-bound: commit-axis
-    margin_commit_axis_upper: float  # axis-bound: commit-axis
+    margin_left: float  # axis-symmetric (visual-side, px)
+    margin_right: float  # axis-symmetric (visual-side, px)
+    margin_bottom: float  # axis-symmetric (visual-side, px)
+    margin_top: float  # axis-symmetric (visual-side, px)
 
 
 def compute_canvas(layout: Layout, theme: Theme) -> RenderCanvas:
@@ -94,21 +100,19 @@ def compute_canvas(layout: Layout, theme: Theme) -> RenderCanvas:
     n_branches = grid.n_branches
     max_branch_pos = max((b.branch_pos for b in branches), default=0)
 
-    margin_branch_axis_lower = _auto_fit_margin_branch_axis(
-        branches, commit_layouts, theme, branch_pos_filter=0, side="left"
-    )
-    margin_branch_axis_upper = _auto_fit_margin_branch_axis(
+    margin_left = _auto_fit_margin_branch_axis(branches, commit_layouts, theme, branch_pos_filter=0, side="left")
+    margin_right = _auto_fit_margin_branch_axis(
         branches, commit_layouts, theme, branch_pos_filter=max_branch_pos, side="right"
     )
-    margin_commit_axis_lower = _auto_fit_margin_commit_axis_lower(branches, theme)
-    # `margin_commit_axis_upper` is the one margin always promoted to
-    # float — the coordinate transform's `y = margin_commit_axis_upper +
-    # ...` propagates the type into every y attribute drawsvg emits, and
-    # the rendered baseline expects float y formatting throughout.
-    margin_commit_axis_upper = float(theme.margin_commit_axis_upper)
+    margin_bottom = _auto_fit_margin_commit_axis_lower(branches, theme)
+    # `margin_top` is the one margin always promoted to float — the
+    # coordinate transform's `y = margin_top + ...` propagates the type
+    # into every y attribute drawsvg emits, and the rendered baseline
+    # expects float y formatting throughout.
+    margin_top = float(theme.margin_top)
 
-    width = margin_branch_axis_lower + (n_branches - 1) * branch_spacing + margin_branch_axis_upper
-    height = margin_commit_axis_upper + (n_commits - 1) * commit_spacing + margin_commit_axis_lower
+    width = margin_left + (n_branches - 1) * branch_spacing + margin_right
+    height = margin_top + (n_commits - 1) * commit_spacing + margin_bottom
     return RenderCanvas(
         width=width,
         height=height,
@@ -116,10 +120,10 @@ def compute_canvas(layout: Layout, theme: Theme) -> RenderCanvas:
         n_branches=n_branches,
         branch_spacing=branch_spacing,
         commit_spacing=commit_spacing,
-        margin_branch_axis_lower=margin_branch_axis_lower,
-        margin_branch_axis_upper=margin_branch_axis_upper,
-        margin_commit_axis_lower=margin_commit_axis_lower,
-        margin_commit_axis_upper=margin_commit_axis_upper,
+        margin_left=margin_left,
+        margin_right=margin_right,
+        margin_bottom=margin_bottom,
+        margin_top=margin_top,
     )
 
 
@@ -155,11 +159,11 @@ def _auto_fit_margin_branch_axis(
         widest pill / outward label on the edge lane.
     """
     if side == "left":
-        default = theme.margin_branch_axis_lower
-        outward_label_side = "left"
+        default = theme.margin_left
+        outward_label_side = "before"
     else:
-        default = theme.margin_branch_axis_upper
-        outward_label_side = "right"
+        default = theme.margin_right
+        outward_label_side = "after"
 
     needed: float = 0.0
     for branch in branches:
@@ -190,13 +194,13 @@ def _auto_fit_margin_commit_axis_lower(branches: list[LayoutBranch], theme: Them
         keep the lowest pill inside the canvas.
     """
     if not branches:
-        return theme.margin_commit_axis_lower
+        return theme.margin_bottom
     pill_height = theme.branch_label_font_size + theme.pill_padding_y
     # Bottom-to-top-orientation-only: the branch-name pill sits at a negative
     # commit-axis offset by default — i.e. below the anchor in screen y. The
-    # lower-margin auto-fit asks how far below the anchor the pill extends;
+    # bottom-margin auto-fit asks how far below the anchor the pill extends;
     # that's the absolute screen-y offset (= negation of the signed offset
     # converted to pixels).
     pill_screen_y_offset = -theme.branch_name_pill_offset_commit_axis_in_rows * theme.commit_spacing
     pill_room = pill_screen_y_offset + pill_height / 2 + _AUTO_FIT_EDGE_PAD_PX
-    return max(theme.margin_commit_axis_lower, pill_room)
+    return max(theme.margin_bottom, pill_room)

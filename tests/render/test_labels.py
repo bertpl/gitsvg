@@ -131,10 +131,10 @@ def test_commit_with_no_msg_no_hash_emits_no_label() -> None:
     assert svg_text.count("<text") == 4
 
 
-def test_label_side_left_uses_text_anchor_end() -> None:
+def test_label_side_before_uses_text_anchor_end() -> None:
     # --- arrange ----------------------
     text = (
-        '{"op": "branch", "name": "main", "label_side": "left"}\n'
+        '{"op": "branch", "name": "main", "label_side": "before"}\n'
         '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
     )
 

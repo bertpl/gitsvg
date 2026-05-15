@@ -39,7 +39,7 @@ from gitsvg.state._apply import (
     apply_remove_op,
 )
 from gitsvg.state._state import State
-from gitsvg.theme import DEFAULT_THEME, Theme
+from gitsvg.theme import DEFAULT_THEME, Theme, resolve_defaults
 
 # Leaf-path import: pulls in `State` for the shared handler signature,
 # so the package-level `gitsvg.theme.__init__` deliberately does not
@@ -60,11 +60,14 @@ def apply_ops(parsed_ops: list[ParsedOp], report: ValidationReport) -> tuple[Sta
         `(state, theme)` — the fully-applied structural state and the
         fully-resolved theme. Even when errors occur, every op is
         attempted and the surviving pair is returned for inspection.
+        `resolve_defaults` runs as the final step so the renderer sees
+        no `None`-default sentinel on any orientation-resolved field.
     """
     state = State()
     theme = copy.deepcopy(DEFAULT_THEME)
     for parsed in parsed_ops:
         _apply_one(state, theme, parsed, report)
+    resolve_defaults(theme)
     return state, theme
 
 

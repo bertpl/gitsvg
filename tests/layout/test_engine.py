@@ -575,22 +575,22 @@ def test_commit_carries_its_branch_id() -> None:
 # ==================================================================================================
 #  Resolved label_side
 # ==================================================================================================
-def test_label_side_defaults_to_right() -> None:
+def test_label_side_defaults_to_after() -> None:
     # --- arrange ----------------------
     layout = _layout_from('{"op": "branch", "name": "main"}\n')
 
     # --- assert -----------------------
     main = next(b for b in layout.branches if b.name == "main")
-    assert main.label_side == "right"
+    assert main.label_side == "after"
 
 
 def test_label_side_explicit_override() -> None:
     # --- arrange ----------------------
-    layout = _layout_from('{"op": "branch", "name": "main", "label_side": "left"}\n')
+    layout = _layout_from('{"op": "branch", "name": "main", "label_side": "before"}\n')
 
     # --- assert -----------------------
     main = next(b for b in layout.branches if b.name == "main")
-    assert main.label_side == "left"
+    assert main.label_side == "before"
 
 
 # ==================================================================================================

@@ -51,21 +51,21 @@ class ThemeOp(OpBase):
         default=None,
         description="Pixel distance between adjacent commit-axis slots.",
     )
-    margin_branch_axis_lower_in_lanes: NonNegativeFloat | None = Field(
+    margin_left: NonNegativeFloat | None = Field(
         default=None,
-        description="Branch-axis margin at the lane-0 end, expressed as a multiple of `branch_spacing`.",
+        description="Pixel margin at the visually-left edge of the canvas. `null` resolves to the per-orientation default (see format spec).",
     )
-    margin_branch_axis_upper_in_lanes: NonNegativeFloat | None = Field(
+    margin_right: NonNegativeFloat | None = Field(
         default=None,
-        description="Branch-axis margin at the highest-lane end, expressed as a multiple of `branch_spacing`.",
+        description="Pixel margin at the visually-right edge of the canvas. `null` resolves to the per-orientation default.",
     )
-    margin_commit_axis_lower_in_rows: NonNegativeFloat | None = Field(
+    margin_top: NonNegativeFloat | None = Field(
         default=None,
-        description="Commit-axis margin at the oldest-commit end, expressed as a multiple of `commit_spacing`.",
+        description="Pixel margin at the visually-top edge of the canvas. `null` resolves to the per-orientation default.",
     )
-    margin_commit_axis_upper_in_rows: NonNegativeFloat | None = Field(
+    margin_bottom: NonNegativeFloat | None = Field(
         default=None,
-        description="Commit-axis margin at the newest-commit end, expressed as a multiple of `commit_spacing`.",
+        description="Pixel margin at the visually-bottom edge of the canvas. `null` resolves to the per-orientation default.",
     )
 
     # --- Strokes & geometry (px) ------------------------

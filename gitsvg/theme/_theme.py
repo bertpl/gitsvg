@@ -38,18 +38,22 @@ class Theme:
     # and the previous module-level constants were ints, producing the
     # int-formatted output that downstream consumers may be checking
     # against. `compute_canvas` re-introduces a float cast on
-    # `margin_commit_axis_upper` so coordinate transforms keep producing
-    # float y's.
+    # `margin_top` so coordinate transforms keep producing float y's.
     branch_spacing: int = 100  # axis-bound: branch-axis
     commit_spacing: int = 50  # axis-bound: commit-axis
 
     # --------------------------------------------------------------------------
-    #  Margins (ratios; resolved via the unsuffixed-name properties below)
+    #  Margins (visual-side, px; `None` = use the orientation-resolved default)
     # --------------------------------------------------------------------------
-    margin_branch_axis_lower_in_lanes: float = 1.0  # axis-bound: branch-axis
-    margin_branch_axis_upper_in_lanes: float = 1.0  # axis-bound: branch-axis
-    margin_commit_axis_lower_in_rows: float = 0.5  # axis-bound: commit-axis
-    margin_commit_axis_upper_in_rows: float = 0.5  # axis-bound: commit-axis
+    # Field name is orientation-invariant (`margin_left` is always the
+    # visually-left margin). `None` means "still default": the resolver
+    # in `gitsvg/theme/_resolve.py` fills the value at end of state stage
+    # from `branch_spacing` / `commit_spacing` per the current orientation.
+    # User overrides are absolute pixels.
+    margin_left: float | None = None  # axis-symmetric (visual-side, px)
+    margin_right: float | None = None  # axis-symmetric (visual-side, px)
+    margin_top: float | None = None  # axis-symmetric (visual-side, px)
+    margin_bottom: float | None = None  # axis-symmetric (visual-side, px)
 
     # --------------------------------------------------------------------------
     #  Strokes & geometry (px, except where noted)
@@ -122,33 +126,18 @@ class Theme:
     #  Resolved-pixel accessors for ratio-stored fields
     # --------------------------------------------------------------------------
     # Read-only: the renderer / canvas auto-fit / primitives read these
-    # (e.g. `theme.margin_branch_axis_lower`) and get the resolved pixel
+    # (e.g. `theme.arc_corner_radius`) and get the resolved pixel
     # value, computed lazily from the stored ratio × the relevant
     # spacing. Storage is the user-facing ratio; reads are pixels.
     # `_resolve_int_or_float` casts whole-number results back to int so
     # the SVG attribute formatting matches the pre-ratio defaults exactly
     # (drawsvg writes `width="100"` from int and `width="100.0"` from
     # float; the byte-identical SVG output gate depends on this).
-
-    @property
-    def margin_branch_axis_lower(self) -> int | float:
-        """Resolved pixel margin at the lower branch-axis end."""
-        return _resolve_int_or_float(self.margin_branch_axis_lower_in_lanes * self.branch_spacing)
-
-    @property
-    def margin_branch_axis_upper(self) -> int | float:
-        """Resolved pixel margin at the upper branch-axis end."""
-        return _resolve_int_or_float(self.margin_branch_axis_upper_in_lanes * self.branch_spacing)
-
-    @property
-    def margin_commit_axis_lower(self) -> int | float:
-        """Resolved pixel margin at the lower commit-axis end."""
-        return _resolve_int_or_float(self.margin_commit_axis_lower_in_rows * self.commit_spacing)
-
-    @property
-    def margin_commit_axis_upper(self) -> int | float:
-        """Resolved pixel margin at the upper commit-axis end."""
-        return _resolve_int_or_float(self.margin_commit_axis_upper_in_rows * self.commit_spacing)
+    #
+    # Margins are not in this set: they are stored as already-resolved
+    # pixel values (filled by `_resolve.resolve_defaults` at end of state
+    # stage when the user left them as `None`). See invariant #4 in
+    # `docs/architecture.md`.
 
     @property
     def arc_corner_radius(self) -> int | float:

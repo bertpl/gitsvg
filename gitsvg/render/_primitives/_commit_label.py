@@ -3,7 +3,9 @@
 Layout:
 
 - Anchored `theme.label_offset` pixels to the side of the commit dot,
-  per the commit's `label_side` (`"left"` or `"right"`).
+  per the commit's `label_side` (`"before"` or `"after"` — the
+  branch-axis-index side; the renderer maps to a pixel side per
+  orientation, currently bottom-to-top only).
 - Multi-line `msg` is `split("\\n")` — each line drawn with
   `theme.label_font_size` text in `theme.label_color`.
 - When `hash` is set, a smaller secondary line follows in
@@ -33,7 +35,7 @@ def draw_commit_label(d: draw.Drawing, commit: LayoutCommit, canvas: RenderCanva
     if not lines:
         return
 
-    if commit.label_side == "left":
+    if commit.label_side == "before":
         anchor = "end"
         branch_axis_offset_in_lanes = -theme.label_offset_branch_axis_in_lanes
     else:

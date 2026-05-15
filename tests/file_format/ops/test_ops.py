@@ -84,7 +84,7 @@ def test_branch_with_from_branch_and_visual_overrides() -> None:
         "name": "feat/x",
         "from_branch": "main",
         "color": "#7b8fb2",
-        "label_side": "left",
+        "label_side": "before",
     }
 
     # --- act --------------------------
@@ -93,7 +93,7 @@ def test_branch_with_from_branch_and_visual_overrides() -> None:
     # --- assert -----------------------
     assert op.from_branch == "main"
     assert op.color == "#7b8fb2"
-    assert op.label_side == "left"
+    assert op.label_side == "before"
 
 
 def test_branch_label_side_rejects_unknown_value() -> None:

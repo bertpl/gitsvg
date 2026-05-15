@@ -44,7 +44,7 @@ A single branch with a few commits. The minimum viable diagram.
 ![Linear history](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/01_linear.svg)
 
 ```jsonl
-{"op": "branch", "name": "main", "label_side": "left"}
+{"op": "branch", "name": "main", "label_side": "before"}
 {"op": "commit", "branch": "main", "id": "c1", "msg": "initial commit", "hash": "auto"}
 {"op": "commit", "branch": "main", "id": "c2", "msg": "add README", "hash": "auto"}
 {"op": "commit", "branch": "main", "id": "c3", "msg": "add tests", "hash": "auto"}
@@ -58,7 +58,7 @@ A `feature` branch forks off `main`, accumulates a couple of commits, then merge
 ![Branch and merge](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/02_branch_merge.svg)
 
 ```jsonl
-{"op": "branch", "name": "main", "label_side": "left"}
+{"op": "branch", "name": "main", "label_side": "before"}
 {"op": "commit", "branch": "main", "id": "c1", "msg": "initial commit", "hash": "auto"}
 {"op": "commit", "branch": "main", "id": "c2", "msg": "setup config", "hash": "auto"}
 {"op": "branch", "name": "feature", "from_branch": "main"}
@@ -74,7 +74,7 @@ Two concurrent branches share lanes 1 and 2; after both merge, a later `feature-
 ![Multiple branches with lane reuse](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/03_multi_branch.svg)
 
 ```jsonl
-{"op": "branch", "name": "main", "label_side": "left"}
+{"op": "branch", "name": "main", "label_side": "before"}
 {"op": "commit", "branch": "main", "id": "c1", "msg": "initial commit", "hash": "auto"}
 {"op": "branch", "name": "feature-a", "from_branch": "main"}
 {"op": "commit", "branch": "feature-a", "id": "a1", "msg": "start feature A", "hash": "auto"}
@@ -95,7 +95,7 @@ The `highlight` op marks an existing commit with an enlarged dot and a bold labe
 ![Highlighted release commit](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/04_highlight.svg)
 
 ```jsonl
-{"op": "branch", "name": "main", "label_side": "left"}
+{"op": "branch", "name": "main", "label_side": "before"}
 {"op": "commit", "branch": "main", "id": "c1", "msg": "initial commit", "hash": "auto"}
 {"op": "commit", "branch": "main", "id": "c2", "msg": "feature work", "hash": "auto"}
 {"op": "commit", "branch": "main", "id": "c3", "msg": "more feature work", "hash": "auto"}
@@ -111,7 +111,7 @@ A `feature` branch is removed and re-declared on top of a more recent `main` com
 ![Remove and rebuild](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/05_remove_rebuild.svg)
 
 ```jsonl
-{"op": "branch", "name": "main", "label_side": "left"}
+{"op": "branch", "name": "main", "label_side": "before"}
 {"op": "commit", "branch": "main", "id": "c1", "msg": "initial commit", "hash": "auto"}
 {"op": "branch", "name": "feature", "from_branch": "main"}
 {"op": "commit", "branch": "feature", "id": "f1", "msg": "WIP feature", "hash": "auto"}
@@ -142,7 +142,7 @@ The `pull_request` op declares a pending merge between two branches. Both endpoi
 ![Open pull request](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/07_pull_request.svg)
 
 ```jsonl
-{"op": "branch", "name": "main", "label_side": "left"}
+{"op": "branch", "name": "main", "label_side": "before"}
 {"op": "commit", "branch": "main", "id": "m1", "msg": "release"}
 {"op": "branch", "name": "feature", "from_branch": "main"}
 {"op": "commit", "branch": "feature", "id": "f1", "msg": "wip"}

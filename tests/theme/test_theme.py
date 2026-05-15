@@ -13,10 +13,12 @@ def test_default_theme_values_pin_the_byte_identical_baseline() -> None:
     # --- arrange / act / assert -------
     assert DEFAULT_THEME.branch_spacing == 100
     assert DEFAULT_THEME.commit_spacing == 50
-    assert DEFAULT_THEME.margin_branch_axis_lower == 100
-    assert DEFAULT_THEME.margin_branch_axis_upper == 100
-    assert DEFAULT_THEME.margin_commit_axis_lower == 25
-    assert DEFAULT_THEME.margin_commit_axis_upper == 25
+    # Margin defaults are `None` on the unresolved DEFAULT_THEME — the
+    # resolver fills them at end of state stage. See the resolver test.
+    assert DEFAULT_THEME.margin_left is None
+    assert DEFAULT_THEME.margin_right is None
+    assert DEFAULT_THEME.margin_bottom is None
+    assert DEFAULT_THEME.margin_top is None
     assert DEFAULT_THEME.branch_line_width == 2
     assert DEFAULT_THEME.commit_radius == 5
     assert DEFAULT_THEME.commit_stroke_width == 1.5
