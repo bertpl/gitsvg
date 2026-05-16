@@ -5,22 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## 0.1.9 (2026-05-16)
 
 ### Added
 
 - Four new `theme:` op fields exposing previously-internal box-anchor values: `branch_pill_anchor`, `pull_request_pill_anchor`, `commit_label_anchor_before`, `commit_label_anchor_after`. Each is a two-element JSON array `[u, v]` in `[0, 1]²` saying where inside the un-rotated bounding box the world anchor point sits (and equivalently where rotation pivots); defaults reproduce the v0.1.8 per-orientation values, so default output is unchanged. Together with the label-angle fields from v0.1.8, non-zero label angles become practically usable for the first time.
-
-### Changed
-
-### Deprecated
-
-### Removed
-
-### Fixed
-
-### Security
-
 ## 0.1.8 (2026-05-16)
 
 ### Added
