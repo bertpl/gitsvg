@@ -8,10 +8,10 @@ from gitsvg.parse import ParsedOp
 from gitsvg.state._apply._impl._commit import _generate_auto_commit_id
 from gitsvg.state._auto_hash import compute_auto_hash, effective_parent_ids
 from gitsvg.state._state import CommitState, State
-from gitsvg.theme import Theme
+from gitsvg.theme import ThemeBuilder
 
 
-def apply_merge_op(state: State, theme: Theme, parsed: ParsedOp, report: ValidationReport) -> None:
+def apply_merge_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, report: ValidationReport) -> None:
     """Apply a `merge` op.
 
     A merge produces a commit on `into` whose parents are the prior tip

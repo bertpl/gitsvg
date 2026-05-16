@@ -6,10 +6,10 @@ from gitsvg.errors import ValidationError, ValidationReport
 from gitsvg.file_format.ops import PullRequestOp
 from gitsvg.parse import ParsedOp
 from gitsvg.state._state import PullRequestState, State
-from gitsvg.theme import Theme
+from gitsvg.theme import ThemeBuilder
 
 
-def apply_pull_request_op(state: State, theme: Theme, parsed: ParsedOp, report: ValidationReport) -> None:
+def apply_pull_request_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, report: ValidationReport) -> None:
     """Apply a `pull_request` op.
 
     A pull-request is a third-namespace entity (alongside commits and

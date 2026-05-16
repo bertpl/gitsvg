@@ -1,4 +1,4 @@
-"""Apply a `theme` op to a `Theme` — patch live theme values per the cascade rule."""
+"""Apply a `theme` op to a `ThemeBuilder` — accumulate user overrides + handle name resets."""
 
 import copy
 from typing import cast
@@ -7,18 +7,20 @@ from gitsvg.errors import ValidationError, ValidationReport
 from gitsvg.file_format.ops import ThemeOp
 from gitsvg.parse import ParsedOp
 from gitsvg.state._state import State
-from gitsvg.theme._theme import DEFAULT_THEME, Theme
+from gitsvg.theme._builder import ThemeBuilder
+from gitsvg.theme._default_theme import DefaultTheme
+from gitsvg.theme._theme import Theme
 
 # ==================================================================================================
 #  Named-theme registry
 # ==================================================================================================
 # Built-in named themes the user can select with `{"op": "theme", "name": "..."}`.
-# Setting a name replaces every theme field with that theme's values before any
-# explicit overrides on the same op apply. Only `"default"` exists today; richer
-# named themes ship in a later version. New entries land here, no other change
-# needed.
-NAMED_THEMES = {
-    "default": DEFAULT_THEME,
+# Setting a name swaps the `ThemeBuilder.theme_cls` to the named subclass and
+# discards any explicit fields accumulated so far. Only `"default"` exists
+# today; richer named themes ship in a later version. New entries land here;
+# no other change needed.
+NAMED_THEMES: dict[str, type[Theme]] = {
+    "default": DefaultTheme,
 }
 
 
@@ -26,14 +28,16 @@ NAMED_THEMES = {
 #  Apply
 # ==================================================================================================
 # Fields a `theme:` op carries that aren't theme fields themselves; excluded
-# when copying the op onto the live theme.
+# when copying the op into the builder's `user_set` dict.
 _NON_THEME_FIELDS = frozenset({"op", "name"})
 
 # Fields with constraints beyond what `NonNegativeFloat` / `NonNegativeInt`
 # already enforce. Each entry maps a field name to a (predicate, error_code,
 # message_suffix) triple. The predicate returns True when the value is
 # *acceptable*; failure emits the error code with a message of the form
-# `{field} {message_suffix} (got {value})`.
+# `{field} {message_suffix} (got {value})`. The same invariants also live on
+# `Theme` as per-field validators (defence in depth at `build()` time); the
+# explicit checks here surface line numbers via the validation report.
 _FIELD_CONSTRAINTS: dict[str, tuple] = {
     # Spacings — zero collapses lanes / rows onto themselves.
     "branch_spacing": (lambda v: v > 0, "E218", "must be > 0"),
@@ -45,23 +49,24 @@ _FIELD_CONSTRAINTS: dict[str, tuple] = {
 }
 
 
-def apply_theme_op(state: State, theme: Theme, parsed: ParsedOp, report: ValidationReport) -> None:
-    """Apply a `theme` op to the live theme.
+def apply_theme_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, report: ValidationReport) -> None:
+    """Apply a `theme` op by mutating the `ThemeBuilder`.
 
     Cascade:
 
-    1. If `name` is set, replace every field on `theme` with the named
-       theme's values. Unknown name → E216, no other change.
+    1. If `name` is set, swap `builder.theme_cls` to the named subclass
+       and discard any previously-accumulated `user_set`. Unknown name →
+       E216, no other change.
     2. For every explicit field present in the op (other than `name`),
-       assign it onto `theme` — overrides any prior value (including
-       any set by step 1).
+       merge it into `builder.user_set` — overrides any prior value
+       (including any cleared by step 1).
 
     An op carrying neither `name` nor any explicit override is rejected
     with E217.
 
     Args:
         state: Unused. Included for the shared apply-handler signature.
-        theme: The live theme to mutate.
+        builder: The live `ThemeBuilder` to mutate.
         parsed: The validated parsed op record.
         report: Receives semantic errors.
     """
@@ -85,10 +90,10 @@ def apply_theme_op(state: State, theme: Theme, parsed: ParsedOp, report: Validat
         )
         return
 
-    # --- Step 1: named theme replaces all -----
+    # --- Step 1: named theme reset ------------
     if has_name:
-        named = NAMED_THEMES.get(op.name)
-        if named is None:
+        theme_cls = NAMED_THEMES.get(op.name)
+        if theme_cls is None:
             known = ", ".join(sorted(NAMED_THEMES))
             report.add(
                 ValidationError(
@@ -100,22 +105,25 @@ def apply_theme_op(state: State, theme: Theme, parsed: ParsedOp, report: Validat
                 )
             )
             return
-        _replace_theme_fields(theme, named)
+        builder.reset_to(theme_cls)
 
-    # --- Step 2: explicit overrides on top ----
-    # Deep-copy each value so mutable fields (e.g. `colors` dict) on
-    # the live theme don't alias back to the op model. Fields that fail
-    # their semantic constraint emit an error but don't block the
-    # other fields from applying.
+    # --- Step 2: accumulate explicit overrides
+    # Deep-copy each value so mutable fields (e.g. `colors` dict) in
+    # `user_set` don't alias the op model. Fields that fail their
+    # semantic constraint emit an error but don't block other fields
+    # from accumulating.
     #
     # Explicit `null` on `orientation` resets to the package default
-    # `"bt"` (the field is always concrete on `Theme`, so `None` is
-    # not a valid stored value — this preserves the "null = reset to
-    # default" sentinel semantic uniformly across all fields).
+    # (`Orientation.BT`); we represent that by *omitting* it from
+    # `user_set` so the resolver fills it at `build()` time. Other
+    # fields with a None-allowed semantic (e.g. `background_color`)
+    # accept None as a legitimate user value and enter `user_set`
+    # normally.
     for name in explicit_fields:
         value = getattr(op, name)
         if name == "orientation" and value is None:
-            value = "bt"
+            builder.user_set.pop("orientation", None)
+            continue
         constraint = _FIELD_CONSTRAINTS.get(name)
         if constraint is not None:
             predicate, code, message_suffix = constraint
@@ -130,16 +138,4 @@ def apply_theme_op(state: State, theme: Theme, parsed: ParsedOp, report: Validat
                     )
                 )
                 continue
-        setattr(theme, name, copy.deepcopy(value))
-
-
-def _replace_theme_fields(theme: Theme, source: Theme) -> None:
-    """Replace every field on `theme` with the corresponding value from `source`.
-
-    Mutates in place so callers holding a reference to `theme` see the
-    new values. Mutable fields are deep-copied so the live theme does
-    not alias the source.
-    """
-    source_copy = copy.deepcopy(source)
-    for field_name in theme.__dataclass_fields__:
-        setattr(theme, field_name, getattr(source_copy, field_name))
+        builder.user_set[name] = copy.deepcopy(value)

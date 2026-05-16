@@ -10,13 +10,11 @@ Covers:
   resolved fields (2 spacings, 4 margins, 4 pill offsets).
 """
 
-import copy
-
 import pytest
 from pydantic import ValidationError
 
 from gitsvg.file_format.ops.impl._theme import ThemeOp
-from gitsvg.theme import DEFAULT_THEME, resolve_defaults
+from gitsvg.theme import DefaultTheme
 
 
 # ==================================================================================================
@@ -104,11 +102,8 @@ def test_orientation_field_absent_means_unset() -> None:
 #  Per-orientation default resolution
 # ==================================================================================================
 def _resolved_with_orientation(orientation: str):
-    """Return a fresh `Theme` initialised with the given orientation and resolved."""
-    theme = copy.deepcopy(DEFAULT_THEME)
-    theme.orientation = orientation
-    resolve_defaults(theme)
-    return theme
+    """Return a fresh `DefaultTheme` resolved with the given orientation."""
+    return DefaultTheme.build({"orientation": orientation})
 
 
 @pytest.mark.parametrize(
@@ -254,27 +249,21 @@ def test_resolver_picks_pr_pill_offset_per_orientation(
 #  Sentinel semantics — user-set values stay sticky; null resets to default
 # ==================================================================================================
 def test_user_set_margin_is_not_overwritten_by_resolver() -> None:
-    # --- arrange ----------------------
-    theme = copy.deepcopy(DEFAULT_THEME)
-    theme.margin_left = 200  # user-set explicitly
-
-    # --- act --------------------------
-    resolve_defaults(theme)
+    # --- arrange / act ----------------
+    theme = DefaultTheme.build({"margin_left": 200})
 
     # --- assert -----------------------
-    assert theme.margin_left == 200  # sticky
+    assert theme.margin_left == 200  # user value wins
+    # Other margins still resolve to defaults.
+    assert theme.margin_right == 100  # default for BT
 
 
 def test_user_set_label_angle_is_not_overwritten_by_resolver() -> None:
-    # --- arrange ----------------------
-    theme = copy.deepcopy(DEFAULT_THEME)
-    theme.commit_label_angle = 45.0  # user-set explicitly
-
-    # --- act --------------------------
-    resolve_defaults(theme)
+    # --- arrange / act ----------------
+    theme = DefaultTheme.build({"commit_label_angle": 45.0})
 
     # --- assert -----------------------
-    assert theme.commit_label_angle == 45.0  # sticky
+    assert theme.commit_label_angle == 45.0  # user value wins
     # Other angle fields still resolve to default.
     assert theme.branch_label_angle == 0.0
     assert theme.pull_request_label_angle == 0.0
