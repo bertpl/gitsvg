@@ -146,6 +146,35 @@ def test_label_side_before_uses_text_anchor_end() -> None:
     assert 'text-anchor="end"' in svg_text
 
 
+def test_commit_label_anchor_per_side_dispatch() -> None:
+    """The renderer picks the matching `commit_label_anchor_*` field per commit's side.
+
+    Overriding only one side leaves the other at its per-orientation
+    default — the renderer must dispatch on `commit.label_side` at draw
+    time, not on a single global anchor.
+    """
+    # --- arrange ----------------------
+    # main with label_side=before; feature with label_side=after. Override
+    # only the `_before` side to a centred (0.5, 0.5) anchor; the `_after`
+    # side should keep its BT default (0.0, 0.5).
+    text = (
+        '{"op": "theme", "commit_label_anchor_before": [0.5, 0.5]}\n'
+        '{"op": "branch", "name": "main", "label_side": "before"}\n'
+        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
+        '{"op": "branch", "name": "feature", "from_branch": "main", "label_side": "after"}\n'
+        '{"op": "commit", "branch": "feature", "id": "c2", "msg": "y"}\n'
+    )
+
+    # --- act --------------------------
+    svg_text = _render_from(text).as_svg()
+
+    # --- assert -----------------------
+    # `before` override (u=0.5) → text-anchor=middle for the "x" label.
+    # `after` default (u=0.0)   → text-anchor=start for the "y" label.
+    assert 'text-anchor="middle"' in svg_text
+    assert 'text-anchor="start"' in svg_text
+
+
 def test_highlight_renders_bold_msg_label() -> None:
     # --- arrange ----------------------
     text = (

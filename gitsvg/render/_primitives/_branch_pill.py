@@ -21,7 +21,7 @@ placement is invariant.
 import drawsvg as draw
 
 from gitsvg.layout import LayoutBranch
-from gitsvg.render._anchor_resolution import resolve_branch_pill_anchor, rotated_target
+from gitsvg.render._anchor_resolution import rotated_target
 from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._geometry import offset_position
 from gitsvg.render._label_widths import pill_width
@@ -44,7 +44,7 @@ def draw_branch_pill(
     height = theme.branch_label_font_size + theme.pill_padding_y
     corner = theme.pill_corner_radius
 
-    box_u, box_v = resolve_branch_pill_anchor(canvas.orientation)
+    box_u, box_v = theme.branch_pill_anchor
     rect_left = x - box_u * width
     rect_top = y - box_v * height
     text_x = rect_left + width / 2

@@ -17,6 +17,7 @@ therefore imported via its leaf path from the state engine to avoid
 a package-load cycle. Same pattern as `file_format/ops/framework/`.
 """
 
+from gitsvg.theme._box_anchor import BoxAnchor
 from gitsvg.theme._builder import ThemeBuilder
 from gitsvg.theme._default_theme import DefaultTheme
 from gitsvg.theme._orientation import Orientation, normalize_orientation
@@ -31,6 +32,7 @@ fully-resolved baseline without going through the apply pipeline.
 
 __all__ = [
     "DEFAULT_THEME",
+    "BoxAnchor",
     "DefaultTheme",
     "Orientation",
     "Theme",

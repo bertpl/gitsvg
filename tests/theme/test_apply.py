@@ -80,6 +80,52 @@ def test_label_angle_field_override_assigns_to_theme(field: str, value: float) -
     assert getattr(theme, field) == value
 
 
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("branch_pill_anchor", (0.25, 0.75)),
+        ("pull_request_pill_anchor", (0.0, 0.0)),
+        ("commit_label_anchor_before", (0.5, 0.5)),
+        ("commit_label_anchor_after", (1.0, 1.0)),
+    ],
+)
+def test_anchor_field_override_assigns_to_theme(field: str, value: tuple[float, float]) -> None:
+    """Each box-anchor field on the `theme:` op assigns onto the live theme.
+
+    The user-set tuple wins over the per-orientation default that
+    `DefaultTheme._resolve_*_anchor` would have produced. Pydantic
+    accepts a two-element JSON array and stores it as a tuple.
+    """
+    # --- arrange / act ----------------
+    import json
+
+    _, theme, report = _apply(json.dumps({"op": "theme", field: list(value)}) + "\n")
+
+    # --- assert -----------------------
+    assert report.is_clean()
+    assert getattr(theme, field) == value
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("branch_pill_anchor", [1.5, 0.5]),
+        ("pull_request_pill_anchor", [-0.1, 0.5]),
+        ("commit_label_anchor_before", [0.5, 2.0]),
+        ("commit_label_anchor_after", [0.5, -0.5]),
+    ],
+)
+def test_anchor_field_rejects_out_of_unit_range(field: str, value: list[float]) -> None:
+    """`BoxAnchor` components outside `[0, 1]` are rejected at parse time."""
+    # --- arrange / act ----------------
+    import json
+
+    _, _theme, report = _apply(json.dumps({"op": "theme", field: value}) + "\n")
+
+    # --- assert -----------------------
+    assert not report.is_clean()
+
+
 def test_second_explicit_op_overwrites_same_field() -> None:
     # --- arrange / act ----------------
     _, theme, report = _apply(
