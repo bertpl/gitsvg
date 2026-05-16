@@ -114,13 +114,18 @@ def _resolved_with_orientation(orientation: str):
 @pytest.mark.parametrize(
     ("orientation", "expected_branch_spacing", "expected_commit_spacing"),
     [
+        # Vertical: wider branch_spacing (lanes stack horizontally and need
+        # horizontal room for labels).
         ("bt", 100, 50),
         ("tb", 100, 50),
-        ("lr", 50, 100),
-        ("rl", 50, 100),
+        # Horizontal: symmetric — commit labels sit above/below the branch
+        # line and need both vertical room between branches and horizontal
+        # room between commits in comparable amounts.
+        ("lr", 75, 75),
+        ("rl", 75, 75),
     ],
 )
-def test_resolver_swaps_spacings_in_horizontal_orientations(
+def test_resolver_picks_spacing_defaults_per_orientation(
     orientation: str, expected_branch_spacing: int, expected_commit_spacing: int
 ) -> None:
     # --- arrange / act ----------------
@@ -142,9 +147,9 @@ def test_resolver_swaps_spacings_in_horizontal_orientations(
         # left/right anchored to commit_spacing but ASYMMETRIC — the
         # start side gets ×1.5 (room for the branch pill at
         # commit_axis=-0.75) and the end side stays at ×1.0. With
-        # commit_spacing=100: start side = 150, end side = 100.
-        ("lr", 150, 100, 50),  # LR: timeline starts on the left
-        ("rl", 100, 150, 50),  # RL: timeline starts on the right
+        # commit_spacing=75: start side = 112.5, end side = 75.
+        ("lr", 112.5, 75, 75),  # LR: timeline starts on the left
+        ("rl", 75, 112.5, 75),  # RL: timeline starts on the right
     ],
 )
 def test_resolver_uses_asymmetric_margins_in_horizontal_orientations(

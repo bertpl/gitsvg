@@ -129,8 +129,8 @@ class Theme:
     colors: dict[str, str] = field(
         default_factory=lambda: {
             "main": "#5c6370",
-            "branch1": "#7b8fb2",
-            "branch2": "#6a9f8d",
+            "branch1": "#6a9f8d",
+            "branch2": "#7b8fb2",
             "branch3": "#b07b8f",
             "branch4": "#9b8fb2",
         }

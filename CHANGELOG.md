@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Pill and commit-label widths now use measured glyph metrics from `theme.label_font_family`'s fallback chain instead of a uniform per-character factor; existing diagrams may show small pixel shifts.
 - Canvas auto-fit now covers long branch names in `lr` / `rl` (start-side margin grows to fit instead of overflowing) and correctly routes the `tb` branch-pill allowance to `margin_top` instead of `margin_bottom`.
+- Default first non-main branch colour swapped from blue-grey to green for a clearer contrast against the `main` palette entry.
+- Horizontal-orientation default spacings (`lr` / `rl`) changed from `(50, 100)` to `(75, 75)` — symmetric reads better when commit labels sit above/below the branch line.
 
 ### Deprecated
 

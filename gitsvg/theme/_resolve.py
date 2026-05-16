@@ -196,9 +196,10 @@ def _spacing_defaults(orientation: OrientationLiteral) -> tuple[int, int]:
 
     Vertical orientations get `(100, 50)` — branches stack horizontally,
     each lane needs horizontal room for labels. Horizontal orientations
-    get `(50, 100)` — branches stack vertically, each commit-axis slot
-    needs horizontal room instead.
+    get `(75, 75)` — symmetric, since commit labels sit above/below the
+    branch line and need both vertical room between branches and
+    horizontal room between commits in comparable amounts.
     """
     if orientation in ("bt", "tb"):
         return 100, 50
-    return 50, 100
+    return 75, 75
