@@ -1,69 +1,67 @@
-"""Theme — every presentational constant for the SVG output.
+"""Theme — every presentational constant the renderer reads.
 
-A `Theme` is a first-class pipeline output alongside `State`. It
-accumulates as the input file's `theme:` ops apply and as `branch:`
-ops carry colour overrides, then flows to the renderer as the
-resolved set of visual constants (spacings, sizes, colours, fonts,
-dashes, opacities). Per-branch colour overrides live on
-`branch_color_overrides`, keyed by `BranchState.id`.
+`Theme` is the Pydantic base class for the diagram's presentational
+surface. Concrete themes (today only `DefaultTheme`) subclass it and
+provide a `build(user_set)` factory that resolves a fully-populated
+`Theme` from the dict of explicitly-set fields the apply pass
+accumulated. Each pipeline stage receives the resolved `Theme`
+(layout and renderer both consume the whole `Theme` for now).
 
-Position/size fields with a natural anchor are stored as ratios
+Every field is `T | None = None` on the base class — `None` means
+"unset" pre-build and "no default-resolved value applies" for the
+handful of fields where unset has semantic meaning (e.g.
+`background_color = None` = transparent). After `build()` runs every
+non-default field carries a concrete value.
+
+Per-field validators capture always-hold invariants (positive
+spacings / font sizes, opacities in `[0, 1]`). The apply pass emits
+catalog-coded errors with line numbers when the same constraints
+fail on user input; the validators are defence in depth at build
+time and document the invariants alongside the field.
+
+Position/size fields with a natural anchor stay stored as ratios
 (suffixed `_in_lanes` / `_in_rows` / `_in_grid_units` /
 `_in_font_sizes`) anchored to the relevant spacing or font size.
-Pixel-valued accessors with the corresponding unsuffixed names
-live as properties below the field block — read-only resolved
-values that downstream consumers (renderer, canvas auto-fit,
-primitives) read just as before. See `docs/architecture.md`
-invariant #4 for the rule.
+Pixel-valued accessors with the corresponding unsuffixed names live
+as properties below the field block — read-only resolved values that
+downstream consumers (renderer, canvas auto-fit, primitives) read
+just as before.
 """
 
-from dataclasses import dataclass, field
+from typing import Any, Self
+
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from gitsvg.theme._orientation import Orientation
 
 
-@dataclass(slots=True)
-class Theme:
+class Theme(BaseModel):
     """Every presentational value the renderer reads.
 
-    Field groups (orientation, spacing, geometry, typography, colours,
-    pull-request visuals, branch colour overrides) mirror the
-    module-level visual constants that lived in `gitsvg/` before they
-    were absorbed into this dataclass.
+    Pydantic base class. Every field is `T | None = None`; the
+    apply pass collects a `user_set: dict` of explicit overrides and
+    a concrete `Theme` subclass (e.g. `DefaultTheme`) resolves the
+    full instance via its `build(user_set)` classmethod. Direct
+    construction (`Theme(branch_spacing=120)`) is supported for tests
+    but typical use goes through `build()`.
     """
+
+    model_config = ConfigDict(extra="forbid")
 
     # --------------------------------------------------------------------------
     #  Orientation
     # --------------------------------------------------------------------------
-    # Drives the renderer's grid → pixel mapping and the per-orientation
-    # default values for spacings, margins, and pill offsets resolved by
-    # `gitsvg/theme/_resolve.py`. Always concrete (never `None`); default
-    # `"bt"` preserves byte-identical output for inputs that don't set
-    # `theme.orientation` explicitly.
-    orientation: Orientation = Orientation.BT  # axis-symmetric (input-side selector)
+    orientation: Orientation | None = None  # axis-symmetric (input-side selector)
 
     # --------------------------------------------------------------------------
-    #  Spacing (px; `None` = use the orientation-resolved default)
+    #  Spacing (px)
     # --------------------------------------------------------------------------
-    # `None` means "still default": the resolver in
-    # `gitsvg/theme/_resolve.py` fills the value at end of state stage
-    # per orientation. Defaults: vertical orientations (`bt`, `tb`)
-    # → `branch_spacing=100, commit_spacing=50`; horizontal orientations
-    # (`lr`, `rl`) → swapped to `branch_spacing=50, commit_spacing=100`.
-    # Stored as int when whole-number so SVG attribute formatting matches
-    # the byte-identical baseline (drawsvg writes `width="100"` from int
-    # and `width="100.0"` from float).
     branch_spacing: int | None = None  # axis-bound: branch-axis
     commit_spacing: int | None = None  # axis-bound: commit-axis
 
     # --------------------------------------------------------------------------
-    #  Margins (visual-side, px; `None` = use the orientation-resolved default)
+    #  Margins (visual-side, px)
     # --------------------------------------------------------------------------
-    # Field name is orientation-invariant (`margin_left` is always the
-    # visually-left margin). `None` means "still default": the resolver
-    # in `gitsvg/theme/_resolve.py` fills the value at end of state stage
-    # from `branch_spacing` / `commit_spacing` per the current orientation.
-    # User overrides are absolute pixels.
     margin_left: float | None = None  # axis-symmetric (visual-side, px)
     margin_right: float | None = None  # axis-symmetric (visual-side, px)
     margin_top: float | None = None  # axis-symmetric (visual-side, px)
@@ -72,70 +70,43 @@ class Theme:
     # --------------------------------------------------------------------------
     #  Strokes & geometry (px, except where noted)
     # --------------------------------------------------------------------------
-    # Stroke widths and pixel-valued radii default to ints to match
-    # drawsvg's int-formatted attribute output.
-    branch_line_width: int = 2  # axis-symmetric
-    commit_radius: int = 5  # axis-symmetric
-    commit_stroke_width: float = 1.5  # axis-symmetric
-    highlight_radius: int = 7  # axis-symmetric
-    arc_corner_radius_in_grid_units: float = 0.4  # axis-symmetric
-    # Per-orientation default fills via `_resolve.py`: vertical
-    # orientations (`bt`, `tb`) use `0.12` (the historical default);
-    # horizontal orientations (`lr`, `rl`) use `0.24` so the resolved
-    # pixel offset stays at ~12 px (matches BT) instead of halving with
-    # the swapped branch_spacing.
+    branch_line_width: int | None = None  # axis-symmetric
+    commit_radius: int | None = None  # axis-symmetric
+    commit_stroke_width: float | None = None  # axis-symmetric
+    highlight_radius: int | None = None  # axis-symmetric
+    arc_corner_radius_in_grid_units: float | None = None  # axis-symmetric
     label_offset_branch_axis_in_lanes: float | None = None  # axis-bound: branch-axis, sign from `label_side`
-    branch_guide_width: float = 0.7  # axis-symmetric
-    branch_guide_dash: str = "4,4"
-    # Per-orientation default fills via `_resolve.py`: vertical
-    # orientations (`bt`, `tb`) use `0.25`; horizontal orientations
-    # (`lr`, `rl`) use `0.5` to give guides enough reach to cover the
-    # branch-pill area in the wider start-side margin.
+    branch_guide_width: float | None = None  # axis-symmetric
+    branch_guide_dash: str | None = None
     guide_overshoot_in_rows: float | None = None  # axis-bound: commit-axis (applied symmetrically at both ends)
 
     # --------------------------------------------------------------------------
     #  Typography
     # --------------------------------------------------------------------------
-    label_font_family: str = "'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif"
-    label_font_family_small: str = "Inter, sans-serif"
-    label_font_size: int = 11  # axis-symmetric
-    branch_label_font_size: int = 11  # axis-symmetric
-    hash_font_size: int = 9  # axis-symmetric
-    # Pill-offset defaults flip with orientation (resolver fills `None`):
-    # vertical orientations use the commit-axis component (`-0.5` rows below
-    # the branch start), horizontal orientations use the branch-axis component
-    # (`-0.5` lanes above the branch start). Keeps the pill's text always
-    # perpendicular to the offset direction, regardless of orientation.
+    label_font_family: str | None = None
+    label_font_family_small: str | None = None
+    label_font_size: int | None = None  # axis-symmetric
+    branch_label_font_size: int | None = None  # axis-symmetric
+    hash_font_size: int | None = None  # axis-symmetric
     branch_name_pill_offset_commit_axis_in_rows: float | None = None  # axis-bound: commit-axis (signed)
     branch_name_pill_offset_branch_axis_in_lanes: float | None = None  # axis-bound: branch-axis (signed)
-    pill_padding_x_in_font_sizes: float = 12 / 11  # axis-symmetric (extra pill width beyond text)
-    pill_padding_y_in_font_sizes: float = 8 / 11  # axis-symmetric (extra pill height beyond font size)
-    pill_corner_radius_in_font_sizes: float = 4 / 11  # axis-symmetric (rounded pill corners)
-    label_line_padding_in_font_sizes: float = 4 / 11  # axis-symmetric (extra height per line in a multi-line stack)
+    pill_padding_x_in_font_sizes: float | None = None  # axis-symmetric (extra pill width beyond text)
+    pill_padding_y_in_font_sizes: float | None = None  # axis-symmetric (extra pill height beyond font size)
+    pill_corner_radius_in_font_sizes: float | None = None  # axis-symmetric (rounded pill corners)
+    label_line_padding_in_font_sizes: float | None = (
+        None  # axis-symmetric (extra height per line in a multi-line stack)
+    )
 
     # --------------------------------------------------------------------------
     #  Pull-request visuals
     # --------------------------------------------------------------------------
-    pull_request_dash: str = "2,6"
-    # Same pattern as the branch-name pill, mirrored: vertical orientations
-    # use commit-axis (`+0.5` rows above the tip), horizontal orientations
-    # use branch-axis (`+0.5` lanes below the tip).
+    pull_request_dash: str | None = None
     pull_request_pill_offset_commit_axis_in_rows: float | None = None  # axis-bound: commit-axis (signed)
     pull_request_pill_offset_branch_axis_in_lanes: float | None = None  # axis-bound: branch-axis (signed)
 
     # --------------------------------------------------------------------------
-    #  Label angles (degrees; `None` = use the orientation-resolved default)
+    #  Label angles (degrees)
     # --------------------------------------------------------------------------
-    # Rotation applied around the world anchor point (= where the
-    # element's resolved `BoxAnchor` lands), so the anchor stays pinned
-    # regardless of angle. `None` means "still default": the resolver in
-    # `gitsvg/theme/_resolve.py` fills the value at end of state stage
-    # per orientation. Defaults are 0° across all orientations today
-    # (labels always horizontally readable). The default-current
-    # `BoxAnchor` values are tuned for un-rotated text; non-zero angles
-    # are mechanically supported but not yet visually practical — that
-    # matures once anchors graduate to user-facing fields and named
-    # themes ship angle / anchor pairings designed together.
     branch_label_angle: float | None = None  # axis-symmetric (renderer rotation)
     commit_label_angle: float | None = None  # axis-symmetric (governs msg + hash + future tag)
     pull_request_label_angle: float | None = None  # axis-symmetric (PR pill)
@@ -143,20 +114,12 @@ class Theme:
     # --------------------------------------------------------------------------
     #  Colours
     # --------------------------------------------------------------------------
-    colors: dict[str, str] = field(
-        default_factory=lambda: {
-            "main": "#5c6370",
-            "branch1": "#6a9f8d",
-            "branch2": "#7b8fb2",
-            "branch3": "#b07b8f",
-            "branch4": "#9b8fb2",
-        }
-    )
-    default_branch_color_cycle: list[str] = field(default_factory=lambda: ["branch1", "branch2", "branch3", "branch4"])
-    label_color: str = "#383838"
-    hash_color: str = "#707070"
-    branch_guide_color: str = "#b8b8b8"
-    branch_label_bg_opacity: float = 0.85
+    colors: dict[str, str] | None = None
+    default_branch_color_cycle: list[str] | None = None
+    label_color: str | None = None
+    hash_color: str | None = None
+    branch_guide_color: str | None = None
+    branch_label_bg_opacity: float | None = None
 
     # --------------------------------------------------------------------------
     #  SVG background
@@ -167,25 +130,70 @@ class Theme:
     # --------------------------------------------------------------------------
     #  State-derived per-branch overrides
     # --------------------------------------------------------------------------
-    branch_color_overrides: dict[str, str] = field(default_factory=dict)
-    """Hex colour overrides, keyed by `BranchState.id` (not name)."""
+    branch_color_overrides: dict[str, str] = Field(default_factory=dict)
+    """Hex colour overrides, keyed by `BranchState.id` (not name). Filled by
+    the apply pass from `branch:` ops carrying a `color` field, then attached
+    to the built `Theme`; not user-input on the `theme:` op."""
+
+    # --------------------------------------------------------------------------
+    #  Always-hold invariants
+    # --------------------------------------------------------------------------
+    @field_validator("branch_spacing", "commit_spacing")
+    @classmethod
+    def _spacings_must_be_positive(cls, v: int | None) -> int | None:
+        """Reject `<= 0` spacings — zero collapses lanes / rows onto themselves."""
+        if v is not None and v <= 0:
+            raise ValueError("must be > 0")
+        return v
+
+    @field_validator("label_font_size", "branch_label_font_size", "hash_font_size")
+    @classmethod
+    def _font_sizes_must_be_positive(cls, v: int | None) -> int | None:
+        """Reject `<= 0` font sizes — zero makes text invisible."""
+        if v is not None and v <= 0:
+            raise ValueError("must be > 0")
+        return v
+
+    @field_validator("branch_label_bg_opacity")
+    @classmethod
+    def _opacity_in_unit_range(cls, v: float | None) -> float | None:
+        """Reject opacities outside `[0, 1]`."""
+        if v is not None and not (0.0 <= v <= 1.0):
+            raise ValueError("must be in [0, 1]")
+        return v
+
+    # --------------------------------------------------------------------------
+    #  Factory (subclasses provide a concrete implementation)
+    # --------------------------------------------------------------------------
+    @classmethod
+    def build(cls, user_set: dict[str, Any]) -> Self:
+        """Resolve a fully-populated `Theme` from the user-set field dict.
+
+        Concrete subclasses (e.g. `DefaultTheme`) override this to
+        orchestrate field-by-field resolution: explicit values from
+        `user_set` win; everything else falls through to the
+        subclass's `_resolve_<field>` classmethods.
+
+        Args:
+            user_set: Mapping from theme-field name to the value the
+                user explicitly supplied via a `theme:` op. Fields the
+                user didn't touch are absent.
+
+        Returns:
+            A fully-populated `Theme` instance.
+
+        Raises:
+            NotImplementedError: Always — `Theme` itself has no default-
+                logic. Subclass and provide a concrete `build()`.
+        """
+        raise NotImplementedError(f"{cls.__name__} must implement build()")
 
     # --------------------------------------------------------------------------
     #  Resolved-pixel accessors for ratio-stored fields
     # --------------------------------------------------------------------------
     # Read-only: the renderer / canvas auto-fit / primitives read these
-    # (e.g. `theme.arc_corner_radius`) and get the resolved pixel
-    # value, computed lazily from the stored ratio × the relevant
-    # spacing. Storage is the user-facing ratio; reads are pixels.
-    # `_resolve_int_or_float` casts whole-number results back to int so
-    # the SVG attribute formatting matches the pre-ratio defaults exactly
-    # (drawsvg writes `width="100"` from int and `width="100.0"` from
-    # float; the byte-identical SVG output gate depends on this).
-    #
-    # Margins are not in this set: they are stored as already-resolved
-    # pixel values (filled by `_resolve.resolve_defaults` at end of state
-    # stage when the user left them as `None`). See invariant #4 in
-    # `docs/architecture.md`.
+    # (e.g. `theme.arc_corner_radius`) and get the resolved pixel value,
+    # computed lazily from the stored ratio × the relevant spacing.
 
     @property
     def arc_corner_radius(self) -> int | float:
@@ -233,7 +241,3 @@ def _resolve_int_or_float(value: float) -> int | float:
     integer values without a decimal point and float values with one).
     """
     return int(value) if value == int(value) else value
-
-
-DEFAULT_THEME = Theme()
-"""Frozen reference for the package-default theme. Use `dataclasses.replace(DEFAULT_THEME, ...)` rather than mutating; ratio fields use the `_in_*` suffixed names."""

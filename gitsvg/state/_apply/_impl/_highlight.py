@@ -6,10 +6,10 @@ from gitsvg.errors import ValidationError, ValidationReport
 from gitsvg.file_format.ops import HighlightOp
 from gitsvg.parse import ParsedOp
 from gitsvg.state._state import State
-from gitsvg.theme import Theme
+from gitsvg.theme import ThemeBuilder
 
 
-def apply_highlight_op(state: State, theme: Theme, parsed: ParsedOp, report: ValidationReport) -> None:
+def apply_highlight_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, report: ValidationReport) -> None:
     """Apply a `highlight` op — set `highlight=True` on the targeted commit.
 
     The targeted commit must exist (E201). Highlighting an already-

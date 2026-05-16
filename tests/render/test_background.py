@@ -4,7 +4,7 @@ from gitsvg.layout import compute_layout
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.render import render
 from gitsvg.state import apply_ops
-from gitsvg.theme import DEFAULT_THEME, Theme
+from gitsvg.theme import DEFAULT_THEME, DefaultTheme
 
 
 def _layout(text: str):
@@ -33,7 +33,7 @@ def test_theme_with_background_emits_full_canvas_rect_first() -> None:
     the first painted element (Z-order layer 0, behind all other content)."""
     # --- arrange ----------------------
     layout = _layout('{"op": "branch", "name": "main"}\n{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n')
-    theme = Theme(background_color="#ff00ff")
+    theme = DefaultTheme.build({"background_color": "#ff00ff"})
 
     # --- act --------------------------
     svg = render(layout, theme).as_svg()

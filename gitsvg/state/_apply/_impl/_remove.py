@@ -6,10 +6,10 @@ from gitsvg.errors import ValidationError, ValidationReport
 from gitsvg.file_format.ops import RemoveOp
 from gitsvg.parse import ParsedOp
 from gitsvg.state._state import State
-from gitsvg.theme import Theme
+from gitsvg.theme import ThemeBuilder
 
 
-def apply_remove_op(state: State, theme: Theme, parsed: ParsedOp, report: ValidationReport) -> None:
+def apply_remove_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, report: ValidationReport) -> None:
     """Apply a `remove` op.
 
     Removes either commits, branches, or pull-requests (the schema
@@ -78,7 +78,7 @@ def apply_remove_op(state: State, theme: Theme, parsed: ParsedOp, report: Valida
                     )
                 )
                 continue
-            _remove_branch_with_cascade(state, theme, branch_name)
+            _remove_branch_with_cascade(state, builder, branch_name)
         return
 
     if op.pull_requests:
@@ -110,10 +110,10 @@ def _remove_commit(state: State, commit_id: str) -> None:
         branch.commit_ids.remove(commit_id)
 
 
-def _remove_branch_with_cascade(state: State, theme: Theme, branch_name: str) -> None:
+def _remove_branch_with_cascade(state: State, builder: ThemeBuilder, branch_name: str) -> None:
     """Drop a branch (and every commit on it) from state, plus its theme override.
 
-    Removing a branch cleans up `theme.branch_color_overrides[branch.id]`
+    Removing a branch cleans up `builder.branch_color_overrides[branch.id]`
     so a redeclared branch with the same name doesn't inherit the
     removed branch's colour through a stale entry, and the dict stays
     aligned with the set of live branch ids.
@@ -125,4 +125,4 @@ def _remove_branch_with_cascade(state: State, theme: Theme, branch_name: str) ->
         state.branch_order.remove(branch_name)
     for commit_id in list(branch.commit_ids):
         state.commits.pop(commit_id, None)
-    theme.branch_color_overrides.pop(branch.id, None)
+    builder.branch_color_overrides.pop(branch.id, None)

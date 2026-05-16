@@ -6,15 +6,15 @@ from gitsvg.errors import ValidationError, ValidationReport
 from gitsvg.file_format.ops import BranchOp
 from gitsvg.parse import ParsedOp
 from gitsvg.state._state import BranchState, State
-from gitsvg.theme import Theme
+from gitsvg.theme import ThemeBuilder
 
 
-def apply_branch_op(state: State, theme: Theme, parsed: ParsedOp, report: ValidationReport) -> None:
+def apply_branch_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, report: ValidationReport) -> None:
     """Apply a `branch` op.
 
     Mutates `state` for the structural side (new `BranchState`,
-    branch-order append) and `theme` for the presentational side
-    (writes `op.color`, when set, to `theme.branch_color_overrides`
+    branch-order append) and `builder` for the presentational side
+    (writes `op.color`, when set, to `builder.branch_color_overrides`
     keyed by the new branch's id).
 
     Validation order:
@@ -29,7 +29,7 @@ def apply_branch_op(state: State, theme: Theme, parsed: ParsedOp, report: Valida
     4. `from_commit` (when set) must reference an existing commit (E201).
        Same kind-typed hint applies.
 
-    On any failure neither state nor theme is mutated.
+    On any failure neither state nor builder is mutated.
     """
     op = cast(BranchOp, parsed.op)
     file = parsed.file
@@ -120,4 +120,4 @@ def apply_branch_op(state: State, theme: Theme, parsed: ParsedOp, report: Valida
 
     # --- Theme: per-branch colour override ------
     if op.color is not None:
-        theme.branch_color_overrides[branch_id] = op.color
+        builder.branch_color_overrides[branch_id] = op.color

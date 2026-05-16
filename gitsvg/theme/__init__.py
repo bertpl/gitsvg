@@ -1,16 +1,15 @@
 """Theme — every presentational constant the renderer reads.
 
-A `Theme` accumulates as the input file's `theme:` ops apply and as
-`branch:` ops carry colour overrides. The pipeline's apply stage
-produces a fully-resolved `Theme` alongside `State`; the renderer
-consumes it directly. See `docs/architecture.md` Pipeline section
-for the dual-output rule.
+A `Theme` is a Pydantic base class with all fields `Optional[T] = None`.
+Concrete subclasses (today `DefaultTheme`) implement per-field
+`_resolve_<field>` classmethods and a `build(user_set)` factory that
+produces a fully-populated instance from the dict of explicit
+overrides the apply pass accumulated.
 
-Public surface:
-
-- `Theme` — the dataclass.
-- `DEFAULT_THEME` — frozen-by-convention reference; use
-  `dataclasses.replace(DEFAULT_THEME, ...)` rather than mutating.
+`ThemeBuilder` is the transient accumulator threaded through the apply
+pass: it tracks the chosen `theme_cls`, the `user_set` dict, and
+state-derived per-branch colour overrides. The state engine calls
+`builder.build()` once at end-of-apply to produce the resolved `Theme`.
 
 The `theme:` op apply handler (`gitsvg.theme._apply.apply_theme_op`)
 imports `State` for the shared apply-handler signature and is
@@ -18,15 +17,24 @@ therefore imported via its leaf path from the state engine to avoid
 a package-load cycle. Same pattern as `file_format/ops/framework/`.
 """
 
+from gitsvg.theme._builder import ThemeBuilder
+from gitsvg.theme._default_theme import DefaultTheme
 from gitsvg.theme._orientation import Orientation, normalize_orientation
-from gitsvg.theme._resolve import resolve_defaults
-from gitsvg.theme._theme import DEFAULT_THEME, Theme, _resolve_int_or_float
+from gitsvg.theme._theme import Theme, _resolve_int_or_float
+
+DEFAULT_THEME = DefaultTheme.build({})
+"""The resolved default theme — `DefaultTheme.build({})` with no user overrides.
+
+Cached as a module-level singleton for tests and callers that need a
+fully-resolved baseline without going through the apply pipeline.
+"""
 
 __all__ = [
     "DEFAULT_THEME",
+    "DefaultTheme",
     "Orientation",
     "Theme",
+    "ThemeBuilder",
     "_resolve_int_or_float",
     "normalize_orientation",
-    "resolve_defaults",
 ]

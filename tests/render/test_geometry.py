@@ -1,22 +1,13 @@
 """Tests for coordinate transforms — `grid_to_pixel` per orientation."""
 
-import copy
-
 from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._geometry import grid_to_pixel
-from gitsvg.theme import DEFAULT_THEME, resolve_defaults
-
-
-def _resolved_default_theme():
-    """Return a deep copy of `DEFAULT_THEME` with the resolver applied."""
-    theme = copy.deepcopy(DEFAULT_THEME)
-    resolve_defaults(theme)
-    return theme
+from gitsvg.theme import DEFAULT_THEME
 
 
 def _canvas(n_commits: int = 3) -> RenderCanvas:
     """Build a minimal `RenderCanvas` matching the resolved-default-theme constants (BT)."""
-    theme = _resolved_default_theme()
+    theme = DEFAULT_THEME
     width = theme.margin_left + theme.margin_right
     height = theme.margin_top + (n_commits - 1) * theme.commit_spacing + theme.margin_bottom
     return RenderCanvas(
@@ -40,12 +31,12 @@ def _canvas(n_commits: int = 3) -> RenderCanvas:
 def test_branch_axis_index_zero_lands_at_left_margin_in_bt() -> None:
     # --- act / assert -----------------
     x, _ = grid_to_pixel(0, 0, _canvas())
-    assert x == _resolved_default_theme().margin_left
+    assert x == DEFAULT_THEME.margin_left
 
 
 def test_branch_axis_increments_by_branch_spacing_in_bt() -> None:
     # --- act / assert -----------------
-    theme = _resolved_default_theme()
+    theme = DEFAULT_THEME
     x, _ = grid_to_pixel(2, 0, _canvas())
     assert x == theme.margin_left + 2 * theme.branch_spacing
 
@@ -54,13 +45,13 @@ def test_commit_axis_top_index_lands_at_top_margin_in_bt() -> None:
     """The newest commit (highest index) sits at the top of the canvas."""
     # --- act / assert -----------------
     _, y = grid_to_pixel(0, 2, _canvas(3))
-    assert y == _resolved_default_theme().margin_top
+    assert y == DEFAULT_THEME.margin_top
 
 
 def test_commit_axis_index_zero_is_at_bottom_of_canvas_in_bt() -> None:
     """Index 0 is the oldest commit; bottom-to-top puts it at the largest y."""
     # --- act / assert -----------------
-    theme = _resolved_default_theme()
+    theme = DEFAULT_THEME
     _, y = grid_to_pixel(0, 0, _canvas(3))
     assert y == theme.margin_top + 2 * theme.commit_spacing
 
@@ -72,7 +63,7 @@ def test_commit_axis_step_size_equals_commit_spacing_in_bt() -> None:
     _, y_at_1 = grid_to_pixel(0, 1, canvas)
 
     # --- assert -----------------------
-    assert y_at_0 - y_at_1 == _resolved_default_theme().commit_spacing
+    assert y_at_0 - y_at_1 == DEFAULT_THEME.commit_spacing
 
 
 def test_geometry_uses_canvas_overrides_when_set_in_bt() -> None:
