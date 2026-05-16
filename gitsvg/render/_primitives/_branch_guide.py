@@ -10,10 +10,10 @@ import drawsvg as draw
 
 from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._geometry import branch_guide_endpoints
-from gitsvg.theme import Theme
+from gitsvg.render._renderer_settings import RendererSettings
 
 
-def draw_branch_guide(d: draw.Drawing, branch_pos: int, canvas: RenderCanvas, theme: Theme) -> None:
+def draw_branch_guide(d: draw.Drawing, branch_pos: int, canvas: RenderCanvas, theme: RendererSettings) -> None:
     """Append a dashed guide for a single lane to the drawing.
 
     Screen direction (vertical in `bt`/`tb`, horizontal in `lr`/`rl`)

@@ -189,6 +189,37 @@ class Theme(BaseModel):
         raise NotImplementedError(f"{cls.__name__} must implement build()")
 
     # --------------------------------------------------------------------------
+    #  Pipeline boundary
+    # --------------------------------------------------------------------------
+    def split(self) -> "tuple[LayoutSettings, RendererSettings]":
+        """Slice the resolved theme into the two pipeline-stage views.
+
+        The layout stage consumes only `LayoutSettings`; the renderer
+        stage consumes only `RendererSettings`. `Theme` itself stays at
+        the orchestration layer and is not passed downstream — the
+        architecture meta-test under `tests/architecture/` enforces
+        that `gitsvg/layout/` and `gitsvg/render/` keep their imports
+        narrow.
+
+        Today `LayoutSettings` is empty (the layout engine reads no
+        theme fields) and `RendererSettings` carries every theme field.
+        Future layout-affecting fields move to `LayoutSettings`,
+        narrowing the renderer slice without changing the pipeline
+        shape.
+
+        Returns:
+            A `(layout_settings, renderer_settings)` pair carrying the
+            two sub-views of the resolved theme.
+        """
+        # Late import to avoid a package-load cycle: `LayoutSettings` lives
+        # under `gitsvg.layout`, `RendererSettings` under `gitsvg.render`,
+        # both of which already import from `gitsvg.theme`.
+        from gitsvg.layout._layout_settings import LayoutSettings
+        from gitsvg.render._renderer_settings import RendererSettings
+
+        return LayoutSettings(), RendererSettings(**self.model_dump())
+
+    # --------------------------------------------------------------------------
     #  Resolved-pixel accessors for ratio-stored fields
     # --------------------------------------------------------------------------
     # Read-only: the renderer / canvas auto-fit / primitives read these

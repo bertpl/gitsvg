@@ -20,7 +20,8 @@ from typing import Literal
 from gitsvg.file_format import LabelSide
 from gitsvg.layout import Layout
 from gitsvg.render._label_widths import commit_label_width, pill_width
-from gitsvg.theme import Orientation, Theme
+from gitsvg.render._renderer_settings import RendererSettings
+from gitsvg.theme import Orientation
 
 # Auto-fit safety margin between content (pill / outward label) and the canvas
 # edge — keeps the rendered geometry from butting right up against the SVG
@@ -86,7 +87,7 @@ class RenderCanvas:
     orientation: Orientation  # axis-symmetric (selector)
 
 
-def compute_canvas(layout: Layout, theme: Theme) -> RenderCanvas:
+def compute_canvas(layout: Layout, theme: RendererSettings) -> RenderCanvas:
     """Compute the effective `RenderCanvas` for `layout` under `theme`.
 
     Margins auto-fit to the longest visible labels and pills via four
@@ -161,7 +162,7 @@ def compute_canvas(layout: Layout, theme: Theme) -> RenderCanvas:
 # ==================================================================================================
 #  Branch-axis auto-fit
 # ==================================================================================================
-def _auto_fit_branch_axis_edge(layout: Layout, theme: Theme, *, edge: _AxisEdge) -> float:
+def _auto_fit_branch_axis_edge(layout: Layout, theme: RendererSettings, *, edge: _AxisEdge) -> float:
     """Pixel allowance for content protruding past a branch-axis edge.
 
     The branch-axis edges are perpendicular to the lane direction —
@@ -213,7 +214,7 @@ def _auto_fit_branch_axis_edge(layout: Layout, theme: Theme, *, edge: _AxisEdge)
 # ==================================================================================================
 #  Commit-axis auto-fit
 # ==================================================================================================
-def _auto_fit_commit_axis_edge(layout: Layout, theme: Theme, *, edge: _AxisEdge) -> float:
+def _auto_fit_commit_axis_edge(layout: Layout, theme: RendererSettings, *, edge: _AxisEdge) -> float:
     """Pixel allowance for content protruding past a commit-axis edge.
 
     The commit-axis edges run along the commit-axis direction —

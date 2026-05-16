@@ -5,10 +5,12 @@ import drawsvg as draw
 from gitsvg.layout import LayoutCommit
 from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._geometry import grid_to_pixel
-from gitsvg.theme import Theme
+from gitsvg.render._renderer_settings import RendererSettings
 
 
-def draw_commit_dot(d: draw.Drawing, commit: LayoutCommit, color: str, canvas: RenderCanvas, theme: Theme) -> None:
+def draw_commit_dot(
+    d: draw.Drawing, commit: LayoutCommit, color: str, canvas: RenderCanvas, theme: RendererSettings
+) -> None:
     """Append a commit dot to the drawing.
 
     Highlighted commits render with `theme.highlight_radius` (40 %

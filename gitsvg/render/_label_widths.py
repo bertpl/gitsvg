@@ -8,10 +8,10 @@ which sizes geometry safely against every font in
 
 from gitsvg.layout import LayoutCommit
 from gitsvg.render._glyph_metrics import text_width
-from gitsvg.theme import Theme
+from gitsvg.render._renderer_settings import RendererSettings
 
 
-def pill_width(text: str, theme: Theme) -> float:
+def pill_width(text: str, theme: RendererSettings) -> float:
     """Return the estimated pixel width of a pill rectangle for `text`.
 
     Args:
@@ -24,7 +24,7 @@ def pill_width(text: str, theme: Theme) -> float:
     return text_width(text, theme.label_font_family, theme.branch_label_font_size) + theme.pill_padding_x
 
 
-def commit_label_width(commit: LayoutCommit, theme: Theme) -> float:
+def commit_label_width(commit: LayoutCommit, theme: RendererSettings) -> float:
     """Return the widest line's pixel width across a commit's label stack.
 
     Considers each ``msg`` line (split on ``"\\n"``) at

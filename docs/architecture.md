@@ -17,10 +17,13 @@ parse → imports → state → layout → render
 Each stage's output is the next stage's only input; no stage reaches
 back into a prior stage's data structures. The `state` stage emits
 two parallel outputs — `State` (structural model + per-entity layout
-hints) and `Theme` (resolved presentational constants) — consumed
-respectively by `layout` and `render`. Cross-cutting subpackages
-(`file_format/`, `errors/`, `theme/`, `cli/`) are consumed by
-pipeline stages without being part of the flow.
+hints) and `Theme` (resolved presentational constants). `Theme` itself
+stays at the orchestration layer: the CLI calls `Theme.split()` to
+produce `LayoutSettings` (consumed by `layout`) and `RendererSettings`
+(consumed by `render`). Neither stage imports `Theme` directly — see
+invariant #8. Cross-cutting subpackages (`file_format/`, `errors/`,
+`theme/`, `cli/`) are consumed by pipeline stages without being part
+of the flow.
 
 **Rationale.** Pipeline shape is the package's load-bearing
 architecture. Locking the five-stage flow as an explicit rule
@@ -46,15 +49,17 @@ below.
 | 5 | Geometry-module routing for coordinate math | v0.1.5 |
 | 6 | Op-to-consumer boundary | v0.1.5 |
 | 7 | Orientation as renderer-only concern | v0.1.6 |
+| 8 | Pipeline-stage settings split (Theme → LayoutSettings + RendererSettings) | v0.1.9 |
 
 ## 1. Layout↔render boundary
 
 **Rule.** The layout engine produces an integer-grid intermediate
-representation; the renderer reads the resolved `Theme` and converts
-grid positions to pixel coordinates. No field crosses the boundary
-in the other direction. Layout output carries no pixel coordinates,
-colours, fonts, strokes, or opacities; presentational state never
-flows back into layout.
+representation; the renderer reads `RendererSettings` (the renderer's
+slice of the resolved theme, produced by `Theme.split()` — see
+invariant #8) and converts grid positions to pixel coordinates. No
+field crosses the boundary in the other direction. Layout output
+carries no pixel coordinates, colours, fonts, strokes, or opacities;
+presentational state never flows back into layout.
 
 **Rationale.** Layout strategies (declaration-order assignment,
 lane-reuse, future orientations) and theme variants (light/dark,
@@ -133,9 +138,10 @@ list:
 - The four visual-side margins (`margin_left`, `margin_right`,
   `margin_top`, `margin_bottom`) — the natural anchor flips with
   orientation, so a single ratio field can't carry it; the
-  default-resolution helper in `gitsvg/theme/_resolve.py` computes
-  the right pixel value from spacings + orientation at end of state
-  stage when the user leaves the field as `None`.
+  per-orientation `DefaultTheme._resolve_margin_*` classmethods
+  (`gitsvg/theme/_default_theme.py`) compute the right pixel value
+  from spacings + orientation at `Theme.build()` time when the user
+  leaves the field unset.
 
 **Rationale.** Tweaking a spacing or font size then rescales
 everything anchored to it proportionally; pixel-exception fields
@@ -193,8 +199,9 @@ op level: each op feeds exactly one consumer.
 **Enforcement.** Code-review discipline. The `GridOp` model
 (`gitsvg/file_format/ops/impl/_grid.py`) carries only the two
 slot-count fields; adding a spacing/margin field there is the
-trigger for review pushback. The `build_theme` adapter
-(`gitsvg/render/_theme.py`) does not import `state.grid` at all.
+trigger for review pushback. The `apply_theme_op` handler
+(`gitsvg/theme/_apply.py`) accepts the state for signature uniformity
+but does not read `state.grid`.
 
 **Locked in:** v0.1.5.
 
@@ -243,3 +250,34 @@ pushback. Inside `gitsvg/render/`, only the geometry module
 branch on `theme.orientation`.
 
 **Locked in:** v0.1.6.
+
+## 8. Pipeline-stage settings split
+
+**Rule.** `Theme` lives only at the orchestration layer between the
+apply pass and the layout / renderer stages. The pipeline stages
+consume disjoint slices: `LayoutSettings` (the home for layout-
+affecting fields — empty today, since `compute_layout(state)` is a
+pure grid transformation) and `RendererSettings` (every current theme
+field). Both slices are produced by `Theme.split()`; neither stage
+imports `Theme` directly. `RendererSettings` is a `Theme` subclass so
+the field declarations, validators, and resolved-pixel property
+accessors stay DRY; the class identity is what marks the boundary.
+
+**Rationale.** Pinning each stage to a narrow type lets layout and
+renderer vary independently. `RendererSettings` can grow new visual
+fields without bleeding into layout's API surface; future layout-
+affecting fields (lane reuse policy, branch-axis hint, etc.) have a
+clear home that won't accidentally touch renderer code. The split
+also makes the orchestration boundary type-visible — the CLI's
+`theme.split()` is the single point where the two stage views
+materialise.
+
+**Enforcement.** Architecture meta-test under
+`tests/architecture/test_pipeline_split.py`. It parses every module
+under `gitsvg/layout/` and `gitsvg/render/` and asserts none of them
+import the `Theme` name. One exemption:
+`gitsvg/render/_renderer_settings.py`, which inherits from `Theme` to
+define `RendererSettings` and therefore necessarily imports the
+parent class.
+
+**Locked in:** v0.1.9.

@@ -24,7 +24,8 @@ primitives.
 """
 
 from gitsvg.render._canvas import RenderCanvas
-from gitsvg.theme import Orientation, Theme, _resolve_int_or_float
+from gitsvg.render._renderer_settings import RendererSettings
+from gitsvg.theme import Orientation, _resolve_int_or_float
 
 
 def grid_to_pixel(branch_pos: int, commit_pos: int, canvas: RenderCanvas) -> tuple[float, float]:
@@ -140,7 +141,7 @@ def branch_line_endpoints(
 def branch_guide_endpoints(
     branch_pos: int,
     canvas: RenderCanvas,
-    theme: Theme,
+    theme: RendererSettings,
 ) -> tuple[tuple[float, float], tuple[float, float]]:
     """Return the two screen endpoints of a branch guide line for a single lane.
 

@@ -27,7 +27,8 @@ import drawsvg as draw
 
 from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._geometry import grid_to_pixel
-from gitsvg.theme import Orientation, Theme
+from gitsvg.render._renderer_settings import RendererSettings
+from gitsvg.theme import Orientation
 
 # Sub-pixel tolerance below which arc segments degenerate (collapse to a
 # straight line, or skip an emit entirely). Pure numerical-precision guard;
@@ -43,7 +44,7 @@ def draw_arc(
     to_branch_pos: int,
     to_commit_pos: int,
     canvas: RenderCanvas,
-    theme: Theme,
+    theme: RendererSettings,
     color: str,
     vertical_first: bool,
     stroke_dasharray: str | None = None,

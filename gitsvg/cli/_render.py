@@ -55,9 +55,10 @@ def render_command(input_path: Path, output_path: Path, small: bool) -> None:
         sys.exit(1)
 
     layout = compute_layout(state)
-    drawing = render(layout, theme)
+    _, renderer_settings = theme.split()
+    drawing = render(layout, renderer_settings)
     if small:
         svg = drawing.as_svg(header="", skip_css=True, skip_js=True)
-        output_path.write_text(minify(svg, small=True, theme=theme))
+        output_path.write_text(minify(svg, small=True, theme=renderer_settings))
     else:
         drawing.save_svg(str(output_path))
