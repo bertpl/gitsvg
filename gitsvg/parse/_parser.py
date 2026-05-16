@@ -122,6 +122,7 @@ _PYDANTIC_TYPE_TO_CODE: dict[str, str] = {
     "too_short": "E106",
     "value_error": "E107",
     "literal_error": "E108",
+    "enum": "E108",
 }
 
 

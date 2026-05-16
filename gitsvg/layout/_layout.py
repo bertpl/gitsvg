@@ -22,6 +22,8 @@ lane-reuse, future left-to-right orientations) all produce the same
 
 from dataclasses import dataclass, field
 
+from gitsvg.file_format import LabelSide
+
 
 @dataclass(slots=True)
 class LayoutGrid:
@@ -71,7 +73,7 @@ class LayoutBranch:
     branch_pos: int  # axis-bound: branch-axis (slot index)
     start: int  # axis-bound: commit-axis (slot index)
     end: int  # axis-bound: commit-axis (slot index)
-    label_side: str  # axis-bound: branch-axis (axis-index side: "before" = lower index, "after" = higher index)
+    label_side: LabelSide  # axis-bound: branch-axis (axis-index side: BEFORE = lower index, AFTER = higher index)
 
 
 @dataclass(slots=True)
@@ -103,7 +105,7 @@ class LayoutCommit:
     msg: str | None
     hash: str | None
     highlight: bool
-    label_side: str  # axis-bound: branch-axis (axis-index side: "before" = lower index, "after" = higher index)
+    label_side: LabelSide  # axis-bound: branch-axis (axis-index side: BEFORE = lower index, AFTER = higher index)
 
 
 @dataclass(slots=True)

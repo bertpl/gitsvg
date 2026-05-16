@@ -4,6 +4,7 @@ from typing import Literal, Self
 
 from pydantic import Field, model_validator
 
+from gitsvg.file_format._label_side import LabelSide
 from gitsvg.file_format.ops.framework._base import OpBase
 from gitsvg.file_format.ops.framework._types import HexColor, IdStr, NonNegativeInt
 
@@ -25,7 +26,7 @@ class BranchOp(OpBase):
         default=None,
         description="Override hex colour for this branch; cycles through defaults when unset.",
     )
-    label_side: Literal["before", "after"] | None = Field(
+    label_side: LabelSide | None = Field(
         default=None,
         description="Branch-axis-index side commit labels render on (`before` = lower-index side; `after` = higher-index side). Orientation-invariant; the renderer maps to a pixel side per `theme.orientation`.",
     )

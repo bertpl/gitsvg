@@ -31,11 +31,10 @@ graduation should be exposing what's already here rather than
 redesigning.
 """
 
-from typing import Literal
-
 import drawsvg as draw
 
-from gitsvg.theme import OrientationLiteral
+from gitsvg.file_format import LabelSide
+from gitsvg.theme import Orientation
 
 # ==================================================================================================
 #  Public types
@@ -45,16 +44,11 @@ BoxAnchor = tuple[float, float]
 box the world anchor point sits (and equivalently where rotation
 pivots around)."""
 
-LabelSideLiteral = Literal["before", "after"]
-"""Branch-axis-index side. `"before"` = lower-index side; `"after"` =
-higher-index side. Consumed by commit-label anchor resolution; the
-two pill resolvers ignore it."""
-
 
 # ==================================================================================================
 #  Per-element resolvers
 # ==================================================================================================
-def resolve_branch_pill_anchor(orientation: OrientationLiteral) -> BoxAnchor:
+def resolve_branch_pill_anchor(orientation: Orientation) -> BoxAnchor:
     """Resolve the branch-name pill's box anchor for the given orientation.
 
     Vertical orientations (`bt`, `tb`): pill centred on the world
@@ -72,14 +66,14 @@ def resolve_branch_pill_anchor(orientation: OrientationLiteral) -> BoxAnchor:
         The `(u, v)` saying where in the pill rect the world point
         sits.
     """
-    if orientation == "lr":
+    if orientation == Orientation.LR:
         return (1.0, 0.5)
-    if orientation == "rl":
+    if orientation == Orientation.RL:
         return (0.0, 0.5)
     return (0.5, 0.5)
 
 
-def resolve_pr_pill_anchor(orientation: OrientationLiteral) -> BoxAnchor:
+def resolve_pr_pill_anchor(orientation: Orientation) -> BoxAnchor:
     """Resolve the PR-title pill's box anchor.
 
     Always `(0.5, 0.5)` — the PR pill's offset point lives away from
@@ -99,8 +93,8 @@ def resolve_pr_pill_anchor(orientation: OrientationLiteral) -> BoxAnchor:
 
 
 def resolve_commit_label_anchor(
-    orientation: OrientationLiteral,
-    label_side: LabelSideLiteral,
+    orientation: Orientation,
+    label_side: LabelSide,
 ) -> BoxAnchor:
     """Resolve the commit-label stack's box anchor.
 
@@ -125,9 +119,9 @@ def resolve_commit_label_anchor(
         The `(u, v)` saying where in the stack's un-rotated bounding
         box the world point sits.
     """
-    if orientation in ("bt", "tb"):
-        return (1.0, 0.5) if label_side == "before" else (0.0, 0.5)
-    return (0.5, 1.0) if label_side == "before" else (0.5, 0.0)
+    if orientation in (Orientation.BT, Orientation.TB):
+        return (1.0, 0.5) if label_side == LabelSide.BEFORE else (0.0, 0.5)
+    return (0.5, 1.0) if label_side == LabelSide.BEFORE else (0.5, 0.0)
 
 
 # ==================================================================================================

@@ -27,7 +27,7 @@ import drawsvg as draw
 
 from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._geometry import grid_to_pixel
-from gitsvg.theme import Theme
+from gitsvg.theme import Orientation, Theme
 
 # Sub-pixel tolerance below which arc segments degenerate (collapse to a
 # straight line, or skip an emit entirely). Pure numerical-precision guard;
@@ -82,7 +82,7 @@ def draw_arc(
     # in BT terms") becomes `screen_y_first` only in vertical
     # orientations; in horizontal orientations it becomes
     # `screen_x_first`.
-    is_vertical_orientation = canvas.orientation in ("bt", "tb")
+    is_vertical_orientation = canvas.orientation in (Orientation.BT, Orientation.TB)
     screen_y_first = vertical_first if is_vertical_orientation else not vertical_first
 
     path_kwargs: dict = {

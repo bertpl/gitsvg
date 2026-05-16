@@ -19,7 +19,7 @@ invariant #4 for the rule.
 
 from dataclasses import dataclass, field
 
-from gitsvg.theme._orientation import OrientationLiteral
+from gitsvg.theme._orientation import Orientation
 
 
 @dataclass(slots=True)
@@ -40,7 +40,7 @@ class Theme:
     # `gitsvg/theme/_resolve.py`. Always concrete (never `None`); default
     # `"bt"` preserves byte-identical output for inputs that don't set
     # `theme.orientation` explicitly.
-    orientation: OrientationLiteral = "bt"  # axis-symmetric (input-side selector)
+    orientation: Orientation = Orientation.BT  # axis-symmetric (input-side selector)
 
     # --------------------------------------------------------------------------
     #  Spacing (px; `None` = use the orientation-resolved default)

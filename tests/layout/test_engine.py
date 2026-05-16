@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 from gitsvg.errors import ValidationReport
+from gitsvg.file_format import LabelSide
 from gitsvg.imports import resolve_imports
 from gitsvg.layout import Layout, compute_layout
 from gitsvg.parse import parse_jsonl_file, parse_jsonl_text
@@ -581,7 +582,7 @@ def test_label_side_defaults_to_after() -> None:
 
     # --- assert -----------------------
     main = next(b for b in layout.branches if b.name == "main")
-    assert main.label_side == "after"
+    assert main.label_side == LabelSide.AFTER
 
 
 def test_label_side_explicit_override() -> None:
@@ -590,7 +591,7 @@ def test_label_side_explicit_override() -> None:
 
     # --- assert -----------------------
     main = next(b for b in layout.branches if b.name == "main")
-    assert main.label_side == "before"
+    assert main.label_side == LabelSide.BEFORE
 
 
 # ==================================================================================================
