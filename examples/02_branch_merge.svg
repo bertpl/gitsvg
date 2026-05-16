@@ -1,31 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-     width="300" height="263.5" viewBox="0 0 300 263.5">
+     width="300.0" height="263.5" viewBox="0 0 300.0 263.5">
 <defs>
 </defs>
-<path d="M100,12.5 L100,237.5" stroke="#b8b8b8" stroke-width="0.7" stroke-dasharray="4,4" />
-<path d="M200,12.5 L200,237.5" stroke="#b8b8b8" stroke-width="0.7" stroke-dasharray="4,4" />
-<path d="M100,175.0 L180,175.0 A20,20,0,0,0,200,155.0 L200,125.0" stroke="#7b8fb2" stroke-width="2" fill="none" stroke-linecap="round" />
-<path d="M200,75.0 L200,45.0 A20,20,0,0,0,180,25.0 L100,25.0" stroke="#7b8fb2" stroke-width="2" fill="none" stroke-linecap="round" />
-<path d="M100,225.0 L100,25.0" stroke="#5c6370" stroke-width="2" stroke-linecap="round" />
-<path d="M200,125.0 L200,75.0" stroke="#7b8fb2" stroke-width="2" stroke-linecap="round" />
+<path d="M100.0,12.5 L100.0,237.5" stroke="#b8b8b8" stroke-width="0.7" stroke-dasharray="4,4" />
+<path d="M200.0,12.5 L200.0,237.5" stroke="#b8b8b8" stroke-width="0.7" stroke-dasharray="4,4" />
+<path d="M100.0,175.0 L180.0,175.0 A20,20,0,0,0,200.0,155.0 L200.0,125.0" stroke="#7b8fb2" stroke-width="2" fill="none" stroke-linecap="round" />
+<path d="M200.0,75.0 L200.0,45.0 A20,20,0,0,0,180.0,25.0 L100.0,25.0" stroke="#7b8fb2" stroke-width="2" fill="none" stroke-linecap="round" />
+<path d="M100.0,225.0 L100.0,25.0" stroke="#5c6370" stroke-width="2" stroke-linecap="round" />
+<path d="M200.0,125.0 L200.0,75.0" stroke="#7b8fb2" stroke-width="2" stroke-linecap="round" />
 <rect x="80.2580575" y="240.5" width="39.483885" height="19" rx="4" ry="4" fill="#5c6370" opacity="0.85" />
 <text x="100.0" y="250.0" font-size="11" text-anchor="middle" dominant-baseline="middle" fill="white" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="500">main</text>
 <rect x="173.922855" y="140.5" width="52.15429" height="19" rx="4" ry="4" fill="#7b8fb2" opacity="0.85" />
 <text x="200.0" y="150.0" font-size="11" text-anchor="middle" dominant-baseline="middle" fill="white" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="500">feature</text>
-<circle cx="100" cy="225.0" r="5" fill="#5c6370" stroke="white" stroke-width="1.5" />
-<circle cx="100" cy="175.0" r="5" fill="#5c6370" stroke="white" stroke-width="1.5" />
-<circle cx="200" cy="125.0" r="5" fill="#7b8fb2" stroke="white" stroke-width="1.5" />
-<circle cx="200" cy="75.0" r="5" fill="#7b8fb2" stroke="white" stroke-width="1.5" />
-<circle cx="100" cy="25.0" r="5" fill="#5c6370" stroke="white" stroke-width="1.5" />
-<text x="88" y="217.5" font-size="11" text-anchor="end" dominant-baseline="middle" fill="#383838" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">initial commit</text>
-<text x="88" y="232.5" font-size="9" text-anchor="end" dominant-baseline="middle" fill="#707070" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">1b35060</text>
-<text x="88" y="167.5" font-size="11" text-anchor="end" dominant-baseline="middle" fill="#383838" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">setup config</text>
-<text x="88" y="182.5" font-size="9" text-anchor="end" dominant-baseline="middle" fill="#707070" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">b1e760e</text>
-<text x="212" y="117.5" font-size="11" text-anchor="start" dominant-baseline="middle" fill="#383838" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">add login form</text>
-<text x="212" y="132.5" font-size="9" text-anchor="start" dominant-baseline="middle" fill="#707070" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">97b103e</text>
-<text x="212" y="67.5" font-size="11" text-anchor="start" dominant-baseline="middle" fill="#383838" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">wire up auth</text>
-<text x="212" y="82.5" font-size="9" text-anchor="start" dominant-baseline="middle" fill="#707070" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">02a38f5</text>
-<text x="88" y="17.5" font-size="11" text-anchor="end" dominant-baseline="middle" fill="#383838" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">merge feature</text>
-<text x="88" y="32.5" font-size="9" text-anchor="end" dominant-baseline="middle" fill="#707070" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">f5acfc5</text>
+<circle cx="100.0" cy="225.0" r="5" fill="#5c6370" stroke="white" stroke-width="1.5" />
+<circle cx="100.0" cy="175.0" r="5" fill="#5c6370" stroke="white" stroke-width="1.5" />
+<circle cx="200.0" cy="125.0" r="5" fill="#7b8fb2" stroke="white" stroke-width="1.5" />
+<circle cx="200.0" cy="75.0" r="5" fill="#7b8fb2" stroke="white" stroke-width="1.5" />
+<circle cx="100.0" cy="25.0" r="5" fill="#5c6370" stroke="white" stroke-width="1.5" />
+<text x="88.0" y="217.5" font-size="11" text-anchor="end" dominant-baseline="middle" fill="#383838" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">initial commit</text>
+<text x="88.0" y="232.5" font-size="9" text-anchor="end" dominant-baseline="middle" fill="#707070" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">1b35060</text>
+<text x="88.0" y="167.5" font-size="11" text-anchor="end" dominant-baseline="middle" fill="#383838" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">setup config</text>
+<text x="88.0" y="182.5" font-size="9" text-anchor="end" dominant-baseline="middle" fill="#707070" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">b1e760e</text>
+<text x="212.0" y="117.5" font-size="11" text-anchor="start" dominant-baseline="middle" fill="#383838" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">add login form</text>
+<text x="212.0" y="132.5" font-size="9" text-anchor="start" dominant-baseline="middle" fill="#707070" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">97b103e</text>
+<text x="212.0" y="67.5" font-size="11" text-anchor="start" dominant-baseline="middle" fill="#383838" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">wire up auth</text>
+<text x="212.0" y="82.5" font-size="9" text-anchor="start" dominant-baseline="middle" fill="#707070" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">02a38f5</text>
+<text x="88.0" y="17.5" font-size="11" text-anchor="end" dominant-baseline="middle" fill="#383838" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">merge feature</text>
+<text x="88.0" y="32.5" font-size="9" text-anchor="end" dominant-baseline="middle" fill="#707070" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">f5acfc5</text>
 </svg>

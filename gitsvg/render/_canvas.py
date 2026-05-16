@@ -4,18 +4,20 @@ The renderer needs concrete pixel dimensions for the SVG it emits:
 canvas `width` / `height` and the effective spacings / margins the
 coordinate transform multiplies into grid indices. `compute_canvas`
 takes the grid extent (from `Layout.grid`, i.e. `LayoutGrid`) plus
-the resolved theme, and walks the same auto-fit rule the layout engine
-used to: keep the canvas just big enough to contain the longest visible
-labels, the branch-name pills, and any open pull-request's projected
-merge-commit row.
+the resolved theme, and walks an axis-relative auto-fit pass: four
+helpers compute the pixel allowance along each axis edge
+(branch-axis lower/upper, commit-axis lower/upper), then a single
+visual-side mapping table converts those to (margin_left,
+margin_right, margin_top, margin_bottom) per orientation.
 
 This module lives in `render/` because it's purely pixel work. The
 layout engine never reads it.
 """
 
 from dataclasses import dataclass
+from typing import Literal
 
-from gitsvg.layout import Layout, LayoutBranch, LayoutCommit
+from gitsvg.layout import Layout
 from gitsvg.render._label_widths import commit_label_width, pill_width
 from gitsvg.theme import OrientationLiteral, Theme
 
@@ -26,6 +28,19 @@ from gitsvg.theme import OrientationLiteral, Theme
 # turn — this internal perceptual pad just prevents zero-margin clipping in
 # the auto-fit path, and never needs per-diagram tuning.
 _AUTO_FIT_EDGE_PAD_PX = 4.0  # axis-symmetric (perceptual)
+
+_AxisEdge = Literal["lower", "upper"]
+
+# Maps each orientation to the visual side each axis edge corresponds
+# to. Mirrors the `label_side` axis-index → pixel-side mapping pattern
+# from invariant #7 (`docs/architecture.md`): axis-relative reasoning
+# everywhere; orientation enters once at the boundary.
+_AXIS_TO_VISUAL: dict[OrientationLiteral, dict[str, str]] = {
+    "bt": {"branch_lower": "left", "branch_upper": "right", "commit_lower": "bottom", "commit_upper": "top"},
+    "tb": {"branch_lower": "left", "branch_upper": "right", "commit_lower": "top", "commit_upper": "bottom"},
+    "lr": {"branch_lower": "top", "branch_upper": "bottom", "commit_lower": "left", "commit_upper": "right"},
+    "rl": {"branch_lower": "top", "branch_upper": "bottom", "commit_lower": "right", "commit_upper": "left"},
+}
 
 
 @dataclass(slots=True)
@@ -73,9 +88,10 @@ class RenderCanvas:
 def compute_canvas(layout: Layout, theme: Theme) -> RenderCanvas:
     """Compute the effective `RenderCanvas` for `layout` under `theme`.
 
-    Margins auto-fit to the longest visible labels and pills; spacings
-    and default margins come from the resolved theme (the `theme:` op
-    is the only source for those, per invariant #6).
+    Margins auto-fit to the longest visible labels and pills via four
+    axis-relative helpers + a per-orientation visual-side mapping;
+    spacings and default margins come from the resolved theme (the
+    `theme:` op is the only source for those, per invariant #6).
 
     Args:
         layout: The completed layout, supplying the integer-grid extent
@@ -88,9 +104,6 @@ def compute_canvas(layout: Layout, theme: Theme) -> RenderCanvas:
         A `RenderCanvas` carrying the pixel-space width / height and the
         effective spacing / margin values the coordinate transform reads.
     """
-    branches = layout.branches
-    commit_layouts = layout.commits
-    pull_requests = layout.pull_requests
     grid = layout.grid
     orientation = theme.orientation
 
@@ -99,58 +112,36 @@ def compute_canvas(layout: Layout, theme: Theme) -> RenderCanvas:
 
     n_commits = grid.n_commits
     n_branches = grid.n_branches
-    max_branch_pos = max((b.branch_pos for b in branches), default=0)
 
-    # Outward labels (and pills on edge lanes) flow toward different visual
-    # sides per orientation — see "Axis-direction conventions" in
-    # `docs/architecture.md` invariant #7. In vertical orientations
-    # `before`-side outward labels go pixel-left, `after`-side go
-    # pixel-right; in horizontal orientations `before` goes pixel-top
-    # (low y) and `after` goes pixel-bottom (high y). The auto-fit grows
-    # the matching visual margin to fit the longest such label / edge pill.
+    # Axis-relative auto-fit needs (pure: no notion of visual sides).
+    axis_needs: dict[str, float] = {
+        "branch_lower": _auto_fit_branch_axis_edge(layout, theme, edge="lower"),
+        "branch_upper": _auto_fit_branch_axis_edge(layout, theme, edge="upper"),
+        "commit_lower": _auto_fit_commit_axis_edge(layout, theme, edge="lower"),
+        "commit_upper": _auto_fit_commit_axis_edge(layout, theme, edge="upper"),
+    }
+
+    # Map axis-relative needs to visual sides per orientation; take the
+    # wider of the theme default and the computed need on each side.
+    # Force-cast to float so the coordinate transform's `y = margin_top
+    # + ...` formula propagates float type into y attributes drawsvg
+    # emits, keeping the SVG output stable across orientations.
+    margins: dict[str, float] = {
+        "left": float(theme.margin_left),
+        "right": float(theme.margin_right),
+        "top": float(theme.margin_top),
+        "bottom": float(theme.margin_bottom),
+    }
+    for axis_edge, visual_side in _AXIS_TO_VISUAL[orientation].items():
+        margins[visual_side] = max(margins[visual_side], axis_needs[axis_edge])
+
     is_vertical = orientation in ("bt", "tb")
     if is_vertical:
-        margin_left = _auto_fit_outward_label_margin(
-            branches, commit_layouts, theme, branch_pos_filter=0, outward_label_side="before"
-        )
-        margin_right = _auto_fit_outward_label_margin(
-            branches,
-            commit_layouts,
-            theme,
-            branch_pos_filter=max_branch_pos,
-            outward_label_side="after",
-        )
-        margin_top = float(theme.margin_top)
-        margin_bottom = _auto_fit_pill_margin_against_branch_start(branches, theme)
+        width = margins["left"] + (n_branches - 1) * branch_spacing + margins["right"]
+        height = margins["top"] + (n_commits - 1) * commit_spacing + margins["bottom"]
     else:
-        margin_top = _auto_fit_outward_label_margin(
-            branches, commit_layouts, theme, branch_pos_filter=0, outward_label_side="before"
-        )
-        margin_bottom = _auto_fit_outward_label_margin(
-            branches,
-            commit_layouts,
-            theme,
-            branch_pos_filter=max_branch_pos,
-            outward_label_side="after",
-        )
-        # In horizontal orientations the branch pill sits along the branch axis
-        # (vertical), so it doesn't drive the bottom-margin auto-fit; bottom is
-        # the theme value (force-cast to float to keep y formatting consistent
-        # — the coordinate transform's `y = margin_top + ...` for horizontal
-        # orientations propagates the float type into y attributes drawsvg
-        # emits, matching the bottom-to-top baseline's float y formatting).
-        margin_left = float(theme.margin_left)
-        margin_right = float(theme.margin_right)
-        # Hold-over: keep margin_top as float for the y-formatting invariant
-        # described above (margin_top above is also float). margin_bottom can
-        # stay int when whole because it doesn't enter the y-baseline formula.
-
-    if is_vertical:
-        width = margin_left + (n_branches - 1) * branch_spacing + margin_right
-        height = margin_top + (n_commits - 1) * commit_spacing + margin_bottom
-    else:
-        width = margin_left + (n_commits - 1) * commit_spacing + margin_right
-        height = margin_top + (n_branches - 1) * branch_spacing + margin_bottom
+        width = margins["left"] + (n_commits - 1) * commit_spacing + margins["right"]
+        height = margins["top"] + (n_branches - 1) * branch_spacing + margins["bottom"]
     return RenderCanvas(
         width=width,
         height=height,
@@ -158,92 +149,132 @@ def compute_canvas(layout: Layout, theme: Theme) -> RenderCanvas:
         n_branches=n_branches,
         branch_spacing=branch_spacing,
         commit_spacing=commit_spacing,
-        margin_left=margin_left,
-        margin_right=margin_right,
-        margin_bottom=margin_bottom,
-        margin_top=margin_top,
+        margin_left=margins["left"],
+        margin_right=margins["right"],
+        margin_bottom=margins["bottom"],
+        margin_top=margins["top"],
         orientation=orientation,
     )
 
 
-def _auto_fit_outward_label_margin(
-    branches: list[LayoutBranch],
-    commit_layouts: dict[str, LayoutCommit],
-    theme: Theme,
-    *,
-    branch_pos_filter: int,
-    outward_label_side: str,
-) -> float:
-    """Compute the auto-fit margin for the visual side that holds outward labels.
+# ==================================================================================================
+#  Branch-axis auto-fit
+# ==================================================================================================
+def _auto_fit_branch_axis_edge(layout: Layout, theme: Theme, *, edge: _AxisEdge) -> float:
+    """Pixel allowance for content protruding past a branch-axis edge.
 
-    Considers the half-pill-width of any pill on the edge lane plus the
-    width of any commit label whose `label_side` points outward from
-    that lane. The visual side this margin lives on is decided by the
-    caller (per orientation); this function just returns the pixel
-    allowance needed to keep the longest outward content inside the
-    canvas.
+    The branch-axis edges are perpendicular to the lane direction —
+    `edge="lower"` is lane 0, `edge="upper"` is the maximum-index
+    lane. Considers two sources:
+
+    - Outward-pointing commit labels on the edge lane. Text extends
+      along the branch axis from the label anchor, in the same
+      direction the edge faces.
+    - Edge-lane branch-name pills. The pill rect's extent along the
+      branch axis depends on orientation: in vertical orientations
+      the rect is centred horizontally over the lane line so the
+      half-pill-width protrudes; in horizontal orientations the rect
+      is anchored along the commit axis (rect width runs along the
+      commit axis, height along the branch axis), so the half-pill-
+      height protrudes along the branch axis.
 
     Args:
-        branches: All layout branches; the edge-lane filter walks this
-            list to find pills on `branch_pos_filter`.
-        commit_layouts: All layout commits, walked the same way to find
-            outward-pointing labels on the edge lane.
-        theme: Supplies the default margin for the side, the
-            `label_offset`, and the font sizes used to estimate label
-            widths.
-        branch_pos_filter: Lane index that counts as the "edge" — 0 on
-            the `before` side, max lane on the `after` side.
-        outward_label_side: `"before"` or `"after"` — picks the matching
-            default margin (left/top for `before`, right/bottom for
-            `after`) and the matching `label_side` filter on commits.
+        layout: Supplies branches and commits to walk.
+        theme: Supplies font sizes, label offset, and the orientation
+            that drives the pill-extent branch.
+        edge: Which branch-axis edge to compute.
 
     Returns:
-        The wider of the default margin and the computed need from the
-        widest pill / outward label on the edge lane.
+        Pixel allowance needed past the edge; returns 0 if nothing
+        on the edge protrudes.
     """
+    branches = layout.branches
+    commit_layouts = layout.commits
+    max_branch_pos = max((b.branch_pos for b in branches), default=0)
+    target_lane = 0 if edge == "lower" else max_branch_pos
+    matching_label_side = "before" if edge == "lower" else "after"
+
     is_vertical = theme.orientation in ("bt", "tb")
-    if outward_label_side == "before":
-        default = theme.margin_left if is_vertical else theme.margin_top
-    else:
-        default = theme.margin_right if is_vertical else theme.margin_bottom
+    pill_height = theme.branch_label_font_size + theme.pill_padding_y
 
     needed: float = 0.0
     for branch in branches:
-        if branch.branch_pos == branch_pos_filter:
-            needed = max(needed, pill_width(branch.name, theme) / 2 + _AUTO_FIT_EDGE_PAD_PX)
+        if branch.branch_pos == target_lane:
+            extent = (pill_width(branch.name, theme) / 2) if is_vertical else (pill_height / 2)
+            needed = max(needed, extent + _AUTO_FIT_EDGE_PAD_PX)
     for commit in commit_layouts.values():
-        if commit.branch_pos == branch_pos_filter and commit.label_side == outward_label_side:
-            needed = max(needed, theme.label_offset + commit_label_width(commit, theme) + _AUTO_FIT_EDGE_PAD_PX)
-    return max(default, needed)
+        if commit.branch_pos == target_lane and commit.label_side == matching_label_side:
+            extent = theme.label_offset + commit_label_width(commit, theme)
+            needed = max(needed, extent + _AUTO_FIT_EDGE_PAD_PX)
+    return needed
 
 
-def _auto_fit_pill_margin_against_branch_start(branches: list[LayoutBranch], theme: Theme) -> float:
-    """Compute the auto-fit bottom margin in vertical orientations.
+# ==================================================================================================
+#  Commit-axis auto-fit
+# ==================================================================================================
+def _auto_fit_commit_axis_edge(layout: Layout, theme: Theme, *, edge: _AxisEdge) -> float:
+    """Pixel allowance for content protruding past a commit-axis edge.
 
-    The branch-name pill sits at a negative commit-axis offset by default
-    in vertical orientations (below the start commit in BT, above it in
-    TB). For BT specifically, the pill on a branch with `start = 0` sits
-    closest to the canvas bottom; reserve enough room for it: the absolute
-    pixel distance from the branch's start row to the pill centre, plus
-    half the pill height, plus a small edge pad.
+    The commit-axis edges run along the commit-axis direction —
+    `edge="lower"` is commit row 0, `edge="upper"` is the maximum
+    commit row. Considers two sources:
 
-    Used only in vertical orientations; horizontal orientations route the
-    pill offset along the branch axis instead, where the bottom-margin
-    auto-fit doesn't apply.
+    - Branch-name pills at branch starts. Default offset is negative
+      along the commit axis in every orientation, so branches with
+      `start == 0` protrude past the lower edge; an override making
+      the offset positive would shift the case to a branch with
+      `start == max_commit_pos`.
+    - PR-title pills at projected merge rows. Default offset is
+      negative along the commit axis in vertical orientations and
+      zero in horizontal orientations; positive overrides shift the
+      case to the upper edge.
+
+    The pill's extent past its anchor depends on orientation: in
+    vertical orientations the rect is centred on the anchor so the
+    half-pill-height extends along the commit axis; in horizontal
+    orientations the rect's near-edge is anchored at the offset
+    point so the full pill_width extends in the offset direction
+    along the commit axis.
 
     Args:
-        branches: All layout branches; only their `start` values and the
-            theme's pill geometry feed the computation.
-        theme: Supplies the default bottom margin, the pill offset, and
-            the font size used to estimate pill height.
+        layout: Supplies branches and PRs to walk.
+        theme: Supplies offset fields, font sizes, and the
+            orientation that drives the pill-extent branch.
+        edge: Which commit-axis edge to compute.
 
     Returns:
-        The wider of the default bottom margin and the room needed to
-        keep the lowest pill inside the canvas.
+        Pixel allowance needed past the edge; returns 0 if nothing
+        on the edge protrudes.
     """
-    if not branches:
-        return theme.margin_bottom
+    is_vertical = theme.orientation in ("bt", "tb")
     pill_height = theme.branch_label_font_size + theme.pill_padding_y
-    pill_screen_y_offset = -theme.branch_name_pill_offset_commit_axis_in_rows * theme.commit_spacing
-    pill_room = pill_screen_y_offset + pill_height / 2 + _AUTO_FIT_EDGE_PAD_PX
-    return max(theme.margin_bottom, pill_room)
+    max_commit_pos = layout.grid.n_commits - 1
+
+    needed: float = 0.0
+
+    # Branch-name pills.
+    branch_offset_rows = theme.branch_name_pill_offset_commit_axis_in_rows
+    if branch_offset_rows != 0:
+        protrudes_at = "lower" if branch_offset_rows < 0 else "upper"
+        if edge == protrudes_at:
+            target_start = 0 if edge == "lower" else max_commit_pos
+            offset_px = abs(branch_offset_rows) * theme.commit_spacing
+            for branch in layout.branches:
+                if branch.start == target_start:
+                    extent = offset_px + (pill_height / 2 if is_vertical else pill_width(branch.name, theme))
+                    needed = max(needed, extent + _AUTO_FIT_EDGE_PAD_PX)
+
+    # PR-title pills (only branches with a non-None title render a pill).
+    pr_offset_rows = theme.pull_request_pill_offset_commit_axis_in_rows
+    if pr_offset_rows != 0:
+        protrudes_at = "lower" if pr_offset_rows < 0 else "upper"
+        if edge == protrudes_at:
+            target_pos = 0 if edge == "lower" else max_commit_pos
+            offset_px = abs(pr_offset_rows) * theme.commit_spacing
+            for pr in layout.pull_requests:
+                if pr.title is None or pr.to_commit_pos != target_pos:
+                    continue
+                extent = offset_px + (pill_height / 2 if is_vertical else pill_width(pr.title, theme))
+                needed = max(needed, extent + _AUTO_FIT_EDGE_PAD_PX)
+
+    return needed

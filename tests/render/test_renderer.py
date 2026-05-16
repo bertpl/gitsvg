@@ -29,8 +29,10 @@ def test_render_produces_valid_svg_with_correct_root_dimensions() -> None:
     # --- assert -----------------------
     assert svg_text.startswith("<?xml") or svg_text.startswith("<svg")
     # Single branch with 3 commits: width 200 (margins 100 + 100), height
-    # auto-fits to include pill room below the lowest dot.
-    assert 'width="200"' in svg_text
+    # auto-fits to include pill room below the lowest dot. Width may be
+    # rendered as int or float depending on whether any auto-fit margin
+    # widened past the integer theme default.
+    assert ('width="200"' in svg_text) or ('width="200.0"' in svg_text)
     assert 'height="' in svg_text  # auto-fit value depends on label widths
 
 
