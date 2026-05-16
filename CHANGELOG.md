@@ -11,8 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Pill and commit-label widths now derive from bundled per-character glyph metrics for the fonts the renderer recognises in `theme.label_font_family` (Inter, plus the `sans-serif` and `monospace` generic keywords, each in regular and bold weights). Width is the per-character maximum across every recognised entry in the chain, so SVG geometry stays safe whichever font the viewer actually picks; unrecognised chains fall back to the previous per-character heuristic. Existing diagrams may show small pixel shifts in pill widths as a consequence.
-- Canvas auto-fit refactored into four axis-relative helpers + a single visual-side mapping per orientation. Closes two latent gaps: long branch names in `lr` / `rl` no longer overflow the left/right canvas edge (the start-side margin now grows to fit the pill), and `tb` no longer mis-routes the branch-pill allowance onto the bottom edge instead of the top. Diagrams whose auto-fit was hitting one of those cases may show small margin shifts.
+- Pill and commit-label widths now use measured glyph metrics from `theme.label_font_family`'s fallback chain instead of a uniform per-character factor; existing diagrams may show small pixel shifts.
+- Canvas auto-fit now covers long branch names in `lr` / `rl` (start-side margin grows to fit instead of overflowing) and correctly routes the `tb` branch-pill allowance to `margin_top` instead of `margin_bottom`.
 
 ### Deprecated
 
