@@ -45,6 +45,7 @@ def resolve_defaults(theme: Theme) -> None:
     _resolve_guide_overshoot(theme)
     _resolve_pill_offsets(theme)
     _resolve_margins(theme)
+    _resolve_label_angles(theme)
 
 
 # ==================================================================================================
@@ -137,6 +138,23 @@ def _resolve_label_offset(theme: Theme) -> None:
             theme.label_offset_branch_axis_in_lanes = 0.12
         else:
             theme.label_offset_branch_axis_in_lanes = 0.24
+
+
+def _resolve_label_angles(theme: Theme) -> None:
+    """Fill `None` label-angle fields with their per-orientation defaults.
+
+    0° across all orientations today for every label kind — labels
+    always horizontally readable. The shape accommodates richer per-
+    orientation defaults once future named themes ship visually-
+    considered angle / anchor pairings (Mermaid-style 45°, follow-line
+    90° / 270° in horizontal orientations, etc.).
+    """
+    if theme.branch_label_angle is None:
+        theme.branch_label_angle = 0.0
+    if theme.commit_label_angle is None:
+        theme.commit_label_angle = 0.0
+    if theme.pull_request_label_angle is None:
+        theme.pull_request_label_angle = 0.0
 
 
 def _resolve_margins(theme: Theme) -> None:

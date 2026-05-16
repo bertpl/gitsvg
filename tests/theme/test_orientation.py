@@ -209,6 +209,22 @@ def test_resolver_routes_branch_pill_offset_per_orientation(
     assert theme.branch_name_pill_offset_branch_axis_in_lanes == expected_branch_pill_branch
 
 
+@pytest.mark.parametrize("orientation", ["bt", "tb", "lr", "rl"])
+def test_resolver_picks_label_angles_zero_per_orientation(orientation: str) -> None:
+    """v0.1.8 default: every label angle resolves to 0° in every orientation.
+
+    Plumbed-but-waiting-on-anchors — non-zero defaults arrive once future
+    named themes ship visually-considered angle / anchor pairings.
+    """
+    # --- arrange / act ----------------
+    theme = _resolved_with_orientation(orientation)
+
+    # --- assert -----------------------
+    assert theme.branch_label_angle == 0.0
+    assert theme.commit_label_angle == 0.0
+    assert theme.pull_request_label_angle == 0.0
+
+
 @pytest.mark.parametrize(
     ("orientation", "expected_pr_pill_commit", "expected_pr_pill_branch"),
     [
@@ -247,6 +263,21 @@ def test_user_set_margin_is_not_overwritten_by_resolver() -> None:
 
     # --- assert -----------------------
     assert theme.margin_left == 200  # sticky
+
+
+def test_user_set_label_angle_is_not_overwritten_by_resolver() -> None:
+    # --- arrange ----------------------
+    theme = copy.deepcopy(DEFAULT_THEME)
+    theme.commit_label_angle = 45.0  # user-set explicitly
+
+    # --- act --------------------------
+    resolve_defaults(theme)
+
+    # --- assert -----------------------
+    assert theme.commit_label_angle == 45.0  # sticky
+    # Other angle fields still resolve to default.
+    assert theme.branch_label_angle == 0.0
+    assert theme.pull_request_label_angle == 0.0
 
 
 def test_explicit_null_orientation_resets_to_default() -> None:

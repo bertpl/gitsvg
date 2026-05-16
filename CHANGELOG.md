@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- New `theme.branch_label_angle` / `commit_label_angle` / `pull_request_label_angle` fields rotate the corresponding labels around their world anchor point (signed degrees, default `0°`); current anchor positions are tuned for un-rotated text, so visually-tuned angle/anchor pairings arrive with later named themes.
+
 ### Changed
 
 ### Deprecated

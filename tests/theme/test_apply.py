@@ -56,6 +56,30 @@ def test_sequential_explicit_overrides_accumulate() -> None:
     assert theme.label_font_size == 17
 
 
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("branch_label_angle", 30.0),
+        ("commit_label_angle", -45.0),
+        ("pull_request_label_angle", 90.0),
+    ],
+)
+def test_label_angle_field_override_assigns_to_theme(field: str, value: float) -> None:
+    """Each label-angle field on the `theme:` op assigns onto the live theme.
+
+    Negative values are accepted (SVG `rotate(...)` is signed); the field
+    has no range constraint.
+    """
+    # --- arrange / act ----------------
+    import json
+
+    _, theme, report = _apply(json.dumps({"op": "theme", field: value}) + "\n")
+
+    # --- assert -----------------------
+    assert report.is_clean()
+    assert getattr(theme, field) == value
+
+
 def test_second_explicit_op_overwrites_same_field() -> None:
     # --- arrange / act ----------------
     _, theme, report = _apply(
