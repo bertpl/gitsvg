@@ -30,7 +30,7 @@ import drawsvg as draw
 
 from gitsvg.file_format import LabelSide
 from gitsvg.layout import LayoutCommit
-from gitsvg.render._anchor_resolution import resolve_commit_label_anchor, rotated_target
+from gitsvg.render._anchor_resolution import rotated_target
 from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._geometry import offset_position
 from gitsvg.render._renderer_settings import RendererSettings
@@ -66,7 +66,9 @@ def draw_commit_label(d: draw.Drawing, commit: LayoutCommit, canvas: RenderCanva
     else:
         branch_axis_offset_in_lanes = theme.label_offset_branch_axis_in_lanes
 
-    box_u, box_v = resolve_commit_label_anchor(canvas.orientation, commit.label_side)
+    box_u, box_v = (
+        theme.commit_label_anchor_before if commit.label_side == LabelSide.BEFORE else theme.commit_label_anchor_after
+    )
     text_anchor = _SVG_TEXT_ANCHOR[box_u]
 
     x, cy = offset_position(

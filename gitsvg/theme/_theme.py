@@ -32,6 +32,7 @@ from typing import Any, Self
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from gitsvg.theme._box_anchor import BoxAnchor, validate_box_anchor
 from gitsvg.theme._orientation import Orientation
 
 
@@ -112,6 +113,20 @@ class Theme(BaseModel):
     pull_request_label_angle: float | None = None  # axis-symmetric (PR pill)
 
     # --------------------------------------------------------------------------
+    #  Box anchors (text-bearing primitives)
+    # --------------------------------------------------------------------------
+    # Each `(u, v) ∈ [0, 1]²` says where inside the primitive's un-rotated
+    # bounding box the world anchor point sits — and equivalently where
+    # rotation pivots, so the world point stays pinned regardless of the
+    # resolved label angle. Commit labels split into `_before` / `_after`
+    # because the resolver depends on per-commit `label_side`; the renderer
+    # picks the field matching each commit's resolved side at draw time.
+    branch_pill_anchor: BoxAnchor | None = None  # axis-symmetric (renderer geometry)
+    pull_request_pill_anchor: BoxAnchor | None = None  # axis-symmetric (renderer geometry)
+    commit_label_anchor_before: BoxAnchor | None = None  # axis-symmetric (renderer geometry; label_side="before")
+    commit_label_anchor_after: BoxAnchor | None = None  # axis-symmetric (renderer geometry; label_side="after")
+
+    # --------------------------------------------------------------------------
     #  Colours
     # --------------------------------------------------------------------------
     colors: dict[str, str] | None = None
@@ -161,6 +176,17 @@ class Theme(BaseModel):
         if v is not None and not (0.0 <= v <= 1.0):
             raise ValueError("must be in [0, 1]")
         return v
+
+    @field_validator(
+        "branch_pill_anchor",
+        "pull_request_pill_anchor",
+        "commit_label_anchor_before",
+        "commit_label_anchor_after",
+    )
+    @classmethod
+    def _anchor_components_in_unit_range(cls, v: BoxAnchor | None) -> BoxAnchor | None:
+        """Reject `BoxAnchor` values with a component outside `[0, 1]`."""
+        return validate_box_anchor(v)
 
     # --------------------------------------------------------------------------
     #  Factory (subclasses provide a concrete implementation)

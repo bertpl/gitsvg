@@ -20,6 +20,7 @@ the original was orientation-dependent.
 
 from typing import Any, Self
 
+from gitsvg.theme._box_anchor import BoxAnchor
 from gitsvg.theme._orientation import Orientation
 from gitsvg.theme._theme import Theme
 
@@ -301,6 +302,66 @@ class DefaultTheme(Theme):
         return 0.0
 
     # --------------------------------------------------------------------------
+    #  Box anchors (text-bearing primitives)
+    # --------------------------------------------------------------------------
+    @classmethod
+    def _resolve_branch_pill_anchor(cls, orientation: Orientation) -> BoxAnchor:
+        """Per-orientation branch-pill `(u, v)`.
+
+        Vertical orientations (`bt`, `tb`): pill centred on the world
+        point — `(0.5, 0.5)`. Horizontal orientations: pill anchored on
+        its edge nearest the start commit, so the resolved offset
+        becomes a minimum gap and a long branch name extends further
+        into the start-side margin without crowding the start commit
+        dot. `lr` → right-edge anchored (`(1.0, 0.5)`); `rl` → left-
+        edge anchored (`(0.0, 0.5)`).
+        """
+        if orientation == Orientation.LR:
+            return (1.0, 0.5)
+        if orientation == Orientation.RL:
+            return (0.0, 0.5)
+        return (0.5, 0.5)
+
+    @classmethod
+    def _resolve_pull_request_pill_anchor(cls, orientation: Orientation) -> BoxAnchor:
+        """Per-orientation PR-pill `(u, v)`.
+
+        Always `(0.5, 0.5)` — the PR pill's offset point lives away
+        from the start-side margin concern the branch pill addresses,
+        so it centres on the offset point in every orientation.
+        """
+        del orientation
+        return (0.5, 0.5)
+
+    @classmethod
+    def _resolve_commit_label_anchor_before(cls, orientation: Orientation) -> BoxAnchor:
+        """Per-orientation commit-label `(u, v)` for the `before` (lower-index) side.
+
+        Vertical orientations (`bt`, `tb`): stack extends to the left
+        of the commit dot, vertically centred — `(1.0, 0.5)` puts the
+        stack's right-middle at the world point. Horizontal
+        orientations (`lr`, `rl`): stack extends below the dot,
+        horizontally centred — `(0.5, 1.0)` puts the stack's bottom-
+        middle at the world point.
+        """
+        if orientation in _VERTICAL_ORIENTATIONS:
+            return (1.0, 0.5)
+        return (0.5, 1.0)
+
+    @classmethod
+    def _resolve_commit_label_anchor_after(cls, orientation: Orientation) -> BoxAnchor:
+        """Per-orientation commit-label `(u, v)` for the `after` (higher-index) side.
+
+        Mirror of `_resolve_commit_label_anchor_before`. Vertical:
+        stack extends to the right, vertically centred — `(0.0, 0.5)`.
+        Horizontal: stack extends above the dot, horizontally centred
+        — `(0.5, 0.0)`.
+        """
+        if orientation in _VERTICAL_ORIENTATIONS:
+            return (0.0, 0.5)
+        return (0.5, 0.0)
+
+    # --------------------------------------------------------------------------
     #  Colours
     # --------------------------------------------------------------------------
     @classmethod
@@ -442,6 +503,16 @@ class DefaultTheme(Theme):
             commit_label_angle=pick("commit_label_angle", cls._resolve_commit_label_angle, orientation),
             pull_request_label_angle=pick(
                 "pull_request_label_angle", cls._resolve_pull_request_label_angle, orientation
+            ),
+            branch_pill_anchor=pick("branch_pill_anchor", cls._resolve_branch_pill_anchor, orientation),
+            pull_request_pill_anchor=pick(
+                "pull_request_pill_anchor", cls._resolve_pull_request_pill_anchor, orientation
+            ),
+            commit_label_anchor_before=pick(
+                "commit_label_anchor_before", cls._resolve_commit_label_anchor_before, orientation
+            ),
+            commit_label_anchor_after=pick(
+                "commit_label_anchor_after", cls._resolve_commit_label_anchor_after, orientation
             ),
             colors=pick("colors", cls._resolve_colors),
             default_branch_color_cycle=pick("default_branch_color_cycle", cls._resolve_default_branch_color_cycle),

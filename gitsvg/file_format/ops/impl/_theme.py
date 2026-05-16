@@ -2,7 +2,7 @@
 
 from typing import Annotated, Literal
 
-from pydantic import BeforeValidator, Field
+from pydantic import BeforeValidator, Field, field_validator
 
 from gitsvg.file_format.ops.framework._base import OpBase
 from gitsvg.file_format.ops.framework._types import (
@@ -12,7 +12,8 @@ from gitsvg.file_format.ops.framework._types import (
     NonNegativeFloat,
     NonNegativeInt,
 )
-from gitsvg.theme import Orientation, normalize_orientation
+from gitsvg.theme import BoxAnchor, Orientation, normalize_orientation
+from gitsvg.theme._box_anchor import validate_box_anchor
 
 Opacity = Annotated[float, Field(ge=0, le=1)]
 """Float in `[0, 1]` — for opacity fields where SVG semantics are bounded."""
@@ -196,6 +197,24 @@ class ThemeOp(OpBase):
         description="Rotation angle (degrees) for the pull-request title pill. Default is 0° across all orientations; see `branch_label_angle` for the visual-practicality caveat.",
     )
 
+    # --- Box anchors ------------------------------------
+    branch_pill_anchor: BoxAnchor | None = Field(
+        default=None,
+        description="Branch-name pill `(u, v)` in `[0, 1]²` — where inside the un-rotated pill rect the world anchor point sits (and equivalently where rotation pivots around). Two-element JSON array. Per-orientation defaults: `bt`/`tb` centre `[0.5, 0.5]`; `lr` right-edge `[1.0, 0.5]`; `rl` left-edge `[0.0, 0.5]`.",
+    )
+    pull_request_pill_anchor: BoxAnchor | None = Field(
+        default=None,
+        description="PR-title pill `(u, v)` in `[0, 1]²`. Two-element JSON array. Defaults to centre `[0.5, 0.5]` in every orientation.",
+    )
+    commit_label_anchor_before: BoxAnchor | None = Field(
+        default=None,
+        description="Commit-label `(u, v)` for the `before` (lower-index) side. Two-element JSON array. Per-orientation defaults: `bt`/`tb` `[1.0, 0.5]` (stack's right-middle at the world point); `lr`/`rl` `[0.5, 1.0]` (stack's bottom-middle).",
+    )
+    commit_label_anchor_after: BoxAnchor | None = Field(
+        default=None,
+        description="Commit-label `(u, v)` for the `after` (higher-index) side. Two-element JSON array. Per-orientation defaults: `bt`/`tb` `[0.0, 0.5]`; `lr`/`rl` `[0.5, 0.0]`.",
+    )
+
     # --- Colours ----------------------------------------
     label_color: HexColor | None = Field(
         default=None,
@@ -221,3 +240,14 @@ class ThemeOp(OpBase):
         default=None,
         description="Replacement branch-palette dict; replaces the current palette wholesale when set.",
     )
+
+    @field_validator(
+        "branch_pill_anchor",
+        "pull_request_pill_anchor",
+        "commit_label_anchor_before",
+        "commit_label_anchor_after",
+    )
+    @classmethod
+    def _validate_anchor_components(cls, v: BoxAnchor | None) -> BoxAnchor | None:
+        """Reject `BoxAnchor` values with a component outside `[0, 1]` at parse time."""
+        return validate_box_anchor(v)

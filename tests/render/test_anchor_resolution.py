@@ -1,28 +1,24 @@
-"""Tests for the per-element box-anchor resolution.
+"""Tests for per-element box-anchor resolution + the rotation-wrap helper.
 
-Verifies that each resolver returns the canonical `(u, v)` for every
-orientation × `label_side` combination it covers. The expected values
-mirror the per-orientation behaviour that previously lived inline in
-each render primitive: vertical pills centred, horizontal branch pills
-edge-anchored toward the start commit, commit labels anchored on the
-side opposite their extension direction.
+The per-orientation anchor defaults now live as `_resolve_*_anchor`
+classmethods on `DefaultTheme` (post v0.1.9 anchor graduation); the
+expected values reproduce v0.1.8's table — vertical pills centred,
+horizontal branch pills edge-anchored toward the start commit,
+commit labels anchored on the side opposite their extension direction.
+
+The rotation-wrap helper (`rotated_target`) stays in
+`gitsvg/render/_anchor_resolution.py`.
 """
 
 import drawsvg as draw
 import pytest
 
-from gitsvg.file_format import LabelSide
-from gitsvg.render._anchor_resolution import (
-    resolve_branch_pill_anchor,
-    resolve_commit_label_anchor,
-    resolve_pr_pill_anchor,
-    rotated_target,
-)
-from gitsvg.theme import Orientation
+from gitsvg.render._anchor_resolution import rotated_target
+from gitsvg.theme import DefaultTheme, Orientation
 
 
 # ==================================================================================================
-#  Branch pill
+#  Branch pill anchor (DefaultTheme classmethod)
 # ==================================================================================================
 @pytest.mark.parametrize(
     ("orientation", "expected"),
@@ -33,51 +29,62 @@ from gitsvg.theme import Orientation
         (Orientation.RL, (0.0, 0.5)),
     ],
 )
-def test_resolve_branch_pill_anchor(orientation: Orientation, expected: tuple[float, float]) -> None:
+def test_default_theme_resolves_branch_pill_anchor(orientation: Orientation, expected: tuple[float, float]) -> None:
     # --- arrange / act ----------------
-    result = resolve_branch_pill_anchor(orientation)
+    result = DefaultTheme._resolve_branch_pill_anchor(orientation)
 
     # --- assert -----------------------
     assert result == expected
 
 
 # ==================================================================================================
-#  PR pill
+#  PR pill anchor (always centred)
 # ==================================================================================================
 @pytest.mark.parametrize("orientation", [Orientation.BT, Orientation.TB, Orientation.LR, Orientation.RL])
-def test_resolve_pr_pill_anchor_always_centred(orientation: Orientation) -> None:
+def test_default_theme_resolves_pr_pill_anchor_always_centred(orientation: Orientation) -> None:
     # --- arrange / act ----------------
-    result = resolve_pr_pill_anchor(orientation)
+    result = DefaultTheme._resolve_pull_request_pill_anchor(orientation)
 
     # --- assert -----------------------
     assert result == (0.5, 0.5)
 
 
 # ==================================================================================================
-#  Commit label
+#  Commit label anchor — per-side split
 # ==================================================================================================
 @pytest.mark.parametrize(
-    ("orientation", "label_side", "expected"),
+    ("orientation", "expected"),
     [
-        # Vertical orientations: stack extends left/right of the dot,
-        # vertically centred — u flips with label_side, v stays 0.5.
-        (Orientation.BT, LabelSide.BEFORE, (1.0, 0.5)),
-        (Orientation.BT, LabelSide.AFTER, (0.0, 0.5)),
-        (Orientation.TB, LabelSide.BEFORE, (1.0, 0.5)),
-        (Orientation.TB, LabelSide.AFTER, (0.0, 0.5)),
-        # Horizontal orientations: stack extends above/below the dot,
-        # horizontally centred — v flips with label_side, u stays 0.5.
-        (Orientation.LR, LabelSide.BEFORE, (0.5, 1.0)),
-        (Orientation.LR, LabelSide.AFTER, (0.5, 0.0)),
-        (Orientation.RL, LabelSide.BEFORE, (0.5, 1.0)),
-        (Orientation.RL, LabelSide.AFTER, (0.5, 0.0)),
+        (Orientation.BT, (1.0, 0.5)),
+        (Orientation.TB, (1.0, 0.5)),
+        (Orientation.LR, (0.5, 1.0)),
+        (Orientation.RL, (0.5, 1.0)),
     ],
 )
-def test_resolve_commit_label_anchor(
-    orientation: Orientation, label_side: LabelSide, expected: tuple[float, float]
+def test_default_theme_resolves_commit_label_anchor_before(
+    orientation: Orientation, expected: tuple[float, float]
 ) -> None:
     # --- arrange / act ----------------
-    result = resolve_commit_label_anchor(orientation, label_side)
+    result = DefaultTheme._resolve_commit_label_anchor_before(orientation)
+
+    # --- assert -----------------------
+    assert result == expected
+
+
+@pytest.mark.parametrize(
+    ("orientation", "expected"),
+    [
+        (Orientation.BT, (0.0, 0.5)),
+        (Orientation.TB, (0.0, 0.5)),
+        (Orientation.LR, (0.5, 0.0)),
+        (Orientation.RL, (0.5, 0.0)),
+    ],
+)
+def test_default_theme_resolves_commit_label_anchor_after(
+    orientation: Orientation, expected: tuple[float, float]
+) -> None:
+    # --- arrange / act ----------------
+    result = DefaultTheme._resolve_commit_label_anchor_after(orientation)
 
     # --- assert -----------------------
     assert result == expected
