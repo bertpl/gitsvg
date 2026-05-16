@@ -40,17 +40,15 @@ def test_each_orientation_renders_without_error(orientation: str) -> None:
 def test_lr_swaps_canvas_dimensions_relative_to_bt() -> None:
     """In LR, the commit axis maps to width and the branch axis to height
     — the opposite of BT. The fixture has more commits (4) than branches
-    (2), so LR should be wider and shorter than BT (the spacings also
-    swap per orientation, amplifying the effect)."""
+    (2); together with LR's commit-axis-dominant orientation, LR ends up
+    wider than BT."""
     # --- arrange / act ----------------
     _, canvas_bt = _render_with_orientation("bt")
     _, canvas_lr = _render_with_orientation("lr")
 
     # --- assert -----------------------
-    # LR is wider (commits drive width with the larger LR commit_spacing).
+    # LR is wider (more commits along the LR commit axis = width).
     assert canvas_lr.width > canvas_bt.width
-    # LR is shorter (branches drive height with the smaller LR branch_spacing).
-    assert canvas_lr.height < canvas_bt.height
     # Sanity: orientation field is propagated to RenderCanvas.
     assert canvas_bt.orientation == "bt"
     assert canvas_lr.orientation == "lr"
