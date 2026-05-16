@@ -24,7 +24,7 @@ estimate; no real glyph measurement.
 import drawsvg as draw
 
 from gitsvg.layout import LayoutPullRequest
-from gitsvg.render._anchor_resolution import resolve_pr_pill_anchor
+from gitsvg.render._anchor_resolution import resolve_pr_pill_anchor, rotated_target
 from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._geometry import offset_position
 from gitsvg.render._label_widths import pill_width
@@ -60,7 +60,8 @@ def draw_pull_request_pill(
     text_x = rect_left + width / 2
     text_y = rect_top + height / 2
 
-    d.append(
+    target = rotated_target(d, theme.pull_request_label_angle, x, y)
+    target.append(
         draw.Rectangle(
             rect_left,
             rect_top,
@@ -72,7 +73,7 @@ def draw_pull_request_pill(
             opacity=theme.branch_label_bg_opacity,
         )
     )
-    d.append(
+    target.append(
         draw.Text(
             pr.title,
             theme.branch_label_font_size,

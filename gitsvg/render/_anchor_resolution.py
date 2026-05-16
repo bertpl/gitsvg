@@ -1,4 +1,4 @@
-"""Resolve per-element anchor points for text-bearing render primitives.
+"""Resolve per-element anchor points and rotation wraps for text-bearing primitives.
 
 Each text-bearing primitive (branch-name pill, PR-title pill, commit
 label stack) has an un-rotated bounding box and a world anchor point
@@ -11,25 +11,29 @@ where in the un-rotated bounding box the world anchor point sits:
 - `(0.5, 0.5)` = centre.
 
 Under rotation, the same `(u, v)` is also the rotation pivot — so the
-world point stays pinned regardless of angle. The label-angle work
-that consumes this lives outside v0.1.8; the rotation surface lands
-in a separate step. Today every angle is 0°, so primitives use only
-the placement aspect of `BoxAnchor`.
+world point stays pinned regardless of angle. `rotated_target` is the
+small renderer-side helper that turns a resolved angle plus world
+point into an SVG `<g transform="rotate(...)">` wrap, or a no-op
+pass-through at 0°. The default `BoxAnchor` values are tuned for
+un-rotated text; non-zero angles render mechanically with the anchor
+acting as the pivot, but the angle / anchor pairing only becomes
+visually practical once anchors graduate to user-facing fields.
 
-This module replaces the orientation-conditional anchor logic that
-previously lived inline in each primitive (`_branch_pill.py`,
-`_commit_label.py`): a single point of resolution per element kind,
-so future angle / anchor configurability can plug in without
-re-touching every primitive.
+This module also replaces the orientation-conditional anchor logic
+that previously lived inline in each primitive: a single point of
+resolution per element kind, so future angle / anchor configurability
+can plug in without re-touching every primitive.
 
-Renderer-internal: nothing about `BoxAnchor` surfaces on the `Theme`.
-The shape is deliberately compatible with the user-facing
-`RendererSettings` fields planned for the Theme architecture refactor
-that follows v0.1.8; graduation should be exposing what's already here
-rather than redesigning.
+Renderer-internal: nothing about `BoxAnchor` surfaces on the `Theme`
+yet. The shape is deliberately compatible with user-facing
+`RendererSettings` fields planned for the Theme architecture refactor;
+graduation should be exposing what's already here rather than
+redesigning.
 """
 
 from typing import Literal
+
+import drawsvg as draw
 
 from gitsvg.theme import OrientationLiteral
 
@@ -124,3 +128,45 @@ def resolve_commit_label_anchor(
     if orientation in ("bt", "tb"):
         return (1.0, 0.5) if label_side == "before" else (0.0, 0.5)
     return (0.5, 1.0) if label_side == "before" else (0.5, 0.0)
+
+
+# ==================================================================================================
+#  Rotation wrap
+# ==================================================================================================
+def rotated_target(
+    target: draw.Drawing | draw.Group,
+    angle: float,
+    pivot_x: float,
+    pivot_y: float,
+) -> draw.Drawing | draw.Group:
+    """Return the drawsvg target a primitive should append its elements to.
+
+    At `angle == 0`, returns `target` unchanged so no transform-wrap
+    element is emitted and the resulting SVG stays byte-identical to
+    the un-rotated path. At any non-zero angle, creates a `<g
+    transform="rotate(...)">` group around `(pivot_x, pivot_y)`,
+    appends it to `target`, and returns the group so the caller's
+    primitives end up inside the rotated frame.
+
+    Centralises the rotation pattern shared across the three text-
+    bearing primitives — each wraps its rect + text (or stack of
+    text lines) in the same single-rotate-transform group when its
+    resolved label angle is non-zero.
+
+    Args:
+        target: Parent drawsvg target (a `Drawing` or another `Group`).
+        angle: Resolved rotation angle in degrees. `0` skips the wrap.
+        pivot_x: Pixel x of the rotation pivot — typically the world
+            anchor point, so the resolved `BoxAnchor` stays at that
+            screen position under rotation.
+        pivot_y: Pixel y of the rotation pivot.
+
+    Returns:
+        `target` when `angle == 0`; otherwise a freshly-appended
+        rotated `Group`.
+    """
+    if angle == 0:
+        return target
+    group = draw.Group(transform=f"rotate({angle}, {pivot_x}, {pivot_y})")
+    target.append(group)
+    return group

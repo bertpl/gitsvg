@@ -29,7 +29,7 @@ Layout:
 import drawsvg as draw
 
 from gitsvg.layout import LayoutCommit
-from gitsvg.render._anchor_resolution import resolve_commit_label_anchor
+from gitsvg.render._anchor_resolution import resolve_commit_label_anchor, rotated_target
 from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._geometry import offset_position
 from gitsvg.theme import Theme
@@ -87,8 +87,9 @@ def draw_commit_label(d: draw.Drawing, commit: LayoutCommit, canvas: RenderCanva
     # (associativity-sensitive rewrites would shift results by 1 ULP).
     top_y = cy - box_v * (len(lines) - 1) * line_height + (0.5 - box_v) * max_font_size
 
+    target = rotated_target(d, theme.commit_label_angle, x, cy)
     for index, (text, font_size, color, weight) in enumerate(lines):
-        d.append(
+        target.append(
             draw.Text(
                 text,
                 font_size,

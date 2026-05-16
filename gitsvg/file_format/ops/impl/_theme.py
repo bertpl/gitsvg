@@ -182,6 +182,20 @@ class ThemeOp(OpBase):
         description="PR title-pill offset along the branch axis, expressed as a signed multiple of `branch_spacing`. Positive = toward higher branch-axis index. Default is `0` (pill is centred on the source branch's lane in bottom-to-top orientation).",
     )
 
+    # --- Label angles -----------------------------------
+    branch_label_angle: float | None = Field(
+        default=None,
+        description="Rotation angle (degrees) for the branch-name pill, applied around the pill's world anchor point so the anchor stays pinned regardless of angle. Default is 0° across all orientations; default-current anchor positions are tuned for un-rotated text, so non-zero values render mechanically but visually optimal angle + anchor pairings arrive with named themes in a later version.",
+    )
+    commit_label_angle: float | None = Field(
+        default=None,
+        description="Rotation angle (degrees) for the commit-label stack (governs msg + hash + future tag lines together). Default is 0° across all orientations; see `branch_label_angle` for the visual-practicality caveat.",
+    )
+    pull_request_label_angle: float | None = Field(
+        default=None,
+        description="Rotation angle (degrees) for the pull-request title pill. Default is 0° across all orientations; see `branch_label_angle` for the visual-practicality caveat.",
+    )
+
     # --- Colours ----------------------------------------
     label_color: HexColor | None = Field(
         default=None,

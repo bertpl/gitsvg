@@ -124,6 +124,23 @@ class Theme:
     pull_request_pill_offset_branch_axis_in_lanes: float | None = None  # axis-bound: branch-axis (signed)
 
     # --------------------------------------------------------------------------
+    #  Label angles (degrees; `None` = use the orientation-resolved default)
+    # --------------------------------------------------------------------------
+    # Rotation applied around the world anchor point (= where the
+    # element's resolved `BoxAnchor` lands), so the anchor stays pinned
+    # regardless of angle. `None` means "still default": the resolver in
+    # `gitsvg/theme/_resolve.py` fills the value at end of state stage
+    # per orientation. Defaults are 0° across all orientations today
+    # (labels always horizontally readable). The default-current
+    # `BoxAnchor` values are tuned for un-rotated text; non-zero angles
+    # are mechanically supported but not yet visually practical — that
+    # matures once anchors graduate to user-facing fields and named
+    # themes ship angle / anchor pairings designed together.
+    branch_label_angle: float | None = None  # axis-symmetric (renderer rotation)
+    commit_label_angle: float | None = None  # axis-symmetric (governs msg + hash + future tag)
+    pull_request_label_angle: float | None = None  # axis-symmetric (PR pill)
+
+    # --------------------------------------------------------------------------
     #  Colours
     # --------------------------------------------------------------------------
     colors: dict[str, str] = field(
