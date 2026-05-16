@@ -5,10 +5,12 @@ import drawsvg as draw
 from gitsvg.layout import LayoutBranch
 from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._geometry import branch_line_endpoints
-from gitsvg.theme import Theme
+from gitsvg.render._renderer_settings import RendererSettings
 
 
-def draw_branch_line(d: draw.Drawing, branch: LayoutBranch, color: str, canvas: RenderCanvas, theme: Theme) -> None:
+def draw_branch_line(
+    d: draw.Drawing, branch: LayoutBranch, color: str, canvas: RenderCanvas, theme: RendererSettings
+) -> None:
     """Append a branch line to the drawing.
 
     The line spans from the branch's `start` (oldest end) to its `end`

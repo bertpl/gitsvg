@@ -11,7 +11,7 @@ place of these passes when implemented.
 
 import re
 
-from gitsvg.theme import Theme
+from gitsvg.render._renderer_settings import RendererSettings
 
 # ==================================================================================================
 #  Individual passes
@@ -82,7 +82,7 @@ def drop_empty_defs_and_unused_xlink(svg: str) -> str:
     return svg
 
 
-def trim_font_family_fallback(svg: str, theme: Theme) -> str:
+def trim_font_family_fallback(svg: str, theme: RendererSettings) -> str:
     """Replace the rendered `font-family` chain with the short form.
 
     The rendered output uses `theme.label_font_family` on every text
@@ -159,7 +159,7 @@ def drop_default_attribute_values(svg: str) -> str:
 # ==================================================================================================
 #  Entrypoint
 # ==================================================================================================
-def minify(svg: str, small: bool, theme: Theme) -> str:
+def minify(svg: str, small: bool, theme: RendererSettings) -> str:
     """Apply the round-1 reductions in sequence when `small` is True.
 
     When `small` is False, returns `svg` unchanged. When True, runs

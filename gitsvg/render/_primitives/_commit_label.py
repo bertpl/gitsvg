@@ -33,7 +33,7 @@ from gitsvg.layout import LayoutCommit
 from gitsvg.render._anchor_resolution import resolve_commit_label_anchor, rotated_target
 from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._geometry import offset_position
-from gitsvg.theme import Theme
+from gitsvg.render._renderer_settings import RendererSettings
 
 # Maps the resolved box-anchor `u` (horizontal fraction in the un-rotated
 # bounding box) to the SVG `text-anchor` attribute that aligns each line
@@ -48,7 +48,7 @@ _SVG_TEXT_ANCHOR: dict[float, str] = {
 }
 
 
-def draw_commit_label(d: draw.Drawing, commit: LayoutCommit, canvas: RenderCanvas, theme: Theme) -> None:
+def draw_commit_label(d: draw.Drawing, commit: LayoutCommit, canvas: RenderCanvas, theme: RendererSettings) -> None:
     """Append a commit's label lines to the drawing.
 
     Skipped silently when the commit has neither `msg` nor `hash` to
@@ -105,7 +105,7 @@ def draw_commit_label(d: draw.Drawing, commit: LayoutCommit, canvas: RenderCanva
         )
 
 
-def _build_lines(commit: LayoutCommit, theme: Theme) -> list[tuple[str, int, str, str]]:
+def _build_lines(commit: LayoutCommit, theme: RendererSettings) -> list[tuple[str, int, str, str]]:
     """Return the line stack as `(text, font_size, color, font_weight)` tuples.
 
     Order: each `msg` split on `"\\n"` becomes a primary line; the

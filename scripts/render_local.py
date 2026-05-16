@@ -41,7 +41,8 @@ def render_one(input_path: Path, output_path: Path) -> ValidationReport:
     if not report.is_clean():
         return report
     layout = compute_layout(state)
-    drawing = render(layout, theme)
+    _, renderer_settings = theme.split()
+    drawing = render(layout, renderer_settings)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     drawing.save_svg(str(output_path))
     return report

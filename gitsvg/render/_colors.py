@@ -7,10 +7,10 @@ subsequent branches cycle through `default_branch_color_cycle`. Primitives
 call this as they emit each branch / commit / arc / PR.
 """
 
-from gitsvg.theme import Theme
+from gitsvg.render._renderer_settings import RendererSettings
 
 
-def resolve_branch_color(branch_id: str, declaration_index: int, theme: Theme) -> str:
+def resolve_branch_color(branch_id: str, declaration_index: int, theme: RendererSettings) -> str:
     """Return the hex colour for a branch.
 
     Args:

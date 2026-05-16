@@ -28,11 +28,11 @@ from gitsvg.render._anchor_resolution import resolve_pr_pill_anchor, rotated_tar
 from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._geometry import offset_position
 from gitsvg.render._label_widths import pill_width
-from gitsvg.theme import Theme
+from gitsvg.render._renderer_settings import RendererSettings
 
 
 def draw_pull_request_pill(
-    d: draw.Drawing, pr: LayoutPullRequest, color: str, canvas: RenderCanvas, theme: Theme
+    d: draw.Drawing, pr: LayoutPullRequest, color: str, canvas: RenderCanvas, theme: RendererSettings
 ) -> None:
     """Append a PR-title pill (background rectangle + text) to the drawing.
 

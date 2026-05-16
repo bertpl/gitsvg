@@ -25,10 +25,12 @@ from gitsvg.render._anchor_resolution import resolve_branch_pill_anchor, rotated
 from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._geometry import offset_position
 from gitsvg.render._label_widths import pill_width
-from gitsvg.theme import Theme
+from gitsvg.render._renderer_settings import RendererSettings
 
 
-def draw_branch_pill(d: draw.Drawing, branch: LayoutBranch, color: str, canvas: RenderCanvas, theme: Theme) -> None:
+def draw_branch_pill(
+    d: draw.Drawing, branch: LayoutBranch, color: str, canvas: RenderCanvas, theme: RendererSettings
+) -> None:
     """Append a branch-name pill (background rectangle + text) to the drawing."""
     x, y = offset_position(
         anchor_branch_pos=branch.branch_pos,

@@ -39,26 +39,29 @@ from gitsvg.render._primitives._branch_pill import draw_branch_pill
 from gitsvg.render._primitives._commit_dot import draw_commit_dot
 from gitsvg.render._primitives._commit_label import draw_commit_label
 from gitsvg.render._primitives._pull_request_pill import draw_pull_request_pill
-from gitsvg.theme import DEFAULT_THEME, Theme
+from gitsvg.render._renderer_settings import RendererSettings
+from gitsvg.theme import DEFAULT_THEME
 
 
-def render(layout: Layout, theme: Theme | None = None) -> draw.Drawing:
+def render(layout: Layout, theme: RendererSettings | None = None) -> draw.Drawing:
     """Render a `Layout` to an SVG drawing.
 
     Args:
         layout: A complete render-ready intermediate representation —
             produced by `gitsvg.layout.compute_layout(state)`.
-        theme: The fully-resolved theme that drives every
-            pixel/colour/font decision. Defaults to `DEFAULT_THEME`
-            when omitted (useful for tests). Production callers pass
-            the theme produced by `apply_ops`, which is already
-            resolved via `ThemeBuilder.build()`.
+        theme: The renderer's slice of the resolved theme. Production
+            callers split the apply pass's `Theme` output via
+            `theme.split()` and pass the second element. Defaults to
+            the renderer slice of `DEFAULT_THEME` when omitted (useful
+            for tests).
 
     Returns:
         A `drawsvg.Drawing`. Callers persist with `.save_svg(path)` or
         convert with `.as_svg()`.
     """
-    theme = copy.deepcopy(theme if theme is not None else DEFAULT_THEME)
+    if theme is None:
+        _, theme = DEFAULT_THEME.split()
+    theme = copy.deepcopy(theme)
     canvas = compute_canvas(layout, theme)
     d = draw.Drawing(canvas.width, canvas.height)
 
