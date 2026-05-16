@@ -5,22 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## 0.1.8 (2026-05-16)
 
 ### Added
 
 - New `theme.branch_label_angle` / `commit_label_angle` / `pull_request_label_angle` fields rotate the corresponding labels around their world anchor point (signed degrees, default `0°`); current anchor positions are tuned for un-rotated text, so visually-tuned angle/anchor pairings arrive with later named themes.
-
-### Changed
-
-### Deprecated
-
-### Removed
-
-### Fixed
-
-### Security
-
 ## 0.1.7 (2026-05-16)
 
 ### Changed
