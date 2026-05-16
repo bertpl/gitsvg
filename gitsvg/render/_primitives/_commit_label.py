@@ -2,17 +2,26 @@
 
 Layout:
 
-- Anchored `theme.label_offset` pixels to the side of the commit dot,
-  per the commit's `label_side` (`"before"` or `"after"` — the
-  branch-axis-index side; the renderer maps to a pixel side per
-  orientation, currently bottom-to-top only).
+- Anchored `theme.label_offset_branch_axis_in_lanes` × lane width to
+  the branch-axis side of the commit dot indicated by
+  `commit.label_side` (`"before"` = lower-index side, `"after"` =
+  higher-index side). The renderer maps that axis-relative side to a
+  pixel direction per orientation via the geometry module.
+- Where the multi-line stack sits relative to that world point comes
+  from the box anchor resolved by
+  `gitsvg/render/_anchor_resolution.py`. Vertical orientations place
+  the stack to the side of the dot horizontally
+  (`(1.0, 0.5)` / `(0.0, 0.5)`); horizontal orientations place it
+  above or below the dot vertically (`(0.5, 1.0)` / `(0.5, 0.0)`).
+- Per-line SVG `text-anchor` is derived from the box anchor's `u`
+  (`start` if 0.0, `middle` if 0.5, `end` if 1.0); each line keeps
+  `dominant_baseline="middle"`.
 - Multi-line `msg` is `split("\\n")` — each line drawn with
   `theme.label_font_size` text in `theme.label_color`.
 - When `hash` is set, a smaller secondary line follows in
   `theme.hash_font_size` / `theme.hash_color`.
 - All lines stack vertically with one consistent line height
-  (`theme.label_font_size + theme.label_line_padding`), centred on
-  the dot's y.
+  (`theme.label_font_size + theme.label_line_padding`).
 - Highlighted commits get bold weight (700) on the `msg` lines; the
   hash line stays at regular weight regardless.
 """
@@ -20,9 +29,22 @@ Layout:
 import drawsvg as draw
 
 from gitsvg.layout import LayoutCommit
+from gitsvg.render._anchor_resolution import resolve_commit_label_anchor
 from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._geometry import offset_position
 from gitsvg.theme import Theme
+
+# Maps the resolved box-anchor `u` (horizontal fraction in the un-rotated
+# bounding box) to the SVG `text-anchor` attribute that aligns each line
+# accordingly when drawn at the anchor x. The three canonical values
+# (`0.0`, `0.5`, `1.0`) cover every position the commit-label resolver
+# returns today; non-canonical `u` would need explicit pixel-x maths
+# instead of the discrete SVG attribute and is out of scope for v0.1.8.
+_SVG_TEXT_ANCHOR: dict[float, str] = {
+    0.0: "start",
+    0.5: "middle",
+    1.0: "end",
+}
 
 
 def draw_commit_label(d: draw.Drawing, commit: LayoutCommit, canvas: RenderCanvas, theme: Theme) -> None:
@@ -43,22 +65,8 @@ def draw_commit_label(d: draw.Drawing, commit: LayoutCommit, canvas: RenderCanva
     else:
         branch_axis_offset_in_lanes = theme.label_offset_branch_axis_in_lanes
 
-    # Text-anchor depends on orientation. In vertical orientations
-    # (`bt`, `tb`) the branch axis is screen-x, so the anchor sits left or
-    # right of the dot and the text flows outward horizontally — `text-
-    # anchor="end"` aligns the text's right edge to a `before`-side
-    # anchor (text extends leftward), `start` aligns the left edge to an
-    # `after`-side anchor (text extends rightward). In horizontal
-    # orientations (`lr`, `rl`) the branch axis is screen-y, so the
-    # anchor sits above or below the dot and the text should be centred
-    # horizontally on the dot's x — `text-anchor="middle"` is the right
-    # choice. (`text_anchor` is always horizontal alignment in SVG; it
-    # doesn't rotate with our notion of branch axis.)
-    is_vertical = canvas.orientation in ("bt", "tb")
-    if is_vertical:
-        anchor = "end" if commit.label_side == "before" else "start"
-    else:
-        anchor = "middle"
+    box_u, box_v = resolve_commit_label_anchor(canvas.orientation, commit.label_side)
+    text_anchor = _SVG_TEXT_ANCHOR[box_u]
 
     x, cy = offset_position(
         anchor_branch_pos=commit.branch_pos,
@@ -69,35 +77,15 @@ def draw_commit_label(d: draw.Drawing, commit: LayoutCommit, canvas: RenderCanva
     )
 
     line_height = theme.label_font_size + theme.label_line_padding
+    max_font_size = max(font_size for _, font_size, _, _ in lines)
 
-    # Stack-vertical anchor:
-    #
-    # - **Vertical orientations** (`bt`, `tb`): the branch line is also
-    #   vertical and the stack extends horizontally outward (left/right
-    #   of the dot via `text_anchor=end/start`), so the stack's vertical
-    #   extent never crosses the line. Centre the stack on the dot's y
-    #   — `top_y = cy - (N-1) * line_height / 2`. (Lines use
-    #   `dominant_baseline="middle"`, so each line's y is its vertical
-    #   centre; a stack of N lines spans `(N-1) * line_height` between
-    #   the outermost line centres.)
-    #
-    # - **Horizontal orientations** (`lr`, `rl`): the branch line is
-    #   horizontal and the stack also extends vertically — centring the
-    #   stack on `cy` would push half the lines across the branch line.
-    #   Anchor the stack edge nearest the line at `cy` instead, so
-    #   `theme.label_offset_branch_axis_in_lanes` becomes the minimum
-    #   gap between the line and the nearest text edge regardless of
-    #   line count. `before` → stack extends *upward* from `cy` (bottom-
-    #   line bottom edge sits at `cy`); `after` → stack extends
-    #   *downward* (top-line top edge sits at `cy`).
-    if is_vertical:
-        top_y = cy - (len(lines) - 1) * line_height / 2
-    else:
-        max_font_size = max(font_size for _, font_size, _, _ in lines)
-        if commit.label_side == "before":
-            top_y = cy - max_font_size / 2 - (len(lines) - 1) * line_height
-        else:
-            top_y = cy + max_font_size / 2
+    # Stack-vertical anchor derived from the resolved `v`: 0 → stack
+    # top edge at `cy`, 1 → bottom edge at `cy`, 0.5 → centred. The
+    # two-term form keeps the line-span offset and the visible-edge
+    # adjustment separate, so for v ∈ {0, 0.5, 1} the resulting float
+    # arithmetic matches the legacy three-branch formula bit-for-bit
+    # (associativity-sensitive rewrites would shift results by 1 ULP).
+    top_y = cy - box_v * (len(lines) - 1) * line_height + (0.5 - box_v) * max_font_size
 
     for index, (text, font_size, color, weight) in enumerate(lines):
         d.append(
@@ -106,7 +94,7 @@ def draw_commit_label(d: draw.Drawing, commit: LayoutCommit, canvas: RenderCanva
                 font_size,
                 x,
                 top_y + index * line_height,
-                text_anchor=anchor,
+                text_anchor=text_anchor,
                 dominant_baseline="middle",
                 fill=color,
                 font_family=theme.label_font_family,

@@ -1,28 +1,27 @@
 """Draw a branch-name pill at the branch's start point.
 
 The pill is a filled rounded rectangle in the branch's colour with the
-branch name in white text, positioned at the signed two-axis offset
-declared on the theme — `branch_name_pill_offset_commit_axis_in_rows`
-and `branch_name_pill_offset_branch_axis_in_lanes`. The resolver in
-`gitsvg/theme/_resolve.py` picks per-orientation defaults: vertical
-orientations route the offset along the commit axis (pill below the
-start in BT, above in TB); horizontal orientations route it along the
-commit axis with `-0.75 × commit_spacing` (pill alongside the branch
-line, before the start commit in `lr` / after in `rl`).
+branch name in white text. Its world anchor point comes from the
+signed two-axis offset declared on the theme
+(`branch_name_pill_offset_commit_axis_in_rows` and
+`branch_name_pill_offset_branch_axis_in_lanes`); the per-orientation
+defaults live in `gitsvg/theme/_resolve.py`.
 
-In horizontal orientations the pill rect is anchored on the **edge
-nearest the start commit** instead of being centred on the offset
-point — so the offset becomes a minimum gap between the start commit
-and the pill, regardless of pill width. Long branch names extend
-further into the margin without ever overlapping the start commit
-dot. The text itself is always centred inside the pill rect (via
-``text_anchor="middle"`` at the rect's centre), independent of the
-rect's anchoring strategy.
+Where the pill rect sits relative to that world point — centred,
+right-edge anchored, left-edge anchored — comes from the box anchor
+resolved by `gitsvg/render/_anchor_resolution.py`. Vertical
+orientations (`bt`, `tb`) centre the pill (`(0.5, 0.5)`); horizontal
+orientations anchor the pill's edge nearest the start commit so the
+theme offset becomes a minimum gap and a long branch name extends
+further into the start-side margin without crowding the dot. The text
+itself is always centred inside the pill rect — pill-internal text
+placement is invariant.
 """
 
 import drawsvg as draw
 
 from gitsvg.layout import LayoutBranch
+from gitsvg.render._anchor_resolution import resolve_branch_pill_anchor
 from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._geometry import offset_position
 from gitsvg.render._label_widths import pill_width
@@ -43,28 +42,16 @@ def draw_branch_pill(d: draw.Drawing, branch: LayoutBranch, color: str, canvas: 
     height = theme.branch_label_font_size + theme.pill_padding_y
     corner = theme.pill_corner_radius
 
-    # Rect anchoring (orientation-dependent) and text positioning
-    # (always centred in the rect) are decoupled:
-    # - BT/TB: rect centred on (x, y).
-    # - LR: rect's right edge at (x, y); rect extends leftward so a
-    #   long pill never overlaps the start commit to the right.
-    # - RL: mirror of LR — left edge at (x, y); extends rightward.
-    # In every orientation the text sits at the rect's centre via
-    # `text_anchor="middle"`, so the visible text stays centred inside
-    # the pill regardless of any drift between predicted and actual
-    # rendered text width.
-    if canvas.orientation == "lr":
-        rect_left = x - width
-    elif canvas.orientation == "rl":
-        rect_left = x
-    else:
-        rect_left = x - width / 2
+    box_u, box_v = resolve_branch_pill_anchor(canvas.orientation)
+    rect_left = x - box_u * width
+    rect_top = y - box_v * height
     text_x = rect_left + width / 2
+    text_y = rect_top + height / 2
 
     d.append(
         draw.Rectangle(
             rect_left,
-            y - height / 2,
+            rect_top,
             width,
             height,
             rx=corner,
@@ -78,7 +65,7 @@ def draw_branch_pill(d: draw.Drawing, branch: LayoutBranch, color: str, canvas: 
             branch.name,
             theme.branch_label_font_size,
             text_x,
-            y,
+            text_y,
             text_anchor="middle",
             dominant_baseline="middle",
             fill="white",
