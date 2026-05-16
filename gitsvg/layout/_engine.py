@@ -49,6 +49,7 @@ Heuristic notes:
   (including any open pull-request's projected merge row).
 """
 
+from gitsvg.file_format import LabelSide
 from gitsvg.layout._layout import (
     Layout,
     LayoutArc,
@@ -62,7 +63,7 @@ from gitsvg.layout._occupancy import Occupancy
 from gitsvg.state import State
 
 _DEFAULT_LABEL_SIDE = (
-    "after"  # fallback when a `branch` op omits `label_side`; commits inherit their branch's resolved side
+    LabelSide.AFTER  # fallback when a `branch` op omits `label_side`; commits inherit their branch's resolved side
 )
 
 
@@ -98,7 +99,9 @@ def compute_layout(state: State) -> Layout:
     branch_pos_by_name: dict[str, int] = _assign_branch_lanes(state, commit_pos_by_id, branch_starts, occupancy)
 
     # --- Resolve per-branch view fields ---------
-    branch_label_side_by_name: dict[str, str] = {name: _resolve_label_side(state, name) for name in state.branch_order}
+    branch_label_side_by_name: dict[str, LabelSide] = {
+        name: _resolve_label_side(state, name) for name in state.branch_order
+    }
 
     # --- Phase 3: build layout dataclasses ------
     commit_layouts: dict[str, LayoutCommit] = {
@@ -391,7 +394,7 @@ def _pick_free_lane(
 # ==================================================================================================
 #  Helpers — per-branch view fields
 # ==================================================================================================
-def _resolve_label_side(state: State, branch_name: str) -> str:
+def _resolve_label_side(state: State, branch_name: str) -> LabelSide:
     """Pick the label side for a branch — explicit override else the default."""
     branch = state.branches[branch_name]
     return branch.label_side or _DEFAULT_LABEL_SIDE

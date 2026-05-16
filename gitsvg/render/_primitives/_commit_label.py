@@ -28,6 +28,7 @@ Layout:
 
 import drawsvg as draw
 
+from gitsvg.file_format import LabelSide
 from gitsvg.layout import LayoutCommit
 from gitsvg.render._anchor_resolution import resolve_commit_label_anchor, rotated_target
 from gitsvg.render._canvas import RenderCanvas
@@ -60,7 +61,7 @@ def draw_commit_label(d: draw.Drawing, commit: LayoutCommit, canvas: RenderCanva
     # Branch-axis offset: signed along the branch axis. Positive = toward
     # higher branch-axis index ("after" side); negative = toward lower
     # ("before" side).
-    if commit.label_side == "before":
+    if commit.label_side == LabelSide.BEFORE:
         branch_axis_offset_in_lanes = -theme.label_offset_branch_axis_in_lanes
     else:
         branch_axis_offset_in_lanes = theme.label_offset_branch_axis_in_lanes

@@ -1,6 +1,6 @@
-"""Orientation literals + the input-alias normalisation table.
+"""Orientation enum + the input-alias normalisation table.
 
-Defines the canonical four-valued orientation `Literal` type used by
+Defines the canonical four-valued `Orientation` `StrEnum` used by
 `Theme.orientation`, and the alias-normalisation function used by the
 `theme:` op's `orientation` field to accept a generous set of input
 forms (case-insensitive short codes including Mermaid's `TD` and CSS
@@ -8,39 +8,52 @@ forms (case-insensitive short codes including Mermaid's `TD` and CSS
 `top_down` / `bottom_up`).
 """
 
-from typing import Literal
+from enum import StrEnum
 
-OrientationLiteral = Literal["bt", "tb", "lr", "rl"]
-"""The canonical four-valued orientation type used internally."""
+
+class Orientation(StrEnum):
+    """Canonical four-valued diagram orientation.
+
+    Members carry the canonical short-code string values (`"bt"`,
+    `"tb"`, `"lr"`, `"rl"`) so the enum interoperates transparently
+    with code that still compares against raw strings and with
+    Pydantic / JSON serialisation (which reads off the string value).
+    """
+
+    BT = "bt"
+    TB = "tb"
+    LR = "lr"
+    RL = "rl"
+
 
 # Two-step normalisation: input is first lowercased and `-` replaced by
 # `_`, then looked up in this table. Every accepted alias (Mermaid `TD`,
 # CSS `ltr` / `rtl`, the four explicit `<dir>_to_<dir>` long forms, and
 # the two vernacular `top_down` / `bottom_up`) maps to its canonical
-# short code; canonical codes also map to themselves so a single lookup
-# covers every accepted input. CamelCase (`bottomToTop`), space-
-# separated (`"bottom to top"`), and malformed-with-extra-underscores
-# (`bo_ttom_t_o_top`) are deliberately rejected — strict table lookup
-# is what enforces this.
-_ALIAS_TABLE: dict[str, OrientationLiteral] = {
-    "bt": "bt",
-    "tb": "tb",
-    "lr": "lr",
-    "rl": "rl",
-    "td": "tb",
-    "ltr": "lr",
-    "rtl": "rl",
-    "bottom_to_top": "bt",
-    "top_to_bottom": "tb",
-    "left_to_right": "lr",
-    "right_to_left": "rl",
-    "bottom_up": "bt",
-    "top_down": "tb",
+# `Orientation` member; canonical codes also map to themselves so a
+# single lookup covers every accepted input. CamelCase (`bottomToTop`),
+# space-separated (`"bottom to top"`), and malformed-with-extra-under-
+# scores (`bo_ttom_t_o_top`) are deliberately rejected — strict table
+# lookup is what enforces this.
+_ALIAS_TABLE: dict[str, Orientation] = {
+    "bt": Orientation.BT,
+    "tb": Orientation.TB,
+    "lr": Orientation.LR,
+    "rl": Orientation.RL,
+    "td": Orientation.TB,
+    "ltr": Orientation.LR,
+    "rtl": Orientation.RL,
+    "bottom_to_top": Orientation.BT,
+    "top_to_bottom": Orientation.TB,
+    "left_to_right": Orientation.LR,
+    "right_to_left": Orientation.RL,
+    "bottom_up": Orientation.BT,
+    "top_down": Orientation.TB,
 }
 
 
 def normalize_orientation(value: object) -> object:
-    """Normalise an input orientation string to its canonical short code.
+    """Normalise an input orientation string to its canonical `Orientation` member.
 
     Two-step normalisation:
 
@@ -48,17 +61,15 @@ def normalize_orientation(value: object) -> object:
     2. Exact lookup in the alias table; raises if not found.
 
     Non-string inputs pass through unchanged (Pydantic raises later
-    when the value doesn't match the declared `OrientationLiteral`
-    type).
+    when the value doesn't match the declared `Orientation` type).
 
     Args:
         value: User-supplied orientation. Strings get normalised;
             anything else passes through.
 
     Returns:
-        The canonical short code (`"bt"`, `"tb"`, `"lr"`, or `"rl"`)
-        when the input is a known string; the original value
-        otherwise.
+        The canonical `Orientation` member when the input is a known
+        string; the original value otherwise.
 
     Raises:
         ValueError: When a string input does not normalise to any

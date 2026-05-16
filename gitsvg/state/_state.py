@@ -11,6 +11,8 @@ downstream layers (layout, rendering) are consumers.
 
 from dataclasses import dataclass, field
 
+from gitsvg.file_format import LabelSide
+
 
 @dataclass(slots=True)
 class GridState:
@@ -58,7 +60,7 @@ class BranchState:
 
     id: str
     name: str
-    label_side: str | None = None
+    label_side: LabelSide | None = None
     branch_pos: int | None = None
     from_branch: str | None = None
     from_commit: str | None = None

@@ -25,7 +25,7 @@ resolutions:
 resolver reads it directly and never overwrites it.
 """
 
-from gitsvg.theme._orientation import OrientationLiteral
+from gitsvg.theme._orientation import Orientation
 from gitsvg.theme._theme import Theme, _resolve_int_or_float
 
 
@@ -84,7 +84,7 @@ def _resolve_pill_offsets(theme: Theme) -> None:
     pending a separate decision on whether to mirror the branch
     pill's treatment.
     """
-    is_vertical = theme.orientation in ("bt", "tb")
+    is_vertical = theme.orientation in (Orientation.BT, Orientation.TB)
     branch_pill_commit_default = -0.5 if is_vertical else -0.25
     branch_pill_branch_default = 0.0 if is_vertical else 0.0
     # PR pill anchor is the phantom point at (source-branch lane,
@@ -118,7 +118,7 @@ def _resolve_guide_overshoot(theme: Theme) -> None:
     the pill visually disconnected from the guide line.
     """
     if theme.guide_overshoot_in_rows is None:
-        if theme.orientation in ("bt", "tb"):
+        if theme.orientation in (Orientation.BT, Orientation.TB):
             theme.guide_overshoot_in_rows = 0.25
         else:
             theme.guide_overshoot_in_rows = 0.5
@@ -134,7 +134,7 @@ def _resolve_label_offset(theme: Theme) -> None:
     `branch_spacing=50` in horizontal orientations).
     """
     if theme.label_offset_branch_axis_in_lanes is None:
-        if theme.orientation in ("bt", "tb"):
+        if theme.orientation in (Orientation.BT, Orientation.TB):
             theme.label_offset_branch_axis_in_lanes = 0.12
         else:
             theme.label_offset_branch_axis_in_lanes = 0.24
@@ -173,7 +173,7 @@ def _resolve_margins(theme: Theme) -> None:
     `_resolve_int_or_float` keeps whole-number results as `int` so SVG
     attribute formatting matches the byte-identical baseline.
     """
-    if theme.orientation in ("bt", "tb"):
+    if theme.orientation in (Orientation.BT, Orientation.TB):
         horizontal_default = _resolve_int_or_float(1.0 * theme.branch_spacing)
         vertical_default = _resolve_int_or_float(0.5 * theme.commit_spacing)
         margin_left_default = horizontal_default
@@ -187,7 +187,7 @@ def _resolve_margins(theme: Theme) -> None:
         margin_bottom_default = _resolve_int_or_float(1.0 * theme.branch_spacing)
         start_side = _resolve_int_or_float(1.5 * theme.commit_spacing)
         end_side = _resolve_int_or_float(1.0 * theme.commit_spacing)
-        if theme.orientation == "lr":
+        if theme.orientation == Orientation.LR:
             # Timeline starts on the left in LR.
             margin_left_default = start_side
             margin_right_default = end_side
@@ -209,7 +209,7 @@ def _resolve_margins(theme: Theme) -> None:
 # ==================================================================================================
 #  Helpers
 # ==================================================================================================
-def _spacing_defaults(orientation: OrientationLiteral) -> tuple[int, int]:
+def _spacing_defaults(orientation: Orientation) -> tuple[int, int]:
     """Return `(branch_spacing_default, commit_spacing_default)` for the given orientation.
 
     Vertical orientations get `(100, 50)` — branches stack horizontally,
@@ -218,6 +218,6 @@ def _spacing_defaults(orientation: OrientationLiteral) -> tuple[int, int]:
     branch line and need both vertical room between branches and
     horizontal room between commits in comparable amounts.
     """
-    if orientation in ("bt", "tb"):
+    if orientation in (Orientation.BT, Orientation.TB):
         return 100, 50
     return 75, 75

@@ -3,6 +3,7 @@
 import pytest
 from pydantic import ValidationError
 
+from gitsvg.file_format import LabelSide
 from gitsvg.file_format.ops import (
     OP_ADAPTER,
     OP_BY_NAME,
@@ -93,7 +94,7 @@ def test_branch_with_from_branch_and_visual_overrides() -> None:
     # --- assert -----------------------
     assert op.from_branch == "main"
     assert op.color == "#7b8fb2"
-    assert op.label_side == "before"
+    assert op.label_side == LabelSide.BEFORE
 
 
 def test_branch_label_side_rejects_unknown_value() -> None:

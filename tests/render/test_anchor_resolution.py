@@ -11,12 +11,14 @@ side opposite their extension direction.
 import drawsvg as draw
 import pytest
 
+from gitsvg.file_format import LabelSide
 from gitsvg.render._anchor_resolution import (
     resolve_branch_pill_anchor,
     resolve_commit_label_anchor,
     resolve_pr_pill_anchor,
     rotated_target,
 )
+from gitsvg.theme import Orientation
 
 
 # ==================================================================================================
@@ -25,15 +27,15 @@ from gitsvg.render._anchor_resolution import (
 @pytest.mark.parametrize(
     ("orientation", "expected"),
     [
-        ("bt", (0.5, 0.5)),
-        ("tb", (0.5, 0.5)),
-        ("lr", (1.0, 0.5)),
-        ("rl", (0.0, 0.5)),
+        (Orientation.BT, (0.5, 0.5)),
+        (Orientation.TB, (0.5, 0.5)),
+        (Orientation.LR, (1.0, 0.5)),
+        (Orientation.RL, (0.0, 0.5)),
     ],
 )
-def test_resolve_branch_pill_anchor(orientation: str, expected: tuple[float, float]) -> None:
+def test_resolve_branch_pill_anchor(orientation: Orientation, expected: tuple[float, float]) -> None:
     # --- arrange / act ----------------
-    result = resolve_branch_pill_anchor(orientation)  # type: ignore[arg-type]
+    result = resolve_branch_pill_anchor(orientation)
 
     # --- assert -----------------------
     assert result == expected
@@ -42,10 +44,10 @@ def test_resolve_branch_pill_anchor(orientation: str, expected: tuple[float, flo
 # ==================================================================================================
 #  PR pill
 # ==================================================================================================
-@pytest.mark.parametrize("orientation", ["bt", "tb", "lr", "rl"])
-def test_resolve_pr_pill_anchor_always_centred(orientation: str) -> None:
+@pytest.mark.parametrize("orientation", [Orientation.BT, Orientation.TB, Orientation.LR, Orientation.RL])
+def test_resolve_pr_pill_anchor_always_centred(orientation: Orientation) -> None:
     # --- arrange / act ----------------
-    result = resolve_pr_pill_anchor(orientation)  # type: ignore[arg-type]
+    result = resolve_pr_pill_anchor(orientation)
 
     # --- assert -----------------------
     assert result == (0.5, 0.5)
@@ -59,21 +61,23 @@ def test_resolve_pr_pill_anchor_always_centred(orientation: str) -> None:
     [
         # Vertical orientations: stack extends left/right of the dot,
         # vertically centred — u flips with label_side, v stays 0.5.
-        ("bt", "before", (1.0, 0.5)),
-        ("bt", "after", (0.0, 0.5)),
-        ("tb", "before", (1.0, 0.5)),
-        ("tb", "after", (0.0, 0.5)),
+        (Orientation.BT, LabelSide.BEFORE, (1.0, 0.5)),
+        (Orientation.BT, LabelSide.AFTER, (0.0, 0.5)),
+        (Orientation.TB, LabelSide.BEFORE, (1.0, 0.5)),
+        (Orientation.TB, LabelSide.AFTER, (0.0, 0.5)),
         # Horizontal orientations: stack extends above/below the dot,
         # horizontally centred — v flips with label_side, u stays 0.5.
-        ("lr", "before", (0.5, 1.0)),
-        ("lr", "after", (0.5, 0.0)),
-        ("rl", "before", (0.5, 1.0)),
-        ("rl", "after", (0.5, 0.0)),
+        (Orientation.LR, LabelSide.BEFORE, (0.5, 1.0)),
+        (Orientation.LR, LabelSide.AFTER, (0.5, 0.0)),
+        (Orientation.RL, LabelSide.BEFORE, (0.5, 1.0)),
+        (Orientation.RL, LabelSide.AFTER, (0.5, 0.0)),
     ],
 )
-def test_resolve_commit_label_anchor(orientation: str, label_side: str, expected: tuple[float, float]) -> None:
+def test_resolve_commit_label_anchor(
+    orientation: Orientation, label_side: LabelSide, expected: tuple[float, float]
+) -> None:
     # --- arrange / act ----------------
-    result = resolve_commit_label_anchor(orientation, label_side)  # type: ignore[arg-type]
+    result = resolve_commit_label_anchor(orientation, label_side)
 
     # --- assert -----------------------
     assert result == expected

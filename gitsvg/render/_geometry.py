@@ -24,7 +24,7 @@ primitives.
 """
 
 from gitsvg.render._canvas import RenderCanvas
-from gitsvg.theme import Theme, _resolve_int_or_float
+from gitsvg.theme import Orientation, Theme, _resolve_int_or_float
 
 
 def grid_to_pixel(branch_pos: int, commit_pos: int, canvas: RenderCanvas) -> tuple[float, float]:
@@ -52,13 +52,13 @@ def grid_to_pixel(branch_pos: int, commit_pos: int, canvas: RenderCanvas) -> tup
     Returns:
         The `(x, y)` pixel coordinates.
     """
-    if canvas.orientation == "bt":
+    if canvas.orientation == Orientation.BT:
         x = canvas.margin_left + branch_pos * canvas.branch_spacing
         y = canvas.margin_top + (canvas.n_commits - 1 - commit_pos) * canvas.commit_spacing
-    elif canvas.orientation == "tb":
+    elif canvas.orientation == Orientation.TB:
         x = canvas.margin_left + branch_pos * canvas.branch_spacing
         y = canvas.margin_top + commit_pos * canvas.commit_spacing
-    elif canvas.orientation == "lr":
+    elif canvas.orientation == Orientation.LR:
         x = canvas.margin_left + commit_pos * canvas.commit_spacing
         y = canvas.margin_top + branch_pos * canvas.branch_spacing
     else:  # rl
@@ -160,7 +160,7 @@ def branch_guide_endpoints(
         guide line.
     """
     overshoot = theme.guide_overshoot
-    if canvas.orientation in ("bt", "tb"):
+    if canvas.orientation in (Orientation.BT, Orientation.TB):
         x = grid_to_pixel(branch_pos, 0, canvas)[0]
         y_top = canvas.margin_top - overshoot
         y_bottom = canvas.height - canvas.margin_bottom + overshoot
@@ -180,7 +180,7 @@ def _apply_pixel_offset(
     y: float,
     branch_axis_offset_px: float,
     commit_axis_offset_px: float,
-    orientation: str,
+    orientation: Orientation,
 ) -> tuple[float, float]:
     """Add signed grid-axis offsets (in pixels) to an anchor position.
 
@@ -202,11 +202,11 @@ def _apply_pixel_offset(
     Returns:
         The offset `(x, y)` position.
     """
-    if orientation == "bt":
+    if orientation == Orientation.BT:
         return (x + branch_axis_offset_px, y - commit_axis_offset_px)
-    if orientation == "tb":
+    if orientation == Orientation.TB:
         return (x + branch_axis_offset_px, y + commit_axis_offset_px)
-    if orientation == "lr":
+    if orientation == Orientation.LR:
         return (x + commit_axis_offset_px, y + branch_axis_offset_px)
     # rl
     return (x - commit_axis_offset_px, y + branch_axis_offset_px)

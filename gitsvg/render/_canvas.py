@@ -17,9 +17,10 @@ layout engine never reads it.
 from dataclasses import dataclass
 from typing import Literal
 
+from gitsvg.file_format import LabelSide
 from gitsvg.layout import Layout
 from gitsvg.render._label_widths import commit_label_width, pill_width
-from gitsvg.theme import OrientationLiteral, Theme
+from gitsvg.theme import Orientation, Theme
 
 # Auto-fit safety margin between content (pill / outward label) and the canvas
 # edge — keeps the rendered geometry from butting right up against the SVG
@@ -35,11 +36,11 @@ _AxisEdge = Literal["lower", "upper"]
 # to. Mirrors the `label_side` axis-index → pixel-side mapping pattern
 # from invariant #7 (`docs/architecture.md`): axis-relative reasoning
 # everywhere; orientation enters once at the boundary.
-_AXIS_TO_VISUAL: dict[OrientationLiteral, dict[str, str]] = {
-    "bt": {"branch_lower": "left", "branch_upper": "right", "commit_lower": "bottom", "commit_upper": "top"},
-    "tb": {"branch_lower": "left", "branch_upper": "right", "commit_lower": "top", "commit_upper": "bottom"},
-    "lr": {"branch_lower": "top", "branch_upper": "bottom", "commit_lower": "left", "commit_upper": "right"},
-    "rl": {"branch_lower": "top", "branch_upper": "bottom", "commit_lower": "right", "commit_upper": "left"},
+_AXIS_TO_VISUAL: dict[Orientation, dict[str, str]] = {
+    Orientation.BT: {"branch_lower": "left", "branch_upper": "right", "commit_lower": "bottom", "commit_upper": "top"},
+    Orientation.TB: {"branch_lower": "left", "branch_upper": "right", "commit_lower": "top", "commit_upper": "bottom"},
+    Orientation.LR: {"branch_lower": "top", "branch_upper": "bottom", "commit_lower": "left", "commit_upper": "right"},
+    Orientation.RL: {"branch_lower": "top", "branch_upper": "bottom", "commit_lower": "right", "commit_upper": "left"},
 }
 
 
@@ -82,7 +83,7 @@ class RenderCanvas:
     margin_right: float  # axis-symmetric (visual-side, px)
     margin_bottom: float  # axis-symmetric (visual-side, px)
     margin_top: float  # axis-symmetric (visual-side, px)
-    orientation: OrientationLiteral  # axis-symmetric (selector)
+    orientation: Orientation  # axis-symmetric (selector)
 
 
 def compute_canvas(layout: Layout, theme: Theme) -> RenderCanvas:
@@ -135,7 +136,7 @@ def compute_canvas(layout: Layout, theme: Theme) -> RenderCanvas:
     for axis_edge, visual_side in _AXIS_TO_VISUAL[orientation].items():
         margins[visual_side] = max(margins[visual_side], axis_needs[axis_edge])
 
-    is_vertical = orientation in ("bt", "tb")
+    is_vertical = orientation in (Orientation.BT, Orientation.TB)
     if is_vertical:
         width = margins["left"] + (n_branches - 1) * branch_spacing + margins["right"]
         height = margins["top"] + (n_commits - 1) * commit_spacing + margins["bottom"]
@@ -192,9 +193,9 @@ def _auto_fit_branch_axis_edge(layout: Layout, theme: Theme, *, edge: _AxisEdge)
     commit_layouts = layout.commits
     max_branch_pos = max((b.branch_pos for b in branches), default=0)
     target_lane = 0 if edge == "lower" else max_branch_pos
-    matching_label_side = "before" if edge == "lower" else "after"
+    matching_label_side = LabelSide.BEFORE if edge == "lower" else LabelSide.AFTER
 
-    is_vertical = theme.orientation in ("bt", "tb")
+    is_vertical = theme.orientation in (Orientation.BT, Orientation.TB)
     pill_height = theme.branch_label_font_size + theme.pill_padding_y
 
     needed: float = 0.0
@@ -246,7 +247,7 @@ def _auto_fit_commit_axis_edge(layout: Layout, theme: Theme, *, edge: _AxisEdge)
         Pixel allowance needed past the edge; returns 0 if nothing
         on the edge protrudes.
     """
-    is_vertical = theme.orientation in ("bt", "tb")
+    is_vertical = theme.orientation in (Orientation.BT, Orientation.TB)
     pill_height = theme.branch_label_font_size + theme.pill_padding_y
     max_commit_pos = layout.grid.n_commits - 1
 

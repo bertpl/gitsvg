@@ -2,7 +2,7 @@
 
 import copy
 
-from gitsvg.theme import DEFAULT_THEME, Theme, resolve_defaults
+from gitsvg.theme import DEFAULT_THEME, Orientation, Theme, resolve_defaults
 
 
 def _resolved_default() -> Theme:
@@ -27,7 +27,7 @@ def test_default_theme_values_pin_the_byte_identical_baseline() -> None:
     sentinel-None status of the resolved ones.
     """
     # --- arrange / act / assert -------
-    assert DEFAULT_THEME.orientation == "bt"
+    assert DEFAULT_THEME.orientation == Orientation.BT
     # Orientation-resolved fields: sentinel `None` on DEFAULT_THEME.
     assert DEFAULT_THEME.branch_spacing is None
     assert DEFAULT_THEME.commit_spacing is None

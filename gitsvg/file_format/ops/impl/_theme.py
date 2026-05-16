@@ -12,12 +12,12 @@ from gitsvg.file_format.ops.framework._types import (
     NonNegativeFloat,
     NonNegativeInt,
 )
-from gitsvg.theme import OrientationLiteral, normalize_orientation
+from gitsvg.theme import Orientation, normalize_orientation
 
 Opacity = Annotated[float, Field(ge=0, le=1)]
 """Float in `[0, 1]` — for opacity fields where SVG semantics are bounded."""
 
-OrientationInput = Annotated[OrientationLiteral, BeforeValidator(normalize_orientation)]
+OrientationInput = Annotated[Orientation, BeforeValidator(normalize_orientation)]
 """Annotated orientation type that normalises permissive input forms (case-insensitive, `-`/`_` interchangeable, Mermaid `TD`, CSS `ltr`/`rtl`, vernacular `top_down`/`bottom_up`) to the canonical short code before the `Literal` validator runs."""
 
 

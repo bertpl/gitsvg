@@ -7,6 +7,7 @@ from gitsvg.parse import parse_jsonl_text
 from gitsvg.render import render
 from gitsvg.render._canvas import compute_canvas
 from gitsvg.state import apply_ops
+from gitsvg.theme import Orientation
 
 
 def _render_with_orientation(orientation: str):
@@ -50,8 +51,8 @@ def test_lr_swaps_canvas_dimensions_relative_to_bt() -> None:
     # LR is wider (more commits along the LR commit axis = width).
     assert canvas_lr.width > canvas_bt.width
     # Sanity: orientation field is propagated to RenderCanvas.
-    assert canvas_bt.orientation == "bt"
-    assert canvas_lr.orientation == "lr"
+    assert canvas_bt.orientation == Orientation.BT
+    assert canvas_lr.orientation == Orientation.LR
 
 
 def test_tb_canvas_dimensions_match_bt() -> None:
