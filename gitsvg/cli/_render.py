@@ -17,7 +17,7 @@ import click
 from gitsvg.imports import resolve_imports
 from gitsvg.layout import compute_layout
 from gitsvg.parse import parse_jsonl_file
-from gitsvg.render import minify, render
+from gitsvg.render import compute_minify_config, minify, render
 from gitsvg.state import apply_ops, check_end_of_file
 
 
@@ -33,11 +33,18 @@ from gitsvg.state import apply_ops, check_end_of_file
 )
 @click.option(
     "--small",
-    is_flag=True,
-    default=False,
-    help="Produce a more compact SVG (some loss of numeric precision).",
+    "minify_level",
+    is_flag=False,
+    flag_value=2,
+    default=0,
+    type=click.IntRange(0, 3),
+    help=(
+        "Minification level (0-3): 0 = pristine (default), 1 = lossless basics, "
+        "2 = + structural compression (the default when --small is given with no value), "
+        "3 = + font-fallback trim and tighter rounding."
+    ),
 )
-def render_command(input_path: Path, output_path: Path, small: bool) -> None:
+def render_command(input_path: Path, output_path: Path, minify_level: int) -> None:
     """Render a `.gitsvg.jsonl` input file to an SVG file.
 
     Runs the same validation pipeline as `gitsvg validate`, then
@@ -57,8 +64,9 @@ def render_command(input_path: Path, output_path: Path, small: bool) -> None:
     layout = compute_layout(state)
     _, renderer_settings = theme.split()
     drawing = render(layout, renderer_settings)
-    if small:
-        svg = drawing.as_svg(header="", skip_css=True, skip_js=True)
-        output_path.write_text(minify(svg, small=True, theme=renderer_settings))
-    else:
+    config = compute_minify_config(minify_level)
+    if config.level == 0:
         drawing.save_svg(str(output_path))
+    else:
+        svg = drawing.as_svg(header="", skip_css=True, skip_js=True)
+        output_path.write_text(minify(svg, config, renderer_settings))
