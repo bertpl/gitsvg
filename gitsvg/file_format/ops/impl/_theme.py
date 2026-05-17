@@ -23,28 +23,42 @@ OrientationInput = Annotated[Orientation, BeforeValidator(normalize_orientation)
 
 
 class ThemeOp(OpBase):
-    """Apply a theme patch to the diagram's live theme.
+    """Apply a theme patch to the diagram's accumulated theme overrides.
 
-    Two patch shapes, composable in a single op:
+    Each `theme:` op contributes to a per-diagram accumulator that
+    resolves to the final `Theme` at end-of-apply. Three field roles:
 
-    - **Explicit field overrides only.** Each field present in the op
-      assigns only that field on the current theme; every other field
-      keeps its current value.
-    - **Named theme.** Setting `name` replaces every field with the
-      named theme's values before any explicit fields apply. The set
-      of named themes is fixed by the package (only `"default"` exists
-      today; built-in palettes ship in a later version).
+    - **`name`** selects the theme class the final resolution
+      dispatches to. Last write wins across the apply pass — the most
+      recent `name` set anywhere in the op stream picks the class.
+    - **`keep_prior_overrides`** modifies the effect of `name` in the
+      same op. By default (`false`) a `name` change wipes every
+      previously-accumulated override (both `theme:` field overrides
+      and state-derived per-branch `branch:` colour overrides) before
+      this op's own explicit fields apply. Setting it to `true`
+      preserves prior overrides so a chosen theme can be layered onto
+      existing tweaks. The flag is only meaningful when `name` is also
+      set in the same op; explicit values without `name` are rejected
+      (E220) and the implicit default has no effect there.
+    - **Every other field** is an explicit theme-field override; later
+      writes to the same field win.
 
     A mixed op (`name` plus explicit fields) applies in two steps: the
-    named theme replaces all fields, then the explicit fields override
-    on top. An op with neither a `name` nor any explicit field is
-    rejected (semantic error).
+    `name` switch runs first (with its conditional wipe), then the
+    explicit fields override on top — so an op's own fields are never
+    discarded by its own reset. An op with neither a `name`, an
+    explicit field, nor a `keep_prior_overrides` value is rejected
+    (E217).
     """
 
     op: Literal["theme"]
     name: IdStr | None = Field(
         default=None,
-        description="Optional named theme; replaces every theme field with that theme's values before explicit overrides apply.",
+        description="Optional named theme; switches the resolution target. By default wipes every accumulated override before this op's own fields apply (see `keep_prior_overrides` to preserve them).",
+    )
+    keep_prior_overrides: bool = Field(
+        default=False,
+        description="When set on an op that also sets `name`, controls whether previously-accumulated overrides survive the theme switch: `false` (default) wipes both prior `theme:` field overrides and state-derived per-branch `branch:` colour overrides; `true` preserves them so this theme layers on top. Only meaningful alongside `name` — explicit values on an op without `name` are rejected (E220).",
     )
 
     # --- Orientation ------------------------------------

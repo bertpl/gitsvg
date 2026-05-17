@@ -151,8 +151,9 @@ def test_named_default_theme_keeps_defaults() -> None:
 
 
 def test_named_theme_replaces_prior_explicit_overrides() -> None:
-    """A named-theme op resets every field — explicit overrides from
-    earlier ops do not survive."""
+    """A named-theme op with the default `keep_prior_overrides=False`
+    wipes prior explicit overrides — they do not survive into the new
+    theme's resolved fields."""
     # --- arrange / act ----------------
     _, theme, report = _apply('{"op": "theme", "background_color": "#deadbe"}\n{"op": "theme", "name": "default"}\n')
 
@@ -160,6 +161,24 @@ def test_named_theme_replaces_prior_explicit_overrides() -> None:
     assert report.is_clean()
     # The named-theme reset reverted background_color to the default's None.
     assert theme.background_color == DEFAULT_THEME.background_color
+
+
+def test_named_theme_wipes_prior_branch_color_overrides_by_default() -> None:
+    """A named-theme op with the default `keep_prior_overrides=False`
+    also wipes state-derived per-branch colour overrides — a "clean
+    slate" reset is clean across both override categories, not just
+    `theme:` field overrides."""
+    # --- arrange / act ----------------
+    state, theme, report = _apply(
+        '{"op": "branch", "name": "main", "color": "#aabbcc"}\n{"op": "theme", "name": "default"}\n'
+    )
+
+    # --- assert -----------------------
+    assert report.is_clean()
+    main_id = state.branches["main"].id
+    # The named-theme reset wiped the per-branch override; the resolved
+    # palette colour for main applies instead.
+    assert main_id not in theme.branch_color_overrides
 
 
 # ==================================================================================================
@@ -194,6 +213,73 @@ def test_mixed_then_partial_sequence() -> None:
     assert theme.label_font_size == 17  # from the mixed op
     assert theme.branch_spacing == 80  # from the partial op
     assert theme.commit_spacing == 50  # bottom-to-top default  # never touched
+
+
+# ==================================================================================================
+#  Cascade — keep_prior_overrides flag
+# ==================================================================================================
+def test_flag_true_preserves_prior_explicit_overrides() -> None:
+    """`keep_prior_overrides: true` on a named-theme op preserves
+    explicit `theme:` field overrides accumulated earlier."""
+    # --- arrange / act ----------------
+    _, theme, report = _apply(
+        '{"op": "theme", "background_color": "#deadbe"}\n'
+        '{"op": "theme", "name": "default", "keep_prior_overrides": true}\n'
+    )
+
+    # --- assert -----------------------
+    assert report.is_clean()
+    # The prior `background_color` override survives the named-theme switch.
+    assert theme.background_color == "#deadbe"
+
+
+def test_flag_true_preserves_prior_branch_color_overrides() -> None:
+    """`keep_prior_overrides: true` also preserves state-derived
+    per-branch colour overrides — both categories survive the switch."""
+    # --- arrange / act ----------------
+    state, theme, report = _apply(
+        '{"op": "branch", "name": "main", "color": "#aabbcc"}\n'
+        '{"op": "theme", "name": "default", "keep_prior_overrides": true}\n'
+    )
+
+    # --- assert -----------------------
+    assert report.is_clean()
+    main_id = state.branches["main"].id
+    assert theme.branch_color_overrides[main_id] == "#aabbcc"
+
+
+def test_flag_false_explicit_matches_default_wipe() -> None:
+    """An explicit `keep_prior_overrides: false` reproduces the default
+    behaviour — wipes both override categories, same as omitting the flag."""
+    # --- arrange / act ----------------
+    state, theme, report = _apply(
+        '{"op": "theme", "background_color": "#deadbe"}\n'
+        '{"op": "branch", "name": "main", "color": "#aabbcc"}\n'
+        '{"op": "theme", "name": "default", "keep_prior_overrides": false}\n'
+    )
+
+    # --- assert -----------------------
+    assert report.is_clean()
+    main_id = state.branches["main"].id
+    assert theme.background_color == DEFAULT_THEME.background_color
+    assert main_id not in theme.branch_color_overrides
+
+
+def test_mixed_op_with_flag_true_layers_current_fields_on_prior_overrides() -> None:
+    """`{name, keep_prior_overrides: true, field}` keeps prior overrides
+    *and* applies the current op's own fields on top — the current op's
+    explicit fields are never discarded by their own op's reset, and
+    flag-true means no reset happens either way."""
+    # --- arrange / act ----------------
+    _, theme, report = _apply(
+        '{"op": "theme", "background_color": "#deadbe"}\n'
+        '{"op": "theme", "name": "default", "keep_prior_overrides": true, "label_font_size": 17}\n'
+    )
+
+    # --- assert -----------------------
+    assert report.is_clean()
+    assert theme.background_color == "#deadbe"  # prior override preserved
+    assert theme.label_font_size == 17  # current op's field applied
 
 
 # ==================================================================================================
@@ -260,6 +346,47 @@ def test_unknown_named_theme_does_not_apply_explicit_fields() -> None:
     # --- assert -----------------------
     assert not report.is_clean()
     assert theme.background_color == DEFAULT_THEME.background_color
+
+
+@pytest.mark.parametrize("value", [True, False])
+def test_explicit_flag_without_name_emits_e220(value: bool) -> None:
+    """Explicit `keep_prior_overrides` (either value) without `name` is
+    rejected — the flag has no meaningful effect outside a named-theme
+    switch."""
+    # --- arrange / act ----------------
+    import json
+
+    _, _theme, report = _apply(json.dumps({"op": "theme", "keep_prior_overrides": value}) + "\n")
+
+    # --- assert -----------------------
+    codes = [e.code for e in report.errors]
+    assert "E220" in codes
+
+
+def test_flag_alone_emits_e220_not_e217() -> None:
+    """An op carrying only `keep_prior_overrides` (no name, no fields)
+    is rejected via E220 — the empty-op check (E217) does not double-up
+    since the flag counts as content."""
+    # --- arrange / act ----------------
+    _, _theme, report = _apply('{"op": "theme", "keep_prior_overrides": true}\n')
+
+    # --- assert -----------------------
+    codes = [e.code for e in report.errors]
+    assert codes == ["E220"]
+
+
+def test_flag_without_name_does_not_block_other_fields_in_same_op() -> None:
+    """An E220 rejection of the flag does not block other valid fields
+    in the same op from accumulating — partial-application pattern
+    matches E218 / E219."""
+    # --- arrange / act ----------------
+    _, theme, report = _apply('{"op": "theme", "keep_prior_overrides": true, "background_color": "#abcdef"}\n')
+
+    # --- assert -----------------------
+    codes = [e.code for e in report.errors]
+    assert codes == ["E220"]
+    # The background_color field still applied.
+    assert theme.background_color == "#abcdef"
 
 
 # ==================================================================================================

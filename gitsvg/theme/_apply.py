@@ -1,4 +1,4 @@
-"""Apply a `theme` op to a `ThemeBuilder` — accumulate user overrides + handle name resets."""
+"""Apply a `theme` op to a `ThemeBuilder` — drive the per-op cascade."""
 
 import copy
 from typing import cast
@@ -15,10 +15,11 @@ from gitsvg.theme._theme import Theme
 #  Named-theme registry
 # ==================================================================================================
 # Built-in named themes the user can select with `{"op": "theme", "name": "..."}`.
-# Setting a name swaps the `ThemeBuilder.theme_cls` to the named subclass and
-# discards any explicit fields accumulated so far. Only `"default"` exists
-# today; richer named themes ship in a later version. New entries land here;
-# no other change needed.
+# Setting a name swaps the `ThemeBuilder.theme_cls` to the named subclass; the
+# subsequent wipe of accumulated overrides is conditional on the op's
+# `keep_prior_overrides` flag (default `False` = wipe, matching v0.1.4's
+# documented `{name: "default"}` behaviour). New entries land here; no other
+# change needed.
 NAMED_THEMES: dict[str, type[Theme]] = {
     "default": DefaultTheme,
 }
@@ -27,9 +28,10 @@ NAMED_THEMES: dict[str, type[Theme]] = {
 # ==================================================================================================
 #  Apply
 # ==================================================================================================
-# Fields a `theme:` op carries that aren't theme fields themselves; excluded
-# when copying the op into the builder's `user_set` dict.
-_NON_THEME_FIELDS = frozenset({"op", "name"})
+# Fields a `theme:` op carries that aren't theme-field overrides; excluded
+# when copying the op into the builder's `user_set` dict. `name` and
+# `keep_prior_overrides` drive the cascade itself and are handled separately.
+_NON_THEME_FIELDS = frozenset({"op", "name", "keep_prior_overrides"})
 
 # Fields with constraints beyond what `NonNegativeFloat` / `NonNegativeInt`
 # already enforce. Each entry maps a field name to a (predicate, error_code,
@@ -52,17 +54,25 @@ _FIELD_CONSTRAINTS: dict[str, tuple] = {
 def apply_theme_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, report: ValidationReport) -> None:
     """Apply a `theme` op by mutating the `ThemeBuilder`.
 
-    Cascade:
+    Cascade rules:
 
-    1. If `name` is set, swap `builder.theme_cls` to the named subclass
-       and discard any previously-accumulated `user_set`. Unknown name →
-       E216, no other change.
-    2. For every explicit field present in the op (other than `name`),
-       merge it into `builder.user_set` — overrides any prior value
-       (including any cleared by step 1).
+    1. The op is rejected as empty (E217) when it carries no `name`,
+       no `keep_prior_overrides`, and no explicit theme fields.
+    2. Explicit `keep_prior_overrides` without `name` is rejected
+       (E220) — the flag has no meaningful effect there. The rest of
+       the op (other valid fields) still applies.
+    3. When `name` is set, `builder.theme_cls` is reassigned to the
+       named subclass. Unknown name → E216 and the rest of the op is
+       skipped. When the name is known and `keep_prior_overrides` is
+       `False` (its default), `builder.clear_overrides()` wipes both
+       prior `user_set` and `branch_color_overrides`.
+    4. Every explicit theme field on the op (i.e. fields other than
+       `name` and `keep_prior_overrides`) merges into `user_set`,
+       overriding any prior value — including any cleared by step 3.
 
-    An op carrying neither `name` nor any explicit override is rejected
-    with E217.
+    The wipe in step 3 runs before the current op's own fields apply
+    in step 4, so a mixed op like `{name: dark, commit_radius: 8}`
+    always produces dark + commit_radius=8 — never plain dark.
 
     Args:
         state: Unused. Included for the shared apply-handler signature.
@@ -75,22 +85,38 @@ def apply_theme_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, report
     file = parsed.file
     line = parsed.line
 
-    explicit_fields = op.model_fields_set - _NON_THEME_FIELDS
-    has_name = "name" in op.model_fields_set
+    fields_set = op.model_fields_set
+    has_name = "name" in fields_set
+    has_flag = "keep_prior_overrides" in fields_set
+    explicit_fields = fields_set - _NON_THEME_FIELDS
 
     # --- Empty-op rejection -------------------
-    if not has_name and not explicit_fields:
+    if not has_name and not has_flag and not explicit_fields:
         report.add(
             ValidationError(
                 file=file,
                 line=line,
                 code="E217",
-                message="theme op must set 'name' or at least one explicit field",
+                message="theme op must set 'name', at least one explicit field, or both",
             )
         )
         return
 
-    # --- Step 1: named theme reset ------------
+    # --- Flag-without-name rejection ----------
+    # Doesn't return — other valid fields in the same op still apply,
+    # matching the partial-application pattern for E218 / E219.
+    if has_flag and not has_name:
+        report.add(
+            ValidationError(
+                file=file,
+                line=line,
+                code="E220",
+                message="keep_prior_overrides may only be set on a theme op that also sets 'name'",
+                field="keep_prior_overrides",
+            )
+        )
+
+    # --- Step 1: named-theme switch -----------
     if has_name:
         theme_cls = NAMED_THEMES.get(op.name)
         if theme_cls is None:
@@ -105,7 +131,9 @@ def apply_theme_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, report
                 )
             )
             return
-        builder.reset_to(theme_cls)
+        builder.set_theme_cls(theme_cls)
+        if not op.keep_prior_overrides:
+            builder.clear_overrides()
 
     # --- Step 2: accumulate explicit overrides
     # Deep-copy each value so mutable fields (e.g. `colors` dict) in
