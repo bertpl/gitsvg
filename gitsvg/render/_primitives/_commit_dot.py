@@ -25,7 +25,7 @@ def draw_commit_dot(
             y,
             radius,
             fill=color,
-            stroke="white",
+            stroke=theme.commit_stroke_color,
             stroke_width=theme.commit_stroke_width,
         )
     )

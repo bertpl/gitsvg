@@ -44,6 +44,9 @@ def test_default_theme_values_pin_the_byte_identical_baseline() -> None:
     assert DEFAULT_THEME.background_color is None
     assert DEFAULT_THEME.colors["main"] == "#5c6370"
     assert DEFAULT_THEME.default_branch_color_cycle == ["branch1", "branch2", "branch3", "branch4"]
+    # `"white"` (not `"#ffffff"`) preserves the byte-identical SVG output the
+    # renderer emitted before this field became themeable.
+    assert DEFAULT_THEME.commit_stroke_color == "white"
 
 
 def test_default_theme_has_no_branch_color_overrides() -> None:

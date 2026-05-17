@@ -134,6 +134,7 @@ class Theme(BaseModel):
     label_color: str | None = None
     hash_color: str | None = None
     branch_guide_color: str | None = None
+    commit_stroke_color: str | None = None
     branch_label_bg_opacity: float | None = None
 
     # --------------------------------------------------------------------------

@@ -242,6 +242,10 @@ class ThemeOp(OpBase):
         default=None,
         description="Stroke colour for the faint per-lane vertical guides.",
     )
+    commit_stroke_color: HexColor | None = Field(
+        default=None,
+        description="Stroke colour for the outline around commit dots. Visually separates the dot from any branch line passing through it. Default is `white` (reads as a halo on light backgrounds); dark themes typically override this to their background colour so the outline reads as a 'carved out' gap.",
+    )
     branch_label_bg_opacity: Opacity | None = Field(
         default=None,
         description="Background opacity (0–1) for branch-name and PR title pills.",
