@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - `--small` is now a minification level dial (`--small=N`, `N` in 0-3) instead of a binary flag; bare `--small` selects level 2 (lossless structural compression). The font-fallback trim from v0.1.2 moves to level 3 — pass `--small=3` to restore the v0.1.10 `--small` output exactly.
+- `--small=2` and `--small=3` now extract repeated presentation attributes into a CSS class block, lifting typical output compression by another ~12 percentage points.
 
 ### Deprecated
 
