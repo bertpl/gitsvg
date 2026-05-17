@@ -9,11 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- New `theme.keep_prior_overrides` flag (default `false`) controls the cascade when a `theme:` op sets `name`. The default behaviour matches today's `{name: "default"}` reset: wipe both prior `theme:` field overrides and state-derived per-branch `branch.color` overrides before this op's own fields apply. Setting it to `true` preserves both categories, so a chosen theme layers on top of accumulated tweaks — useful when importing a file that carries its own `theme:` ops. The flag is only meaningful alongside `name`; explicit values on an op without `name` are rejected with new error code `E220`.
+- New `theme.keep_prior_overrides: bool` (default `false`); when `true` on an op that sets `name`, prior `theme:` field overrides and `branch.color` overrides survive the theme switch instead of being wiped. Only meaningful alongside `name` — explicit values without `name` raise new error `E220`.
 
 ### Changed
 
-- A `theme:` op with `name` now wipes state-derived per-branch `branch.color` overrides in addition to the prior `theme:` field overrides it already wiped. Previously only the latter were reset; the former bled through. Use `keep_prior_overrides: true` to opt back into the old leak-through behaviour.
+- **Breaking:** a `theme:` op with `name` now wipes prior `branch.color` overrides alongside `theme:` field overrides; pass `keep_prior_overrides: true` to preserve them.
 
 ### Deprecated
 
