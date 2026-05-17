@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- README example fixes — Example 8 JSONL synced with the shipped file; Example 10 narrative distinguishes the "how to use" snippet from the multi-theme preview image.
+- README CLI reference — explicit pointer to `gitsvg schema theme` (no name) for the theme op's field schema, disambiguating from the named-theme inspection forms.
+
 ### Deprecated
 
 ### Removed

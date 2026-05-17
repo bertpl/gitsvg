@@ -242,14 +242,19 @@ Confining all orientation-specific code to the renderer means future
 orientations or per-orientation fine-tuning add no surface area to
 layout, state, or theme application.
 
-**Enforcement.** Code-review discipline. References to screen
-direction (`x`, `y`, "above", "below", "left", "right") inside
-`gitsvg/layout/` or `gitsvg/state/` are the trigger for review
-pushback. Inside `gitsvg/render/`, only the geometry module
-(`_geometry.py`) and the canvas-dimension code (`_canvas.py`) may
-branch on `theme.orientation`.
+**Enforcement.** Code-review discipline. The invariant is the
+layout-state boundary, not the renderer's internal structure.
+Inside `gitsvg/layout/` or `gitsvg/state/`, any reference to screen
+direction (`x`, `y`, "above", "below", "left", "right") or any branch
+on `theme.orientation` is the trigger for review pushback. Inside
+`gitsvg/render/`, orientation branching is unrestricted — primitives,
+the geometry module, and the canvas-dimension code may all consult
+orientation as needed.
 
-**Locked in:** v0.1.6.
+**Locked in:** v0.1.6; renderer-internal scope relaxed in v0.2.0
+after clarifying that the invariant exists to keep layout and state
+orientation-blind, not to confine orientation logic to a sub-set of
+renderer modules.
 
 ## 8. Pipeline-stage settings split
 

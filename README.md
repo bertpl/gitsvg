@@ -35,7 +35,7 @@ gitsvg validate diagram.gitsvg.jsonl
 
 ## Diagrams
 
-The [`examples/`](examples/) folder ships nine self-contained input files demonstrating the format. The first seven examples cover the diagram operations; the [Theming](#theming) section below covers visual customisation. Each subsection shows the rendered output and the source it came from.
+The [`examples/`](examples/) folder ships ten self-contained input files demonstrating the format. The first seven examples cover the diagram operations; the [Theming](#theming) section below covers visual customisation. Each subsection shows the rendered output and the source it came from.
 
 ### Example 1: Linear history
 
@@ -163,7 +163,7 @@ Here we import Example 3 unchanged and apply a saturated palette with thicker st
 
 ```jsonl
 {"op": "import", "path": "03_multi_branch.gitsvg.jsonl"}
-{"op": "theme", "background_color": "#fff8e7", "branch_line_width": 4, "label_font_size": 14, "branch_label_font_size": 14, "hash_font_size": 11, "commit_radius": 7, "highlight_radius": 9, "colors": {"main": "#d62728", "branch1": "#1f77b4", "branch2": "#2ca02c", "branch3": "#ff7f0e", "branch4": "#9467bd"}}
+{"op": "theme", "background_color": "#fff8e7", "branch_spacing": 110, "branch_line_width": 4, "label_font_size": 14, "branch_label_font_size": 14, "hash_font_size": 11, "commit_radius": 7, "highlight_radius": 9, "branch_name_pill_offset_commit_axis_in_rows": -0.56, "colors": {"main": "#d62728", "branch1": "#1f77b4", "branch2": "#2ca02c", "branch3": "#ff7f0e", "branch4": "#9467bd"}}
 ```
 
 ### Example 9: Horizontal orientation
@@ -194,14 +194,16 @@ Beyond `default`, gitsvg ships two built-in themes:
 - **`dark`** — One Dark-inspired palette on a `#282c34` canvas.
 - **`compact`** — ~30 % denser spacing with smaller fonts.
 
-Select one with the `name` field on a `theme` op:
-
-![Built-in named themes](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/10_named_themes.svg)
+Selecting one is a single field on a `theme` op:
 
 ```jsonl
 {"op": "import", "path": "03_multi_branch.gitsvg.jsonl"}
 {"op": "theme", "name": "dark"}
 ```
+
+The shipped preview below shows the three built-in themes side-by-side on the same input file:
+
+![Built-in named themes](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/10_named_themes.svg)
 
 Selecting a named theme also wipes any `theme:` field overrides and `branch.color` overrides accumulated earlier — useful for "use exactly this theme." To layer a chosen theme on top of those overrides instead (e.g. when importing a diagram that already carries its own theming), pass `keep_prior_overrides: true` on the same op.
 
@@ -211,7 +213,7 @@ Selecting a named theme also wipes any `theme:` field overrides and `branch.colo
 |---------|---------|
 | `gitsvg render <input> -o <output>` | Render a `.gitsvg.jsonl` file to SVG. `--small=N` selects minification level 0-3; bare `--small` is level 2 (lossless structural compression). |
 | `gitsvg validate <input>` | Run the full validation pipeline; report errors with `file:line: [code] field: message`. Add `--json` for a structured report. |
-| `gitsvg schema` | Index of all input operations. `gitsvg schema <op>` prints the JSON Schema for a specific operation; `--list-ops` prints a bare op list. `gitsvg schema themes` lists the registered named themes; `gitsvg schema theme <name>` prints one theme's resolved field values. |
+| `gitsvg schema` | Index of all input operations. `gitsvg schema <op>` prints the JSON Schema for one operation (e.g. `gitsvg schema theme` for the theme op's field schema); `--list-ops` prints a bare op list. `gitsvg schema themes` lists the registered named themes; `gitsvg schema theme <name>` prints a named theme's resolved field values. |
 | `gitsvg errors` | Index of all validation error codes. `gitsvg errors <code>` prints the long-form catalog entry; `--list-codes` prints a bare code list. |
 
 `gitsvg schema` and `gitsvg errors` are designed for agents and tooling: an LLM-based agent producing input can fetch the schema for a single op and the catalog entry for any error it hits, without reading the rest of the documentation.
