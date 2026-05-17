@@ -2,28 +2,38 @@
 
 Step ordering is fixed (not data-driven). The pinned order:
 
-1. `drop_default_attribute_values` — clean defaults first so
-   subsequent steps don't extract or hoist them.
+1. `drop_default_attribute_values` — clean defaults first so subsequent
+   steps don't extract or hoist them.
 2. `drop_empty_defs_and_unused_xlink` — remove empty `<defs>` and
    unused xlink. (Future symbol/use dedup may re-populate `<defs>`.)
 3. `hoist_font_family_to_root` — consolidate `font-family` onto the
    root, before any trim or extraction sees it.
-4. *(reserved)* CSS class extraction — slot for the L2+ step.
-5. *(reserved)* `<symbol>` + `<use>` dedup — slot for the L2+ step.
-6. `trim_font_family_fallback` — operates on the consolidated root
+4. `trim_font_family_fallback` — operates on the consolidated root
    attribute; L3 only.
-7. `shorten_hex_colors` — colour-attribute substitution.
-8. `round_numbers` — coordinates are stable by now.
+5. `shorten_hex_colors` — colour-attribute substitution.
+6. `round_numbers` — coordinates are stable by now; runs before CSS
+   class extraction so values packed into the `<style>` block are
+   already at the level's target precision (the rounding regex
+   targets quoted attribute values only and would otherwise miss the
+   CSS-property syntax).
+7. `extract_css_classes` — hoist repeated presentation clusters into
+   a `<style>` block; L2+.
+8. *(reserved)* `<symbol>` + `<use>` dedup — slot for the L2+ step.
 9. `strip_inter_element_whitespace` — purely cosmetic, runs last.
 
 Most adjacencies are order-independent but pinned for determinism.
-The few real dependencies are noted in the step list above.
+The few real dependencies: defaults-drop before CSS extraction (so
+defaults aren't hoisted); hex/rounding before CSS extraction (so
+extracted values are already normalised); empty-defs drop before
+symbol/use (so a populated `<defs>` from dedup isn't accidentally
+dropped); font-family hoist before font-fallback trim.
 """
 
 from gitsvg.render._minify._config import MinifyConfig
 from gitsvg.render._minify._steps import (
     drop_default_attribute_values,
     drop_empty_defs_and_unused_xlink,
+    extract_css_classes,
     hoist_font_family_to_root,
     round_numbers,
     shorten_hex_colors,
@@ -58,14 +68,15 @@ def minify(svg: str, config: MinifyConfig, theme: RendererSettings) -> str:
         svg = drop_empty_defs_and_unused_xlink(svg)
     if config.hoist_font_family:
         svg = hoist_font_family_to_root(svg)
-    # Reserved slot 4: CSS class extraction (L2+).
-    # Reserved slot 5: `<symbol>` + `<use>` dedup (L2+).
     if config.trim_font_fallback:
         svg = trim_font_family_fallback(svg, theme)
     if config.shorten_hex:
         svg = shorten_hex_colors(svg)
     if config.round_numbers:
         svg = round_numbers(svg, decimals=config.rounding_decimals)
+    if config.extract_css_classes:
+        svg = extract_css_classes(svg)
+    # Reserved slot 8: `<symbol>` + `<use>` dedup (L2+).
     if config.strip_whitespace:
         svg = strip_inter_element_whitespace(svg)
     return svg

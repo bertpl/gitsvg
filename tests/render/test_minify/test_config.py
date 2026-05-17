@@ -17,6 +17,7 @@ def test_l0_disables_every_toggle() -> None:
     assert not config.trim_font_fallback
     assert not config.shorten_hex
     assert not config.round_numbers
+    assert not config.extract_css_classes
     assert not config.strip_whitespace
     assert config.rounding_decimals == 0
 
@@ -32,18 +33,20 @@ def test_l1_enables_lossless_basics_only() -> None:
     assert config.hoist_font_family
     assert not config.shorten_hex
     assert not config.trim_font_fallback
+    assert not config.extract_css_classes
     assert config.round_numbers
     assert config.strip_whitespace
     assert config.rounding_decimals == 6
 
 
-def test_l2_adds_hex_shortening_and_tighter_rounding() -> None:
+def test_l2_adds_hex_shortening_css_extraction_and_tighter_rounding() -> None:
     # --- act --------------------------
     config = compute_minify_config(2)
 
     # --- assert -----------------------
     assert config.level == 2
     assert config.shorten_hex
+    assert config.extract_css_classes
     assert not config.trim_font_fallback
     assert config.rounding_decimals == 4
     # L1 toggles inherit.
@@ -64,6 +67,7 @@ def test_l3_adds_font_fallback_trim_and_tightest_rounding() -> None:
     assert config.rounding_decimals == 2
     # L2 toggles inherit.
     assert config.shorten_hex
+    assert config.extract_css_classes
     # L1 toggles inherit.
     assert config.drop_default_attrs
     assert config.drop_empty_defs
@@ -106,6 +110,7 @@ def test_minify_config_is_a_dataclass_with_explicit_fields() -> None:
         "trim_font_fallback",
         "shorten_hex",
         "round_numbers",
+        "extract_css_classes",
         "strip_whitespace",
         "rounding_decimals",
     }

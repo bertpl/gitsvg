@@ -7,6 +7,10 @@ L0 ↔ L1 ↔ L2 transform in the pipeline:
 - XML declaration stripped.
 - Empty `<defs>` elements removed.
 - `xmlns:*` namespace declarations ignored (serialiser skips them).
+- CSS class definitions in `<style>` blocks resolved: for every
+  element with `class="cN"`, the declarations from `cN` are written
+  inline; the `class` attribute and the `<style>` block are then
+  removed, so the L2 classed form matches the L0/L1 inline form.
 - Default attribute values dropped (e.g. `font-weight="400"`).
 - Hex colours expanded to long form (`#abc` → `#aabbcc`).
 - Numeric attribute values rounded to 1dp; sub-pixel differences are
@@ -77,6 +81,7 @@ def canonicalise(svg: str) -> str:
     """
     cleaned = _XML_DECL_RE.sub("", svg)
     root = ET.fromstring(cleaned)
+    _resolve_css_classes(root)
     _drop_empty_defs(root)
     _drop_default_attrs(root)
     _normalise_attr_values(root)
@@ -118,6 +123,68 @@ def assert_dom_equivalent(svg_a: str, svg_b: str, label_a: str = "A", label_b: s
         f"  {label_a} tail: ...{canon_a[-60:]!r}\n"
         f"  {label_b} tail: ...{canon_b[-60:]!r}"
     )
+
+
+_CSS_RULE_RE = re.compile(r"\.([a-zA-Z_][a-zA-Z0-9_-]*)\s*\{([^}]*)\}")
+
+
+def _is_bare_number(value: str) -> bool:
+    """Whether `value` parses as a plain numeric string with no unit suffix."""
+    try:
+        float(value)
+        return True
+    except ValueError:
+        return False
+
+
+def _resolve_css_classes(root: ET.Element) -> None:
+    """Inline CSS class declarations and remove `<style>` blocks (in-place).
+
+    Parses every `<style>` block under `root` as a sequence of simple
+    `.cN{prop:val;prop:val}` rules. For each element with a `class`
+    attribute, looks up each named class and writes its declarations
+    inline (unless the element already has an inline value for that
+    attribute, which wins by CSS specificity). Then removes the
+    `class` attribute and the `<style>` block.
+    """
+    class_defs: dict[str, dict[str, str]] = {}
+    style_locations: list[tuple[ET.Element, ET.Element]] = []
+    for parent in root.iter():
+        for child in list(parent):
+            if _local(child.tag) == "style":
+                if child.text:
+                    for match in _CSS_RULE_RE.finditer(child.text):
+                        name = match.group(1)
+                        decls: dict[str, str] = {}
+                        for decl in match.group(2).split(";"):
+                            if ":" in decl:
+                                prop, val = decl.split(":", 1)
+                                decls[prop.strip()] = val.strip()
+                        class_defs[name] = decls
+                style_locations.append((parent, child))
+
+    for elem in root.iter():
+        cls_attr = elem.attrib.get("class")
+        if not cls_attr:
+            continue
+        for name in cls_attr.split():
+            decls = class_defs.get(name)
+            if not decls:
+                continue
+            for attr, value in decls.items():
+                if attr not in elem.attrib:
+                    # CSS values may carry a `px` unit suffix that bare
+                    # SVG attribute values do not (e.g. CSS `font-size:11px`
+                    # vs attribute `font-size="11"`). Strip the suffix
+                    # when copying into attribute form so the canonical
+                    # comparison sees the same string from both sides.
+                    if value.endswith("px") and _is_bare_number(value[:-2]):
+                        value = value[:-2]
+                    elem.set(attr, value)
+        del elem.attrib["class"]
+
+    for parent, child in style_locations:
+        parent.remove(child)
 
 
 def _drop_empty_defs(root: ET.Element) -> None:

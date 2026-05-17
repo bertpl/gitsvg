@@ -23,6 +23,7 @@ class MinifyConfig:
     trim_font_fallback: bool
     shorten_hex: bool
     round_numbers: bool
+    extract_css_classes: bool
     strip_whitespace: bool
 
     # Step parameters.
@@ -58,6 +59,7 @@ def compute_minify_config(level: MinifyLevel) -> MinifyConfig:
         trim_font_fallback=level >= 3,
         shorten_hex=level >= 2,
         round_numbers=level >= 1,
+        extract_css_classes=level >= 2,
         strip_whitespace=level >= 1,
         rounding_decimals=_ROUNDING_DECIMALS_BY_LEVEL[level],
     )

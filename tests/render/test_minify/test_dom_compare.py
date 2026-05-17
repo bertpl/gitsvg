@@ -103,6 +103,46 @@ def test_attribute_order_does_not_matter() -> None:
     assert canonicalise(order_a) == canonicalise(order_b)
 
 
+def test_css_class_form_matches_inline_form() -> None:
+    """A single-class reference resolved from a `<style>` block matches the inline form."""
+    # --- arrange ----------------------
+    classed = '<svg><style>.c1{fill:#abc;stroke-width:2}</style><path class="c1" d="M0,0"/></svg>'
+    inline = '<svg><path fill="#abc" stroke-width="2" d="M0,0"/></svg>'
+
+    # --- act / assert -----------------
+    assert canonicalise(classed) == canonicalise(inline)
+
+
+def test_multi_class_form_matches_inline_form() -> None:
+    """A multi-class reference (`class="c1 c2"`) applies declarations from both classes."""
+    # --- arrange ----------------------
+    classed = '<svg><style>.c1{stroke-width:2;fill:none}.c2{stroke:#a00}</style><path class="c1 c2" d="M0,0"/></svg>'
+    inline = '<svg><path stroke-width="2" fill="none" stroke="#a00" d="M0,0"/></svg>'
+
+    # --- act / assert -----------------
+    assert canonicalise(classed) == canonicalise(inline)
+
+
+def test_css_value_with_px_unit_matches_bare_numeric_attribute() -> None:
+    """A CSS rule `font-size:11px` must canonicalise equal to attribute `font-size="11"`."""
+    # --- arrange ----------------------
+    classed = '<svg><style>.c1{font-size:11px}</style><text class="c1">a</text></svg>'
+    inline = '<svg><text font-size="11">a</text></svg>'
+
+    # --- act / assert -----------------
+    assert canonicalise(classed) == canonicalise(inline)
+
+
+def test_inline_attribute_wins_over_class_definition() -> None:
+    """When an element has both `class` and an inline attribute, the inline value wins."""
+    # --- arrange ----------------------
+    classed = '<svg><style>.c1{fill:#abc}</style><path class="c1" fill="#0a0" d="M0,0"/></svg>'
+    inline = '<svg><path fill="#0a0" d="M0,0"/></svg>'
+
+    # --- act / assert -----------------
+    assert canonicalise(classed) == canonicalise(inline)
+
+
 # ==================================================================================================
 #  assert_dom_equivalent — failure cases
 # ==================================================================================================

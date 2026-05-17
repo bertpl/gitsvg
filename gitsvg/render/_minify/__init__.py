@@ -25,6 +25,7 @@ from gitsvg.render._minify._runner import minify
 from gitsvg.render._minify._steps import (
     drop_default_attribute_values,
     drop_empty_defs_and_unused_xlink,
+    extract_css_classes,
     hoist_font_family_to_root,
     round_numbers,
     shorten_hex_colors,
@@ -38,6 +39,7 @@ __all__ = [
     "compute_minify_config",
     "drop_default_attribute_values",
     "drop_empty_defs_and_unused_xlink",
+    "extract_css_classes",
     "hoist_font_family_to_root",
     "minify",
     "round_numbers",
