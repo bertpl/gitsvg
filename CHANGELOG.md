@@ -11,11 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - New `theme.keep_prior_overrides: bool` flag (default `false`); set `true` to preserve prior overrides across a named-theme switch.
 - New built-in `dark` named theme (One Dark-inspired palette).
+- New built-in `compact` named theme (denser spacings and smaller fonts).
 - New `theme.commit_stroke_color` field for the commit-dot outline (default `"white"`).
 
 ### Changed
 
 - **Breaking:** a `theme:` op with `name` now wipes prior `branch.color` overrides alongside `theme:` field overrides; pass `keep_prior_overrides: true` to preserve them.
+- `theme:` font-size fields now accept floats; SVG `font-size=` attributes render with a trailing `.0`.
 
 ### Deprecated
 

@@ -225,5 +225,6 @@ def test_hash_secondary_line_uses_smaller_font_size() -> None:
 
     # --- assert -----------------------
     # Both LABEL_FONT_SIZE (11) and HASH_FONT_SIZE (9) appear: 11 for msg + pill, 9 for hash.
-    assert 'font-size="11"' in svg_text
-    assert 'font-size="9"' in svg_text
+    # Floats render with a trailing `.0` since the font-size fields are typed `float`.
+    assert 'font-size="11.0"' in svg_text
+    assert 'font-size="9.0"' in svg_text

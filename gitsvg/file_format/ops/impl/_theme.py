@@ -10,7 +10,6 @@ from gitsvg.file_format.ops.framework._types import (
     IdStr,
     NonEmptyStr,
     NonNegativeFloat,
-    NonNegativeInt,
 )
 from gitsvg.theme import BoxAnchor, Orientation, normalize_orientation
 from gitsvg.theme._box_anchor import validate_box_anchor
@@ -146,15 +145,15 @@ class ThemeOp(OpBase):
         default=None,
         description="Compact font-family chain emitted under `--small`.",
     )
-    label_font_size: NonNegativeInt | None = Field(
+    label_font_size: NonNegativeFloat | None = Field(
         default=None,
         description="Font size for commit-message labels.",
     )
-    branch_label_font_size: NonNegativeInt | None = Field(
+    branch_label_font_size: NonNegativeFloat | None = Field(
         default=None,
         description="Font size for branch-name pills and pull-request title pills.",
     )
-    hash_font_size: NonNegativeInt | None = Field(
+    hash_font_size: NonNegativeFloat | None = Field(
         default=None,
         description="Font size for the secondary hash line on commit labels.",
     )

@@ -86,9 +86,9 @@ class Theme(BaseModel):
     # --------------------------------------------------------------------------
     label_font_family: str | None = None
     label_font_family_small: str | None = None
-    label_font_size: int | None = None  # axis-symmetric
-    branch_label_font_size: int | None = None  # axis-symmetric
-    hash_font_size: int | None = None  # axis-symmetric
+    label_font_size: float | None = None  # axis-symmetric
+    branch_label_font_size: float | None = None  # axis-symmetric
+    hash_font_size: float | None = None  # axis-symmetric
     branch_name_pill_offset_commit_axis_in_rows: float | None = None  # axis-bound: commit-axis (signed)
     branch_name_pill_offset_branch_axis_in_lanes: float | None = None  # axis-bound: branch-axis (signed)
     pill_padding_x_in_font_sizes: float | None = None  # axis-symmetric (extra pill width beyond text)
@@ -164,7 +164,7 @@ class Theme(BaseModel):
 
     @field_validator("label_font_size", "branch_label_font_size", "hash_font_size")
     @classmethod
-    def _font_sizes_must_be_positive(cls, v: int | None) -> int | None:
+    def _font_sizes_must_be_positive(cls, v: float | None) -> float | None:
         """Reject `<= 0` font sizes — zero makes text invisible."""
         if v is not None and v <= 0:
             raise ValueError("must be > 0")
