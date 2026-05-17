@@ -187,9 +187,14 @@ A `theme.orientation` of `lr` flips the diagram left-to-right: the commit axis g
 {"op": "theme", "orientation": "lr"}
 ```
 
-### Example 10: Built-in named themes
+## Named themes
 
-Beyond `default`, gitsvg ships `dark` (One Dark-inspired palette on a dark canvas) and `compact` (~30 % denser spacing with smaller fonts). Select one with `name`:
+Beyond `default`, gitsvg ships two built-in themes:
+
+- **`dark`** — One Dark-inspired palette on a `#282c34` canvas.
+- **`compact`** — ~30 % denser spacing with smaller fonts.
+
+Select one with the `name` field on a `theme` op:
 
 ![Built-in named themes](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/10_named_themes.svg)
 
