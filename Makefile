@@ -1,4 +1,4 @@
-.PHONY: help dev-setup build test format lint update-deps install release validate-local render-local rebuild-glyph-widths
+.PHONY: help dev-setup build test format lint update-deps install release validate-local render-local refresh-examples rebuild-glyph-widths
 
 help:
 	@echo 'Commands:'
@@ -11,6 +11,7 @@ help:
 	@echo '  install        Re-install gitsvg stand-alone tool'
 	@echo '  validate-local Validate every .gitsvg.jsonl under local/test_examples/'
 	@echo '  render-local   Render every .gitsvg.jsonl under local/test_examples/ to SVG'
+	@echo '  refresh-examples  Re-render every committed examples/*.gitsvg.jsonl, then rebuild the tiled themes preview'
 	@echo '  rebuild-glyph-widths  Regenerate glyph-width LUTs from scripts/font_sources/'
 	@echo '  release        Bump version, validate, tag, push (VERSION=X.Y.Z)'
 
@@ -42,6 +43,18 @@ validate-local:
 
 render-local:
 	uv run python scripts/render_local.py
+
+# Re-render every committed example then rebuild the tiled themes preview.
+# Order matters: the bulk loop would otherwise overwrite the tile via the
+# indirect 10_named_themes.gitsvg.jsonl -> 10_named_themes.svg render, so the
+# preview script runs at the end to restore the actual tile.
+refresh-examples:
+	@for f in examples/*.gitsvg.jsonl; do \
+		base=$$(basename "$$f" .gitsvg.jsonl); \
+		echo "rendering $$f -> examples/$$base.svg"; \
+		uv run gitsvg render "$$f" -o "examples/$$base.svg" || exit 1; \
+	done
+	uv run python scripts/build_themed_preview.py
 
 rebuild-glyph-widths:
 	uv run python scripts/build_glyph_widths.py
