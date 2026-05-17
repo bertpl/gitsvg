@@ -153,7 +153,7 @@ The `pull_request` op declares a pending merge between two branches. Both endpoi
 
 ## Theming
 
-The `theme` op patches the diagram's live theme — spacings, sizes, fonts, the branch-colour palette, the SVG background, the orientation, and more. Each op only overrides the fields it lists; a `name` selects a built-in theme (today: `default`) that replaces every field first.
+The `theme` op customises the diagram's presentational surface — spacings, sizes, fonts, the branch-colour palette, the SVG background, the orientation, and more. Each op only overrides the fields it lists; a `name` (`default`, `dark`, `compact`) selects a built-in theme to base resolution on.
 
 ### Example 8: Recoloured palette
 
@@ -187,13 +187,26 @@ A `theme.orientation` of `lr` flips the diagram left-to-right: the commit axis g
 {"op": "theme", "orientation": "lr"}
 ```
 
+### Example 10: Built-in named themes
+
+Beyond `default`, gitsvg ships `dark` (One Dark-inspired palette on a dark canvas) and `compact` (~30 % denser spacing with smaller fonts). Select one with `name`:
+
+![Built-in named themes](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/10_named_themes.svg)
+
+```jsonl
+{"op": "import", "path": "03_multi_branch.gitsvg.jsonl"}
+{"op": "theme", "name": "dark"}
+```
+
+Selecting a named theme also wipes any `theme:` field overrides and `branch.color` overrides accumulated earlier — useful for "use exactly this theme." To layer a chosen theme on top of those overrides instead (e.g. when importing a diagram that already carries its own theming), pass `keep_prior_overrides: true` on the same op.
+
 ## CLI reference
 
 | Command | Purpose |
 |---------|---------|
 | `gitsvg render <input> -o <output>` | Render a `.gitsvg.jsonl` file to SVG. Add `--small` for a more compact SVG (some loss of numeric precision). |
 | `gitsvg validate <input>` | Run the full validation pipeline; report errors with `file:line: [code] field: message`. Add `--json` for a structured report. |
-| `gitsvg schema` | Index of all input operations. `gitsvg schema <op>` prints the JSON Schema for a specific operation; `--list-ops` prints a bare op list. |
+| `gitsvg schema` | Index of all input operations. `gitsvg schema <op>` prints the JSON Schema for a specific operation; `--list-ops` prints a bare op list. `gitsvg schema themes` lists the registered named themes; `gitsvg schema theme <name>` prints one theme's resolved field values. |
 | `gitsvg errors` | Index of all validation error codes. `gitsvg errors <code>` prints the long-form catalog entry; `--list-codes` prints a bare code list. |
 
 `gitsvg schema` and `gitsvg errors` are designed for agents and tooling: an LLM-based agent producing input can fetch the schema for a single op and the catalog entry for any error it hits, without reading the rest of the documentation.
