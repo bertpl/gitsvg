@@ -1,30 +1,47 @@
-"""Round-1 size reductions applied to rendered SVG output under `--small`.
+"""Size reductions applied to rendered SVG output via the `--small` level dial.
 
 These are string-level (and one call-site-level) transforms over the SVG
-already emitted by drawsvg. The CLI's `--small` flag toggles them on;
-default rendering is byte-identical to non-`--small` output.
+already emitted by drawsvg. The CLI's `--small` flag selects a minification
+level (0-3); each level enables a different subset of transforms. Default
+rendering (`--small` absent, or `--small=0`) is byte-identical to drawsvg's
+default output.
 
-Round-2 size reductions (renderer rewrites: CSS classes, `<g>` grouping,
-`<symbol>` + `<use>`) are deferred — they will live alongside or in
-place of these passes when implemented.
+Level contract:
+
+- L0: pristine drawsvg output.
+- L1: lossless basics — structural drops, whitespace strip, font-family
+  hoist, 6dp rounding. Visually lossless when rendered full screen on
+  current screen resolutions.
+- L2: L1 + hex shortening + 4dp rounding. Same visually-lossless
+  guarantee under the same viewing conditions.
+- L3: L2 + font-fallback trim + 2dp rounding. Accepts platform-dependent
+  visual deviation (font-fallback trim changes rendering on viewers
+  without Inter installed).
 """
 
+from gitsvg.render._minify._config import MinifyConfig, compute_minify_config
+from gitsvg.render._minify._level import MinifyLevel
 from gitsvg.render._minify._runner import minify
 from gitsvg.render._minify._steps import (
     drop_default_attribute_values,
     drop_empty_defs_and_unused_xlink,
     hoist_font_family_to_root,
     round_numbers,
+    shorten_hex_colors,
     strip_inter_element_whitespace,
     trim_font_family_fallback,
 )
 
 __all__ = [
+    "MinifyConfig",
+    "MinifyLevel",
+    "compute_minify_config",
     "drop_default_attribute_values",
     "drop_empty_defs_and_unused_xlink",
     "hoist_font_family_to_root",
     "minify",
     "round_numbers",
+    "shorten_hex_colors",
     "strip_inter_element_whitespace",
     "trim_font_family_fallback",
 ]

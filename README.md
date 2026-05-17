@@ -209,7 +209,7 @@ Selecting a named theme also wipes any `theme:` field overrides and `branch.colo
 
 | Command | Purpose |
 |---------|---------|
-| `gitsvg render <input> -o <output>` | Render a `.gitsvg.jsonl` file to SVG. Add `--small` for a more compact SVG (some loss of numeric precision). |
+| `gitsvg render <input> -o <output>` | Render a `.gitsvg.jsonl` file to SVG. `--small=N` selects minification level 0-3; bare `--small` is level 2 (lossless structural compression). |
 | `gitsvg validate <input>` | Run the full validation pipeline; report errors with `file:line: [code] field: message`. Add `--json` for a structured report. |
 | `gitsvg schema` | Index of all input operations. `gitsvg schema <op>` prints the JSON Schema for a specific operation; `--list-ops` prints a bare op list. `gitsvg schema themes` lists the registered named themes; `gitsvg schema theme <name>` prints one theme's resolved field values. |
 | `gitsvg errors` | Index of all validation error codes. `gitsvg errors <code>` prints the long-form catalog entry; `--list-codes` prints a bare code list. |
