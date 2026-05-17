@@ -11,8 +11,7 @@ from gitsvg.file_format.ops.framework._types import (
     NonEmptyStr,
     NonNegativeFloat,
 )
-from gitsvg.theme import BoxAnchor, Orientation, normalize_orientation
-from gitsvg.theme._box_anchor import validate_box_anchor
+from gitsvg.theme import BoxAnchor, Orientation, normalize_orientation, validate_box_anchor
 
 Opacity = Annotated[float, Field(ge=0, le=1)]
 """Float in `[0, 1]` — for opacity fields where SVG semantics are bounded."""
@@ -199,7 +198,7 @@ class ThemeOp(OpBase):
     # --- Label angles -----------------------------------
     branch_label_angle: float | None = Field(
         default=None,
-        description="Rotation angle (degrees) for the branch-name pill, applied around the pill's world anchor point so the anchor stays pinned regardless of angle. Default is 0° across all orientations; default-current anchor positions are tuned for un-rotated text, so non-zero values render mechanically but visually optimal angle + anchor pairings arrive with named themes in a later version.",
+        description="Rotation angle (degrees) for the branch-name pill, applied around the pill's world anchor point so the anchor stays pinned regardless of angle. Default is 0° across all orientations; the default anchor positions are tuned for un-rotated text, so non-zero values render mechanically but typically need a custom `branch_pill_anchor` to look visually settled.",
     )
     commit_label_angle: float | None = Field(
         default=None,

@@ -32,13 +32,13 @@ import drawsvg as draw
 from gitsvg.layout import Layout
 from gitsvg.render._canvas import compute_canvas
 from gitsvg.render._colors import resolve_branch_color
-from gitsvg.render._primitives._arc import draw_arc
-from gitsvg.render._primitives._branch_guide import draw_branch_guide
-from gitsvg.render._primitives._branch_line import draw_branch_line
-from gitsvg.render._primitives._branch_pill import draw_branch_pill
-from gitsvg.render._primitives._commit_dot import draw_commit_dot
-from gitsvg.render._primitives._commit_label import draw_commit_label
-from gitsvg.render._primitives._pull_request_pill import draw_pull_request_pill
+from gitsvg.render._primitives.arc import draw_arc
+from gitsvg.render._primitives.branch_guide import draw_branch_guide
+from gitsvg.render._primitives.branch_line import draw_branch_line
+from gitsvg.render._primitives.branch_pill import draw_branch_pill
+from gitsvg.render._primitives.commit_dot import draw_commit_dot
+from gitsvg.render._primitives.commit_label import draw_commit_label
+from gitsvg.render._primitives.pull_request_pill import draw_pull_request_pill
 from gitsvg.render._renderer_settings import RendererSettings
 from gitsvg.theme import DEFAULT_THEME
 
@@ -71,6 +71,7 @@ def render(layout: Layout, theme: RendererSettings | None = None) -> draw.Drawin
     declaration_index_by_id: dict[str, int] = {b.id: i for i, b in enumerate(layout.branches)}
 
     def color_for(branch_id: str) -> str:
+        """Resolve `branch_id` to its rendered colour using the closed-over index map and theme."""
         return resolve_branch_color(branch_id, declaration_index_by_id.get(branch_id, 0), theme)
 
     # --- Canvas background ----------------------

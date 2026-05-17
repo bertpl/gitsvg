@@ -99,6 +99,7 @@ def extract_css_classes(svg: str) -> str:
     next_id = [1]
 
     def _new_class() -> str:
+        """Return the next sequential class name (`c1`, `c2`, ...) and bump the counter."""
         name = f"c{next_id[0]}"
         next_id[0] += 1
         return name

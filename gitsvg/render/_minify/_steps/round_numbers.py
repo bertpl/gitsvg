@@ -27,6 +27,7 @@ def round_numbers(svg: str, decimals: int) -> str:
     """
 
     def _round_match(match: re.Match[str]) -> str:
+        """Round one matched decimal number to `decimals` places and trim trailing zeros."""
         rounded = round(float(match.group(0)), decimals)
         if decimals <= 0:
             return str(int(rounded))
@@ -35,6 +36,7 @@ def round_numbers(svg: str, decimals: int) -> str:
         return formatted.rstrip("0").rstrip(".")
 
     def _round_inside_quoted_value(match: re.Match[str]) -> str:
+        """Apply `_round_match` to every decimal number inside one quoted attribute value."""
         return _NUMBER_RE.sub(_round_match, match.group(0))
 
     return _QUOTED_VALUE_RE.sub(_round_inside_quoted_value, svg)

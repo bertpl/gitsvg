@@ -8,7 +8,7 @@ from gitsvg.layout import LayoutBranch, compute_layout
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.render import render
 from gitsvg.render._canvas import RenderCanvas
-from gitsvg.render._primitives._branch_line import draw_branch_line
+from gitsvg.render._primitives.branch_line import draw_branch_line
 from gitsvg.state import apply_ops
 from gitsvg.theme import DEFAULT_THEME
 

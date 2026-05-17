@@ -5,7 +5,7 @@ from typing import cast
 from gitsvg.errors import ValidationError, ValidationReport
 from gitsvg.file_format.ops import MergeOp
 from gitsvg.parse import ParsedOp
-from gitsvg.state._apply._impl._commit import _generate_auto_commit_id
+from gitsvg.state._apply._impl.commit import _generate_auto_commit_id
 from gitsvg.state._auto_hash import compute_auto_hash, effective_parent_ids
 from gitsvg.state._state import CommitState, State
 from gitsvg.theme import ThemeBuilder
