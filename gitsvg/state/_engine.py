@@ -9,11 +9,13 @@ layer; they were dropped by the parser before becoming `ParsedOp`
 records.
 
 Theme construction threads a single `ThemeBuilder` through the apply
-pass. Theme ops mutate the builder's `theme_cls` and `user_set`;
-branch / remove ops mutate the builder's `branch_color_overrides`;
-every other op handler receives the builder for signature uniformity
-but leaves it alone. The engine calls `builder.build()` once at end-
-of-apply to produce the fully-resolved `Theme`.
+pass. Theme ops mutate the builder's `theme_cls` and `user_set` (and,
+when a name-bearing op leaves `keep_prior_overrides` at its default
+`False`, wipe both `user_set` and `branch_color_overrides`); branch /
+remove ops mutate the builder's `branch_color_overrides`; every other
+op handler receives the builder for signature uniformity but leaves
+it alone. The engine calls `builder.build()` once at end-of-apply to
+produce the fully-resolved `Theme`.
 
 `import` ops are expanded away upstream by `gitsvg.imports.resolve_imports`
 before `apply_ops` runs, so they normally do not reach the engine. Any

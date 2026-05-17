@@ -10,6 +10,10 @@ overrides the apply pass accumulated.
 pass: it tracks the chosen `theme_cls`, the `user_set` dict, and
 state-derived per-branch colour overrides. The state engine calls
 `builder.build()` once at end-of-apply to produce the resolved `Theme`.
+A `theme:` op carrying `name` reassigns `theme_cls` (via
+`set_theme_cls`) and, unless the op also carries
+`keep_prior_overrides: true`, wipes both accumulator dicts (via
+`clear_overrides`).
 
 The `theme:` op apply handler (`gitsvg.theme._apply.apply_theme_op`)
 imports `State` for the shared apply-handler signature and is

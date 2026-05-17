@@ -9,7 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- New `theme.keep_prior_overrides: bool` (default `false`); when `true` on an op that sets `name`, prior `theme:` field overrides and `branch.color` overrides survive the theme switch instead of being wiped. Only meaningful alongside `name` — explicit values without `name` raise new error `E220`.
+
 ### Changed
+
+- **Breaking:** a `theme:` op with `name` now wipes prior `branch.color` overrides alongside `theme:` field overrides; pass `keep_prior_overrides: true` to preserve them.
 
 ### Deprecated
 
