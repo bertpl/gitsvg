@@ -5,23 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
-
-### Added
+## 0.1.11 (2026-05-17)
 
 ### Changed
 
 - `--small` is now a minification level dial (`--small=N`, `N` in 0-3) instead of a binary flag; bare `--small` selects level 2 (lossless structural compression). The font-fallback trim from v0.1.2 moves to level 3 — pass `--small=3` to restore the v0.1.10 `--small` output exactly.
 - `--small=2` and `--small=3` now extract repeated presentation attributes into a CSS class block, further increasing compression.
-
-### Deprecated
-
-### Removed
-
-### Fixed
-
-### Security
-
 ## 0.1.10 (2026-05-17)
 
 ### Added
