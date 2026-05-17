@@ -68,3 +68,101 @@ def test_schema_unknown_op_exits_non_zero() -> None:
     # --- assert -----------------------
     assert result.exit_code != 0
     assert "Unknown op" in result.output
+
+
+# ==================================================================================================
+#  schema themes (list)
+# ==================================================================================================
+def test_schema_themes_lists_registered_names_alphabetically() -> None:
+    # --- arrange ----------------------
+    runner = CliRunner()
+
+    # --- act --------------------------
+    result = runner.invoke(cli, ["schema", "themes"])
+
+    # --- assert -----------------------
+    assert result.exit_code == 0
+    lines = [line for line in result.output.splitlines() if line]
+    assert lines == ["compact", "dark", "default"]
+
+
+# ==================================================================================================
+#  schema theme <name> (inspect)
+# ==================================================================================================
+def test_schema_theme_default_emits_resolved_json() -> None:
+    # --- arrange ----------------------
+    runner = CliRunner()
+
+    # --- act --------------------------
+    result = runner.invoke(cli, ["schema", "theme", "default"])
+
+    # --- assert -----------------------
+    assert result.exit_code == 0
+    payload = json.loads(result.output)
+    assert payload["orientation"] == "bt"
+    assert payload["branch_spacing"] == 100
+    assert payload["background_color"] is None
+
+
+def test_schema_theme_dark_emits_dark_palette() -> None:
+    # --- arrange ----------------------
+    runner = CliRunner()
+
+    # --- act --------------------------
+    result = runner.invoke(cli, ["schema", "theme", "dark"])
+
+    # --- assert -----------------------
+    assert result.exit_code == 0
+    payload = json.loads(result.output)
+    assert payload["background_color"] == "#282c34"
+    assert payload["colors"]["main"] == "#abb2bf"
+    assert payload["commit_stroke_color"] == "#282c34"
+
+
+def test_schema_theme_compact_emits_tighter_metrics() -> None:
+    # --- arrange ----------------------
+    runner = CliRunner()
+
+    # --- act --------------------------
+    result = runner.invoke(cli, ["schema", "theme", "compact"])
+
+    # --- assert -----------------------
+    assert result.exit_code == 0
+    payload = json.loads(result.output)
+    assert payload["branch_spacing"] == 70
+    assert payload["commit_spacing"] == 35
+    assert payload["label_font_size"] == 9.5
+
+
+def test_schema_theme_unknown_exits_non_zero_with_known_list() -> None:
+    # --- arrange ----------------------
+    runner = CliRunner()
+
+    # --- act --------------------------
+    result = runner.invoke(cli, ["schema", "theme", "midnight"])
+
+    # --- assert -----------------------
+    assert result.exit_code != 0
+    assert "Unknown theme" in result.output
+    # Lists the registered names so the user can pick one.
+    for name in ("compact", "dark", "default"):
+        assert name in result.output
+
+
+def test_schema_theme_without_name_still_emits_op_schema() -> None:
+    """`schema theme` (no second arg) keeps its existing meaning — the
+    JSON schema for the `theme` op — so the new commands don't break
+    the original surface."""
+    # --- arrange ----------------------
+    runner = CliRunner()
+
+    # --- act --------------------------
+    result = runner.invoke(cli, ["schema", "theme"])
+
+    # --- assert -----------------------
+    assert result.exit_code == 0
+    payload = json.loads(result.output)
+    assert payload["type"] == "object"
+    # `keep_prior_overrides` is a `theme` op field — sanity check we're
+    # looking at the op schema and not the resolved-theme JSON.
+    assert "keep_prior_overrides" in payload["properties"]
