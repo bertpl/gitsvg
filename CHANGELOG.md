@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - **Breaking:** a `theme:` op with `name` now wipes prior `branch.color` overrides alongside `theme:` field overrides; pass `keep_prior_overrides: true` to preserve them.
-- `theme:` font-size fields now accept floats; SVG `font-size=` attributes render with a trailing `.0`.
+- `theme:` font-size fields now accept floats.
 
 ### Deprecated
 
