@@ -396,6 +396,18 @@ class DefaultTheme(Theme):
         return "#b8b8b8"
 
     @classmethod
+    def _resolve_commit_stroke_color(cls) -> str:
+        """Stroke colour for the outline around commit dots.
+
+        Visually separates the dot from any branch line passing
+        through it. `"white"` works for the default theme's
+        transparent (or white-rendered) background; dark themes
+        should override to their background colour so the outline
+        reads as a "carved out" gap rather than a bright halo.
+        """
+        return "white"
+
+    @classmethod
     def _resolve_branch_label_bg_opacity(cls) -> float:
         """Background opacity for branch-name and PR title pills."""
         return 0.85
@@ -519,6 +531,7 @@ class DefaultTheme(Theme):
             label_color=pick("label_color", cls._resolve_label_color),
             hash_color=pick("hash_color", cls._resolve_hash_color),
             branch_guide_color=pick("branch_guide_color", cls._resolve_branch_guide_color),
+            commit_stroke_color=pick("commit_stroke_color", cls._resolve_commit_stroke_color),
             branch_label_bg_opacity=pick("branch_label_bg_opacity", cls._resolve_branch_label_bg_opacity),
             background_color=pick("background_color", cls._resolve_background_color),
         )
