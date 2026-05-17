@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- New `theme.keep_prior_overrides: bool` (default `false`); when `true` on an op that sets `name`, prior `theme:` field overrides and `branch.color` overrides survive the theme switch instead of being wiped. Only meaningful alongside `name` — explicit values without `name` raise new error `E220`.
+- New `theme.keep_prior_overrides: bool` flag (default `false`); set `true` to preserve prior overrides across a named-theme switch.
 - New built-in `dark` named theme (One Dark-inspired palette).
 - New `theme.commit_stroke_color` field for the commit-dot outline (default `"white"`).
 
