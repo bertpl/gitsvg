@@ -2,6 +2,14 @@
 
 Thanks for your interest in contributing.
 
+## Architecture
+
+[`docs/architecture.md`](docs/architecture.md) is the canonical reference for the
+package's pipeline shape and the architectural invariants that bind the codebase.
+Read it before making structural changes — it covers the validate-and-render
+flow (`parse → imports → state → layout → render`) and the conventions each
+stage upholds.
+
 ## Dev setup
 
 One-time setup on a fresh clone:
