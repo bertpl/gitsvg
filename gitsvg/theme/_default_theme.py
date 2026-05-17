@@ -189,17 +189,17 @@ class DefaultTheme(Theme):
         return "Inter, sans-serif"
 
     @classmethod
-    def _resolve_label_font_size(cls) -> int:
+    def _resolve_label_font_size(cls) -> float:
         """Font size (px) for commit-message labels."""
         return 11
 
     @classmethod
-    def _resolve_branch_label_font_size(cls) -> int:
+    def _resolve_branch_label_font_size(cls) -> float:
         """Font size (px) for branch-name pills and PR title pills."""
         return 11
 
     @classmethod
-    def _resolve_hash_font_size(cls) -> int:
+    def _resolve_hash_font_size(cls) -> float:
         """Font size (px) for the secondary hash line on commit labels."""
         return 9
 

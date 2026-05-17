@@ -11,6 +11,7 @@ every field and dispatches to whichever `_resolve_*` the subclass
 exposes, falling back to `DefaultTheme`'s for anything not overridden.
 """
 
+from gitsvg.theme.themes._compact import CompactTheme
 from gitsvg.theme.themes._dark import DarkTheme
 
-__all__ = ["DarkTheme"]
+__all__ = ["CompactTheme", "DarkTheme"]

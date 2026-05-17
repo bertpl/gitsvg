@@ -54,7 +54,8 @@ def test_happy_theme_renders_with_background_rect() -> None:
 
     # --- assert -----------------------
     assert 'fill="#fffaf0"' in svg
-    assert 'font-size="13"' in svg
+    # Font-size fields are typed `float`, so values render with a trailing `.0`.
+    assert 'font-size="13.0"' in svg
     # The background rect is the first SVG element after the root.
     bg_pos = svg.index('fill="#fffaf0"')
     first_branch_pos = svg.index("<path")
