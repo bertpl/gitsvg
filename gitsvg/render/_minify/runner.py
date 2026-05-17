@@ -29,7 +29,6 @@ symbol/use (so a populated `<defs>` from dedup isn't accidentally
 dropped); font-family hoist before font-fallback trim.
 """
 
-from gitsvg.render._minify._config import MinifyConfig
 from gitsvg.render._minify._steps import (
     drop_default_attribute_values,
     drop_empty_defs_and_unused_xlink,
@@ -40,6 +39,7 @@ from gitsvg.render._minify._steps import (
     strip_inter_element_whitespace,
     trim_font_family_fallback,
 )
+from gitsvg.render._minify.config import MinifyConfig
 from gitsvg.render._renderer_settings import RendererSettings
 
 

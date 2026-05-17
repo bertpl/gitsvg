@@ -19,9 +19,6 @@ Level contract:
   without Inter installed).
 """
 
-from gitsvg.render._minify._config import MinifyConfig, compute_minify_config
-from gitsvg.render._minify._level import MinifyLevel
-from gitsvg.render._minify._runner import minify
 from gitsvg.render._minify._steps import (
     drop_default_attribute_values,
     drop_empty_defs_and_unused_xlink,
@@ -32,6 +29,9 @@ from gitsvg.render._minify._steps import (
     strip_inter_element_whitespace,
     trim_font_family_fallback,
 )
+from gitsvg.render._minify.config import MinifyConfig, compute_minify_config
+from gitsvg.render._minify.level import MinifyLevel
+from gitsvg.render._minify.runner import minify
 
 __all__ = [
     "MinifyConfig",
