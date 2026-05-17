@@ -71,6 +71,7 @@ def render(layout: Layout, theme: RendererSettings | None = None) -> draw.Drawin
     declaration_index_by_id: dict[str, int] = {b.id: i for i, b in enumerate(layout.branches)}
 
     def color_for(branch_id: str) -> str:
+        """Resolve `branch_id` to its rendered colour using the closed-over index map and theme."""
         return resolve_branch_color(branch_id, declaration_index_by_id.get(branch_id, 0), theme)
 
     # --- Canvas background ----------------------

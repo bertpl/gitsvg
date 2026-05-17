@@ -24,6 +24,7 @@ def shorten_hex_colors(svg: str) -> str:
     """
 
     def _replace(match: re.Match[str]) -> str:
+        """Shorten one matched `#RRGGBB` to `#RGB` when each pair's digits match; else keep verbatim."""
         r1, r2, g1, g2, b1, b2 = match.groups()
         if r1 == r2 and g1 == g2 and b1 == b2:
             return f"#{r1}{g1}{b1}"

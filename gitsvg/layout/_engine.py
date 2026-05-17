@@ -276,6 +276,7 @@ def _assign_branch_lanes(
     in_progress: set[str] = set()
 
     def assign(name: str) -> None:
+        """Resolve `name`'s lane index, recursing through its ancestor chain first."""
         if name in positions or name in in_progress:
             return
         in_progress.add(name)

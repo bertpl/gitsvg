@@ -21,7 +21,7 @@ therefore imported via its leaf path from the state engine to avoid
 a package-load cycle. Same pattern as `file_format/ops/framework/`.
 """
 
-from gitsvg.theme._box_anchor import BoxAnchor
+from gitsvg.theme._box_anchor import BoxAnchor, validate_box_anchor
 from gitsvg.theme._builder import ThemeBuilder
 from gitsvg.theme._default_theme import DefaultTheme
 from gitsvg.theme._orientation import Orientation, normalize_orientation
@@ -43,4 +43,5 @@ __all__ = [
     "ThemeBuilder",
     "_resolve_int_or_float",
     "normalize_orientation",
+    "validate_box_anchor",
 ]

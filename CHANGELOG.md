@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - README example fixes — Example 8 JSONL synced with the shipped file; Example 10 narrative distinguishes the "how to use" snippet from the multi-theme preview image.
 - README CLI reference — explicit pointer to `gitsvg schema theme` (no name) for the theme op's field schema, disambiguating from the named-theme inspection forms.
+- `gitsvg schema theme` — `branch_label_angle` field description no longer references a deferred "later version" for visually optimal angle/anchor pairings; named themes already shipped in v0.1.10.
 
 ### Deprecated
 
