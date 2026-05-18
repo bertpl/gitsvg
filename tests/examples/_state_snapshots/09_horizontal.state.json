@@ -1,0 +1,95 @@
+{
+  "branches": [
+    {
+      "name": "main",
+      "head_commit_id": "m3"
+    },
+    {
+      "name": "feature",
+      "head_commit_id": "f2"
+    },
+    {
+      "name": "docs",
+      "head_commit_id": "d1"
+    }
+  ],
+  "commits": [
+    {
+      "id": "m1",
+      "branch": "main",
+      "hash": "7b14e2d",
+      "msg": "init",
+      "highlight": false,
+      "parents": []
+    },
+    {
+      "id": "m2",
+      "branch": "main",
+      "hash": "691ac26",
+      "msg": "release v1",
+      "highlight": true,
+      "parents": [
+        "m1"
+      ]
+    },
+    {
+      "id": "f1",
+      "branch": "feature",
+      "hash": "577eb2f",
+      "msg": "wip",
+      "highlight": false,
+      "parents": [
+        "m2"
+      ]
+    },
+    {
+      "id": "f2",
+      "branch": "feature",
+      "hash": "02a38f5",
+      "msg": "polish",
+      "highlight": false,
+      "parents": [
+        "f1"
+      ]
+    },
+    {
+      "id": "d1",
+      "branch": "docs",
+      "hash": "c2c3fad",
+      "msg": "readme",
+      "highlight": false,
+      "parents": [
+        "m2"
+      ]
+    },
+    {
+      "id": "_c1",
+      "branch": "main",
+      "hash": "a4b68e8",
+      "msg": "merge feature",
+      "highlight": false,
+      "parents": [
+        "m2",
+        "f2"
+      ]
+    },
+    {
+      "id": "m3",
+      "branch": "main",
+      "hash": "5c5d0aa",
+      "msg": "hotfix",
+      "highlight": false,
+      "parents": [
+        "_c1"
+      ]
+    }
+  ],
+  "pull_requests": [
+    {
+      "id": "pr1",
+      "from_branch": "docs",
+      "into_branch": "main",
+      "title": "PR 1: docs update"
+    }
+  ]
+}

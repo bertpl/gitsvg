@@ -1,0 +1,64 @@
+{
+  "branches": [
+    {
+      "name": "main",
+      "head_commit_id": "m1"
+    },
+    {
+      "name": "feature",
+      "head_commit_id": "f2"
+    }
+  ],
+  "commits": [
+    {
+      "id": "c1",
+      "branch": "main",
+      "hash": "1b35060",
+      "msg": "initial commit",
+      "highlight": false,
+      "parents": []
+    },
+    {
+      "id": "c2",
+      "branch": "main",
+      "hash": "b1e760e",
+      "msg": "setup config",
+      "highlight": false,
+      "parents": [
+        "c1"
+      ]
+    },
+    {
+      "id": "f1",
+      "branch": "feature",
+      "hash": "97b103e",
+      "msg": "add login form",
+      "highlight": false,
+      "parents": [
+        "c2"
+      ]
+    },
+    {
+      "id": "f2",
+      "branch": "feature",
+      "hash": "02a38f5",
+      "msg": "wire up auth",
+      "highlight": false,
+      "parents": [
+        "f1"
+      ]
+    },
+    {
+      "id": "m1",
+      "branch": "main",
+      "hash": "f5acfc5",
+      "msg": "merge feature",
+      "highlight": false,
+      "parents": [
+        "c2",
+        "f2"
+      ]
+    }
+  ],
+  "pull_requests": []
+}

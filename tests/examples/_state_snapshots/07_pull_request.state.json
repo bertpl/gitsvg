@@ -1,0 +1,60 @@
+{
+  "branches": [
+    {
+      "name": "main",
+      "head_commit_id": "m2"
+    },
+    {
+      "name": "feature",
+      "head_commit_id": "f2"
+    }
+  ],
+  "commits": [
+    {
+      "id": "m1",
+      "branch": "main",
+      "hash": null,
+      "msg": "release",
+      "highlight": false,
+      "parents": []
+    },
+    {
+      "id": "f1",
+      "branch": "feature",
+      "hash": null,
+      "msg": "wip",
+      "highlight": false,
+      "parents": [
+        "m1"
+      ]
+    },
+    {
+      "id": "f2",
+      "branch": "feature",
+      "hash": null,
+      "msg": "polish",
+      "highlight": false,
+      "parents": [
+        "f1"
+      ]
+    },
+    {
+      "id": "m2",
+      "branch": "main",
+      "hash": null,
+      "msg": "hotfix",
+      "highlight": false,
+      "parents": [
+        "m1"
+      ]
+    }
+  ],
+  "pull_requests": [
+    {
+      "id": "pr1",
+      "from_branch": "feature",
+      "into_branch": "main",
+      "title": "PR 1: add thing"
+    }
+  ]
+}

@@ -212,6 +212,7 @@ Selecting a named theme also wipes any `theme:` field overrides and `branch.colo
 | Command | Purpose |
 |---------|---------|
 | `gitsvg render <input> -o <output>` | Render a `.gitsvg.jsonl` file to SVG. Pass a directory at both ends to recursively walk the input tree and write mirrored `.svg` outputs under the output directory. `--small=N` selects minification level 0-3; bare `--small` is level 2 (lossless structural compression). |
+| `gitsvg state <input>` | Emit the resolved diagram state as JSON — branches with current heads, commits with resolved hashes and parent chain, open pull requests. Stdout by default; pass `-o <file>` to write to a file, or pass a directory pair to recursively walk and emit one `<stem>.state.json` per input. Output format may change before 1.0; pin a gitsvg version when caching the schema. |
 | `gitsvg validate <input>` | Run the full validation pipeline; report errors with `file:line: [code] field: message`. Add `--json` for a structured report. |
 | `gitsvg schema` | Index of all input operations. `gitsvg schema <op>` prints the JSON Schema for one operation (e.g. `gitsvg schema theme` for the theme op's field schema); `--list-ops` prints a bare op list. `gitsvg schema themes` lists the registered named themes; `gitsvg schema theme <name>` prints a named theme's resolved field values. |
 | `gitsvg errors` | Index of all validation error codes. `gitsvg errors <code>` prints the long-form catalog entry; `--list-codes` prints a bare code list. |

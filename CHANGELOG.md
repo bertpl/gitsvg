@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `gitsvg render` accepts a directory pair: recursively walks `INPUT_DIR` for `*.gitsvg.jsonl` files and writes mirrored `.svg` outputs under `OUTPUT_DIR`, preserving subdirectory structure.
+- New `gitsvg state INPUT` command emits the resolved diagram state as JSON (branches with current heads, commits with resolved hashes and parent chain, open pull requests); writes to stdout, or to `-o <file>`, or recursively walks an `INPUT_DIR` and emits one `<stem>.state.json` per input under `-o <OUTPUT_DIR>`. Output format may change before 1.0.
 
 ### Changed
 
