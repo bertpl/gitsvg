@@ -55,7 +55,7 @@ from gitsvg.state import state_to_json
     ),
 )
 def state_command(input_path: Path, output_path: Path | None) -> None:
-    """Emit a JSON snapshot of the diagram (branches, commits, open pull requests).
+    """Emit a JSON snapshot of the diagram (branches, commits, open pull requests, ids, parents).
 
     With a single file at INPUT and no `-o`, writes the JSON to
     stdout. With `-o OUTPUT.json`, writes to that file. With a
