@@ -1,12 +1,13 @@
 """The `gitsvg state` CLI command.
 
-Emits the resolved diagram state (branches, commits, parent chain,
-open pull requests) as a JSON document. The intended consumer is an
-LLM agent that authored a `.gitsvg.jsonl` file and needs to read
-back the resolved structure — auto-generated commit ids, resolved
-hashes (the `"auto"` sentinel turned concrete), current branch
-heads, and the parent chain — without re-parsing its own input or
-round-tripping through the rendered SVG.
+Emits a JSON snapshot of the diagram — branches, commits with their
+parent chain, and open pull requests — as a structural description
+of the resolved graph. The intended consumer is an LLM agent that
+authored a `.gitsvg.jsonl` file and needs to read back the resolved
+structure — auto-generated commit ids, resolved hashes (the
+`"auto"` sentinel turned concrete), current branch heads, and the
+parent chain — without re-parsing its own input or round-tripping
+through the rendered SVG.
 
 Three invocation forms, mirroring `gitsvg render`:
 
@@ -54,7 +55,7 @@ from gitsvg.state import state_to_json
     ),
 )
 def state_command(input_path: Path, output_path: Path | None) -> None:
-    """Emit the resolved diagram state as JSON.
+    """Emit a JSON snapshot of the diagram (branches, commits, open pull requests).
 
     With a single file at INPUT and no `-o`, writes the JSON to
     stdout. With `-o OUTPUT.json`, writes to that file. With a
