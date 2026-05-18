@@ -1,0 +1,105 @@
+{
+  "grid": {
+    "n_commits": 5,
+    "n_branches": 2
+  },
+  "branches": [
+    {
+      "id": "b0",
+      "name": "main",
+      "branch_pos": 0,
+      "start": 0,
+      "end": 4,
+      "label_side": "before"
+    },
+    {
+      "id": "b1",
+      "name": "feature",
+      "branch_pos": 1,
+      "start": 2,
+      "end": 3,
+      "label_side": "after"
+    }
+  ],
+  "commits": [
+    {
+      "id": "c1",
+      "branch_id": "b0",
+      "branch_pos": 0,
+      "commit_pos": 0,
+      "msg": "initial commit",
+      "hash": "1b35060",
+      "highlight": false,
+      "label_side": "before"
+    },
+    {
+      "id": "c2",
+      "branch_id": "b0",
+      "branch_pos": 0,
+      "commit_pos": 1,
+      "msg": "setup config",
+      "hash": "b1e760e",
+      "highlight": false,
+      "label_side": "before"
+    },
+    {
+      "id": "f1",
+      "branch_id": "b1",
+      "branch_pos": 1,
+      "commit_pos": 2,
+      "msg": "add login form",
+      "hash": "97b103e",
+      "highlight": false,
+      "label_side": "after"
+    },
+    {
+      "id": "f2",
+      "branch_id": "b1",
+      "branch_pos": 1,
+      "commit_pos": 3,
+      "msg": "wire up auth",
+      "hash": "02a38f5",
+      "highlight": false,
+      "label_side": "after"
+    },
+    {
+      "id": "m1",
+      "branch_id": "b0",
+      "branch_pos": 0,
+      "commit_pos": 4,
+      "msg": "merge feature",
+      "hash": "f5acfc5",
+      "highlight": false,
+      "label_side": "before"
+    }
+  ],
+  "arcs": [
+    {
+      "kind": "branch_off",
+      "from_branch_pos": 0,
+      "from_commit_pos": 1,
+      "to_branch_pos": 1,
+      "to_commit_pos": 2,
+      "color_branch_id": "b1",
+      "vertical_first": false
+    },
+    {
+      "kind": "merge",
+      "from_branch_pos": 1,
+      "from_commit_pos": 3,
+      "to_branch_pos": 0,
+      "to_commit_pos": 4,
+      "color_branch_id": "b1",
+      "vertical_first": true
+    }
+  ],
+  "guides": [
+    {
+      "branch_pos": 0
+    },
+    {
+      "branch_pos": 1
+    }
+  ],
+  "pull_requests": []
+}

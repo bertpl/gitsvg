@@ -24,6 +24,7 @@ from gitsvg.layout._layout import (
     LayoutGuide,
     LayoutPullRequest,
 )
+from gitsvg.layout._serialisation import layout_to_json
 
 __all__ = [
     "Layout",
@@ -34,4 +35,5 @@ __all__ = [
     "LayoutGuide",
     "LayoutPullRequest",
     "compute_layout",
+    "layout_to_json",
 ]
