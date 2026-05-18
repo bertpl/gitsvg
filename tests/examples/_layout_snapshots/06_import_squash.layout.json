@@ -1,0 +1,86 @@
+{
+  "grid": {
+    "n_commits": 4,
+    "n_branches": 2
+  },
+  "branches": [
+    {
+      "id": "b0",
+      "name": "main",
+      "branch_pos": 0,
+      "start": 0,
+      "end": 2,
+      "label_side": "before"
+    },
+    {
+      "id": "b2",
+      "name": "feature",
+      "branch_pos": 1,
+      "start": 3,
+      "end": 3,
+      "label_side": "after"
+    }
+  ],
+  "commits": [
+    {
+      "id": "c1",
+      "branch_id": "b0",
+      "branch_pos": 0,
+      "commit_pos": 0,
+      "msg": "initial commit",
+      "hash": "1b35060",
+      "highlight": false,
+      "label_side": "before"
+    },
+    {
+      "id": "c2",
+      "branch_id": "b0",
+      "branch_pos": 0,
+      "commit_pos": 1,
+      "msg": "main moves on",
+      "hash": "b1e760e",
+      "highlight": false,
+      "label_side": "before"
+    },
+    {
+      "id": "c3",
+      "branch_id": "b0",
+      "branch_pos": 0,
+      "commit_pos": 2,
+      "msg": "more main work",
+      "hash": "62a6989",
+      "highlight": false,
+      "label_side": "before"
+    },
+    {
+      "id": "f_squash",
+      "branch_id": "b2",
+      "branch_pos": 1,
+      "commit_pos": 3,
+      "msg": "complete feature",
+      "hash": "d29397d",
+      "highlight": false,
+      "label_side": "after"
+    }
+  ],
+  "arcs": [
+    {
+      "kind": "branch_off",
+      "from_branch_pos": 0,
+      "from_commit_pos": 2,
+      "to_branch_pos": 1,
+      "to_commit_pos": 3,
+      "color_branch_id": "b2",
+      "vertical_first": false
+    }
+  ],
+  "guides": [
+    {
+      "branch_pos": 0
+    },
+    {
+      "branch_pos": 1
+    }
+  ],
+  "pull_requests": []
+}

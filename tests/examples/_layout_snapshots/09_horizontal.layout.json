@@ -1,0 +1,155 @@
+{
+  "grid": {
+    "n_commits": 7,
+    "n_branches": 3
+  },
+  "branches": [
+    {
+      "id": "b0",
+      "name": "main",
+      "branch_pos": 0,
+      "start": 0,
+      "end": 5,
+      "label_side": "before"
+    },
+    {
+      "id": "b1",
+      "name": "feature",
+      "branch_pos": 1,
+      "start": 2,
+      "end": 3,
+      "label_side": "after"
+    },
+    {
+      "id": "b2",
+      "name": "docs",
+      "branch_pos": 2,
+      "start": 2,
+      "end": 2,
+      "label_side": "after"
+    }
+  ],
+  "commits": [
+    {
+      "id": "m1",
+      "branch_id": "b0",
+      "branch_pos": 0,
+      "commit_pos": 0,
+      "msg": "init",
+      "hash": "7b14e2d",
+      "highlight": false,
+      "label_side": "before"
+    },
+    {
+      "id": "m2",
+      "branch_id": "b0",
+      "branch_pos": 0,
+      "commit_pos": 1,
+      "msg": "release v1",
+      "hash": "691ac26",
+      "highlight": true,
+      "label_side": "before"
+    },
+    {
+      "id": "f1",
+      "branch_id": "b1",
+      "branch_pos": 1,
+      "commit_pos": 2,
+      "msg": "wip",
+      "hash": "577eb2f",
+      "highlight": false,
+      "label_side": "after"
+    },
+    {
+      "id": "f2",
+      "branch_id": "b1",
+      "branch_pos": 1,
+      "commit_pos": 3,
+      "msg": "polish",
+      "hash": "02a38f5",
+      "highlight": false,
+      "label_side": "after"
+    },
+    {
+      "id": "d1",
+      "branch_id": "b2",
+      "branch_pos": 2,
+      "commit_pos": 2,
+      "msg": "readme",
+      "hash": "c2c3fad",
+      "highlight": false,
+      "label_side": "after"
+    },
+    {
+      "id": "_c1",
+      "branch_id": "b0",
+      "branch_pos": 0,
+      "commit_pos": 4,
+      "msg": "merge feature",
+      "hash": "a4b68e8",
+      "highlight": false,
+      "label_side": "before"
+    },
+    {
+      "id": "m3",
+      "branch_id": "b0",
+      "branch_pos": 0,
+      "commit_pos": 5,
+      "msg": "hotfix",
+      "hash": "5c5d0aa",
+      "highlight": false,
+      "label_side": "before"
+    }
+  ],
+  "arcs": [
+    {
+      "kind": "branch_off",
+      "from_branch_pos": 0,
+      "from_commit_pos": 1,
+      "to_branch_pos": 1,
+      "to_commit_pos": 2,
+      "color_branch_id": "b1",
+      "vertical_first": false
+    },
+    {
+      "kind": "branch_off",
+      "from_branch_pos": 0,
+      "from_commit_pos": 1,
+      "to_branch_pos": 2,
+      "to_commit_pos": 2,
+      "color_branch_id": "b2",
+      "vertical_first": false
+    },
+    {
+      "kind": "merge",
+      "from_branch_pos": 1,
+      "from_commit_pos": 3,
+      "to_branch_pos": 0,
+      "to_commit_pos": 4,
+      "color_branch_id": "b1",
+      "vertical_first": true
+    }
+  ],
+  "guides": [
+    {
+      "branch_pos": 0
+    },
+    {
+      "branch_pos": 1
+    },
+    {
+      "branch_pos": 2
+    }
+  ],
+  "pull_requests": [
+    {
+      "id": "pr1",
+      "from_branch_pos": 2,
+      "from_commit_pos": 2,
+      "to_branch_pos": 0,
+      "to_commit_pos": 6,
+      "color_branch_id": "b2",
+      "title": "PR 1: docs update"
+    }
+  ]
+}

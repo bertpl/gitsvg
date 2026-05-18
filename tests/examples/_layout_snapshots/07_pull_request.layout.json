@@ -1,0 +1,96 @@
+{
+  "grid": {
+    "n_commits": 4,
+    "n_branches": 2
+  },
+  "branches": [
+    {
+      "id": "b0",
+      "name": "main",
+      "branch_pos": 0,
+      "start": 0,
+      "end": 1,
+      "label_side": "before"
+    },
+    {
+      "id": "b1",
+      "name": "feature",
+      "branch_pos": 1,
+      "start": 1,
+      "end": 2,
+      "label_side": "after"
+    }
+  ],
+  "commits": [
+    {
+      "id": "m1",
+      "branch_id": "b0",
+      "branch_pos": 0,
+      "commit_pos": 0,
+      "msg": "release",
+      "hash": null,
+      "highlight": false,
+      "label_side": "before"
+    },
+    {
+      "id": "f1",
+      "branch_id": "b1",
+      "branch_pos": 1,
+      "commit_pos": 1,
+      "msg": "wip",
+      "hash": null,
+      "highlight": false,
+      "label_side": "after"
+    },
+    {
+      "id": "f2",
+      "branch_id": "b1",
+      "branch_pos": 1,
+      "commit_pos": 2,
+      "msg": "polish",
+      "hash": null,
+      "highlight": false,
+      "label_side": "after"
+    },
+    {
+      "id": "m2",
+      "branch_id": "b0",
+      "branch_pos": 0,
+      "commit_pos": 1,
+      "msg": "hotfix",
+      "hash": null,
+      "highlight": false,
+      "label_side": "before"
+    }
+  ],
+  "arcs": [
+    {
+      "kind": "branch_off",
+      "from_branch_pos": 0,
+      "from_commit_pos": 0,
+      "to_branch_pos": 1,
+      "to_commit_pos": 1,
+      "color_branch_id": "b1",
+      "vertical_first": false
+    }
+  ],
+  "guides": [
+    {
+      "branch_pos": 0
+    },
+    {
+      "branch_pos": 1
+    }
+  ],
+  "pull_requests": [
+    {
+      "id": "pr1",
+      "from_branch_pos": 1,
+      "from_commit_pos": 2,
+      "to_branch_pos": 0,
+      "to_commit_pos": 3,
+      "color_branch_id": "b1",
+      "title": "PR 1: add thing"
+    }
+  ]
+}

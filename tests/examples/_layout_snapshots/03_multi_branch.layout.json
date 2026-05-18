@@ -1,0 +1,190 @@
+{
+  "grid": {
+    "n_commits": 7,
+    "n_branches": 3
+  },
+  "branches": [
+    {
+      "id": "b0",
+      "name": "main",
+      "branch_pos": 0,
+      "start": 0,
+      "end": 6,
+      "label_side": "before"
+    },
+    {
+      "id": "b1",
+      "name": "feature-a",
+      "branch_pos": 1,
+      "start": 1,
+      "end": 1,
+      "label_side": "after"
+    },
+    {
+      "id": "b2",
+      "name": "bugfix",
+      "branch_pos": 2,
+      "start": 1,
+      "end": 1,
+      "label_side": "after"
+    },
+    {
+      "id": "b3",
+      "name": "feature-b",
+      "branch_pos": 1,
+      "start": 5,
+      "end": 5,
+      "label_side": "after"
+    }
+  ],
+  "commits": [
+    {
+      "id": "c1",
+      "branch_id": "b0",
+      "branch_pos": 0,
+      "commit_pos": 0,
+      "msg": "initial commit",
+      "hash": "1b35060",
+      "highlight": false,
+      "label_side": "before"
+    },
+    {
+      "id": "a1",
+      "branch_id": "b1",
+      "branch_pos": 1,
+      "commit_pos": 1,
+      "msg": "start feature A",
+      "hash": "a8ba520",
+      "highlight": false,
+      "label_side": "after"
+    },
+    {
+      "id": "x1",
+      "branch_id": "b2",
+      "branch_pos": 2,
+      "commit_pos": 1,
+      "msg": "fix #42",
+      "hash": "ff2bf3a",
+      "highlight": false,
+      "label_side": "after"
+    },
+    {
+      "id": "m1",
+      "branch_id": "b0",
+      "branch_pos": 0,
+      "commit_pos": 2,
+      "msg": "merge feature A",
+      "hash": "c521ba8",
+      "highlight": false,
+      "label_side": "before"
+    },
+    {
+      "id": "m2",
+      "branch_id": "b0",
+      "branch_pos": 0,
+      "commit_pos": 3,
+      "msg": "merge bugfix",
+      "hash": "dca1553",
+      "highlight": false,
+      "label_side": "before"
+    },
+    {
+      "id": "c2",
+      "branch_id": "b0",
+      "branch_pos": 0,
+      "commit_pos": 4,
+      "msg": "release prep",
+      "hash": "b2ed627",
+      "highlight": false,
+      "label_side": "before"
+    },
+    {
+      "id": "b1",
+      "branch_id": "b3",
+      "branch_pos": 1,
+      "commit_pos": 5,
+      "msg": "feature B",
+      "hash": "b8e625f",
+      "highlight": false,
+      "label_side": "after"
+    },
+    {
+      "id": "m3",
+      "branch_id": "b0",
+      "branch_pos": 0,
+      "commit_pos": 6,
+      "msg": "merge feature B",
+      "hash": "d193154",
+      "highlight": false,
+      "label_side": "before"
+    }
+  ],
+  "arcs": [
+    {
+      "kind": "branch_off",
+      "from_branch_pos": 0,
+      "from_commit_pos": 0,
+      "to_branch_pos": 1,
+      "to_commit_pos": 1,
+      "color_branch_id": "b1",
+      "vertical_first": false
+    },
+    {
+      "kind": "branch_off",
+      "from_branch_pos": 0,
+      "from_commit_pos": 0,
+      "to_branch_pos": 2,
+      "to_commit_pos": 1,
+      "color_branch_id": "b2",
+      "vertical_first": false
+    },
+    {
+      "kind": "branch_off",
+      "from_branch_pos": 0,
+      "from_commit_pos": 4,
+      "to_branch_pos": 1,
+      "to_commit_pos": 5,
+      "color_branch_id": "b3",
+      "vertical_first": false
+    },
+    {
+      "kind": "merge",
+      "from_branch_pos": 1,
+      "from_commit_pos": 1,
+      "to_branch_pos": 0,
+      "to_commit_pos": 2,
+      "color_branch_id": "b1",
+      "vertical_first": true
+    },
+    {
+      "kind": "merge",
+      "from_branch_pos": 2,
+      "from_commit_pos": 1,
+      "to_branch_pos": 0,
+      "to_commit_pos": 3,
+      "color_branch_id": "b2",
+      "vertical_first": true
+    },
+    {
+      "kind": "merge",
+      "from_branch_pos": 1,
+      "from_commit_pos": 5,
+      "to_branch_pos": 0,
+      "to_commit_pos": 6,
+      "color_branch_id": "b3",
+      "vertical_first": true
+    }
+  ],
+  "guides": [
+    {
+      "branch_pos": 0
+    },
+    {
+      "branch_pos": 1
+    },
+    {
+      "branch_pos": 2
+    }
+  ],
+  "pull_requests": []
+}

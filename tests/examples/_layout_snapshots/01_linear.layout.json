@@ -1,0 +1,65 @@
+{
+  "grid": {
+    "n_commits": 4,
+    "n_branches": 1
+  },
+  "branches": [
+    {
+      "id": "b0",
+      "name": "main",
+      "branch_pos": 0,
+      "start": 0,
+      "end": 3,
+      "label_side": "before"
+    }
+  ],
+  "commits": [
+    {
+      "id": "c1",
+      "branch_id": "b0",
+      "branch_pos": 0,
+      "commit_pos": 0,
+      "msg": "initial commit",
+      "hash": "1b35060",
+      "highlight": false,
+      "label_side": "before"
+    },
+    {
+      "id": "c2",
+      "branch_id": "b0",
+      "branch_pos": 0,
+      "commit_pos": 1,
+      "msg": "add README",
+      "hash": "b1e760e",
+      "highlight": false,
+      "label_side": "before"
+    },
+    {
+      "id": "c3",
+      "branch_id": "b0",
+      "branch_pos": 0,
+      "commit_pos": 2,
+      "msg": "add tests",
+      "hash": "62a6989",
+      "highlight": false,
+      "label_side": "before"
+    },
+    {
+      "id": "c4",
+      "branch_id": "b0",
+      "branch_pos": 0,
+      "commit_pos": 3,
+      "msg": "fix typo",
+      "hash": "e6109b7",
+      "highlight": false,
+      "label_side": "before"
+    }
+  ],
+  "arcs": [],
+  "guides": [
+    {
+      "branch_pos": 0
+    }
+  ],
+  "pull_requests": []
+}
