@@ -42,18 +42,14 @@ validate-local:
 	uv run python scripts/validate_local.py
 
 render-local:
-	uv run python scripts/render_local.py
+	uv run gitsvg render local/test_examples -o local/test_examples
 
 # Re-render every committed example then rebuild the tiled themes preview.
-# Order matters: the bulk loop would otherwise overwrite the tile via the
+# Order matters: the bulk render would otherwise overwrite the tile via the
 # indirect 10_named_themes.gitsvg.jsonl -> 10_named_themes.svg render, so the
 # preview script runs at the end to restore the actual tile.
 refresh-examples:
-	@for f in examples/*.gitsvg.jsonl; do \
-		base=$$(basename "$$f" .gitsvg.jsonl); \
-		echo "rendering $$f -> examples/$$base.svg"; \
-		uv run gitsvg render "$$f" -o "examples/$$base.svg" || exit 1; \
-	done
+	uv run gitsvg render examples -o examples
 	uv run python scripts/build_themed_preview.py
 
 rebuild-glyph-widths:
