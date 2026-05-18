@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `gitsvg render` accepts a directory pair: walks `INPUT_DIR` for `*.gitsvg.jsonl` files and writes mirrored `.svg` outputs under `OUTPUT_DIR`, preserving subdirectory structure.
+- `gitsvg render` accepts a directory pair: recursively walks `INPUT_DIR` for `*.gitsvg.jsonl` files and writes mirrored `.svg` outputs under `OUTPUT_DIR`, preserving subdirectory structure.
 
 ### Changed
 

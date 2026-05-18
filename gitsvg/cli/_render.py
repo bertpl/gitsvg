@@ -5,11 +5,11 @@ Two invocation forms:
 - *Single-file* — `gitsvg render INPUT.jsonl -o OUTPUT.svg`. Runs
   the full validate pipeline on `INPUT.jsonl`, computes a layout,
   renders the result, and writes one SVG to `OUTPUT.svg`.
-- *Bulk* — `gitsvg render INPUT_DIR -o OUTPUT_DIR`. Walks
-  `INPUT_DIR` for `*.gitsvg.jsonl` files, renders each one to a
-  mirrored path under `OUTPUT_DIR` with `.gitsvg.jsonl` swapped
-  for `.svg`. Continue-on-error; exit non-zero if any file
-  failed.
+- *Bulk* — `gitsvg render INPUT_DIR -o OUTPUT_DIR`. Recursively
+  walks `INPUT_DIR` for `*.gitsvg.jsonl` files, renders each one
+  to a mirrored path under `OUTPUT_DIR` with `.gitsvg.jsonl`
+  swapped for `.svg`. Continue-on-error; exit non-zero if any
+  file failed.
 
 Validation errors print to stderr (one per line in single-file
 mode, aggregated at the end in bulk mode) and exit non-zero. No
@@ -57,10 +57,11 @@ from gitsvg.render import compute_minify_config, minify, render
 def render_command(input_path: Path, output_path: Path, minify_level: int) -> None:
     """Render a `.gitsvg.jsonl` input file (or directory tree) to SVG.
 
-    With a single file at INPUT and a file path at `-o`, renders one
-    SVG. With a directory at INPUT and a directory at `-o`, walks
-    INPUT for `*.gitsvg.jsonl` files and writes mirrored `.svg`
-    outputs under OUTPUT, preserving subdirectory structure.
+    With a single file at INPUT and a file path at `-o`, renders
+    one SVG. With a directory at INPUT and a directory at `-o`,
+    recursively walks INPUT for `*.gitsvg.jsonl` files and writes
+    mirrored `.svg` outputs under OUTPUT, preserving subdirectory
+    structure.
 
     Runs the same validation pipeline as `gitsvg validate` per
     input. Exits non-zero (writing nothing for that input) on any

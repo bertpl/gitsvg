@@ -47,8 +47,9 @@ def process_input(
 
     Inspects `input_path` to decide the mode, validates that
     `output_path`'s type matches, then either invokes `process_one`
-    once (single-file mode) or walks the input tree and invokes it
-    per file (bulk mode). Writes any validation errors to stderr,
+    once (single-file mode) or recursively walks the input tree
+    and invokes it per file (bulk mode). Writes any validation
+    errors to stderr,
     prints a summary line in bulk mode, and returns the exit code
     the CLI subcommand should propagate.
 
@@ -105,7 +106,7 @@ def run_bulk(
     output_ext: str,
     process_one: ProcessOne,
 ) -> int:
-    """Walk `input_root` for `*.gitsvg.jsonl` and process each file.
+    """Recursively walk `input_root` for `*.gitsvg.jsonl` and process each file.
 
     Each input maps to a mirrored output path under `output_root`
     with the `.gitsvg.jsonl` suffix replaced by `output_ext`. The
@@ -153,11 +154,11 @@ def run_bulk(
 
 
 def walk_inputs(input_root: Path) -> list[Path]:
-    """Return a sorted list of `*.gitsvg.jsonl` paths under `input_root`.
+    """Return a sorted list of `*.gitsvg.jsonl` paths recursively under `input_root`.
 
     Args:
-        input_root: Directory to walk. Missing directories produce
-            an empty list (no error).
+        input_root: Directory to recursively walk. Missing directories
+            produce an empty list (no error).
 
     Returns:
         Sorted list of matching paths. Empty if the directory is
