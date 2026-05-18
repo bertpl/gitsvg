@@ -1,0 +1,53 @@
+{
+  "branches": [
+    {
+      "name": "main",
+      "head_commit_id": "c3"
+    },
+    {
+      "name": "feature",
+      "head_commit_id": "f_squash"
+    }
+  ],
+  "commits": [
+    {
+      "id": "c1",
+      "branch": "main",
+      "hash": "1b35060",
+      "msg": "initial commit",
+      "highlight": false,
+      "parents": []
+    },
+    {
+      "id": "c2",
+      "branch": "main",
+      "hash": "b1e760e",
+      "msg": "main moves on",
+      "highlight": false,
+      "parents": [
+        "c1"
+      ]
+    },
+    {
+      "id": "c3",
+      "branch": "main",
+      "hash": "62a6989",
+      "msg": "more main work",
+      "highlight": false,
+      "parents": [
+        "c2"
+      ]
+    },
+    {
+      "id": "f_squash",
+      "branch": "feature",
+      "hash": "d29397d",
+      "msg": "complete feature",
+      "highlight": false,
+      "parents": [
+        "c3"
+      ]
+    }
+  ],
+  "pull_requests": []
+}

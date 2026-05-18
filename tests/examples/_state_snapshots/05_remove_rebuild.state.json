@@ -1,0 +1,63 @@
+{
+  "branches": [
+    {
+      "name": "main",
+      "head_commit_id": "c3"
+    },
+    {
+      "name": "feature",
+      "head_commit_id": "f2"
+    }
+  ],
+  "commits": [
+    {
+      "id": "c1",
+      "branch": "main",
+      "hash": "1b35060",
+      "msg": "initial commit",
+      "highlight": false,
+      "parents": []
+    },
+    {
+      "id": "c2",
+      "branch": "main",
+      "hash": "b1e760e",
+      "msg": "main moves on",
+      "highlight": false,
+      "parents": [
+        "c1"
+      ]
+    },
+    {
+      "id": "c3",
+      "branch": "main",
+      "hash": "62a6989",
+      "msg": "more main work",
+      "highlight": false,
+      "parents": [
+        "c2"
+      ]
+    },
+    {
+      "id": "f1",
+      "branch": "feature",
+      "hash": "4ef0ae4",
+      "msg": "WIP feature",
+      "highlight": false,
+      "parents": [
+        "c3"
+      ]
+    },
+    {
+      "id": "f2",
+      "branch": "feature",
+      "hash": "02a38f5",
+      "msg": "more WIP",
+      "highlight": false,
+      "parents": [
+        "f1"
+      ]
+    }
+  ],
+  "pull_requests": []
+}

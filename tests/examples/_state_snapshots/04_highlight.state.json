@@ -1,0 +1,59 @@
+{
+  "branches": [
+    {
+      "name": "main",
+      "head_commit_id": "c4"
+    }
+  ],
+  "commits": [
+    {
+      "id": "c1",
+      "branch": "main",
+      "hash": "1b35060",
+      "msg": "initial commit",
+      "highlight": false,
+      "parents": []
+    },
+    {
+      "id": "c2",
+      "branch": "main",
+      "hash": "b1e760e",
+      "msg": "feature work",
+      "highlight": false,
+      "parents": [
+        "c1"
+      ]
+    },
+    {
+      "id": "c3",
+      "branch": "main",
+      "hash": "62a6989",
+      "msg": "more feature work",
+      "highlight": false,
+      "parents": [
+        "c2"
+      ]
+    },
+    {
+      "id": "v1",
+      "branch": "main",
+      "hash": "e15ee8a",
+      "msg": "release v1.0",
+      "highlight": true,
+      "parents": [
+        "c3"
+      ]
+    },
+    {
+      "id": "c4",
+      "branch": "main",
+      "hash": "21ac90c",
+      "msg": "post-release fix",
+      "highlight": false,
+      "parents": [
+        "v1"
+      ]
+    }
+  ],
+  "pull_requests": []
+}

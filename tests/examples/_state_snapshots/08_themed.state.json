@@ -1,0 +1,104 @@
+{
+  "branches": [
+    {
+      "name": "main",
+      "head_commit_id": "m3"
+    },
+    {
+      "name": "feature-a",
+      "head_commit_id": "a1"
+    },
+    {
+      "name": "bugfix",
+      "head_commit_id": "x1"
+    },
+    {
+      "name": "feature-b",
+      "head_commit_id": "b1"
+    }
+  ],
+  "commits": [
+    {
+      "id": "c1",
+      "branch": "main",
+      "hash": "1b35060",
+      "msg": "initial commit",
+      "highlight": false,
+      "parents": []
+    },
+    {
+      "id": "a1",
+      "branch": "feature-a",
+      "hash": "a8ba520",
+      "msg": "start feature A",
+      "highlight": false,
+      "parents": [
+        "c1"
+      ]
+    },
+    {
+      "id": "x1",
+      "branch": "bugfix",
+      "hash": "ff2bf3a",
+      "msg": "fix #42",
+      "highlight": false,
+      "parents": [
+        "c1"
+      ]
+    },
+    {
+      "id": "m1",
+      "branch": "main",
+      "hash": "c521ba8",
+      "msg": "merge feature A",
+      "highlight": false,
+      "parents": [
+        "c1",
+        "a1"
+      ]
+    },
+    {
+      "id": "m2",
+      "branch": "main",
+      "hash": "dca1553",
+      "msg": "merge bugfix",
+      "highlight": false,
+      "parents": [
+        "m1",
+        "x1"
+      ]
+    },
+    {
+      "id": "c2",
+      "branch": "main",
+      "hash": "b2ed627",
+      "msg": "release prep",
+      "highlight": false,
+      "parents": [
+        "m2"
+      ]
+    },
+    {
+      "id": "b1",
+      "branch": "feature-b",
+      "hash": "b8e625f",
+      "msg": "feature B",
+      "highlight": false,
+      "parents": [
+        "c2"
+      ]
+    },
+    {
+      "id": "m3",
+      "branch": "main",
+      "hash": "d193154",
+      "msg": "merge feature B",
+      "highlight": false,
+      "parents": [
+        "c2",
+        "b1"
+      ]
+    }
+  ],
+  "pull_requests": []
+}

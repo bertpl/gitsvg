@@ -12,6 +12,7 @@ Public surface:
 
 from gitsvg.state._engine import apply_ops
 from gitsvg.state._eof import check_end_of_file
+from gitsvg.state._serialisation import state_to_json
 from gitsvg.state._state import BranchState, CommitState, GridState, State
 
 __all__ = [
@@ -21,4 +22,5 @@ __all__ = [
     "State",
     "apply_ops",
     "check_end_of_file",
+    "state_to_json",
 ]
