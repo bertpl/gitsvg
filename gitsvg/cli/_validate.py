@@ -18,10 +18,8 @@ from pathlib import Path
 
 import click
 
+from gitsvg.cli._pipeline import run_validate_pipeline
 from gitsvg.errors import ValidationReport
-from gitsvg.imports import resolve_imports
-from gitsvg.parse import parse_jsonl_file
-from gitsvg.state import apply_ops, check_end_of_file
 
 
 # ==================================================================================================
@@ -38,10 +36,7 @@ def validate_command(path: Path, json_output: bool) -> None:
     validation. Prints any errors and exits non-zero when validation
     fails.
     """
-    parsed_ops, report = parse_jsonl_file(path)
-    expanded_ops = resolve_imports(parsed_ops, file=path, report=report)
-    state, _theme = apply_ops(expanded_ops, report)
-    check_end_of_file(state, report)
+    _state, report, _theme = run_validate_pipeline(path)
     if json_output:
         click.echo(_render_json(report))
     else:
