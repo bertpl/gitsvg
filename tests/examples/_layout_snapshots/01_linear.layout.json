@@ -56,10 +56,5 @@
     }
   ],
   "arcs": [],
-  "guides": [
-    {
-      "branch_pos": 0
-    }
-  ],
   "pull_requests": []
 }

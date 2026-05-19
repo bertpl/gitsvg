@@ -617,27 +617,9 @@ def test_branch_off_arc_emitted_for_each_non_root_branch() -> None:
     assert arc.from_commit_pos == 0  # m1
     assert arc.to_branch_pos == 1  # feat lane
     assert arc.to_commit_pos == 1  # feat.start
-    assert arc.vertical_first is False
 
 
-def test_branch_off_arc_tagged_with_target_branch_id() -> None:
-    # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-    )
-
-    # --- act --------------------------
-    layout = _layout_from(text)
-
-    # --- assert -----------------------
-    arc = next(a for a in layout.arcs if a.kind == "branch_off")
-    feat = next(b for b in layout.branches if b.name == "feat")
-    assert arc.color_branch_id == feat.id
-
-
-def test_merge_arc_emitted_tagged_with_source_branch_id() -> None:
+def test_merge_arc_emitted_per_cross_lane_parent() -> None:
     # --- arrange ----------------------
     text = (
         '{"op": "branch", "name": "main"}\n'
@@ -654,28 +636,8 @@ def test_merge_arc_emitted_tagged_with_source_branch_id() -> None:
     merge_arcs = [a for a in layout.arcs if a.kind == "merge"]
     assert len(merge_arcs) == 1
     arc = merge_arcs[0]
-    feat = next(b for b in layout.branches if b.name == "feat")
-    assert arc.color_branch_id == feat.id  # source branch
-    assert arc.vertical_first is True
-
-
-# ==================================================================================================
-#  Branch guides — one per occupied lane
-# ==================================================================================================
-def test_one_guide_per_unique_branch_pos() -> None:
-    # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "branch", "name": "docs", "from_branch": "main"}\n'
-    )
-
-    # --- act --------------------------
-    layout = _layout_from(text)
-
-    # --- assert -----------------------
-    assert len(layout.guides) == 3
-    assert sorted(g.branch_pos for g in layout.guides) == [0, 1, 2]
+    assert arc.from_branch_pos == 1  # feat lane
+    assert arc.to_branch_pos == 0  # main lane
 
 
 # ==================================================================================================

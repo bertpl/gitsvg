@@ -79,26 +79,14 @@
       "from_branch_pos": 0,
       "from_commit_pos": 1,
       "to_branch_pos": 1,
-      "to_commit_pos": 2,
-      "color_branch_id": "b1",
-      "vertical_first": false
+      "to_commit_pos": 2
     },
     {
       "kind": "merge",
       "from_branch_pos": 1,
       "from_commit_pos": 3,
       "to_branch_pos": 0,
-      "to_commit_pos": 4,
-      "color_branch_id": "b1",
-      "vertical_first": true
-    }
-  ],
-  "guides": [
-    {
-      "branch_pos": 0
-    },
-    {
-      "branch_pos": 1
+      "to_commit_pos": 4
     }
   ],
   "pull_requests": []

@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `gitsvg layout` JSON output trimmed — render-strategy fields no longer leak into the layout schema; arc `kind` becomes a typed enum. JSONL input and SVG output unchanged.
+
 ### Deprecated
 
 ### Removed

@@ -17,15 +17,14 @@ def test_empty_input_emits_top_level_keys_with_empty_lists() -> None:
     payload = _layout_json("")
 
     # --- assert -----------------------
-    assert set(payload.keys()) == {"grid", "branches", "commits", "arcs", "guides", "pull_requests"}
+    assert set(payload.keys()) == {"grid", "branches", "commits", "arcs", "pull_requests"}
     assert payload["branches"] == []
     assert payload["commits"] == []
     assert payload["arcs"] == []
-    assert payload["guides"] == []
     assert payload["pull_requests"] == []
 
 
-def test_linear_chain_emits_branch_commits_and_guide() -> None:
+def test_linear_chain_emits_branch_and_commits() -> None:
     # --- arrange ----------------------
     jsonl = (
         '{"op": "branch", "name": "main"}\n'
@@ -43,7 +42,6 @@ def test_linear_chain_emits_branch_commits_and_guide() -> None:
     assert payload["branches"][0]["branch_pos"] == 0
     assert [c["id"] for c in payload["commits"]] == ["c1", "c2"]
     assert payload["arcs"] == []
-    assert payload["guides"] == [{"branch_pos": 0}]
 
 
 def test_branch_off_emits_branch_off_arc() -> None:
@@ -62,7 +60,6 @@ def test_branch_off_emits_branch_off_arc() -> None:
     arcs = payload["arcs"]
     assert len(arcs) == 1
     assert arcs[0]["kind"] == "branch_off"
-    assert arcs[0]["vertical_first"] is False
 
 
 def test_merge_emits_merge_arc() -> None:
@@ -81,7 +78,6 @@ def test_merge_emits_merge_arc() -> None:
     # --- assert -----------------------
     merge_arcs = [a for a in payload["arcs"] if a["kind"] == "merge"]
     assert len(merge_arcs) == 1
-    assert merge_arcs[0]["vertical_first"] is True
 
 
 def test_pull_request_emits_pull_request_geometry() -> None:

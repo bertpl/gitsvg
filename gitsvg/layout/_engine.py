@@ -2,9 +2,9 @@
 
 `compute_layout(state)` is a pure transformation. It walks state once,
 producing a `Layout` with integer-grid positions, resolved label sides,
-pre-computed arcs (branch-off + merge), pre-enumerated branch guides,
-and the grid extent. The renderer consumes the result alongside a
-resolved `Theme` to make every pixel-side decision.
+pre-computed arcs (branch-off + merge), and the grid extent. The
+renderer consumes the result alongside a resolved `Theme` to make every
+pixel-side decision.
 
 The pipeline runs in three phases. Phase 1 walks every commit in
 chronological order and computes its `commit_pos` together with each
@@ -39,11 +39,11 @@ Heuristic notes:
 - **Branch line span**: from `start` to `max(commit_pos for commit in
   branch.commits)`, or just `start` for empty branches.
 - **Branch-off arcs**: one per non-root branch, from the parent
-  commit's position to the branch's start, tagged with the *target*
-  (new) branch's id.
+  commit's position to the branch's start. Colour attribution (the
+  target branch) is a renderer-side derivation from the arc's `kind`.
 - **Merge arcs**: one per cross-lane parent on any commit with
-  `len(parents) >= 2`, tagged with the *source* (parent) branch's id.
-- **Branch guides**: one per occupied branch-axis lane.
+  `len(parents) >= 2`. Colour attribution (the source branch) is a
+  renderer-side derivation from the arc's `kind`.
 - **Grid extent**: `n_commits` / `n_branches` honour pinned values on
   `state.grid` when set; otherwise auto-fit from the visible content
   (including any open pull-request's projected merge row).
@@ -53,10 +53,10 @@ from gitsvg.file_format import LabelSide
 from gitsvg.layout._layout import (
     Layout,
     LayoutArc,
+    LayoutArcKind,
     LayoutBranch,
     LayoutCommit,
     LayoutGrid,
-    LayoutGuide,
     LayoutPullRequest,
 )
 from gitsvg.layout._occupancy import Occupancy
@@ -77,7 +77,7 @@ def compute_layout(state: State) -> Layout:
 
     Returns:
         A `Layout` with positions, resolved label sides, pre-computed
-        arcs and guides, and the grid extent.
+        arcs, and the grid extent.
     """
     # --- Phase 1: commit positions --------------
     chain_parent: dict[str, str | None] = _compute_chain_parents(state)
@@ -136,9 +136,6 @@ def compute_layout(state: State) -> Layout:
         *_merge_arcs(state, commit_layouts),
     ]
 
-    # --- Build guide list -----------------------
-    guides = [LayoutGuide(branch_pos=lane) for lane in occupancy.occupied_lanes()]
-
     # --- Build pull-request list ----------------
     pull_requests = _build_pull_requests(state, branches)
 
@@ -150,7 +147,6 @@ def compute_layout(state: State) -> Layout:
         branches=branches,
         commits=commit_layouts,
         arcs=arcs,
-        guides=guides,
         pull_requests=pull_requests,
     )
 
@@ -422,13 +418,11 @@ def _branch_off_arcs(
         branch_layout = branch_layouts_by_name[name]
         arcs.append(
             LayoutArc(
-                kind="branch_off",
+                kind=LayoutArcKind.BRANCH_OFF,
                 from_branch_pos=parent_layout.branch_pos,
                 from_commit_pos=parent_layout.commit_pos,
                 to_branch_pos=branch_layout.branch_pos,
                 to_commit_pos=branch_layout.start,
-                color_branch_id=branch_layout.id,
-                vertical_first=False,
             )
         )
     return arcs
@@ -448,20 +442,13 @@ def _merge_arcs(
             parent_layout = commit_layouts.get(parent_id)
             if parent_layout is None or parent_layout.branch_pos == commit_layout.branch_pos:
                 continue
-            parent_state = state.commits.get(parent_id)
-            from_branch_name = parent_state.branch if parent_state is not None else cstate.branch
-            from_branch_id = (
-                state.branches[from_branch_name].id if from_branch_name in state.branches else commit_layout.branch_id
-            )
             arcs.append(
                 LayoutArc(
-                    kind="merge",
+                    kind=LayoutArcKind.MERGE,
                     from_branch_pos=parent_layout.branch_pos,
                     from_commit_pos=parent_layout.commit_pos,
                     to_branch_pos=commit_layout.branch_pos,
                     to_commit_pos=commit_layout.commit_pos,
-                    color_branch_id=from_branch_id,
-                    vertical_first=True,
                 )
             )
     return arcs
@@ -500,7 +487,6 @@ def _build_pull_requests(state: State, branches: list[LayoutBranch]) -> list[Lay
                 from_commit_pos=from_branch.end,
                 to_branch_pos=into_branch.branch_pos,
                 to_commit_pos=projected_merge_pos,
-                color_branch_id=from_branch.id,
                 title=pr_state.title,
             )
         )

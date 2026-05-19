@@ -69,17 +69,7 @@
       "from_branch_pos": 0,
       "from_commit_pos": 2,
       "to_branch_pos": 1,
-      "to_commit_pos": 3,
-      "color_branch_id": "b2",
-      "vertical_first": false
-    }
-  ],
-  "guides": [
-    {
-      "branch_pos": 0
-    },
-    {
-      "branch_pos": 1
+      "to_commit_pos": 3
     }
   ],
   "pull_requests": []
