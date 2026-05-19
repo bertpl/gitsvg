@@ -9,8 +9,7 @@
       "name": "main",
       "branch_pos": 0,
       "start": 0,
-      "end": 3,
-      "label_side": "before"
+      "end": 3
     }
   ],
   "commits": [
@@ -21,8 +20,7 @@
       "commit_pos": 0,
       "msg": "initial commit",
       "hash": "1b35060",
-      "highlight": false,
-      "label_side": "before"
+      "highlight": false
     },
     {
       "id": "c2",
@@ -31,8 +29,7 @@
       "commit_pos": 1,
       "msg": "add README",
       "hash": "b1e760e",
-      "highlight": false,
-      "label_side": "before"
+      "highlight": false
     },
     {
       "id": "c3",
@@ -41,8 +38,7 @@
       "commit_pos": 2,
       "msg": "add tests",
       "hash": "62a6989",
-      "highlight": false,
-      "label_side": "before"
+      "highlight": false
     },
     {
       "id": "c4",
@@ -51,8 +47,7 @@
       "commit_pos": 3,
       "msg": "fix typo",
       "hash": "e6109b7",
-      "highlight": false,
-      "label_side": "before"
+      "highlight": false
     }
   ],
   "arcs": [],

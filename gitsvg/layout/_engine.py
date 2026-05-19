@@ -1,10 +1,9 @@
 """Layout engine — turn validated `State` into a render-ready `Layout`.
 
 `compute_layout(state)` is a pure transformation. It walks state once,
-producing a `Layout` with integer-grid positions, resolved label sides,
-pre-computed arcs (branch-off + merge), and the grid extent. The
-renderer consumes the result alongside a resolved `Theme` to make every
-pixel-side decision.
+producing a `Layout` with integer-grid positions, pre-computed arcs
+(branch-off + merge), and the grid extent. The renderer consumes the
+result alongside a resolved `Theme` to make every pixel-side decision.
 
 The pipeline runs in three phases. Phase 1 walks every commit in
 chronological order and computes its `commit_pos` together with each
@@ -49,7 +48,6 @@ Heuristic notes:
   (including any open pull-request's projected merge row).
 """
 
-from gitsvg.file_format import LabelSide
 from gitsvg.layout._layout import (
     Layout,
     LayoutArc,
@@ -62,10 +60,6 @@ from gitsvg.layout._layout import (
 from gitsvg.layout._occupancy import Occupancy
 from gitsvg.state import State
 
-_DEFAULT_LABEL_SIDE = (
-    LabelSide.AFTER  # fallback when a `branch` op omits `label_side`; commits inherit their branch's resolved side
-)
-
 
 def compute_layout(state: State) -> Layout:
     """Compute a render-ready `Layout` from a fully-built `State`.
@@ -76,8 +70,8 @@ def compute_layout(state: State) -> Layout:
             layout engine does not re-validate.
 
     Returns:
-        A `Layout` with positions, resolved label sides, pre-computed
-        arcs, and the grid extent.
+        A `Layout` with positions, pre-computed arcs, and the grid
+        extent.
     """
     # --- Phase 1: commit positions --------------
     chain_parent: dict[str, str | None] = _compute_chain_parents(state)
@@ -98,11 +92,6 @@ def compute_layout(state: State) -> Layout:
     occupancy = Occupancy()
     branch_pos_by_name: dict[str, int] = _assign_branch_lanes(state, commit_pos_by_id, branch_starts, occupancy)
 
-    # --- Resolve per-branch view fields ---------
-    branch_label_side_by_name: dict[str, LabelSide] = {
-        name: _resolve_label_side(state, name) for name in state.branch_order
-    }
-
     # --- Phase 3: build layout dataclasses ------
     commit_layouts: dict[str, LayoutCommit] = {
         cid: LayoutCommit(
@@ -113,7 +102,6 @@ def compute_layout(state: State) -> Layout:
             msg=cstate.msg,
             hash=cstate.hash,
             highlight=cstate.highlight,
-            label_side=branch_label_side_by_name[cstate.branch],
         )
         for cid, cstate in state.commits.items()
     }
@@ -125,7 +113,6 @@ def compute_layout(state: State) -> Layout:
             branch_pos=branch_pos_by_name[name],
             start=branch_starts[name],
             end=branch_ends[name],
-            label_side=branch_label_side_by_name[name],
         )
         for name in state.branch_order
     ]
@@ -386,15 +373,6 @@ def _pick_free_lane(
     while occupancy.is_blocked_at_or_after(candidate, threshold):
         candidate += 1
     return candidate
-
-
-# ==================================================================================================
-#  Helpers — per-branch view fields
-# ==================================================================================================
-def _resolve_label_side(state: State, branch_name: str) -> LabelSide:
-    """Pick the label side for a branch — explicit override else the default."""
-    branch = state.branches[branch_name]
-    return branch.label_side or _DEFAULT_LABEL_SIDE
 
 
 # ==================================================================================================

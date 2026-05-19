@@ -131,7 +131,7 @@ def test_grid_serialised_as_dict_with_slot_counts() -> None:
     assert payload["grid"] == {"n_commits": 3, "n_branches": 1}
 
 
-def test_branch_carries_id_name_position_and_label_side() -> None:
+def test_branch_carries_id_name_and_grid_positions() -> None:
     # --- arrange ----------------------
     jsonl = '{"op": "branch", "name": "main"}\n'
 
@@ -140,6 +140,6 @@ def test_branch_carries_id_name_position_and_label_side() -> None:
 
     # --- assert -----------------------
     branch = payload["branches"][0]
-    assert set(branch.keys()) == {"id", "name", "branch_pos", "start", "end", "label_side"}
+    assert set(branch.keys()) == {"id", "name", "branch_pos", "start", "end"}
     assert branch["id"] == "b0"
     assert branch["name"] == "main"

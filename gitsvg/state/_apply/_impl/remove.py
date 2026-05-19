@@ -111,12 +111,14 @@ def _remove_commit(state: State, commit_id: str) -> None:
 
 
 def _remove_branch_with_cascade(state: State, builder: ThemeBuilder, branch_name: str) -> None:
-    """Drop a branch (and every commit on it) from state, plus its theme override.
+    """Drop a branch (and every commit on it) from state, plus its theme overrides.
 
-    Removing a branch cleans up `builder.branch_color_overrides[branch.id]`
-    so a redeclared branch with the same name doesn't inherit the
-    removed branch's colour through a stale entry, and the dict stays
-    aligned with the set of live branch ids.
+    Removing a branch cleans up every per-branch entry on `builder`
+    keyed by the branch's id (`branch_color_overrides`,
+    `branch_label_side_overrides`) so a redeclared branch with the
+    same name doesn't inherit the removed branch's presentational
+    choices through stale entries, and each dict stays aligned with
+    the set of live branch ids.
     """
     branch = state.branches.pop(branch_name, None)
     if branch is None:
@@ -126,3 +128,4 @@ def _remove_branch_with_cascade(state: State, builder: ThemeBuilder, branch_name
     for commit_id in list(branch.commit_ids):
         state.commits.pop(commit_id, None)
     builder.branch_color_overrides.pop(branch.id, None)
+    builder.branch_label_side_overrides.pop(branch.id, None)

@@ -9,24 +9,21 @@
       "name": "main",
       "branch_pos": 0,
       "start": 0,
-      "end": 5,
-      "label_side": "before"
+      "end": 5
     },
     {
       "id": "b1",
       "name": "feature",
       "branch_pos": 1,
       "start": 2,
-      "end": 3,
-      "label_side": "after"
+      "end": 3
     },
     {
       "id": "b2",
       "name": "docs",
       "branch_pos": 2,
       "start": 2,
-      "end": 2,
-      "label_side": "after"
+      "end": 2
     }
   ],
   "commits": [
@@ -37,8 +34,7 @@
       "commit_pos": 0,
       "msg": "init",
       "hash": "7b14e2d",
-      "highlight": false,
-      "label_side": "before"
+      "highlight": false
     },
     {
       "id": "m2",
@@ -47,8 +43,7 @@
       "commit_pos": 1,
       "msg": "release v1",
       "hash": "691ac26",
-      "highlight": true,
-      "label_side": "before"
+      "highlight": true
     },
     {
       "id": "f1",
@@ -57,8 +52,7 @@
       "commit_pos": 2,
       "msg": "wip",
       "hash": "577eb2f",
-      "highlight": false,
-      "label_side": "after"
+      "highlight": false
     },
     {
       "id": "f2",
@@ -67,8 +61,7 @@
       "commit_pos": 3,
       "msg": "polish",
       "hash": "02a38f5",
-      "highlight": false,
-      "label_side": "after"
+      "highlight": false
     },
     {
       "id": "d1",
@@ -77,8 +70,7 @@
       "commit_pos": 2,
       "msg": "readme",
       "hash": "c2c3fad",
-      "highlight": false,
-      "label_side": "after"
+      "highlight": false
     },
     {
       "id": "_c1",
@@ -87,8 +79,7 @@
       "commit_pos": 4,
       "msg": "merge feature",
       "hash": "a4b68e8",
-      "highlight": false,
-      "label_side": "before"
+      "highlight": false
     },
     {
       "id": "m3",
@@ -97,8 +88,7 @@
       "commit_pos": 5,
       "msg": "hotfix",
       "hash": "5c5d0aa",
-      "highlight": false,
-      "label_side": "before"
+      "highlight": false
     }
   ],
   "arcs": [

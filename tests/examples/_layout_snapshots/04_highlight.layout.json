@@ -9,8 +9,7 @@
       "name": "main",
       "branch_pos": 0,
       "start": 0,
-      "end": 4,
-      "label_side": "before"
+      "end": 4
     }
   ],
   "commits": [
@@ -21,8 +20,7 @@
       "commit_pos": 0,
       "msg": "initial commit",
       "hash": "1b35060",
-      "highlight": false,
-      "label_side": "before"
+      "highlight": false
     },
     {
       "id": "c2",
@@ -31,8 +29,7 @@
       "commit_pos": 1,
       "msg": "feature work",
       "hash": "b1e760e",
-      "highlight": false,
-      "label_side": "before"
+      "highlight": false
     },
     {
       "id": "c3",
@@ -41,8 +38,7 @@
       "commit_pos": 2,
       "msg": "more feature work",
       "hash": "62a6989",
-      "highlight": false,
-      "label_side": "before"
+      "highlight": false
     },
     {
       "id": "v1",
@@ -51,8 +47,7 @@
       "commit_pos": 3,
       "msg": "release v1.0",
       "hash": "e15ee8a",
-      "highlight": true,
-      "label_side": "before"
+      "highlight": true
     },
     {
       "id": "c4",
@@ -61,8 +56,7 @@
       "commit_pos": 4,
       "msg": "post-release fix",
       "hash": "21ac90c",
-      "highlight": false,
-      "label_side": "before"
+      "highlight": false
     }
   ],
   "arcs": [],

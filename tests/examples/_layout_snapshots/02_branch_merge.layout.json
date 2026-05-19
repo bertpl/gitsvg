@@ -9,16 +9,14 @@
       "name": "main",
       "branch_pos": 0,
       "start": 0,
-      "end": 4,
-      "label_side": "before"
+      "end": 4
     },
     {
       "id": "b1",
       "name": "feature",
       "branch_pos": 1,
       "start": 2,
-      "end": 3,
-      "label_side": "after"
+      "end": 3
     }
   ],
   "commits": [
@@ -29,8 +27,7 @@
       "commit_pos": 0,
       "msg": "initial commit",
       "hash": "1b35060",
-      "highlight": false,
-      "label_side": "before"
+      "highlight": false
     },
     {
       "id": "c2",
@@ -39,8 +36,7 @@
       "commit_pos": 1,
       "msg": "setup config",
       "hash": "b1e760e",
-      "highlight": false,
-      "label_side": "before"
+      "highlight": false
     },
     {
       "id": "f1",
@@ -49,8 +45,7 @@
       "commit_pos": 2,
       "msg": "add login form",
       "hash": "97b103e",
-      "highlight": false,
-      "label_side": "after"
+      "highlight": false
     },
     {
       "id": "f2",
@@ -59,8 +54,7 @@
       "commit_pos": 3,
       "msg": "wire up auth",
       "hash": "02a38f5",
-      "highlight": false,
-      "label_side": "after"
+      "highlight": false
     },
     {
       "id": "m1",
@@ -69,8 +63,7 @@
       "commit_pos": 4,
       "msg": "merge feature",
       "hash": "f5acfc5",
-      "highlight": false,
-      "label_side": "before"
+      "highlight": false
     }
   ],
   "arcs": [

@@ -2,6 +2,7 @@
 
 import pytest
 
+from gitsvg.file_format import LabelSide
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.state import apply_ops
 from gitsvg.theme import DEFAULT_THEME
@@ -181,6 +182,21 @@ def test_named_theme_wipes_prior_branch_color_overrides_by_default() -> None:
     assert main_id not in theme.branch_color_overrides
 
 
+def test_named_theme_wipes_prior_branch_label_side_overrides_by_default() -> None:
+    """A named-theme op with the default `keep_prior_overrides=False`
+    also wipes state-derived per-branch label-side overrides — same
+    reset semantics as the colour-override category."""
+    # --- arrange / act ----------------
+    state, theme, report = _apply(
+        '{"op": "branch", "name": "main", "label_side": "before"}\n{"op": "theme", "name": "default"}\n'
+    )
+
+    # --- assert -----------------------
+    assert report.is_clean()
+    main_id = state.branches["main"].id
+    assert main_id not in theme.branch_label_side_overrides
+
+
 # ==================================================================================================
 #  Cascade — mixed op (name + explicit fields)
 # ==================================================================================================
@@ -246,6 +262,22 @@ def test_flag_true_preserves_prior_branch_color_overrides() -> None:
     assert report.is_clean()
     main_id = state.branches["main"].id
     assert theme.branch_color_overrides[main_id] == "#aabbcc"
+
+
+def test_flag_true_preserves_prior_branch_label_side_overrides() -> None:
+    """`keep_prior_overrides: true` also preserves state-derived
+    per-branch label-side overrides — same survival semantics as the
+    colour-override category."""
+    # --- arrange / act ----------------
+    state, theme, report = _apply(
+        '{"op": "branch", "name": "main", "label_side": "before"}\n'
+        '{"op": "theme", "name": "default", "keep_prior_overrides": true}\n'
+    )
+
+    # --- assert -----------------------
+    assert report.is_clean()
+    main_id = state.branches["main"].id
+    assert theme.branch_label_side_overrides[main_id] == LabelSide.BEFORE
 
 
 def test_flag_false_explicit_matches_default_wipe() -> None:

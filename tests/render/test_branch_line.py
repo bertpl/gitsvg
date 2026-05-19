@@ -43,7 +43,6 @@ def test_empty_branch_emits_no_line() -> None:
         branch_pos=1,
         start=2,
         end=2,
-        label_side="after",
     )
 
     # --- act --------------------------
@@ -66,7 +65,6 @@ def test_non_empty_branch_emits_a_line() -> None:
         branch_pos=1,
         start=0,
         end=2,
-        label_side="after",
     )
 
     # --- act --------------------------

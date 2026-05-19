@@ -20,6 +20,7 @@ from gitsvg.layout import compute_layout
 from gitsvg.parse import parse_jsonl_file
 from gitsvg.render import render
 from gitsvg.state import apply_ops
+from gitsvg.theme import Theme
 from gitsvg.theme._apply import NAMED_THEMES
 
 # ==================================================================================================
@@ -55,17 +56,26 @@ _OUTER_MARGIN = 8  # outer padding around the whole composition, px
 # ==================================================================================================
 #  Per-theme render
 # ==================================================================================================
-def _render_through_theme(state, theme_name: str) -> draw.Drawing:
+def _render_through_theme(state, source_theme: Theme, theme_name: str) -> draw.Drawing:
     """Render the shared state through a single named theme.
+
+    Per-branch overrides authored on the source diagram (`branch.color`,
+    `branch.label_side`) are forwarded onto the named theme so each
+    showcase tile honours the user's authoring choices — only the
+    palette / typography / spacings differ between tiles.
 
     Args:
         state: The fully-applied diagram state (theme-independent).
+        source_theme: The theme produced by the apply pass — carries
+            the per-branch overrides authored on the source JSONL.
         theme_name: Name of a registered theme in `NAMED_THEMES`.
 
     Returns:
         The drawsvg `Drawing` for the named theme.
     """
     theme = NAMED_THEMES[theme_name].build({})
+    theme.branch_color_overrides = dict(source_theme.branch_color_overrides)
+    theme.branch_label_side_overrides = dict(source_theme.branch_label_side_overrides)
     _, renderer_settings = theme.split()
     layout = compute_layout(state)
     return render(layout, renderer_settings)
@@ -189,7 +199,7 @@ def main() -> None:
     # --- parse + apply --------------------
     parsed_ops, report = parse_jsonl_file(INPUT_PATH)
     parsed_ops = resolve_imports(parsed_ops, file=INPUT_PATH, report=report)
-    state, _ = apply_ops(parsed_ops, report)
+    state, source_theme = apply_ops(parsed_ops, report)
     if not report.is_clean():
         raise SystemExit(f"input did not validate cleanly:\n{report}")
 
@@ -198,7 +208,7 @@ def main() -> None:
     for name in PREVIEW_THEMES:
         if name not in NAMED_THEMES:
             raise SystemExit(f"PREVIEW_THEMES references unknown theme {name!r}; not in NAMED_THEMES")
-        rendered.append((name, _render_through_theme(state, name)))
+        rendered.append((name, _render_through_theme(state, source_theme, name)))
 
     # --- compose + write --------------------
     preview = _build_preview(rendered)

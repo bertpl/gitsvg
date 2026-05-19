@@ -3,10 +3,11 @@
 Layout:
 
 - Anchored `theme.label_offset_branch_axis_in_lanes` × lane width to
-  the branch-axis side of the commit dot indicated by
-  `commit.label_side` (`"before"` = lower-index side, `"after"` =
-  higher-index side). The renderer maps that axis-relative side to a
-  pixel direction per orientation via the geometry module.
+  the branch-axis side of the commit dot resolved by
+  `theme.branch_label_side(commit.branch_id)` (`"before"` = lower-index
+  side, `"after"` = higher-index side). The renderer maps that
+  axis-relative side to a pixel direction per orientation via the
+  geometry module.
 - Where the multi-line stack sits relative to that world point comes
   from the box anchor resolved by
   `gitsvg/render/_anchor_resolution.py`. Vertical orientations place
@@ -58,16 +59,18 @@ def draw_commit_label(d: draw.Drawing, commit: LayoutCommit, canvas: RenderCanva
     if not lines:
         return
 
+    label_side = theme.branch_label_side(commit.branch_id)
+
     # Branch-axis offset: signed along the branch axis. Positive = toward
     # higher branch-axis index ("after" side); negative = toward lower
     # ("before" side).
-    if commit.label_side == LabelSide.BEFORE:
+    if label_side == LabelSide.BEFORE:
         branch_axis_offset_in_lanes = -theme.label_offset_branch_axis_in_lanes
     else:
         branch_axis_offset_in_lanes = theme.label_offset_branch_axis_in_lanes
 
     box_u, box_v = (
-        theme.commit_label_anchor_before if commit.label_side == LabelSide.BEFORE else theme.commit_label_anchor_after
+        theme.commit_label_anchor_before if label_side == LabelSide.BEFORE else theme.commit_label_anchor_after
     )
     text_anchor = _SVG_TEXT_ANCHOR[box_u]
 

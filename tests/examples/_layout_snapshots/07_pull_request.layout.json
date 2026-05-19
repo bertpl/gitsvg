@@ -9,16 +9,14 @@
       "name": "main",
       "branch_pos": 0,
       "start": 0,
-      "end": 1,
-      "label_side": "before"
+      "end": 1
     },
     {
       "id": "b1",
       "name": "feature",
       "branch_pos": 1,
       "start": 1,
-      "end": 2,
-      "label_side": "after"
+      "end": 2
     }
   ],
   "commits": [
@@ -29,8 +27,7 @@
       "commit_pos": 0,
       "msg": "release",
       "hash": null,
-      "highlight": false,
-      "label_side": "before"
+      "highlight": false
     },
     {
       "id": "f1",
@@ -39,8 +36,7 @@
       "commit_pos": 1,
       "msg": "wip",
       "hash": null,
-      "highlight": false,
-      "label_side": "after"
+      "highlight": false
     },
     {
       "id": "f2",
@@ -49,8 +45,7 @@
       "commit_pos": 2,
       "msg": "polish",
       "hash": null,
-      "highlight": false,
-      "label_side": "after"
+      "highlight": false
     },
     {
       "id": "m2",
@@ -59,8 +54,7 @@
       "commit_pos": 1,
       "msg": "hotfix",
       "hash": null,
-      "highlight": false,
-      "label_side": "before"
+      "highlight": false
     }
   ],
   "arcs": [

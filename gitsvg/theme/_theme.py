@@ -32,6 +32,7 @@ from typing import Any, Self
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from gitsvg.file_format import LabelSide
 from gitsvg.theme._box_anchor import BoxAnchor, validate_box_anchor
 from gitsvg.theme._orientation import Orientation
 
@@ -144,12 +145,25 @@ class Theme(BaseModel):
     """Optional fill for a full-canvas background rect; `None` keeps the SVG transparent."""
 
     # --------------------------------------------------------------------------
+    #  Label-side defaults
+    # --------------------------------------------------------------------------
+    label_side_default: LabelSide = LabelSide.AFTER
+    """Default `label_side` for branches that didn't set one on the `branch:`
+    op. Lives on `Theme` so a future named theme can flip the diagram-wide
+    default; not user-input on the `theme:` op today."""
+
+    # --------------------------------------------------------------------------
     #  State-derived per-branch overrides
     # --------------------------------------------------------------------------
     branch_color_overrides: dict[str, str] = Field(default_factory=dict)
     """Hex colour overrides, keyed by `BranchState.id` (not name). Filled by
     the apply pass from `branch:` ops carrying a `color` field, then attached
     to the built `Theme`; not user-input on the `theme:` op."""
+
+    branch_label_side_overrides: dict[str, LabelSide] = Field(default_factory=dict)
+    """`label_side` overrides, keyed by `BranchState.id` (not name). Filled by
+    the apply pass from `branch:` ops carrying a `label_side` field, then
+    attached to the built `Theme`; not user-input on the `theme:` op."""
 
     # --------------------------------------------------------------------------
     #  Always-hold invariants
@@ -289,6 +303,22 @@ class Theme(BaseModel):
     def label_line_padding(self) -> int | float:
         """Resolved extra height per line (px) in a multi-line label stack."""
         return _resolve_int_or_float(self.label_line_padding_in_font_sizes * self.label_font_size)
+
+    # --------------------------------------------------------------------------
+    #  Per-branch resolved-value lookups
+    # --------------------------------------------------------------------------
+    def branch_label_side(self, branch_id: str) -> LabelSide:
+        """Resolve a branch's `label_side` — per-branch override, then theme default.
+
+        Args:
+            branch_id: The branch's stable internal id (`BranchState.id`).
+
+        Returns:
+            The resolved `LabelSide` for the branch. Falls through to
+            `self.label_side_default` when the branch never set
+            `label_side` on its `branch:` op.
+        """
+        return self.branch_label_side_overrides.get(branch_id, self.label_side_default)
 
 
 def _resolve_int_or_float(value: float) -> int | float:

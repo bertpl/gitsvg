@@ -1,5 +1,6 @@
 """Tests for the `Theme` Pydantic model and `DEFAULT_THEME` baseline values."""
 
+from gitsvg.file_format import LabelSide
 from gitsvg.theme import DEFAULT_THEME, DefaultTheme, Orientation, Theme
 
 
@@ -52,6 +53,45 @@ def test_default_theme_values_pin_the_byte_identical_baseline() -> None:
 def test_default_theme_has_no_branch_color_overrides() -> None:
     # --- assert -----------------------
     assert DEFAULT_THEME.branch_color_overrides == {}
+
+
+def test_default_theme_has_no_branch_label_side_overrides() -> None:
+    # --- assert -----------------------
+    assert DEFAULT_THEME.branch_label_side_overrides == {}
+
+
+def test_default_theme_label_side_default_is_after() -> None:
+    # --- assert -----------------------
+    assert DEFAULT_THEME.label_side_default is LabelSide.AFTER
+
+
+# ==================================================================================================
+#  Per-branch label-side resolver
+# ==================================================================================================
+def test_branch_label_side_falls_through_to_default_when_unset() -> None:
+    # --- arrange ----------------------
+    theme = Theme()  # `label_side_default` carries its model default (`AFTER`).
+
+    # --- act / assert -----------------
+    assert theme.branch_label_side("b0") == LabelSide.AFTER
+
+
+def test_branch_label_side_returns_per_branch_override_when_set() -> None:
+    # --- arrange ----------------------
+    theme = Theme(branch_label_side_overrides={"b0": LabelSide.BEFORE})
+
+    # --- act / assert -----------------
+    assert theme.branch_label_side("b0") == LabelSide.BEFORE
+    assert theme.branch_label_side("b1") == LabelSide.AFTER  # fall-through to default
+
+
+def test_branch_label_side_default_field_governs_unset_branches() -> None:
+    # --- arrange ----------------------
+    theme = Theme(label_side_default=LabelSide.BEFORE, branch_label_side_overrides={"b0": LabelSide.AFTER})
+
+    # --- act / assert -----------------
+    assert theme.branch_label_side("b0") == LabelSide.AFTER  # explicit override wins
+    assert theme.branch_label_side("b1") == LabelSide.BEFORE  # falls through to the flipped default
 
 
 def test_theme_constructible_with_explicit_values() -> None:

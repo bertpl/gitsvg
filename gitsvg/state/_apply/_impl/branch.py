@@ -14,8 +14,9 @@ def apply_branch_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, repor
 
     Mutates `state` for the structural side (new `BranchState`,
     branch-order append) and `builder` for the presentational side
-    (writes `op.color`, when set, to `builder.branch_color_overrides`
-    keyed by the new branch's id).
+    (routes `op.color` and `op.label_side`, when set, into the
+    matching per-branch override dict on `builder` keyed by the new
+    branch's id).
 
     Validation order:
 
@@ -108,7 +109,6 @@ def apply_branch_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, repor
     state.branches[op.name] = BranchState(
         id=branch_id,
         name=op.name,
-        label_side=op.label_side,
         branch_pos=op.branch_pos,
         from_branch=op.from_branch,
         from_commit=op.from_commit,
@@ -118,6 +118,8 @@ def apply_branch_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, repor
     )
     state.branch_order.append(op.name)
 
-    # --- Theme: per-branch colour override ------
+    # --- Theme: per-branch overrides ------------
     if op.color is not None:
         builder.branch_color_overrides[branch_id] = op.color
+    if op.label_side is not None:
+        builder.branch_label_side_overrides[branch_id] = op.label_side

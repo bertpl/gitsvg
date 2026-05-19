@@ -6,7 +6,6 @@ from pathlib import Path
 import pytest
 
 from gitsvg.errors import ValidationReport
-from gitsvg.file_format import LabelSide
 from gitsvg.imports import resolve_imports
 from gitsvg.layout import Layout, compute_layout
 from gitsvg.parse import parse_jsonl_file, parse_jsonl_text
@@ -571,27 +570,6 @@ def test_commit_carries_its_branch_id() -> None:
     # --- assert -----------------------
     main = next(b for b in layout.branches if b.name == "main")
     assert layout.commits["c1"].branch_id == main.id
-
-
-# ==================================================================================================
-#  Resolved label_side
-# ==================================================================================================
-def test_label_side_defaults_to_after() -> None:
-    # --- arrange ----------------------
-    layout = _layout_from('{"op": "branch", "name": "main"}\n')
-
-    # --- assert -----------------------
-    main = next(b for b in layout.branches if b.name == "main")
-    assert main.label_side == LabelSide.AFTER
-
-
-def test_label_side_explicit_override() -> None:
-    # --- arrange ----------------------
-    layout = _layout_from('{"op": "branch", "name": "main", "label_side": "before"}\n')
-
-    # --- assert -----------------------
-    main = next(b for b in layout.branches if b.name == "main")
-    assert main.label_side == LabelSide.BEFORE
 
 
 # ==================================================================================================

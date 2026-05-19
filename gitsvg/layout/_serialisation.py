@@ -6,8 +6,8 @@ output schema — a direct mirror of the `Layout` dataclass at
 
 - `grid` — integer-grid extent: `n_commits`, `n_branches`.
 - `branches` — one entry per declared branch, with the opaque
-  internal id, the user-facing name, the lane index, and the
-  resolved label side.
+  internal id, the user-facing name, and the lane / start / end
+  slot positions.
 - `commits` — one entry per surviving commit, with lane / row
   positions and the branch id the commit lives on.
 - `arcs` — pre-computed connectors (branch-off and merge) as slot
