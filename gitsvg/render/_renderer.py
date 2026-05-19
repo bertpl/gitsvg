@@ -43,7 +43,7 @@ from gitsvg.render._renderer_settings import RendererSettings
 from gitsvg.theme import DEFAULT_THEME
 
 
-def _branch_for_arc(layout: Layout, arc: LayoutArc) -> LayoutBranch:
+def _get_color_branch_of_arc(layout: Layout, arc: LayoutArc) -> LayoutBranch:
     """Return the branch whose colour the arc takes.
 
     Branch-off arcs take the *target* branch's colour (the new branch
@@ -72,7 +72,7 @@ def _branch_for_arc(layout: Layout, arc: LayoutArc) -> LayoutBranch:
     raise LookupError(f"no branch matches arc {arc!r}")
 
 
-def _branch_for_pull_request(layout: Layout, pr: LayoutPullRequest) -> LayoutBranch:
+def _get_color_branch_of_pull_request(layout: Layout, pr: LayoutPullRequest) -> LayoutBranch:
     """Return the source branch whose colour the pull request takes.
 
     The PR's dashed arc and title pill take the source branch's colour
@@ -95,7 +95,7 @@ def _branch_for_pull_request(layout: Layout, pr: LayoutPullRequest) -> LayoutBra
     raise LookupError(f"no branch matches pull request {pr!r}")
 
 
-def _occupied_lanes(layout: Layout) -> list[int]:
+def _get_occupied_lanes(layout: Layout) -> list[int]:
     """Return the sorted, deduplicated lane indices occupied by any branch."""
     return sorted({branch.branch_pos for branch in layout.branches})
 
@@ -144,12 +144,12 @@ def render(layout: Layout, theme: RendererSettings | None = None) -> draw.Drawin
         )
 
     # --- Branch guides --------------------------
-    for lane in _occupied_lanes(layout):
+    for lane in _get_occupied_lanes(layout):
         draw_branch_guide(d, lane, canvas, theme)
 
     # --- Arcs (branch-off + merge) --------------
     for arc in layout.arcs:
-        arc_branch = _branch_for_arc(layout, arc)
+        arc_branch = _get_color_branch_of_arc(layout, arc)
         draw_arc(
             d,
             from_branch_pos=arc.from_branch_pos,
@@ -172,7 +172,7 @@ def render(layout: Layout, theme: RendererSettings | None = None) -> draw.Drawin
             to_commit_pos=pr.to_commit_pos,
             canvas=canvas,
             theme=theme,
-            color=color_for(_branch_for_pull_request(layout, pr).id),
+            color=color_for(_get_color_branch_of_pull_request(layout, pr).id),
             vertical_first=True,
             stroke_dasharray=theme.pull_request_dash,
         )
@@ -187,7 +187,7 @@ def render(layout: Layout, theme: RendererSettings | None = None) -> draw.Drawin
 
     # --- Pull-request title pills ---------------
     for pr in layout.pull_requests:
-        draw_pull_request_pill(d, pr, color_for(_branch_for_pull_request(layout, pr).id), canvas, theme)
+        draw_pull_request_pill(d, pr, color_for(_get_color_branch_of_pull_request(layout, pr).id), canvas, theme)
 
     # --- Commit dots ----------------------------
     for commit in layout.commits.values():
