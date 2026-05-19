@@ -1,6 +1,6 @@
 """`ThemeBuilder` — transient accumulator threaded through the apply pass.
 
-A `Theme` is constructed from three independent inputs that the apply
+A `Theme` is constructed from four independent inputs that the apply
 pass collects op by op:
 
 - `theme_cls`: the concrete `Theme` subclass selected by the most
@@ -14,8 +14,11 @@ pass collects op by op:
 - `branch_color_overrides`: state-derived per-branch hex colours,
   accumulated from `branch:` ops carrying `color`, removed when a
   `remove:` op drops the branch.
+- `branch_label_side_overrides`: state-derived per-branch label
+  sides, accumulated from `branch:` ops carrying `label_side`,
+  removed when a `remove:` op drops the branch.
 
-`ThemeBuilder` is the mutable container that holds these three
+`ThemeBuilder` is the mutable container that holds these four
 pieces while the apply pass iterates. `apply_theme_op`,
 `apply_branch_op`, and `apply_remove_op` mutate it; every other op
 handler receives it for signature uniformity but leaves it alone. The
@@ -36,6 +39,7 @@ across the apply pass and dispatches to the chosen `theme_cls`.
 from dataclasses import dataclass, field
 from typing import Any
 
+from gitsvg.file_format import LabelSide
 from gitsvg.theme._default_theme import DefaultTheme
 from gitsvg.theme._theme import Theme
 
@@ -54,11 +58,15 @@ class ThemeBuilder:
         branch_color_overrides: Hex-colour overrides keyed by
             `BranchState.id`, populated as `branch:` ops with `color`
             apply and pruned when their branch is removed.
+        branch_label_side_overrides: `label_side` overrides keyed by
+            `BranchState.id`, populated as `branch:` ops with
+            `label_side` apply and pruned when their branch is removed.
     """
 
     theme_cls: type[Theme] = DefaultTheme
     user_set: dict[str, Any] = field(default_factory=dict)
     branch_color_overrides: dict[str, str] = field(default_factory=dict)
+    branch_label_side_overrides: dict[str, LabelSide] = field(default_factory=dict)
 
     def set_theme_cls(self, theme_cls: type[Theme]) -> None:
         """Switch the concrete theme to build with — no other state changes.
@@ -74,29 +82,32 @@ class ThemeBuilder:
         self.theme_cls = theme_cls
 
     def clear_overrides(self) -> None:
-        """Discard every accumulated override — both user `theme:` fields and state-derived per-branch colours.
+        """Discard every accumulated override — user `theme:` fields and state-derived per-branch values.
 
         Called by `apply_theme_op` when a `name`-bearing op leaves
-        `keep_prior_overrides` at its default `False`. Wiping both
-        dicts is what makes "switch theme cleanly" actually clean:
-        leaving `branch_color_overrides` in place would let earlier
-        `branch.color:` choices bleed through into the new theme with
-        no syntactic way to clear them.
+        `keep_prior_overrides` at its default `False`. Wiping all
+        accumulators is what makes "switch theme cleanly" actually
+        clean: leaving `branch_color_overrides` or
+        `branch_label_side_overrides` in place would let earlier
+        per-branch choices bleed through into the new theme with no
+        syntactic way to clear them.
         """
         self.user_set = {}
         self.branch_color_overrides = {}
+        self.branch_label_side_overrides = {}
 
     def build(self) -> Theme:
         """Resolve a fully-populated `Theme` and attach state-derived overrides.
 
         Calls `self.theme_cls.build(self.user_set)` to produce the
-        resolved theme; then writes the accumulated
-        `branch_color_overrides` onto the result. Called once by the
-        state engine at end-of-apply.
+        resolved theme; then writes the accumulated per-branch
+        overrides onto the result. Called once by the state engine at
+        end-of-apply.
 
         Returns:
             The fully-populated `Theme`.
         """
         theme = self.theme_cls.build(self.user_set)
         theme.branch_color_overrides = dict(self.branch_color_overrides)
+        theme.branch_label_side_overrides = dict(self.branch_label_side_overrides)
         return theme

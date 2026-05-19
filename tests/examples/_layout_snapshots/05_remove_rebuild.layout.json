@@ -9,16 +9,14 @@
       "name": "main",
       "branch_pos": 0,
       "start": 0,
-      "end": 2,
-      "label_side": "before"
+      "end": 2
     },
     {
       "id": "b2",
       "name": "feature",
       "branch_pos": 1,
       "start": 3,
-      "end": 4,
-      "label_side": "after"
+      "end": 4
     }
   ],
   "commits": [
@@ -29,8 +27,7 @@
       "commit_pos": 0,
       "msg": "initial commit",
       "hash": "1b35060",
-      "highlight": false,
-      "label_side": "before"
+      "highlight": false
     },
     {
       "id": "c2",
@@ -39,8 +36,7 @@
       "commit_pos": 1,
       "msg": "main moves on",
       "hash": "b1e760e",
-      "highlight": false,
-      "label_side": "before"
+      "highlight": false
     },
     {
       "id": "c3",
@@ -49,8 +45,7 @@
       "commit_pos": 2,
       "msg": "more main work",
       "hash": "62a6989",
-      "highlight": false,
-      "label_side": "before"
+      "highlight": false
     },
     {
       "id": "f1",
@@ -59,8 +54,7 @@
       "commit_pos": 3,
       "msg": "WIP feature",
       "hash": "4ef0ae4",
-      "highlight": false,
-      "label_side": "after"
+      "highlight": false
     },
     {
       "id": "f2",
@@ -69,8 +63,7 @@
       "commit_pos": 4,
       "msg": "more WIP",
       "hash": "02a38f5",
-      "highlight": false,
-      "label_side": "after"
+      "highlight": false
     }
   ],
   "arcs": [

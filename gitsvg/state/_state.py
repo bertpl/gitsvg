@@ -2,16 +2,15 @@
 
 State holds the structural model — commits, branches, pull-requests,
 branch declaration order, and the optional pinned grid extent — plus
-per-entity layout hints (branch lane overrides, label-side hints,
-commit gap). Presentational data lives in a separate `Theme`,
+the one per-entity layout hint that is still structural (the branch
+lane override). Presentational data — colours, label sides, and
+every other render-side decision — lives in a separate `Theme`,
 produced alongside `State` by the apply stage. Each op mutates
 state when it applies cleanly; the state engine is the producer,
 downstream layers (layout, rendering) are consumers.
 """
 
 from dataclasses import dataclass, field
-
-from gitsvg.file_format import LabelSide
 
 
 @dataclass(slots=True)
@@ -42,7 +41,6 @@ class BranchState:
         name: Branch name as written in the JSONL. Unique among
             currently-live branches, but can be reused after `remove`
             — `id` is the stable handle.
-        label_side: Optional label-side hint from the declaration.
         branch_pos: Optional explicit lane-index override from the
             declaration. Stored verbatim; the layout engine consumes it
             and bypasses the lane-reuse heuristic when set.
@@ -60,7 +58,6 @@ class BranchState:
 
     id: str
     name: str
-    label_side: LabelSide | None = None
     branch_pos: int | None = None
     from_branch: str | None = None
     from_commit: str | None = None

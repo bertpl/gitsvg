@@ -205,7 +205,7 @@ def _auto_fit_branch_axis_edge(layout: Layout, theme: RendererSettings, *, edge:
             extent = (pill_width(branch.name, theme) / 2) if is_vertical else (pill_height / 2)
             needed = max(needed, extent + _AUTO_FIT_EDGE_PAD_PX)
     for commit in commit_layouts.values():
-        if commit.branch_pos == target_lane and commit.label_side == matching_label_side:
+        if commit.branch_pos == target_lane and theme.branch_label_side(commit.branch_id) == matching_label_side:
             extent = theme.label_offset + commit_label_width(commit, theme)
             needed = max(needed, extent + _AUTO_FIT_EDGE_PAD_PX)
     return needed

@@ -6,7 +6,6 @@ layout is *exclusively* about integer-grid positioning:
 
 - `branch_pos` / `commit_pos` slot indices for every entity.
 - Semantic identifiers (branch `id`, commit `id`, PR `id`).
-- Resolved label sides (no `None`-fallback logic in the renderer).
 - Resolved hash strings (auto-resolved 7-char hex from state).
 - Pre-computed arc connectors as slot pairs, tagged with their
   semantic `kind` (branch-off / merge — open enum, growing as the
@@ -15,8 +14,9 @@ layout is *exclusively* about integer-grid positioning:
 
 Layout output carries **no** colour, pixel, font, stroke, opacity,
 render-strategy, or presentational-override data. Every presentational
-decision happens in the renderer from the resolved `Theme`, including
-the colour each arc takes and the segment-draw-order for connectors.
+decision happens in the renderer from the resolved `Theme` — colour
+attribution and segment-draw-order for arcs, per-branch label-side
+resolution, and so on.
 
 Different layout strategies (default declaration-order assignment,
 lane-reuse, future left-to-right orientations) all produce the same
@@ -25,8 +25,6 @@ lane-reuse, future left-to-right orientations) all produce the same
 
 from dataclasses import dataclass, field
 from enum import StrEnum
-
-from gitsvg.file_format import LabelSide
 
 
 class LayoutArcKind(StrEnum):
@@ -68,7 +66,7 @@ class LayoutBranch:
     Attributes:
         id: Stable opaque branch id matching `BranchState.id`. The
             renderer uses this to look up per-branch presentational
-            overrides (e.g. colour) on the resolved theme.
+            overrides (colour, label-side) on the resolved theme.
         name: Branch name (used to draw the name pill).
         branch_pos: Slot index along the branch axis (the lane).
         start: Commit-axis position where the branch begins (the
@@ -76,12 +74,6 @@ class LayoutBranch:
             above the parent commit's `commit_pos`).
         end: Commit-axis position of the latest commit on this branch,
             or `start` when the branch has no commits yet.
-        label_side: Resolved branch-axis-index side for the branch's
-            commit labels: `"before"` = lower-index side; `"after"` =
-            higher-index side. Orientation-invariant — the renderer
-            maps to a pixel side per `theme.orientation`. Never `None`
-            in the layout: the layout engine fills in the default when
-            the branch op omits it.
     """
 
     id: str
@@ -89,7 +81,6 @@ class LayoutBranch:
     branch_pos: int  # axis-bound: branch-axis (slot index)
     start: int  # axis-bound: commit-axis (slot index)
     end: int  # axis-bound: commit-axis (slot index)
-    label_side: LabelSide  # axis-bound: branch-axis (axis-index side: BEFORE = lower index, AFTER = higher index)
 
 
 @dataclass(slots=True)
@@ -99,7 +90,8 @@ class LayoutCommit:
     Attributes:
         id: The commit's id (matching `CommitState.id` in state).
         branch_id: Id of the branch the commit lives on; the renderer
-            uses this to resolve the commit's colour.
+            uses this to resolve per-branch presentational overrides
+            (colour, label-side) on the resolved theme.
         branch_pos: Slot index along the branch axis.
         commit_pos: Slot index along the commit axis (0 = oldest).
         msg: Optional commit message — drawn as the primary label line.
@@ -107,11 +99,6 @@ class LayoutCommit:
             label line. Already resolved from any `"auto"` sentinel.
         highlight: True when the commit should render with the highlight
             visual (enlarged dot + bold label).
-        label_side: Resolved branch-axis-index side for this commit's
-            label: `"before"` = lower-index side; `"after"` =
-            higher-index side. Inherited from the commit's branch.
-            Orientation-invariant — the renderer maps to a pixel side
-            per `theme.orientation`.
     """
 
     id: str
@@ -121,7 +108,6 @@ class LayoutCommit:
     msg: str | None
     hash: str | None
     highlight: bool
-    label_side: LabelSide  # axis-bound: branch-axis (axis-index side: BEFORE = lower index, AFTER = higher index)
 
 
 @dataclass(slots=True)

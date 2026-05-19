@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- `gitsvg layout` JSON output schema slimmed.
+- `gitsvg layout` JSON output schema slimmed — `vertical_first`, `color_branch_id`, `guides`, and `label_side` no longer emitted.
 
 ### Deprecated
 
