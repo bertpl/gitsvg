@@ -11,14 +11,19 @@ output schema — a direct mirror of the `Layout` dataclass at
 - `commits` — one entry per surviving commit, with lane / row
   positions and the branch id the commit lives on.
 - `arcs` — pre-computed connectors (branch-off and merge) as slot
-  pairs, in z-order.
-- `guides` — one entry per occupied lane.
+  pairs, in z-order. Each arc carries its semantic `kind`
+  (`"branch_off"` / `"merge"`); colour attribution and
+  segment-draw-order are renderer-side derivations from `kind`,
+  not encoded in the layout.
 - `pull_requests` — geometry for each open pull request (source tip
   → projected merge point on the target lane).
 
 The dataclass has `commits` as a dict keyed by id for renderer
 lookup convenience; the JSON view emits it as a list (each entry
 carries its own `id`) so all collections share a uniform shape.
+`LayoutArcKind` is a `StrEnum`, so `dataclasses.asdict` serialises
+its members straight to the underlying string value through
+`json.dumps` — no custom encoder needed.
 """
 
 import dataclasses
@@ -35,7 +40,7 @@ def layout_to_json(layout: Layout) -> dict[str, Any]:
 
     Returns:
         A nested dict with `grid`, `branches`, `commits`, `arcs`,
-        `guides`, and `pull_requests` top-level keys. The dict is
+        and `pull_requests` top-level keys. The dict is
         `json.dumps`-able with no custom encoder.
     """
     return {
@@ -43,6 +48,5 @@ def layout_to_json(layout: Layout) -> dict[str, Any]:
         "branches": [dataclasses.asdict(b) for b in layout.branches],
         "commits": [dataclasses.asdict(c) for c in layout.commits.values()],
         "arcs": [dataclasses.asdict(a) for a in layout.arcs],
-        "guides": [dataclasses.asdict(g) for g in layout.guides],
         "pull_requests": [dataclasses.asdict(p) for p in layout.pull_requests],
     }

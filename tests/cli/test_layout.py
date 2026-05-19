@@ -33,7 +33,7 @@ def test_layout_clean_single_file_emits_json_to_stdout(tmp_path: Path) -> None:
     # --- assert -----------------------
     assert result.exit_code == 0
     payload = json.loads(result.stdout)
-    assert set(payload.keys()) == {"grid", "branches", "commits", "arcs", "guides", "pull_requests"}
+    assert set(payload.keys()) == {"grid", "branches", "commits", "arcs", "pull_requests"}
     assert [c["id"] for c in payload["commits"]] == ["c1", "c2"]
 
 

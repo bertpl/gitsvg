@@ -8,12 +8,15 @@ layout is *exclusively* about integer-grid positioning:
 - Semantic identifiers (branch `id`, commit `id`, PR `id`).
 - Resolved label sides (no `None`-fallback logic in the renderer).
 - Resolved hash strings (auto-resolved 7-char hex from state).
-- Pre-computed arc connectors and branch guides as slot pairs.
+- Pre-computed arc connectors as slot pairs, tagged with their
+  semantic `kind` (branch-off / merge — open enum, growing as the
+  layout engine evolves).
 - Grid extent (`n_commits`, `n_branches`).
 
-Layout output carries **no** colour, pixel, font, stroke, or
-opacity data. Every presentational decision happens in the renderer
-from the resolved `Theme`.
+Layout output carries **no** colour, pixel, font, stroke, opacity,
+render-strategy, or presentational-override data. Every presentational
+decision happens in the renderer from the resolved `Theme`, including
+the colour each arc takes and the segment-draw-order for connectors.
 
 Different layout strategies (default declaration-order assignment,
 lane-reuse, future left-to-right orientations) all produce the same
@@ -21,8 +24,21 @@ lane-reuse, future left-to-right orientations) all produce the same
 """
 
 from dataclasses import dataclass, field
+from enum import StrEnum
 
 from gitsvg.file_format import LabelSide
+
+
+class LayoutArcKind(StrEnum):
+    """Semantic kind of a layout arc connector.
+
+    Open enum: additional values land as the layout engine evolves
+    (e.g. a pure lane-change arc once a single branch can migrate
+    across lanes mid-life).
+    """
+
+    BRANCH_OFF = "branch_off"
+    MERGE = "merge"
 
 
 @dataclass(slots=True)
@@ -114,42 +130,23 @@ class LayoutArc:
 
     Used for branch-off arcs (a parent commit on one lane → the start
     of a child branch on another lane) and merge arcs (the from-branch
-    tip → the merge commit on the into-branch's lane).
+    tip → the merge commit on the into-branch's lane). Colour
+    attribution and segment-draw-order are render-side decisions the
+    renderer derives from `kind` plus the layout's branch index.
 
     Attributes:
-        kind: Either `"branch_off"` or `"merge"`.
+        kind: Semantic kind of the connector — `BRANCH_OFF` or `MERGE`.
         from_branch_pos: Source point's branch-axis index.
         from_commit_pos: Source point's commit-axis index.
         to_branch_pos: Target point's branch-axis index.
         to_commit_pos: Target point's commit-axis index.
-        color_branch_id: Id of the branch whose colour this arc takes.
-            Branch-off arcs use the *target* (new) branch; merge arcs
-            use the *source* (from) branch. The renderer resolves the
-            actual hex value via the theme.
-        vertical_first: True for merge arcs (vertical segment → arc →
-            horizontal segment); False for branch-off arcs (horizontal
-            → arc → vertical).
     """
 
-    kind: str
+    kind: LayoutArcKind
     from_branch_pos: int  # axis-bound: branch-axis (slot index)
     from_commit_pos: int  # axis-bound: commit-axis (slot index)
     to_branch_pos: int  # axis-bound: branch-axis (slot index)
     to_commit_pos: int  # axis-bound: commit-axis (slot index)
-    color_branch_id: str
-    vertical_first: bool
-
-
-@dataclass(slots=True)
-class LayoutGuide:
-    """A faint dashed vertical guide for one occupied lane.
-
-    Attributes:
-        branch_pos: Slot index along the branch axis where the guide is
-            drawn.
-    """
-
-    branch_pos: int  # axis-bound: branch-axis (slot index)
 
 
 @dataclass(slots=True)
@@ -174,8 +171,6 @@ class LayoutPullRequest:
             segment runs).
         to_commit_pos: Projected merge-commit row on the target lane —
             the position a real `merge` would land at if it ran now.
-        color_branch_id: Id of the source branch — its colour drives the
-            dashed arc and the title pill.
         title: Optional PR title; when None no pill is rendered.
     """
 
@@ -184,7 +179,6 @@ class LayoutPullRequest:
     from_commit_pos: int  # axis-bound: commit-axis (slot index)
     to_branch_pos: int  # axis-bound: branch-axis (slot index)
     to_commit_pos: int  # axis-bound: commit-axis (slot index)
-    color_branch_id: str
     title: str | None
 
 
@@ -200,7 +194,6 @@ class Layout:
             for renderer convenience.
         arcs: All connectors (branch-off + merge) in z-order
             (back-to-front).
-        guides: One per occupied branch-axis lane.
         pull_requests: One `LayoutPullRequest` per open PR, in the
             order they were declared.
     """
@@ -209,5 +202,4 @@ class Layout:
     branches: list[LayoutBranch] = field(default_factory=list)
     commits: dict[str, LayoutCommit] = field(default_factory=dict)
     arcs: list[LayoutArc] = field(default_factory=list)
-    guides: list[LayoutGuide] = field(default_factory=list)
     pull_requests: list[LayoutPullRequest] = field(default_factory=list)

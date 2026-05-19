@@ -61,9 +61,6 @@ def test_pr_endpoints_track_current_branch_tips() -> None:
     assert pr.to_branch_pos == main.branch_pos
     assert pr.to_commit_pos == max(feat.end, main.end) + 1
 
-    # Colour-tagging points at the source branch's id.
-    assert pr.color_branch_id == feat.id
-
 
 def test_pr_without_title_has_none_title() -> None:
     # --- act --------------------------
