@@ -4,7 +4,7 @@ from gitsvg.layout import compute_layout
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.render import render
 from gitsvg.state import apply_ops
-from gitsvg.theme import Orientation
+from gitsvg.theme import BranchLineStyle, MergeCommitStyle, Orientation
 from gitsvg.theme.themes import CompactTheme
 
 
@@ -42,15 +42,27 @@ def test_compact_theme_build_resolves_overridden_metrics_horizontal() -> None:
 
 
 def test_compact_theme_inherits_default_palette() -> None:
-    """`CompactTheme` only overrides metrics — colours inherit unchanged from `DefaultTheme`."""
+    """`CompactTheme` inherits the refreshed default palette unchanged — it varies metrics, not colour."""
     # --- arrange / act ----------------
     theme = CompactTheme.build({})
 
     # --- assert -----------------------
     assert theme.background_color is None
-    assert theme.colors["main"] == "#5c6370"
+    assert theme.colors["main"] == "#4a4f5a"
     assert theme.label_color == "#383838"
     assert theme.commit_stroke_color == "white"
+
+
+def test_compact_theme_uses_double_rounded_connectors_but_inherits_checkmark_merges() -> None:
+    """`CompactTheme` pins `branch_line_style` to double-rounded to set the
+    dense layout apart from the default's plain rounded elbow, while
+    inheriting the refreshed default's checkmark merge dots."""
+    # --- arrange / act ----------------
+    theme = CompactTheme.build({})
+
+    # --- assert -----------------------
+    assert theme.branch_line_style is BranchLineStyle.DOUBLE_ROUNDED
+    assert theme.merge_commit_style is MergeCommitStyle.CHECKMARK
 
 
 def test_compact_theme_build_with_user_overrides_layers_on_metrics() -> None:

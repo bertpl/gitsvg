@@ -1,11 +1,106 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-     width="876.984342" height="423.5" viewBox="0 0 876.984342 423.5">
+     width="876.984342" height="847.0" viewBox="0 0 876.984342 847.0">
 <defs>
 </defs>
-<text x="219.2460855" y="22.0" font-size="14" text-anchor="middle" dominant-baseline="middle" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" fill="#383838">dark</text>
-<rect x="8.0" y="36" width="422.492171" height="379.5" stroke="#d4d4d4" stroke-width="1" fill="none" />
+<text x="219.2460855" y="22.0" font-size="14" text-anchor="middle" dominant-baseline="middle" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" fill="#383838">default</text>
+<rect x="8.0" y="36.0" width="422.492171" height="379.5" stroke="#d4d4d4" stroke-width="1" fill="none" />
 <svg x="16.0" y="44.0" width="406.492171" height="363.5" viewBox="0 0 406.492171 363.5"><defs>
+</defs>
+<path d="M106.492171,12.5 L106.492171,337.5" stroke="#b8b8b8" stroke-width="0.7" stroke-dasharray="4,4" />
+<path d="M206.49217099999998,12.5 L206.49217099999998,337.5" stroke="#b8b8b8" stroke-width="0.7" stroke-dasharray="4,4" />
+<path d="M306.492171,12.5 L306.492171,337.5" stroke="#b8b8b8" stroke-width="0.7" stroke-dasharray="4,4" />
+<path d="M106.492171,325.0 L106.492171,25.0" stroke="#4a4f5a" stroke-width="2" stroke-linecap="round" />
+<path d="M106.492171,325.0 L186.49217099999998,325.0 A20,20,0,0,0,206.49217099999998,305.0 L206.49217099999998,275.0" stroke="#56b393" stroke-width="2" fill="none" stroke-linecap="round" />
+<path d="M206.49217099999998,275.0 L206.49217099999998,245.0 A20,20,0,0,0,186.49217099999998,225.0 L106.492171,225.0" stroke="#56b393" stroke-width="2" fill="none" stroke-linecap="round" />
+<path d="M106.492171,325.0 L286.492171,325.0 A20,20,0,0,0,306.492171,305.0 L306.492171,275.0" stroke="#6b8bc2" stroke-width="2" fill="none" stroke-linecap="round" />
+<path d="M306.492171,275.0 L306.492171,195.0 A20,20,0,0,0,286.492171,175.0 L106.492171,175.0" stroke="#6b8bc2" stroke-width="2" fill="none" stroke-linecap="round" />
+<path d="M106.492171,125.0 L186.49217099999998,125.0 A20,20,0,0,0,206.49217099999998,105.0 L206.49217099999998,75.0" stroke="#c06b8b" stroke-width="2" fill="none" stroke-linecap="round" />
+<path d="M206.49217099999998,75.0 L206.49217099999998,45.0 A20,20,0,0,0,186.49217099999998,25.0 L106.492171,25.0" stroke="#c06b8b" stroke-width="2" fill="none" stroke-linecap="round" />
+<circle cx="106.492171" cy="325.0" r="5" fill="#4a4f5a" stroke="white" stroke-width="1.5" />
+<circle cx="206.49217099999998" cy="275.0" r="5" fill="#56b393" stroke="white" stroke-width="1.5" />
+<circle cx="306.492171" cy="275.0" r="5" fill="#6b8bc2" stroke="white" stroke-width="1.5" />
+<circle cx="106.492171" cy="225.0" r="5.5" fill="white" stroke="#4a4f5a" stroke-width="2" />
+<path d="M103.992171,225.4 L105.692171,227.1 L109.092171,223.4" stroke="#4a4f5a" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<circle cx="106.492171" cy="175.0" r="5.5" fill="white" stroke="#4a4f5a" stroke-width="2" />
+<path d="M103.992171,175.4 L105.692171,177.1 L109.092171,173.4" stroke="#4a4f5a" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<circle cx="106.492171" cy="125.0" r="5" fill="#4a4f5a" stroke="white" stroke-width="1.5" />
+<circle cx="206.49217099999998" cy="75.0" r="5" fill="#c06b8b" stroke="white" stroke-width="1.5" />
+<circle cx="106.492171" cy="25.0" r="5.5" fill="white" stroke="#4a4f5a" stroke-width="2" />
+<path d="M103.992171,25.4 L105.692171,27.1 L109.092171,23.4" stroke="#4a4f5a" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<rect x="86.75022849999999" y="340.5" width="39.483885" height="19.0" rx="4" ry="4" fill="#4a4f5a" opacity="0.85" />
+<text x="106.49217099999998" y="350.0" font-size="11.0" text-anchor="middle" dominant-baseline="middle" fill="white" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="500">main</text>
+<rect x="174.51487899999998" y="290.5" width="63.954584000000004" height="19.0" rx="4" ry="4" fill="#56b393" opacity="0.85" />
+<text x="206.49217099999998" y="300.0" font-size="11.0" text-anchor="middle" dominant-baseline="middle" fill="white" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="500">feature-a</text>
+<rect x="283.20530249999996" y="290.5" width="46.573737" height="19.0" rx="4" ry="4" fill="#6b8bc2" opacity="0.85" />
+<text x="306.492171" y="300.0" font-size="11.0" text-anchor="middle" dominant-baseline="middle" fill="white" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="500">bugfix</text>
+<rect x="174.3940275" y="90.5" width="64.19628700000001" height="19.0" rx="4" ry="4" fill="#c06b8b" opacity="0.85" />
+<text x="206.49217099999998" y="100.0" font-size="11.0" text-anchor="middle" dominant-baseline="middle" fill="white" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="500">feature-b</text>
+<text x="94.492171" y="317.5" font-size="11.0" text-anchor="end" dominant-baseline="middle" fill="#383838" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">initial commit</text>
+<text x="94.492171" y="332.5" font-size="9.0" text-anchor="end" dominant-baseline="middle" fill="#707070" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">1b35060</text>
+<text x="218.49217099999998" y="267.5" font-size="11.0" text-anchor="start" dominant-baseline="middle" fill="#383838" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">start feature A</text>
+<text x="218.49217099999998" y="282.5" font-size="9.0" text-anchor="start" dominant-baseline="middle" fill="#707070" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">a8ba520</text>
+<text x="318.492171" y="267.5" font-size="11.0" text-anchor="start" dominant-baseline="middle" fill="#383838" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">fix #42</text>
+<text x="318.492171" y="282.5" font-size="9.0" text-anchor="start" dominant-baseline="middle" fill="#707070" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">ff2bf3a</text>
+<text x="94.492171" y="217.5" font-size="11.0" text-anchor="end" dominant-baseline="middle" fill="#383838" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">merge feature A</text>
+<text x="94.492171" y="232.5" font-size="9.0" text-anchor="end" dominant-baseline="middle" fill="#707070" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">c521ba8</text>
+<text x="94.492171" y="167.5" font-size="11.0" text-anchor="end" dominant-baseline="middle" fill="#383838" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">merge bugfix</text>
+<text x="94.492171" y="182.5" font-size="9.0" text-anchor="end" dominant-baseline="middle" fill="#707070" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">dca1553</text>
+<text x="94.492171" y="117.5" font-size="11.0" text-anchor="end" dominant-baseline="middle" fill="#383838" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">release prep</text>
+<text x="94.492171" y="132.5" font-size="9.0" text-anchor="end" dominant-baseline="middle" fill="#707070" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">b2ed627</text>
+<text x="218.49217099999998" y="67.5" font-size="11.0" text-anchor="start" dominant-baseline="middle" fill="#383838" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">feature B</text>
+<text x="218.49217099999998" y="82.5" font-size="9.0" text-anchor="start" dominant-baseline="middle" fill="#707070" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">b8e625f</text>
+<text x="94.492171" y="17.5" font-size="11.0" text-anchor="end" dominant-baseline="middle" fill="#383838" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">merge feature B</text>
+<text x="94.492171" y="32.5" font-size="9.0" text-anchor="end" dominant-baseline="middle" fill="#707070" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">d193154</text></svg>
+<text x="657.7382565" y="22.0" font-size="14" text-anchor="middle" dominant-baseline="middle" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" fill="#383838">muted</text>
+<rect x="446.492171" y="36.0" width="422.492171" height="379.5" stroke="#d4d4d4" stroke-width="1" fill="none" />
+<svg x="454.492171" y="44.0" width="406.492171" height="363.5" viewBox="0 0 406.492171 363.5"><defs>
+</defs>
+<path d="M106.492171,12.5 L106.492171,337.5" stroke="#b8b8b8" stroke-width="0.7" stroke-dasharray="4,4" />
+<path d="M206.49217099999998,12.5 L206.49217099999998,337.5" stroke="#b8b8b8" stroke-width="0.7" stroke-dasharray="4,4" />
+<path d="M306.492171,12.5 L306.492171,337.5" stroke="#b8b8b8" stroke-width="0.7" stroke-dasharray="4,4" />
+<path d="M106.492171,325.0 L106.492171,25.0" stroke="#5c6370" stroke-width="2" stroke-linecap="round" />
+<path d="M106.492171,325.0 L186.49217099999998,325.0 A20,20,0,0,0,206.49217099999998,305.0 L206.49217099999998,275.0" stroke="#6a9f8d" stroke-width="2" fill="none" stroke-linecap="round" />
+<path d="M206.49217099999998,275.0 L206.49217099999998,245.0 A20,20,0,0,0,186.49217099999998,225.0 L106.492171,225.0" stroke="#6a9f8d" stroke-width="2" fill="none" stroke-linecap="round" />
+<path d="M106.492171,325.0 L286.492171,325.0 A20,20,0,0,0,306.492171,305.0 L306.492171,275.0" stroke="#7b8fb2" stroke-width="2" fill="none" stroke-linecap="round" />
+<path d="M306.492171,275.0 L306.492171,195.0 A20,20,0,0,0,286.492171,175.0 L106.492171,175.0" stroke="#7b8fb2" stroke-width="2" fill="none" stroke-linecap="round" />
+<path d="M106.492171,125.0 L186.49217099999998,125.0 A20,20,0,0,0,206.49217099999998,105.0 L206.49217099999998,75.0" stroke="#b07b8f" stroke-width="2" fill="none" stroke-linecap="round" />
+<path d="M206.49217099999998,75.0 L206.49217099999998,45.0 A20,20,0,0,0,186.49217099999998,25.0 L106.492171,25.0" stroke="#b07b8f" stroke-width="2" fill="none" stroke-linecap="round" />
+<circle cx="106.492171" cy="325.0" r="5" fill="#5c6370" stroke="white" stroke-width="1.5" />
+<circle cx="206.49217099999998" cy="275.0" r="5" fill="#6a9f8d" stroke="white" stroke-width="1.5" />
+<circle cx="306.492171" cy="275.0" r="5" fill="#7b8fb2" stroke="white" stroke-width="1.5" />
+<circle cx="106.492171" cy="225.0" r="5" fill="#5c6370" stroke="white" stroke-width="1.5" />
+<circle cx="106.492171" cy="175.0" r="5" fill="#5c6370" stroke="white" stroke-width="1.5" />
+<circle cx="106.492171" cy="125.0" r="5" fill="#5c6370" stroke="white" stroke-width="1.5" />
+<circle cx="206.49217099999998" cy="75.0" r="5" fill="#b07b8f" stroke="white" stroke-width="1.5" />
+<circle cx="106.492171" cy="25.0" r="5" fill="#5c6370" stroke="white" stroke-width="1.5" />
+<rect x="86.75022849999999" y="340.5" width="39.483885" height="19.0" rx="4" ry="4" fill="#5c6370" opacity="0.85" />
+<text x="106.49217099999998" y="350.0" font-size="11.0" text-anchor="middle" dominant-baseline="middle" fill="white" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="500">main</text>
+<rect x="174.51487899999998" y="290.5" width="63.954584000000004" height="19.0" rx="4" ry="4" fill="#6a9f8d" opacity="0.85" />
+<text x="206.49217099999998" y="300.0" font-size="11.0" text-anchor="middle" dominant-baseline="middle" fill="white" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="500">feature-a</text>
+<rect x="283.20530249999996" y="290.5" width="46.573737" height="19.0" rx="4" ry="4" fill="#7b8fb2" opacity="0.85" />
+<text x="306.492171" y="300.0" font-size="11.0" text-anchor="middle" dominant-baseline="middle" fill="white" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="500">bugfix</text>
+<rect x="174.3940275" y="90.5" width="64.19628700000001" height="19.0" rx="4" ry="4" fill="#b07b8f" opacity="0.85" />
+<text x="206.49217099999998" y="100.0" font-size="11.0" text-anchor="middle" dominant-baseline="middle" fill="white" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="500">feature-b</text>
+<text x="94.492171" y="317.5" font-size="11.0" text-anchor="end" dominant-baseline="middle" fill="#383838" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">initial commit</text>
+<text x="94.492171" y="332.5" font-size="9.0" text-anchor="end" dominant-baseline="middle" fill="#707070" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">1b35060</text>
+<text x="218.49217099999998" y="267.5" font-size="11.0" text-anchor="start" dominant-baseline="middle" fill="#383838" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">start feature A</text>
+<text x="218.49217099999998" y="282.5" font-size="9.0" text-anchor="start" dominant-baseline="middle" fill="#707070" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">a8ba520</text>
+<text x="318.492171" y="267.5" font-size="11.0" text-anchor="start" dominant-baseline="middle" fill="#383838" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">fix #42</text>
+<text x="318.492171" y="282.5" font-size="9.0" text-anchor="start" dominant-baseline="middle" fill="#707070" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">ff2bf3a</text>
+<text x="94.492171" y="217.5" font-size="11.0" text-anchor="end" dominant-baseline="middle" fill="#383838" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">merge feature A</text>
+<text x="94.492171" y="232.5" font-size="9.0" text-anchor="end" dominant-baseline="middle" fill="#707070" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">c521ba8</text>
+<text x="94.492171" y="167.5" font-size="11.0" text-anchor="end" dominant-baseline="middle" fill="#383838" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">merge bugfix</text>
+<text x="94.492171" y="182.5" font-size="9.0" text-anchor="end" dominant-baseline="middle" fill="#707070" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">dca1553</text>
+<text x="94.492171" y="117.5" font-size="11.0" text-anchor="end" dominant-baseline="middle" fill="#383838" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">release prep</text>
+<text x="94.492171" y="132.5" font-size="9.0" text-anchor="end" dominant-baseline="middle" fill="#707070" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">b2ed627</text>
+<text x="218.49217099999998" y="67.5" font-size="11.0" text-anchor="start" dominant-baseline="middle" fill="#383838" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">feature B</text>
+<text x="218.49217099999998" y="82.5" font-size="9.0" text-anchor="start" dominant-baseline="middle" fill="#707070" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">b8e625f</text>
+<text x="94.492171" y="17.5" font-size="11.0" text-anchor="end" dominant-baseline="middle" fill="#383838" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">merge feature B</text>
+<text x="94.492171" y="32.5" font-size="9.0" text-anchor="end" dominant-baseline="middle" fill="#707070" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">d193154</text></svg>
+<text x="219.2460855" y="445.5" font-size="14" text-anchor="middle" dominant-baseline="middle" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" fill="#383838">dark</text>
+<rect x="8.0" y="459.5" width="422.492171" height="379.5" stroke="#d4d4d4" stroke-width="1" fill="none" />
+<svg x="16.0" y="467.5" width="406.492171" height="363.5" viewBox="0 0 406.492171 363.5"><defs>
 </defs>
 <rect x="0" y="0" width="406.492171" height="363.5" fill="#282c34" />
 <path d="M106.492171,12.5 L106.492171,337.5" stroke="#3e4451" stroke-width="0.7" stroke-dasharray="4,4" />
@@ -21,11 +116,14 @@
 <circle cx="106.492171" cy="325.0" r="5" fill="#abb2bf" stroke="#282c34" stroke-width="1.5" />
 <circle cx="206.49217099999998" cy="275.0" r="5" fill="#98c379" stroke="#282c34" stroke-width="1.5" />
 <circle cx="306.492171" cy="275.0" r="5" fill="#61afef" stroke="#282c34" stroke-width="1.5" />
-<circle cx="106.492171" cy="225.0" r="5" fill="#abb2bf" stroke="#282c34" stroke-width="1.5" />
-<circle cx="106.492171" cy="175.0" r="5" fill="#abb2bf" stroke="#282c34" stroke-width="1.5" />
+<circle cx="106.492171" cy="225.0" r="5.5" fill="#282c34" stroke="#abb2bf" stroke-width="2" />
+<path d="M103.992171,225.4 L105.692171,227.1 L109.092171,223.4" stroke="#abb2bf" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<circle cx="106.492171" cy="175.0" r="5.5" fill="#282c34" stroke="#abb2bf" stroke-width="2" />
+<path d="M103.992171,175.4 L105.692171,177.1 L109.092171,173.4" stroke="#abb2bf" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round" />
 <circle cx="106.492171" cy="125.0" r="5" fill="#abb2bf" stroke="#282c34" stroke-width="1.5" />
 <circle cx="206.49217099999998" cy="75.0" r="5" fill="#e06c75" stroke="#282c34" stroke-width="1.5" />
-<circle cx="106.492171" cy="25.0" r="5" fill="#abb2bf" stroke="#282c34" stroke-width="1.5" />
+<circle cx="106.492171" cy="25.0" r="5.5" fill="#282c34" stroke="#abb2bf" stroke-width="2" />
+<path d="M103.992171,25.4 L105.692171,27.1 L109.092171,23.4" stroke="#abb2bf" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round" />
 <rect x="86.75022849999999" y="340.5" width="39.483885" height="19.0" rx="4" ry="4" fill="#abb2bf" opacity="0.85" />
 <text x="106.49217099999998" y="350.0" font-size="11.0" text-anchor="middle" dominant-baseline="middle" fill="white" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="500">main</text>
 <rect x="174.51487899999998" y="290.5" width="63.954584000000004" height="19.0" rx="4" ry="4" fill="#98c379" opacity="0.85" />
@@ -50,35 +148,38 @@
 <text x="218.49217099999998" y="82.5" font-size="9.0" text-anchor="start" dominant-baseline="middle" fill="#7f848e" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">b8e625f</text>
 <text x="94.492171" y="17.5" font-size="11.0" text-anchor="end" dominant-baseline="middle" fill="#abb2bf" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">merge feature B</text>
 <text x="94.492171" y="32.5" font-size="9.0" text-anchor="end" dominant-baseline="middle" fill="#7f848e" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">d193154</text></svg>
-<text x="657.7382565" y="22.0" font-size="14" text-anchor="middle" dominant-baseline="middle" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" fill="#383838">compact</text>
-<rect x="446.492171" y="36" width="422.492171" height="379.5" stroke="#d4d4d4" stroke-width="1" fill="none" />
-<svg x="507.46209174999996" y="94.30681818181819" width="300.55232950000004" height="262.8863636363636" viewBox="0 0 300.55232950000004 262.8863636363636"><defs>
+<text x="657.7382565" y="445.5" font-size="14" text-anchor="middle" dominant-baseline="middle" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" fill="#383838">compact</text>
+<rect x="446.492171" y="459.5" width="422.492171" height="379.5" stroke="#d4d4d4" stroke-width="1" fill="none" />
+<svg x="507.46209174999996" y="517.8068181818182" width="300.55232950000004" height="262.8863636363636" viewBox="0 0 300.55232950000004 262.8863636363636"><defs>
 </defs>
 <path d="M90.55232950000001,8.75 L90.55232950000001,236.25" stroke="#b8b8b8" stroke-width="0.7" stroke-dasharray="4,4" />
 <path d="M160.5523295,8.75 L160.5523295,236.25" stroke="#b8b8b8" stroke-width="0.7" stroke-dasharray="4,4" />
 <path d="M230.5523295,8.75 L230.5523295,236.25" stroke="#b8b8b8" stroke-width="0.7" stroke-dasharray="4,4" />
-<path d="M90.55232950000001,227.5 L90.55232950000001,17.5" stroke="#5c6370" stroke-width="2" stroke-linecap="round" />
-<path d="M90.55232950000001,227.5 L146.5523295,227.5 A14,14,0,0,0,160.5523295,213.5 L160.5523295,192.5" stroke="#6a9f8d" stroke-width="2" fill="none" stroke-linecap="round" />
-<path d="M160.5523295,192.5 L160.5523295,171.5 A14,14,0,0,0,146.5523295,157.5 L90.55232950000001,157.5" stroke="#6a9f8d" stroke-width="2" fill="none" stroke-linecap="round" />
-<path d="M90.55232950000001,227.5 L216.5523295,227.5 A14,14,0,0,0,230.5523295,213.5 L230.5523295,192.5" stroke="#7b8fb2" stroke-width="2" fill="none" stroke-linecap="round" />
-<path d="M230.5523295,192.5 L230.5523295,136.5 A14,14,0,0,0,216.5523295,122.5 L90.55232950000001,122.5" stroke="#7b8fb2" stroke-width="2" fill="none" stroke-linecap="round" />
-<path d="M90.55232950000001,87.5 L146.5523295,87.5 A14,14,0,0,0,160.5523295,73.5 L160.5523295,52.5" stroke="#b07b8f" stroke-width="2" fill="none" stroke-linecap="round" />
-<path d="M160.5523295,52.5 L160.5523295,31.5 A14,14,0,0,0,146.5523295,17.5 L90.55232950000001,17.5" stroke="#b07b8f" stroke-width="2" fill="none" stroke-linecap="round" />
-<circle cx="90.55232950000001" cy="227.5" r="5" fill="#5c6370" stroke="white" stroke-width="1.5" />
-<circle cx="160.5523295" cy="192.5" r="5" fill="#6a9f8d" stroke="white" stroke-width="1.5" />
-<circle cx="230.5523295" cy="192.5" r="5" fill="#7b8fb2" stroke="white" stroke-width="1.5" />
-<circle cx="90.55232950000001" cy="157.5" r="5" fill="#5c6370" stroke="white" stroke-width="1.5" />
-<circle cx="90.55232950000001" cy="122.5" r="5" fill="#5c6370" stroke="white" stroke-width="1.5" />
-<circle cx="90.55232950000001" cy="87.5" r="5" fill="#5c6370" stroke="white" stroke-width="1.5" />
-<circle cx="160.5523295" cy="52.5" r="5" fill="#b07b8f" stroke="white" stroke-width="1.5" />
-<circle cx="90.55232950000001" cy="17.5" r="5" fill="#5c6370" stroke="white" stroke-width="1.5" />
-<rect x="72.60510904545455" y="241.61363636363637" width="35.89444090909091" height="17.272727272727273" rx="3.6363636363636367" ry="3.6363636363636367" fill="#5c6370" opacity="0.85" />
+<path d="M90.55232950000001,227.5 L90.55232950000001,17.5" stroke="#4a4f5a" stroke-width="2" stroke-linecap="round" />
+<path d="M90.55232950000001,227.5 A14,14,0,0,1,104.55232950000001,213.5 L146.5523295,213.5 A14,14,0,0,0,160.5523295,199.5 L160.5523295,192.5" stroke="#56b393" stroke-width="2" fill="none" stroke-linecap="round" />
+<path d="M90.55232950000001,157.5 A14,14,0,0,0,104.55232950000001,171.5 L146.5523295,171.5 A14,14,0,0,1,160.5523295,185.5 L160.5523295,192.5" stroke="#56b393" stroke-width="2" fill="none" stroke-linecap="round" />
+<path d="M90.55232950000001,227.5 A14,14,0,0,1,104.55232950000001,213.5 L216.5523295,213.5 A14,14,0,0,0,230.5523295,199.5 L230.5523295,192.5" stroke="#6b8bc2" stroke-width="2" fill="none" stroke-linecap="round" />
+<path d="M90.55232950000001,122.5 A14,14,0,0,0,104.55232950000001,136.5 L216.5523295,136.5 A14,14,0,0,1,230.5523295,150.5 L230.5523295,192.5" stroke="#6b8bc2" stroke-width="2" fill="none" stroke-linecap="round" />
+<path d="M90.55232950000001,87.5 A14,14,0,0,1,104.55232950000001,73.5 L146.5523295,73.5 A14,14,0,0,0,160.5523295,59.5 L160.5523295,52.5" stroke="#c06b8b" stroke-width="2" fill="none" stroke-linecap="round" />
+<path d="M90.55232950000001,17.5 A14,14,0,0,0,104.55232950000001,31.5 L146.5523295,31.5 A14,14,0,0,1,160.5523295,45.5 L160.5523295,52.5" stroke="#c06b8b" stroke-width="2" fill="none" stroke-linecap="round" />
+<circle cx="90.55232950000001" cy="227.5" r="5" fill="#4a4f5a" stroke="white" stroke-width="1.5" />
+<circle cx="160.5523295" cy="192.5" r="5" fill="#56b393" stroke="white" stroke-width="1.5" />
+<circle cx="230.5523295" cy="192.5" r="5" fill="#6b8bc2" stroke="white" stroke-width="1.5" />
+<circle cx="90.55232950000001" cy="157.5" r="5.5" fill="white" stroke="#4a4f5a" stroke-width="2" />
+<path d="M88.05232950000001,157.9 L89.75232950000002,159.6 L93.15232950000001,155.9" stroke="#4a4f5a" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<circle cx="90.55232950000001" cy="122.5" r="5.5" fill="white" stroke="#4a4f5a" stroke-width="2" />
+<path d="M88.05232950000001,122.9 L89.75232950000002,124.6 L93.15232950000001,120.9" stroke="#4a4f5a" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<circle cx="90.55232950000001" cy="87.5" r="5" fill="#4a4f5a" stroke="white" stroke-width="1.5" />
+<circle cx="160.5523295" cy="52.5" r="5" fill="#c06b8b" stroke="white" stroke-width="1.5" />
+<circle cx="90.55232950000001" cy="17.5" r="5.5" fill="white" stroke="#4a4f5a" stroke-width="2" />
+<path d="M88.05232950000001,17.9 L89.75232950000002,19.6 L93.15232950000001,15.9" stroke="#4a4f5a" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<rect x="72.60510904545455" y="241.61363636363637" width="35.89444090909091" height="17.272727272727273" rx="3.6363636363636367" ry="3.6363636363636367" fill="#4a4f5a" opacity="0.85" />
 <text x="90.55232950000001" y="250.25" font-size="10.0" text-anchor="middle" dominant-baseline="middle" fill="white" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="500">main</text>
-<rect x="131.48206404545456" y="206.61363636363637" width="58.14053090909091" height="17.272727272727273" rx="3.6363636363636367" ry="3.6363636363636367" fill="#6a9f8d" opacity="0.85" />
+<rect x="131.48206404545456" y="206.61363636363637" width="58.14053090909091" height="17.272727272727273" rx="3.6363636363636367" ry="3.6363636363636367" fill="#56b393" opacity="0.85" />
 <text x="160.5523295" y="215.25" font-size="10.0" text-anchor="middle" dominant-baseline="middle" fill="white" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="500">feature-a</text>
-<rect x="209.38244904545456" y="206.61363636363637" width="42.33976090909091" height="17.272727272727273" rx="3.6363636363636367" ry="3.6363636363636367" fill="#7b8fb2" opacity="0.85" />
+<rect x="209.38244904545456" y="206.61363636363637" width="42.33976090909091" height="17.272727272727273" rx="3.6363636363636367" ry="3.6363636363636367" fill="#6b8bc2" opacity="0.85" />
 <text x="230.5523295" y="215.25" font-size="10.0" text-anchor="middle" dominant-baseline="middle" fill="white" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="500">bugfix</text>
-<rect x="131.37219904545455" y="66.61363636363636" width="58.36026090909091" height="17.272727272727273" rx="3.6363636363636367" ry="3.6363636363636367" fill="#b07b8f" opacity="0.85" />
+<rect x="131.37219904545455" y="66.61363636363636" width="58.36026090909091" height="17.272727272727273" rx="3.6363636363636367" ry="3.6363636363636367" fill="#c06b8b" opacity="0.85" />
 <text x="160.5523295" y="75.25" font-size="10.0" text-anchor="middle" dominant-baseline="middle" fill="white" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="500">feature-b</text>
 <text x="82.15232950000001" y="221.02272727272728" font-size="9.5" text-anchor="end" dominant-baseline="middle" fill="#383838" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">initial commit</text>
 <text x="82.15232950000001" y="233.97727272727275" font-size="8.0" text-anchor="end" dominant-baseline="middle" fill="#707070" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">1b35060</text>

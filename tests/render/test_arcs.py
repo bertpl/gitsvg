@@ -80,12 +80,15 @@ def test_branch_off_from_explicit_commit_uses_that_commits_position() -> None:
 # ==================================================================================================
 def test_merge_emits_an_extra_path_for_the_merge_arc() -> None:
     # --- arrange ----------------------
+    # `merge_commit_style: circle` isolates the arc count from the default
+    # checkmark dot, whose tick is an extra <path> unrelated to the merge arc.
     text = (
         '{"op": "branch", "name": "main"}\n'
         '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
         '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
         '{"op": "commit", "branch": "feat", "id": "f1", "msg": "x"}\n'
         '{"op": "merge", "from": "feat", "into": "main", "as": "m2"}\n'
+        '{"op": "theme", "merge_commit_style": "circle"}\n'
     )
 
     # --- act --------------------------

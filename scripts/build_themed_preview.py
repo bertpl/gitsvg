@@ -10,6 +10,7 @@ Usage::
     uv run python scripts/build_themed_preview.py
 """
 
+import math
 import re
 from pathlib import Path
 
@@ -34,11 +35,11 @@ OUTPUT_PATH = REPO_ROOT / "examples" / "10_named_themes.svg"
 # ==================================================================================================
 #  Themes to showcase
 # ==================================================================================================
-# Subset of `NAMED_THEMES` to include in the preview tile, in display order.
-# `default` is intentionally excluded — the README already shows several
-# default-theme renders before this section, so the preview focuses on the
-# themes that visibly differ from it. Extend this tuple when new themes ship.
-PREVIEW_THEMES: tuple[str, ...] = ("dark", "compact")
+# Subset of `NAMED_THEMES` to include in the preview tile, in display order
+# (row-major across the 2×2 grid). `default` and `muted` lead so the refresh
+# and its escape hatch sit side by side. Extend this tuple when new themes
+# ship; `_build_preview` lays them out in a grid that grows with the count.
+PREVIEW_THEMES: tuple[str, ...] = ("default", "muted", "dark", "compact")
 
 
 # ==================================================================================================
@@ -116,10 +117,11 @@ def _inner_svg_content(svg_text: str) -> str:
 def _build_preview(themes: list[tuple[str, draw.Drawing]]) -> draw.Drawing:
     """Tile the per-theme drawings into one labelled preview SVG.
 
-    Tiles sit in a single row, each consisting of a centered label above
-    a bordered viewport containing the rendered diagram. Tile widths
-    match the widest per-theme render so the row aligns; tile heights
-    match the tallest, with shorter renders sitting top-aligned inside.
+    Tiles sit in a squarish grid (`ceil(sqrt(n))` columns, row-major in
+    display order), each consisting of a centered label above a bordered
+    viewport containing the rendered diagram. Every tile is sized to the
+    widest / tallest per-theme render so the grid aligns; shorter renders
+    sit centered inside their tile. Four themes lay out as a 2×2 grid.
 
     Args:
         themes: List of `(theme_name, drawing)` pairs in display order.
@@ -132,19 +134,26 @@ def _build_preview(themes: list[tuple[str, draw.Drawing]]) -> draw.Drawing:
     tile_inner_height = max(d.height for _, d in themes)
     tile_width = tile_inner_width + 2 * _TILE_PADDING
     tile_height = tile_inner_height + 2 * _TILE_PADDING
+    cell_height = _LABEL_HEIGHT + tile_height  # label band + bordered viewport
+
+    # --- grid shape ---------------------------
+    n = len(themes)
+    n_cols = math.ceil(math.sqrt(n))
+    n_rows = math.ceil(n / n_cols)
 
     # --- canvas dimensions --------------------
-    n = len(themes)
-    canvas_width = 2 * _OUTER_MARGIN + n * tile_width + (n - 1) * _TILE_GAP
-    canvas_height = 2 * _OUTER_MARGIN + _LABEL_HEIGHT + tile_height
+    canvas_width = 2 * _OUTER_MARGIN + n_cols * tile_width + (n_cols - 1) * _TILE_GAP
+    canvas_height = 2 * _OUTER_MARGIN + n_rows * cell_height + (n_rows - 1) * _TILE_GAP
 
     d = draw.Drawing(canvas_width, canvas_height, origin=(0, 0))
 
     # --- per-tile placement -------------------
     for i, (name, inner) in enumerate(themes):
-        tile_x = _OUTER_MARGIN + i * (tile_width + _TILE_GAP)
-        tile_y_label = _OUTER_MARGIN + _LABEL_HEIGHT / 2
-        tile_y_box = _OUTER_MARGIN + _LABEL_HEIGHT
+        col, row = i % n_cols, i // n_cols
+        tile_x = _OUTER_MARGIN + col * (tile_width + _TILE_GAP)
+        cell_y = _OUTER_MARGIN + row * (cell_height + _TILE_GAP)
+        tile_y_label = cell_y + _LABEL_HEIGHT / 2
+        tile_y_box = cell_y + _LABEL_HEIGHT
 
         # Label (centered above the tile).
         d.append(

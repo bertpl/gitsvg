@@ -83,7 +83,7 @@ def test_schema_themes_lists_registered_names_alphabetically() -> None:
     # --- assert -----------------------
     assert result.exit_code == 0
     lines = [line for line in result.output.splitlines() if line]
-    assert lines == ["compact", "dark", "default"]
+    assert lines == ["compact", "dark", "default", "muted"]
 
 
 # ==================================================================================================
@@ -119,6 +119,37 @@ def test_schema_theme_dark_emits_dark_palette() -> None:
     assert payload["commit_stroke_color"] == "#282c34"
 
 
+def test_schema_theme_muted_emits_pre_refresh_palette_and_styles() -> None:
+    # --- arrange ----------------------
+    runner = CliRunner()
+
+    # --- act --------------------------
+    result = runner.invoke(cli, ["schema", "theme", "muted"])
+
+    # --- assert -----------------------
+    assert result.exit_code == 0
+    payload = json.loads(result.output)
+    assert payload["colors"]["main"] == "#5c6370"
+    assert payload["branch_line_style"] == "rounded"
+    assert payload["merge_commit_style"] == "circle"
+
+
+def test_schema_theme_default_emits_refreshed_palette_and_styles() -> None:
+    # --- arrange ----------------------
+    runner = CliRunner()
+
+    # --- act --------------------------
+    result = runner.invoke(cli, ["schema", "theme", "default"])
+
+    # --- assert -----------------------
+    assert result.exit_code == 0
+    payload = json.loads(result.output)
+    assert payload["colors"]["main"] == "#4a4f5a"
+    assert payload["colors"]["branch1"] == "#56b393"
+    assert payload["branch_line_style"] == "rounded"
+    assert payload["merge_commit_style"] == "checkmark"
+
+
 def test_schema_theme_compact_emits_tighter_metrics() -> None:
     # --- arrange ----------------------
     runner = CliRunner()
@@ -145,7 +176,7 @@ def test_schema_theme_unknown_exits_non_zero_with_known_list() -> None:
     assert result.exit_code != 0
     assert "Unknown theme" in result.output
     # Lists the registered names so the user can pick one.
-    for name in ("compact", "dark", "default"):
+    for name in ("compact", "dark", "default", "muted"):
         assert name in result.output
 
 

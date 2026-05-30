@@ -1,7 +1,7 @@
 """Tests for the `Theme` Pydantic model and `DEFAULT_THEME` baseline values."""
 
 from gitsvg.file_format import LabelSide
-from gitsvg.theme import DEFAULT_THEME, DefaultTheme, Orientation, Theme
+from gitsvg.theme import DEFAULT_THEME, BranchLineStyle, DefaultTheme, MergeCommitStyle, Orientation, Theme
 
 
 # ==================================================================================================
@@ -43,8 +43,12 @@ def test_default_theme_values_pin_the_byte_identical_baseline() -> None:
     assert DEFAULT_THEME.pull_request_pill_offset_commit_axis_in_rows == -0.5
     assert DEFAULT_THEME.pull_request_pill_offset_branch_axis_in_lanes == 0.0
     assert DEFAULT_THEME.background_color is None
-    assert DEFAULT_THEME.colors["main"] == "#5c6370"
+    assert DEFAULT_THEME.colors["main"] == "#4a4f5a"
+    assert DEFAULT_THEME.colors["branch1"] == "#56b393"
     assert DEFAULT_THEME.default_branch_color_cycle == ["branch1", "branch2", "branch3", "branch4"]
+    # Refreshed visual vocabulary.
+    assert DEFAULT_THEME.branch_line_style is BranchLineStyle.ROUNDED
+    assert DEFAULT_THEME.merge_commit_style is MergeCommitStyle.CHECKMARK
     # `"white"` (not `"#ffffff"`) preserves the byte-identical SVG output the
     # renderer emitted before this field became themeable.
     assert DEFAULT_THEME.commit_stroke_color == "white"

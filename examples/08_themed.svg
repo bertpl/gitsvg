@@ -17,11 +17,14 @@
 <circle cx="132.37185399999998" cy="325.0" r="7" fill="#d62728" stroke="white" stroke-width="1.5" />
 <circle cx="242.37185399999998" cy="275.0" r="7" fill="#1f77b4" stroke="white" stroke-width="1.5" />
 <circle cx="352.371854" cy="275.0" r="7" fill="#2ca02c" stroke="white" stroke-width="1.5" />
-<circle cx="132.37185399999998" cy="225.0" r="7" fill="#d62728" stroke="white" stroke-width="1.5" />
-<circle cx="132.37185399999998" cy="175.0" r="7" fill="#d62728" stroke="white" stroke-width="1.5" />
+<circle cx="132.37185399999998" cy="225.0" r="7.7" fill="white" stroke="#d62728" stroke-width="4" />
+<path d="M128.87185399999998,225.56 L131.25185399999998,227.94 L136.01185399999997,222.76" stroke="#d62728" stroke-width="2.24" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<circle cx="132.37185399999998" cy="175.0" r="7.7" fill="white" stroke="#d62728" stroke-width="4" />
+<path d="M128.87185399999998,175.56 L131.25185399999998,177.94 L136.01185399999997,172.76" stroke="#d62728" stroke-width="2.24" fill="none" stroke-linecap="round" stroke-linejoin="round" />
 <circle cx="132.37185399999998" cy="125.0" r="7" fill="#d62728" stroke="white" stroke-width="1.5" />
 <circle cx="242.37185399999998" cy="75.0" r="7" fill="#ff7f0e" stroke="white" stroke-width="1.5" />
-<circle cx="132.37185399999998" cy="25.0" r="7" fill="#d62728" stroke="white" stroke-width="1.5" />
+<circle cx="132.37185399999998" cy="25.0" r="7.7" fill="white" stroke="#d62728" stroke-width="4" />
+<path d="M128.87185399999998,25.56 L131.25185399999998,27.94 L136.01185399999997,22.759999999999998" stroke="#d62728" stroke-width="2.24" fill="none" stroke-linecap="round" stroke-linejoin="round" />
 <rect x="107.24574536363635" y="340.90909090909093" width="50.25221727272728" height="24.18181818181818" rx="5.090909090909091" ry="5.090909090909091" fill="#d62728" opacity="0.85" />
 <text x="132.37185399999998" y="353.0" font-size="14.0" text-anchor="middle" dominant-baseline="middle" fill="white" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="500">main</text>
 <rect x="201.67348236363634" y="290.90909090909093" width="81.39674327272728" height="24.18181818181818" rx="5.090909090909091" ry="5.090909090909091" fill="#1f77b4" opacity="0.85" />
