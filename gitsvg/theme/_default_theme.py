@@ -22,6 +22,7 @@ from typing import Any, Self
 
 from gitsvg.theme._box_anchor import BoxAnchor
 from gitsvg.theme._branch_line_style import BranchLineStyle
+from gitsvg.theme._merge_commit_style import MergeCommitStyle
 from gitsvg.theme._orientation import Orientation
 from gitsvg.theme._theme import Theme
 
@@ -150,6 +151,11 @@ class DefaultTheme(Theme):
     def _resolve_branch_line_style(cls) -> BranchLineStyle:
         """Connector shape between lanes — the rounded quarter-arc elbow."""
         return BranchLineStyle.ROUNDED
+
+    @classmethod
+    def _resolve_merge_commit_style(cls) -> MergeCommitStyle:
+        """Merge-commit dot style — the plain circle dot."""
+        return MergeCommitStyle.CIRCLE
 
     @classmethod
     def _resolve_label_offset_branch_axis_in_lanes(cls, orientation: Orientation) -> float:
@@ -410,6 +416,10 @@ class DefaultTheme(Theme):
         transparent (or white-rendered) background; dark themes
         should override to their background colour so the outline
         reads as a "carved out" gap rather than a bright halo.
+
+        Under `merge_commit_style: checkmark` this colour is also
+        reused as the merge dot's fill (fill and stroke swap), so a
+        dark theme's override flows through to the hollow merge dot.
         """
         return "white"
 
@@ -474,6 +484,7 @@ class DefaultTheme(Theme):
                 "arc_corner_radius_in_grid_units", cls._resolve_arc_corner_radius_in_grid_units
             ),
             branch_line_style=pick("branch_line_style", cls._resolve_branch_line_style),
+            merge_commit_style=pick("merge_commit_style", cls._resolve_merge_commit_style),
             label_offset_branch_axis_in_lanes=pick(
                 "label_offset_branch_axis_in_lanes", cls._resolve_label_offset_branch_axis_in_lanes, orientation
             ),

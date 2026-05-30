@@ -101,6 +101,7 @@ def compute_layout(state: State) -> Layout:
             msg=cstate.msg,
             hash=cstate.hash,
             highlight=cstate.highlight,
+            is_merge=len(cstate.parents) >= 2,
         )
         for cid, cstate in state.commits.items()
     }

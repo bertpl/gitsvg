@@ -41,7 +41,8 @@
       "commit_pos": 0,
       "msg": "initial commit",
       "hash": "1b35060",
-      "highlight": false
+      "highlight": false,
+      "is_merge": false
     },
     {
       "id": "a1",
@@ -50,7 +51,8 @@
       "commit_pos": 1,
       "msg": "start feature A",
       "hash": "a8ba520",
-      "highlight": false
+      "highlight": false,
+      "is_merge": false
     },
     {
       "id": "x1",
@@ -59,7 +61,8 @@
       "commit_pos": 1,
       "msg": "fix #42",
       "hash": "ff2bf3a",
-      "highlight": false
+      "highlight": false,
+      "is_merge": false
     },
     {
       "id": "m1",
@@ -68,7 +71,8 @@
       "commit_pos": 2,
       "msg": "merge feature A",
       "hash": "c521ba8",
-      "highlight": false
+      "highlight": false,
+      "is_merge": true
     },
     {
       "id": "m2",
@@ -77,7 +81,8 @@
       "commit_pos": 3,
       "msg": "merge bugfix",
       "hash": "dca1553",
-      "highlight": false
+      "highlight": false,
+      "is_merge": true
     },
     {
       "id": "c2",
@@ -86,7 +91,8 @@
       "commit_pos": 4,
       "msg": "release prep",
       "hash": "b2ed627",
-      "highlight": false
+      "highlight": false,
+      "is_merge": false
     },
     {
       "id": "b1",
@@ -95,7 +101,8 @@
       "commit_pos": 5,
       "msg": "feature B",
       "hash": "b8e625f",
-      "highlight": false
+      "highlight": false,
+      "is_merge": false
     },
     {
       "id": "m3",
@@ -104,7 +111,8 @@
       "commit_pos": 6,
       "msg": "merge feature B",
       "hash": "d193154",
-      "highlight": false
+      "highlight": false,
+      "is_merge": true
     }
   ],
   "arcs": [

@@ -18,8 +18,8 @@ Z-order (back to front):
 5. Branch-name pills (coloured rounded rectangles + branch name).
 6. Pull-request title pills (anchored at source-tip commits; only
    when the PR has a `title`).
-7. Commit dots (in branch colour, with white outline; enlarged when
-   highlighted).
+7. Commit dots (ordinary commits in branch colour with white outline;
+   merge commits per `merge_commit_style`; enlarged when highlighted).
 8. Commit labels (`msg` primary lines + optional `hash` secondary
    line, on the side indicated by `label_side`; bold msg when
    highlighted).

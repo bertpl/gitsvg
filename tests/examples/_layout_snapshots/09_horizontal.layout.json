@@ -34,7 +34,8 @@
       "commit_pos": 0,
       "msg": "init",
       "hash": "7b14e2d",
-      "highlight": false
+      "highlight": false,
+      "is_merge": false
     },
     {
       "id": "m2",
@@ -43,7 +44,8 @@
       "commit_pos": 1,
       "msg": "release v1",
       "hash": "691ac26",
-      "highlight": true
+      "highlight": true,
+      "is_merge": false
     },
     {
       "id": "f1",
@@ -52,7 +54,8 @@
       "commit_pos": 2,
       "msg": "wip",
       "hash": "577eb2f",
-      "highlight": false
+      "highlight": false,
+      "is_merge": false
     },
     {
       "id": "f2",
@@ -61,7 +64,8 @@
       "commit_pos": 3,
       "msg": "polish",
       "hash": "02a38f5",
-      "highlight": false
+      "highlight": false,
+      "is_merge": false
     },
     {
       "id": "d1",
@@ -70,7 +74,8 @@
       "commit_pos": 2,
       "msg": "readme",
       "hash": "c2c3fad",
-      "highlight": false
+      "highlight": false,
+      "is_merge": false
     },
     {
       "id": "_c1",
@@ -79,7 +84,8 @@
       "commit_pos": 4,
       "msg": "merge feature",
       "hash": "a4b68e8",
-      "highlight": false
+      "highlight": false,
+      "is_merge": true
     },
     {
       "id": "m3",
@@ -88,7 +94,8 @@
       "commit_pos": 5,
       "msg": "hotfix",
       "hash": "5c5d0aa",
-      "highlight": false
+      "highlight": false,
+      "is_merge": false
     }
   ],
   "arcs": [

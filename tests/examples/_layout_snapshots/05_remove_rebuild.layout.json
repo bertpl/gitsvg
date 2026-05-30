@@ -27,7 +27,8 @@
       "commit_pos": 0,
       "msg": "initial commit",
       "hash": "1b35060",
-      "highlight": false
+      "highlight": false,
+      "is_merge": false
     },
     {
       "id": "c2",
@@ -36,7 +37,8 @@
       "commit_pos": 1,
       "msg": "main moves on",
       "hash": "b1e760e",
-      "highlight": false
+      "highlight": false,
+      "is_merge": false
     },
     {
       "id": "c3",
@@ -45,7 +47,8 @@
       "commit_pos": 2,
       "msg": "more main work",
       "hash": "62a6989",
-      "highlight": false
+      "highlight": false,
+      "is_merge": false
     },
     {
       "id": "f1",
@@ -54,7 +57,8 @@
       "commit_pos": 3,
       "msg": "WIP feature",
       "hash": "4ef0ae4",
-      "highlight": false
+      "highlight": false,
+      "is_merge": false
     },
     {
       "id": "f2",
@@ -63,7 +67,8 @@
       "commit_pos": 4,
       "msg": "more WIP",
       "hash": "02a38f5",
-      "highlight": false
+      "highlight": false,
+      "is_merge": false
     }
   ],
   "arcs": [

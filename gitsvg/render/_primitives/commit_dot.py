@@ -5,7 +5,9 @@ import drawsvg as draw
 from gitsvg.layout import LayoutCommit
 from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._geometry import grid_to_pixel
+from gitsvg.render._primitives._merge_dot_styles import _MERGE_DOT_BUILDERS
 from gitsvg.render._renderer_settings import RendererSettings
+from gitsvg.theme import MergeCommitStyle
 
 
 def draw_commit_dot(
@@ -13,19 +15,14 @@ def draw_commit_dot(
 ) -> None:
     """Append a commit dot to the drawing.
 
-    Highlighted commits render with `theme.highlight_radius` (40 %
-    bigger than `theme.commit_radius`); the bold label is wired
-    separately in the label primitive.
+    Ordinary commits draw the plain `circle` dot. Merge commits draw the
+    style `theme.merge_commit_style` selects (`circle` / `checkmark`),
+    dispatched through the `_merge_dot_styles` registry. The base radius is
+    `theme.highlight_radius` when highlighted else `theme.commit_radius`; the
+    `checkmark` dot enlarges its ring from there while its tick stays at the
+    base size. The bold label is wired separately in the label primitive.
     """
     x, y = grid_to_pixel(commit.branch_pos, commit.commit_pos, canvas)
+    style = theme.merge_commit_style if commit.is_merge else MergeCommitStyle.CIRCLE
     radius = theme.highlight_radius if commit.highlight else theme.commit_radius
-    d.append(
-        draw.Circle(
-            x,
-            y,
-            radius,
-            fill=color,
-            stroke=theme.commit_stroke_color,
-            stroke_width=theme.commit_stroke_width,
-        )
-    )
+    _MERGE_DOT_BUILDERS[style](d, x, y, radius, color, theme)
