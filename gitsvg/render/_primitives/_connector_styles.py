@@ -1,0 +1,241 @@
+"""Connector style builders — per-style path geometry, the shared geometry
+derivation, and the style registry.
+
+A connector joins a trunk point and a branch point on two lanes (see
+`arc.py` for the role semantics). `theme.branch_line_style` selects how
+the two points are connected:
+
+- `rounded` — two straight legs joined by a single quarter-arc corner
+  (the default).
+- `straight` — a direct line between the two points (no arc).
+- `bezier` — a smooth cubic-Bézier S, tangent to the commit axis at both
+  ends.
+- `double_rounded` — a stepped connector: leave the trunk parallel to its
+  lane, two quarter-arcs around an orthogonal crossing one radius from the
+  trunk, then a parallel run to the branch.
+
+Each style is a `_build_<style>(path, geometry)` function that owns its
+whole path, opening `M` included. `_connector_geometry` derives the shared
+pixel-space `_ConnectorGeometry` once; styles that use the corner radius
+clamp the raw `corner_radius` to what their own geometry can fit (the
+generic `>= 0` validation lives on the `theme:` op). `_CONNECTOR_BUILDERS`
+maps each `BranchLineStyle` to its builder; adding a style is a localized
+change: a new enum member, a new `_build_*`, and a new registry entry.
+"""
+
+from collections.abc import Callable
+from dataclasses import dataclass
+
+import drawsvg as draw
+
+from gitsvg.layout import GridSlot
+from gitsvg.render._canvas import RenderCanvas
+from gitsvg.render._geometry import grid_to_pixel
+from gitsvg.render._renderer_settings import RendererSettings
+from gitsvg.theme._branch_line_style import BranchLineStyle
+from gitsvg.theme._orientation import Orientation
+
+# Sub-pixel tolerance below which a connector segment degenerates (collapses
+# to a straight line). Pure numerical-precision guard; never scales.
+_ARC_DEGENERATE_TOLERANCE_PX = 0.5  # axis-symmetric (perceptual)
+
+# `bezier` tangent strength: cubic control-point handle length along the
+# commit axis, as a fraction of the connector's commit-axis span. 0.5 places
+# the handles at the midpoint (a gentle S); 1.0 reaches the opposite
+# endpoint's row (parallel to the lanes longest, but starts to over-curve).
+# 0.75 is the tuned sweet spot.
+_BEZIER_TANGENT_STRENGTH = 0.75  # axis-symmetric (perceptual)
+
+
+@dataclass(frozen=True, slots=True)
+class _ConnectorGeometry:
+    """Pixel-space geometry of one connector, derived once and shared by the style builders.
+
+    Attributes:
+        x1: Source pixel x (the BT-canonical from-point).
+        y1: Source pixel y.
+        x2: Target pixel x (the to-point).
+        y2: Target pixel y.
+        dx: Branch-axis corner direction from source to target (+1 / -1).
+        dy: Commit-axis corner direction from source to target (+1 / -1; SVG y-down).
+        corner_radius: Raw configured corner radius (px); each style clamps it
+            to what its own geometry can fit.
+        screen_y_first: `rounded` draws the screen-y leg first when True.
+        commit_axis_vertical: True in vertical orientations (`bt` / `tb`),
+            where the commit axis runs screen-vertical.
+        trunk_is_start: True when the source point is the trunk (branch-off);
+            False when the source is the branch and the target is the trunk
+            (merge / pull request). Lets `double_rounded` put its crossing
+            near the trunk.
+    """
+
+    x1: float
+    y1: float
+    x2: float
+    y2: float
+    dx: int
+    dy: int
+    corner_radius: float
+    screen_y_first: bool
+    commit_axis_vertical: bool
+    trunk_is_start: bool
+
+
+def _connector_geometry(
+    trunk_point: GridSlot, branch_point: GridSlot, canvas: RenderCanvas, theme: RendererSettings
+) -> _ConnectorGeometry:
+    """Derive the shared pixel-space geometry for one connector.
+
+    Resolves the two role-labeled grid points to the BT-canonical (source,
+    target, leg-order) — a branch point above the trunk is a branch-off
+    (`trunk_is_start`), at or below is a merge — then maps to pixels and the
+    active orientation. See `arc.py` for the role semantics.
+
+    Args:
+        trunk_point: The endpoint on the ongoing branch.
+        branch_point: The endpoint on a branch's own start or tip.
+        canvas: Effective canvas spec for the grid → pixel transform.
+        theme: Resolved theme; supplies the raw corner radius.
+
+    Returns:
+        The `_ConnectorGeometry` every style builder reads.
+    """
+    trunk_is_start = branch_point.commit_pos > trunk_point.commit_pos
+    if trunk_is_start:
+        from_branch_pos, from_commit_pos = trunk_point.branch_pos, trunk_point.commit_pos
+        to_branch_pos, to_commit_pos = branch_point.branch_pos, branch_point.commit_pos
+        vertical_first = False
+    else:
+        from_branch_pos, from_commit_pos = branch_point.branch_pos, branch_point.commit_pos
+        to_branch_pos, to_commit_pos = trunk_point.branch_pos, trunk_point.commit_pos
+        vertical_first = True
+
+    x1, y1 = grid_to_pixel(from_branch_pos, from_commit_pos, canvas)
+    x2, y2 = grid_to_pixel(to_branch_pos, to_commit_pos, canvas)
+
+    commit_axis_vertical = canvas.orientation in (Orientation.BT, Orientation.TB)
+    screen_y_first = vertical_first if commit_axis_vertical else not vertical_first
+
+    dx = 1 if x2 > x1 else -1
+    dy = 1 if y2 > y1 else -1  # SVG y-down: positive = down the screen
+
+    return _ConnectorGeometry(
+        x1=x1,
+        y1=y1,
+        x2=x2,
+        y2=y2,
+        dx=dx,
+        dy=dy,
+        corner_radius=theme.arc_corner_radius,
+        screen_y_first=screen_y_first,
+        commit_axis_vertical=commit_axis_vertical,
+        trunk_is_start=trunk_is_start,
+    )
+
+
+# ==================================================================================================
+#  Style builders — each owns its full path (opening M included)
+# ==================================================================================================
+def _build_rounded(path: draw.Path, g: _ConnectorGeometry) -> None:
+    """Two straight legs joined by a single quarter-arc corner.
+
+    The corner radius clamps to either leg so it stays a true quarter
+    circle. Degenerate (same row or column) collapses to a straight
+    segment. This reproduces the prior-version connector exactly, so default
+    output stays byte-identical.
+    """
+    path.M(g.x1, g.y1)
+    r = min(g.corner_radius, abs(g.x2 - g.x1), abs(g.y2 - g.y1))
+
+    if abs(g.y2 - g.y1) < _ARC_DEGENERATE_TOLERANCE_PX:
+        path.L(g.x2, g.y1)
+        return
+    if abs(g.x2 - g.x1) < _ARC_DEGENERATE_TOLERANCE_PX:
+        path.L(g.x1, g.y2)
+        return
+
+    if g.screen_y_first:
+        path.L(g.x1, g.y2 - g.dy * r)
+        sweep = 1 if (g.dx > 0) != (g.dy > 0) else 0
+        path.A(r, r, 0, 0, sweep, g.x1 + g.dx * r, g.y2)
+        if abs(g.x2 - (g.x1 + g.dx * r)) > _ARC_DEGENERATE_TOLERANCE_PX:
+            path.L(g.x2, g.y2)
+    else:
+        path.L(g.x2 - g.dx * r, g.y1)
+        sweep = 0 if (g.dx > 0) != (g.dy > 0) else 1
+        path.A(r, r, 0, 0, sweep, g.x2, g.y1 + g.dy * r)
+        if abs(g.y2 - (g.y1 + g.dy * r)) > _ARC_DEGENERATE_TOLERANCE_PX:
+            path.L(g.x2, g.y2)
+
+
+def _build_straight(path: draw.Path, g: _ConnectorGeometry) -> None:
+    """A direct line from the source point to the target point."""
+    path.M(g.x1, g.y1)
+    path.L(g.x2, g.y2)
+
+
+def _build_bezier(path: draw.Path, g: _ConnectorGeometry) -> None:
+    """A smooth cubic-Bézier S, tangent to the commit axis at both ends.
+
+    The control points sit on the commit-axis line through each endpoint,
+    `_BEZIER_TANGENT_STRENGTH` of the commit-axis span away — so the curve
+    leaves and arrives parallel to the branch lines. Degenerate (same row or
+    column) collapses to a straight segment.
+    """
+    path.M(g.x1, g.y1)
+    if abs(g.y2 - g.y1) < _ARC_DEGENERATE_TOLERANCE_PX:
+        path.L(g.x2, g.y1)
+        return
+    if abs(g.x2 - g.x1) < _ARC_DEGENERATE_TOLERANCE_PX:
+        path.L(g.x1, g.y2)
+        return
+
+    s = _BEZIER_TANGENT_STRENGTH
+    if g.commit_axis_vertical:
+        span = g.y2 - g.y1
+        path.C(g.x1, g.y1 + s * span, g.x2, g.y2 - s * span, g.x2, g.y2)
+    else:
+        span = g.x2 - g.x1
+        path.C(g.x1 + s * span, g.y1, g.x2 - s * span, g.y2, g.x2, g.y2)
+
+
+def _build_double_rounded(path: draw.Path, g: _ConnectorGeometry) -> None:
+    """A stepped connector: two quarter-arcs around an orthogonal crossing.
+
+    Drawn from the trunk: leave it parallel to its lane, arc to orthogonal,
+    cross the lane gap one radius from the trunk, arc back to parallel, then
+    run parallel the rest of the way to the branch. The corner radius clamps
+    to half each span so both the orthogonal leg and the final parallel leg
+    stay ≥ 0 (so `≤ ½` the commit span for a one-row connector). Degenerate
+    (same row or column) collapses to a straight segment.
+    """
+    tx, ty, bx, by = (g.x1, g.y1, g.x2, g.y2) if g.trunk_is_start else (g.x2, g.y2, g.x1, g.y1)
+    path.M(tx, ty)
+    if abs(bx - tx) < _ARC_DEGENERATE_TOLERANCE_PX or abs(by - ty) < _ARC_DEGENERATE_TOLERANCE_PX:
+        path.L(bx, by)
+        return
+
+    sx = 1 if bx > tx else -1
+    sy = 1 if by > ty else -1
+    r = min(g.corner_radius, abs(bx - tx) / 2, abs(by - ty) / 2)
+
+    if g.commit_axis_vertical:
+        # Parallel = screen-y, orthogonal = screen-x; crossing one radius up.
+        path.A(r, r, 0, 0, 1 if sx * sy < 0 else 0, tx + sx * r, ty + sy * r)
+        path.L(bx - sx * r, ty + sy * r)
+        path.A(r, r, 0, 0, 1 if sx * sy > 0 else 0, bx, ty + 2 * sy * r)
+        path.L(bx, by)
+    else:
+        # Parallel = screen-x, orthogonal = screen-y; crossing one radius over.
+        path.A(r, r, 0, 0, 1 if sx * sy > 0 else 0, tx + sx * r, ty + sy * r)
+        path.L(tx + sx * r, by - sy * r)
+        path.A(r, r, 0, 0, 1 if sx * sy < 0 else 0, tx + 2 * sx * r, by)
+        path.L(bx, by)
+
+
+_CONNECTOR_BUILDERS: dict[BranchLineStyle, Callable[[draw.Path, _ConnectorGeometry], None]] = {
+    BranchLineStyle.ROUNDED: _build_rounded,
+    BranchLineStyle.STRAIGHT: _build_straight,
+    BranchLineStyle.BEZIER: _build_bezier,
+    BranchLineStyle.DOUBLE_ROUNDED: _build_double_rounded,
+}

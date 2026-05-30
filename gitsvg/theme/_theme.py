@@ -34,6 +34,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from gitsvg.file_format import LabelSide
 from gitsvg.theme._box_anchor import BoxAnchor, validate_box_anchor
+from gitsvg.theme._branch_line_style import BranchLineStyle
 from gitsvg.theme._orientation import Orientation
 
 
@@ -77,6 +78,7 @@ class Theme(BaseModel):
     commit_stroke_width: float | None = None  # axis-symmetric
     highlight_radius: int | None = None  # axis-symmetric
     arc_corner_radius_in_grid_units: float | None = None  # axis-symmetric
+    branch_line_style: BranchLineStyle | None = None  # axis-symmetric (connector shape)
     label_offset_branch_axis_in_lanes: float | None = None  # axis-bound: branch-axis, sign from `label_side`
     branch_guide_width: float | None = None  # axis-symmetric
     branch_guide_dash: str | None = None
