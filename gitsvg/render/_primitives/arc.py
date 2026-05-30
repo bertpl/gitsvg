@@ -57,9 +57,10 @@ def draw_arc(
 
     Args:
         d: The drawing to append to.
-        trunk_point: The lateral-leg end — where the connector tees into
-            the ongoing branch.
-        branch_point: The tangent-leg end — a branch's own start or tip.
+        trunk_point: The endpoint on the ongoing branch — the parent
+            commit for a branch-off, the merge commit for a merge.
+        branch_point: The endpoint on a branch's own line — that branch's
+            start (branch-off) or tip (merge).
         canvas: Effective canvas spec, used for the geometry transform.
         theme: Resolved theme; supplies corner radius and stroke width.
         color: Stroke colour for the connector (resolved upstream).
