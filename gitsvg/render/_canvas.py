@@ -274,7 +274,7 @@ def _auto_fit_commit_axis_edge(layout: Layout, theme: RendererSettings, *, edge:
             target_pos = 0 if edge == "lower" else max_commit_pos
             offset_px = abs(pr_offset_rows) * theme.commit_spacing
             for pr in layout.pull_requests:
-                if pr.title is None or pr.to_commit_pos != target_pos:
+                if pr.title is None or pr.trunk_point.commit_pos != target_pos:
                     continue
                 extent = offset_px + (pill_height / 2 if is_vertical else pill_width(pr.title, theme))
                 needed = max(needed, extent + _AUTO_FIT_EDGE_PAD_PX)

@@ -29,7 +29,7 @@ import copy
 
 import drawsvg as draw
 
-from gitsvg.layout import Layout, LayoutArc, LayoutArcKind, LayoutBranch, LayoutPullRequest
+from gitsvg.layout import GridSlot, Layout, LayoutBranch
 from gitsvg.render._canvas import compute_canvas
 from gitsvg.render._colors import resolve_branch_color
 from gitsvg.render._primitives.arc import draw_arc
@@ -43,44 +43,18 @@ from gitsvg.render._renderer_settings import RendererSettings
 from gitsvg.theme import DEFAULT_THEME
 
 
-def _get_color_branch_of_arc(layout: Layout, arc: LayoutArc) -> LayoutBranch:
-    """Return the branch whose colour the arc takes.
+def _branch_through_point(layout: Layout, point: GridSlot) -> LayoutBranch:
+    """Return the branch whose line passes through `point`.
 
-    Branch-off arcs take the *target* branch's colour (the new branch
-    starting at the arc's to-point). Merge arcs take the *source*
-    branch's colour (the branch active at the arc's from-point).
-
-    Args:
-        layout: The resolved layout.
-        arc: The arc to look up.
-
-    Returns:
-        The `LayoutBranch` whose colour the renderer should use.
-
-    Raises:
-        LookupError: If no branch matches — should never happen for a
-            valid layout, so the error is a defensive guard.
-    """
-    if arc.kind is LayoutArcKind.BRANCH_OFF:
-        for branch in layout.branches:
-            if branch.branch_pos == arc.to_branch_pos and branch.start == arc.to_commit_pos:
-                return branch
-    else:  # LayoutArcKind.MERGE
-        for branch in layout.branches:
-            if branch.branch_pos == arc.from_branch_pos and branch.start <= arc.from_commit_pos <= branch.end:
-                return branch
-    raise LookupError(f"no branch matches arc {arc!r}")
-
-
-def _get_color_branch_of_pull_request(layout: Layout, pr: LayoutPullRequest) -> LayoutBranch:
-    """Return the source branch whose colour the pull request takes.
-
-    The PR's dashed arc and title pill take the source branch's colour
-    — the branch active at the PR's from-point on the source lane.
+    A connector takes its colour from the branch at its branch point —
+    the new branch for a branch-off (the point is that branch's start),
+    or the merged-in / source branch for a merge or pull request (the
+    point is a row within that branch's life). Matched by lane plus a
+    row inside the branch's `[start, end]` span.
 
     Args:
         layout: The resolved layout.
-        pr: The pull request to look up.
+        point: The grid slot to resolve — a connector's branch point.
 
     Returns:
         The `LayoutBranch` whose colour the renderer should use.
@@ -90,9 +64,9 @@ def _get_color_branch_of_pull_request(layout: Layout, pr: LayoutPullRequest) -> 
             valid layout, so the error is a defensive guard.
     """
     for branch in layout.branches:
-        if branch.branch_pos == pr.from_branch_pos and branch.start <= pr.from_commit_pos <= branch.end:
+        if branch.branch_pos == point.branch_pos and branch.start <= point.commit_pos <= branch.end:
             return branch
-    raise LookupError(f"no branch matches pull request {pr!r}")
+    raise LookupError(f"no branch passes through {point!r}")
 
 
 def _get_occupied_lanes(layout: Layout) -> list[int]:
@@ -149,31 +123,25 @@ def render(layout: Layout, theme: RendererSettings | None = None) -> draw.Drawin
 
     # --- Arcs (branch-off + merge) --------------
     for arc in layout.arcs:
-        arc_branch = _get_color_branch_of_arc(layout, arc)
+        arc_branch = _branch_through_point(layout, arc.branch_point)
         draw_arc(
             d,
-            from_branch_pos=arc.from_branch_pos,
-            from_commit_pos=arc.from_commit_pos,
-            to_branch_pos=arc.to_branch_pos,
-            to_commit_pos=arc.to_commit_pos,
+            trunk_point=arc.trunk_point,
+            branch_point=arc.branch_point,
             canvas=canvas,
             theme=theme,
             color=color_for(arc_branch.id),
-            vertical_first=arc.kind is LayoutArcKind.MERGE,
         )
 
     # --- Pull-request arcs (dashed) -------------
     for pr in layout.pull_requests:
         draw_arc(
             d,
-            from_branch_pos=pr.from_branch_pos,
-            from_commit_pos=pr.from_commit_pos,
-            to_branch_pos=pr.to_branch_pos,
-            to_commit_pos=pr.to_commit_pos,
+            trunk_point=pr.trunk_point,
+            branch_point=pr.branch_point,
             canvas=canvas,
             theme=theme,
-            color=color_for(_get_color_branch_of_pull_request(layout, pr).id),
-            vertical_first=True,
+            color=color_for(_branch_through_point(layout, pr.branch_point).id),
             stroke_dasharray=theme.pull_request_dash,
         )
 
@@ -187,7 +155,7 @@ def render(layout: Layout, theme: RendererSettings | None = None) -> draw.Drawin
 
     # --- Pull-request title pills ---------------
     for pr in layout.pull_requests:
-        draw_pull_request_pill(d, pr, color_for(_get_color_branch_of_pull_request(layout, pr).id), canvas, theme)
+        draw_pull_request_pill(d, pr, color_for(_branch_through_point(layout, pr.branch_point).id), canvas, theme)
 
     # --- Commit dots ----------------------------
     for commit in layout.commits.values():

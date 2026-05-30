@@ -37,21 +37,20 @@ Heuristic notes:
   cases of this rule with no extra logic.
 - **Branch line span**: from `start` to `max(commit_pos for commit in
   branch.commits)`, or just `start` for empty branches.
-- **Branch-off arcs**: one per non-root branch, from the parent
-  commit's position to the branch's start. Colour attribution (the
-  target branch) is a renderer-side derivation from the arc's `kind`.
+- **Branch-off arcs**: one per non-root branch, with the parent commit
+  as the trunk point and the branch's start as the branch point.
 - **Merge arcs**: one per cross-lane parent on any commit with
-  `len(parents) >= 2`. Colour attribution (the source branch) is a
-  renderer-side derivation from the arc's `kind`.
+  `len(parents) >= 2`, with the merge commit as the trunk point and the
+  merged-in tip as the branch point.
 - **Grid extent**: `n_commits` / `n_branches` honour pinned values on
   `state.grid` when set; otherwise auto-fit from the visible content
   (including any open pull-request's projected merge row).
 """
 
 from gitsvg.layout._layout import (
+    GridSlot,
     Layout,
     LayoutArc,
-    LayoutArcKind,
     LayoutBranch,
     LayoutCommit,
     LayoutGrid,
@@ -396,11 +395,8 @@ def _branch_off_arcs(
         branch_layout = branch_layouts_by_name[name]
         arcs.append(
             LayoutArc(
-                kind=LayoutArcKind.BRANCH_OFF,
-                from_branch_pos=parent_layout.branch_pos,
-                from_commit_pos=parent_layout.commit_pos,
-                to_branch_pos=branch_layout.branch_pos,
-                to_commit_pos=branch_layout.start,
+                trunk_point=GridSlot(parent_layout.branch_pos, parent_layout.commit_pos),
+                branch_point=GridSlot(branch_layout.branch_pos, branch_layout.start),
             )
         )
     return arcs
@@ -422,11 +418,8 @@ def _merge_arcs(
                 continue
             arcs.append(
                 LayoutArc(
-                    kind=LayoutArcKind.MERGE,
-                    from_branch_pos=parent_layout.branch_pos,
-                    from_commit_pos=parent_layout.commit_pos,
-                    to_branch_pos=commit_layout.branch_pos,
-                    to_commit_pos=commit_layout.commit_pos,
+                    trunk_point=GridSlot(commit_layout.branch_pos, commit_layout.commit_pos),
+                    branch_point=GridSlot(parent_layout.branch_pos, parent_layout.commit_pos),
                 )
             )
     return arcs
@@ -440,9 +433,9 @@ def _build_pull_requests(state: State, branches: list[LayoutBranch]) -> list[Lay
 
     Endpoints are resolved from the current branch tips:
 
-    - `from_commit_pos` is the source branch's `end` (latest commit
-      row, or `start` for empty branches).
-    - `to_commit_pos` is the projected merge-commit row on the target
+    - the `branch_point` is the source branch's tip — its `end` (latest
+      commit row, or `start` for empty branches) on the source lane.
+    - the `trunk_point` is the projected merge-commit row on the target
       lane, computed with the same anchor formula a real `merge` would
       use: `max(from.end, into.end) + 1`.
 
@@ -461,10 +454,8 @@ def _build_pull_requests(state: State, branches: list[LayoutBranch]) -> list[Lay
         pull_requests.append(
             LayoutPullRequest(
                 id=pr_id,
-                from_branch_pos=from_branch.branch_pos,
-                from_commit_pos=from_branch.end,
-                to_branch_pos=into_branch.branch_pos,
-                to_commit_pos=projected_merge_pos,
+                trunk_point=GridSlot(into_branch.branch_pos, projected_merge_pos),
+                branch_point=GridSlot(from_branch.branch_pos, from_branch.end),
                 title=pr_state.title,
             )
         )
@@ -491,7 +482,7 @@ def _compute_grid(
     max_branch_pos = max((b.branch_pos for b in branches), default=0)
     max_commit_pos_from_commits = max((c.commit_pos for c in commit_layouts.values()), default=-1)
     max_commit_pos_from_branches = max((b.end for b in branches), default=-1)
-    max_commit_pos_from_prs = max((pr.to_commit_pos for pr in pull_requests), default=-1)
+    max_commit_pos_from_prs = max((pr.trunk_point.commit_pos for pr in pull_requests), default=-1)
     max_commit_pos = max(max_commit_pos_from_commits, max_commit_pos_from_branches, max_commit_pos_from_prs)
     auto_n_commits = max_commit_pos + 1 if max_commit_pos >= 0 else 1
     auto_n_branches = max_branch_pos + 1 if branches else 1

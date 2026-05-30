@@ -5,9 +5,9 @@ Public surface:
 - `compute_layout(state)` — pure transformation; takes the state engine's
   output and returns a complete `Layout` (integer-grid slot positions,
   resolved label sides, pre-computed arcs, grid extent).
-- `Layout`, `LayoutBranch`, `LayoutCommit`, `LayoutArc`, `LayoutArcKind`,
-  `LayoutPullRequest`, `LayoutGrid` — the dataclasses (and arc-kind
-  enum) the renderer consumes.
+- `Layout`, `LayoutBranch`, `LayoutCommit`, `LayoutArc`,
+  `LayoutPullRequest`, `LayoutGrid`, `GridSlot` — the dataclasses the
+  renderer consumes.
 
 Layout output is exclusively about integer-grid positioning. Colours,
 fonts, pixel dimensions, and every other presentational decision live
@@ -16,9 +16,9 @@ on the resolved `Theme` the renderer reads.
 
 from gitsvg.layout._engine import compute_layout
 from gitsvg.layout._layout import (
+    GridSlot,
     Layout,
     LayoutArc,
-    LayoutArcKind,
     LayoutBranch,
     LayoutCommit,
     LayoutGrid,
@@ -27,9 +27,9 @@ from gitsvg.layout._layout import (
 from gitsvg.layout._serialisation import layout_to_json
 
 __all__ = [
+    "GridSlot",
     "Layout",
     "LayoutArc",
-    "LayoutArcKind",
     "LayoutBranch",
     "LayoutCommit",
     "LayoutGrid",
