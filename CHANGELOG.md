@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - New `theme.branch_line_style` — `rounded` (default), `straight`, `bezier`, or `double_rounded` — sets the shape of branch-off, merge, and pull-request connectors; default output unchanged.
+- New `theme.merge_commit_style` — `circle` (default) or `checkmark` — marks merge commits with a checkmark inside the dot; default output unchanged.
 
 ### Changed
 

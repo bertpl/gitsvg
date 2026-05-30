@@ -99,6 +99,8 @@ class LayoutCommit:
             label line. Already resolved from any `"auto"` sentinel.
         highlight: True when the commit should render with the highlight
             visual (enlarged dot + bold label).
+        is_merge: True when the commit has two or more parents (a merge
+            commit); selects the merge-commit dot style at render time.
     """
 
     id: str
@@ -108,6 +110,7 @@ class LayoutCommit:
     msg: str | None
     hash: str | None
     highlight: bool
+    is_merge: bool
 
 
 @dataclass(slots=True)

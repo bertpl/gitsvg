@@ -13,6 +13,7 @@ from gitsvg.file_format.ops.framework._types import (
 )
 from gitsvg.theme._box_anchor import BoxAnchor, validate_box_anchor
 from gitsvg.theme._branch_line_style import BranchLineStyle
+from gitsvg.theme._merge_commit_style import MergeCommitStyle
 from gitsvg.theme._orientation import Orientation, normalize_orientation
 
 Opacity = Annotated[float, Field(ge=0, le=1)]
@@ -123,6 +124,10 @@ class ThemeOp(OpBase):
     branch_line_style: BranchLineStyle | None = Field(
         default=None,
         description="Shape of the connectors between lanes (branch-off, merge, pull-request): `rounded` (default; two straight legs joined by a single quarter-arc corner), `straight` (a direct line), `bezier` (a smooth cubic-Bézier S), or `double_rounded` (a stepped connector — two quarter-arcs around an orthogonal crossing near the trunk).",
+    )
+    merge_commit_style: MergeCommitStyle | None = Field(
+        default=None,
+        description="Style for merge-commit dots (commits with 2+ parents); ordinary commits are unaffected: `circle` (default; the plain branch-colour dot, identical to an ordinary commit) or `checkmark` (a hollow dot — fill and stroke swap so the dot is `commit_stroke_color`-filled with a branch-colour ring — overlaid with a branch-colour checkmark).",
     )
     label_offset_branch_axis_in_lanes: NonNegativeFloat | None = Field(
         default=None,
@@ -248,7 +253,7 @@ class ThemeOp(OpBase):
     )
     commit_stroke_color: HexColor | None = Field(
         default=None,
-        description="Stroke colour for the outline around commit dots. Visually separates the dot from any branch line passing through it. Default is `white` (reads as a halo on light backgrounds); dark themes typically override this to their background colour so the outline reads as a 'carved out' gap.",
+        description="Stroke colour for the outline around commit dots. Visually separates the dot from any branch line passing through it. Default is `white` (reads as a halo on light backgrounds); dark themes typically override this to their background colour so the outline reads as a 'carved out' gap. Under `merge_commit_style: checkmark`, merge dots reuse this colour as their fill.",
     )
     branch_label_bg_opacity: Opacity | None = Field(
         default=None,

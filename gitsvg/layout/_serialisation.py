@@ -9,8 +9,8 @@ churn it:
 - `grid` — integer-grid extent: `n_commits`, `n_branches`.
 - `branches` — one entry per declared branch, with the opaque internal
   id, the user-facing name, and the lane / start / end slot positions.
-- `commits` — one entry per surviving commit, with lane / row positions
-  and the branch id the commit lives on.
+- `commits` — one entry per surviving commit, with lane / row positions,
+  the branch id the commit lives on, and an `is_merge` flag (2+ parents).
 - `arcs` — pre-computed connectors (branch-off and merge), in z-order.
   Each carries a `kind` (`"branch_off"` / `"merge"`) and `from_*` / `to_*`
   endpoint slots — the orientation a reader debugging a layout reads most

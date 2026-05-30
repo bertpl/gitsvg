@@ -27,7 +27,8 @@
       "commit_pos": 0,
       "msg": "initial commit",
       "hash": "1b35060",
-      "highlight": false
+      "highlight": false,
+      "is_merge": false
     },
     {
       "id": "c2",
@@ -36,7 +37,8 @@
       "commit_pos": 1,
       "msg": "setup config",
       "hash": "b1e760e",
-      "highlight": false
+      "highlight": false,
+      "is_merge": false
     },
     {
       "id": "f1",
@@ -45,7 +47,8 @@
       "commit_pos": 2,
       "msg": "add login form",
       "hash": "97b103e",
-      "highlight": false
+      "highlight": false,
+      "is_merge": false
     },
     {
       "id": "f2",
@@ -54,7 +57,8 @@
       "commit_pos": 3,
       "msg": "wire up auth",
       "hash": "02a38f5",
-      "highlight": false
+      "highlight": false,
+      "is_merge": false
     },
     {
       "id": "m1",
@@ -63,7 +67,8 @@
       "commit_pos": 4,
       "msg": "merge feature",
       "hash": "f5acfc5",
-      "highlight": false
+      "highlight": false,
+      "is_merge": true
     }
   ],
   "arcs": [

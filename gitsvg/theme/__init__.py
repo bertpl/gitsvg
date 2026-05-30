@@ -25,6 +25,7 @@ from gitsvg.theme._box_anchor import BoxAnchor, validate_box_anchor
 from gitsvg.theme._branch_line_style import BranchLineStyle
 from gitsvg.theme._builder import ThemeBuilder
 from gitsvg.theme._default_theme import DefaultTheme
+from gitsvg.theme._merge_commit_style import MergeCommitStyle
 from gitsvg.theme._orientation import Orientation, normalize_orientation
 from gitsvg.theme._theme import Theme, _resolve_int_or_float
 
@@ -40,6 +41,7 @@ __all__ = [
     "BoxAnchor",
     "BranchLineStyle",
     "DefaultTheme",
+    "MergeCommitStyle",
     "Orientation",
     "Theme",
     "ThemeBuilder",

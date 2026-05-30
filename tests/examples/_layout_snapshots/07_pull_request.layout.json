@@ -27,7 +27,8 @@
       "commit_pos": 0,
       "msg": "release",
       "hash": null,
-      "highlight": false
+      "highlight": false,
+      "is_merge": false
     },
     {
       "id": "f1",
@@ -36,7 +37,8 @@
       "commit_pos": 1,
       "msg": "wip",
       "hash": null,
-      "highlight": false
+      "highlight": false,
+      "is_merge": false
     },
     {
       "id": "f2",
@@ -45,7 +47,8 @@
       "commit_pos": 2,
       "msg": "polish",
       "hash": null,
-      "highlight": false
+      "highlight": false,
+      "is_merge": false
     },
     {
       "id": "m2",
@@ -54,7 +57,8 @@
       "commit_pos": 1,
       "msg": "hotfix",
       "hash": null,
-      "highlight": false
+      "highlight": false,
+      "is_merge": false
     }
   ],
   "arcs": [
