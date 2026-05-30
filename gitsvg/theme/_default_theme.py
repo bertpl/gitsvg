@@ -21,6 +21,7 @@ the original was orientation-dependent.
 from typing import Any, Self
 
 from gitsvg.theme._box_anchor import BoxAnchor
+from gitsvg.theme._branch_line_style import BranchLineStyle
 from gitsvg.theme._orientation import Orientation
 from gitsvg.theme._theme import Theme
 
@@ -144,6 +145,11 @@ class DefaultTheme(Theme):
     def _resolve_arc_corner_radius_in_grid_units(cls) -> float:
         """Corner radius for branch-off / merge arcs, as a multiple of `min(branch_spacing, commit_spacing)`."""
         return 0.4
+
+    @classmethod
+    def _resolve_branch_line_style(cls) -> BranchLineStyle:
+        """Connector shape between lanes — the rounded quarter-arc elbow."""
+        return BranchLineStyle.ROUNDED
 
     @classmethod
     def _resolve_label_offset_branch_axis_in_lanes(cls, orientation: Orientation) -> float:
@@ -467,6 +473,7 @@ class DefaultTheme(Theme):
             arc_corner_radius_in_grid_units=pick(
                 "arc_corner_radius_in_grid_units", cls._resolve_arc_corner_radius_in_grid_units
             ),
+            branch_line_style=pick("branch_line_style", cls._resolve_branch_line_style),
             label_offset_branch_axis_in_lanes=pick(
                 "label_offset_branch_axis_in_lanes", cls._resolve_label_offset_branch_axis_in_lanes, orientation
             ),

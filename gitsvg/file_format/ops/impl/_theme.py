@@ -11,7 +11,9 @@ from gitsvg.file_format.ops.framework._types import (
     NonEmptyStr,
     NonNegativeFloat,
 )
-from gitsvg.theme import BoxAnchor, Orientation, normalize_orientation, validate_box_anchor
+from gitsvg.theme._box_anchor import BoxAnchor, validate_box_anchor
+from gitsvg.theme._branch_line_style import BranchLineStyle
+from gitsvg.theme._orientation import Orientation, normalize_orientation
 
 Opacity = Annotated[float, Field(ge=0, le=1)]
 """Float in `[0, 1]` — for opacity fields where SVG semantics are bounded."""
@@ -116,7 +118,11 @@ class ThemeOp(OpBase):
     )
     arc_corner_radius_in_grid_units: NonNegativeFloat | None = Field(
         default=None,
-        description="Corner radius for branch-off and merge arcs, expressed as a multiple of `min(branch_spacing, commit_spacing)`. Per-arc clamped at render time to fit the arc's segment lengths, so values larger than 1.0 produce no further effect.",
+        description="Corner radius for `rounded`-style connectors, expressed as a multiple of `min(branch_spacing, commit_spacing)`. Per-connector clamped at render time to fit the segment lengths, so values larger than 1.0 produce no further effect. Ignored by the `straight` and `double_rounded` styles.",
+    )
+    branch_line_style: BranchLineStyle | None = Field(
+        default=None,
+        description="Shape of the connectors between lanes (branch-off, merge, pull-request): `rounded` (default; two straight legs joined by a single quarter-arc corner), `straight` (a direct line), `bezier` (a smooth cubic-Bézier S), or `double_rounded` (a stepped connector — two quarter-arcs around an orthogonal crossing near the trunk).",
     )
     label_offset_branch_axis_in_lanes: NonNegativeFloat | None = Field(
         default=None,
