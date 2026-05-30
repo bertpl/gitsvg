@@ -54,12 +54,12 @@ def test_pr_endpoints_track_current_branch_tips() -> None:
     main = by_name["main"]
 
     # Arc starts at source tip — the row of feat's latest commit (f1).
-    assert pr.from_branch_pos == feat.branch_pos
-    assert pr.from_commit_pos == feat.end
+    assert pr.branch_point.branch_pos == feat.branch_pos
+    assert pr.branch_point.commit_pos == feat.end
 
     # Arc lands on into's lane at the projected merge row.
-    assert pr.to_branch_pos == main.branch_pos
-    assert pr.to_commit_pos == max(feat.end, main.end) + 1
+    assert pr.trunk_point.branch_pos == main.branch_pos
+    assert pr.trunk_point.commit_pos == max(feat.end, main.end) + 1
 
 
 def test_pr_without_title_has_none_title() -> None:
@@ -97,8 +97,8 @@ def test_pr_endpoints_advance_when_commits_land_after_pr_op() -> None:
     later_pr = _layout_from(later).pull_requests[0]
 
     # --- assert -----------------------
-    assert later_pr.from_commit_pos > early_pr.from_commit_pos
-    assert later_pr.to_commit_pos > early_pr.to_commit_pos
+    assert later_pr.branch_point.commit_pos > early_pr.branch_point.commit_pos
+    assert later_pr.trunk_point.commit_pos > early_pr.trunk_point.commit_pos
 
 
 # ==================================================================================================

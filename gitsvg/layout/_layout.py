@@ -7,9 +7,9 @@ layout is *exclusively* about integer-grid positioning:
 - `branch_pos` / `commit_pos` slot indices for every entity.
 - Semantic identifiers (branch `id`, commit `id`, PR `id`).
 - Resolved hash strings (auto-resolved 7-char hex from state).
-- Pre-computed arc connectors as slot pairs, tagged with their
-  semantic `kind` (branch-off / merge — open enum, growing as the
-  layout engine evolves).
+- Pre-computed connectors as a `trunk_point` / `branch_point` slot pair
+  each (branch-off and merge); the renderer derives elbow orientation,
+  draw direction, and colour attribution from the two points.
 - Grid extent (`n_commits`, `n_branches`).
 
 Layout output carries **no** colour, pixel, font, stroke, opacity,
@@ -24,19 +24,19 @@ lane-reuse, future left-to-right orientations) all produce the same
 """
 
 from dataclasses import dataclass, field
-from enum import StrEnum
 
 
-class LayoutArcKind(StrEnum):
-    """Semantic kind of a layout arc connector.
+@dataclass(slots=True)
+class GridSlot:
+    """One slot on the integer grid — a (branch-axis, commit-axis) index pair.
 
-    Open enum: additional values land as the layout engine evolves
-    (e.g. a pure lane-change arc once a single branch can migrate
-    across lanes mid-life).
+    Attributes:
+        branch_pos: Slot index along the branch axis (the lane).
+        commit_pos: Slot index along the commit axis (the row).
     """
 
-    BRANCH_OFF = "branch_off"
-    MERGE = "merge"
+    branch_pos: int  # axis-bound: branch-axis (slot index)
+    commit_pos: int  # axis-bound: commit-axis (slot index)
 
 
 @dataclass(slots=True)
@@ -112,38 +112,40 @@ class LayoutCommit:
 
 @dataclass(slots=True)
 class LayoutArc:
-    """One curved connector between two points on different lanes.
+    """One connector between a trunk point and a branch point on two lanes.
 
-    Used for branch-off arcs (a parent commit on one lane → the start
-    of a child branch on another lane) and merge arcs (the from-branch
-    tip → the merge commit on the into-branch's lane). Colour
-    attribution and segment-draw-order are render-side decisions the
-    renderer derives from `kind` plus the layout's branch index.
+    Used for branch-off connectors (trunk = the parent commit on the
+    ongoing branch; branch = the start of the new branch) and merge
+    connectors (trunk = the merge commit on the ongoing branch; branch =
+    the merged-in tip). The renderer derives every presentational
+    decision from the two points:
+
+    - the **elbow** sits at `(branch_point lane, trunk_point row)`;
+    - the **branch-off vs merge look** is `sign(branch_point.commit_pos
+      − trunk_point.commit_pos)` — branch point above the trunk reads as
+      a branch-off, below as a merge (they are mirror images across the
+      commit axis);
+    - **colour** is the branch passing through the branch point.
 
     Attributes:
-        kind: Semantic kind of the connector — `BRANCH_OFF` or `MERGE`.
-        from_branch_pos: Source point's branch-axis index.
-        from_commit_pos: Source point's commit-axis index.
-        to_branch_pos: Target point's branch-axis index.
-        to_commit_pos: Target point's commit-axis index.
+        trunk_point: Where the connector tees laterally into the ongoing
+            branch (the lateral leg).
+        branch_point: Where the connector aligns with a branch's own
+            line — that branch's start or tip (the tangent leg).
     """
 
-    kind: LayoutArcKind
-    from_branch_pos: int  # axis-bound: branch-axis (slot index)
-    from_commit_pos: int  # axis-bound: commit-axis (slot index)
-    to_branch_pos: int  # axis-bound: branch-axis (slot index)
-    to_commit_pos: int  # axis-bound: commit-axis (slot index)
+    trunk_point: GridSlot
+    branch_point: GridSlot
 
 
 @dataclass(slots=True)
 class LayoutPullRequest:
     """One open pull-request as the renderer should draw it.
 
-    Geometrically the same shape as a merge arc-and-line: a vertical
-    segment up from the source tip → a quarter arc → a horizontal
-    segment along the target lane to the projected merge point.
-    Distinguished from a real merge by its dashed stroke and the
-    optional title pill anchored at the source tip.
+    Geometrically the same shape as a merge connector — `trunk_point` is
+    the projected merge point on the target lane, `branch_point` is the
+    source tip — distinguished from a real merge by its dashed stroke and
+    the optional title pill anchored at the source tip.
 
     Endpoints are recomputed every layout cycle from the branches'
     current tips, so as new commits land on either side the visual
@@ -151,20 +153,15 @@ class LayoutPullRequest:
 
     Attributes:
         id: The PR's id (matches `PullRequestState.id`).
-        from_branch_pos: Source branch's lane (where the arc begins).
-        from_commit_pos: Source-tip row (where the arc begins).
-        to_branch_pos: Target branch's lane (where the horizontal
-            segment runs).
-        to_commit_pos: Projected merge-commit row on the target lane —
-            the position a real `merge` would land at if it ran now.
+        trunk_point: Projected merge point — the target branch's lane at
+            the row a real `merge` would land at if it ran now.
+        branch_point: The source tip (where the arc begins).
         title: Optional PR title; when None no pill is rendered.
     """
 
     id: str
-    from_branch_pos: int  # axis-bound: branch-axis (slot index)
-    from_commit_pos: int  # axis-bound: commit-axis (slot index)
-    to_branch_pos: int  # axis-bound: branch-axis (slot index)
-    to_commit_pos: int  # axis-bound: commit-axis (slot index)
+    trunk_point: GridSlot
+    branch_point: GridSlot
     title: str | None
 
 

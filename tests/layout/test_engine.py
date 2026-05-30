@@ -588,13 +588,13 @@ def test_branch_off_arc_emitted_for_each_non_root_branch() -> None:
     layout = _layout_from(text)
 
     # --- assert -----------------------
-    branch_off_arcs = [a for a in layout.arcs if a.kind == "branch_off"]
+    branch_off_arcs = [a for a in layout.arcs if a.branch_point.commit_pos > a.trunk_point.commit_pos]
     assert len(branch_off_arcs) == 1
     arc = branch_off_arcs[0]
-    assert arc.from_branch_pos == 0  # main lane
-    assert arc.from_commit_pos == 0  # m1
-    assert arc.to_branch_pos == 1  # feat lane
-    assert arc.to_commit_pos == 1  # feat.start
+    assert arc.trunk_point.branch_pos == 0  # main lane
+    assert arc.trunk_point.commit_pos == 0  # m1
+    assert arc.branch_point.branch_pos == 1  # feat lane
+    assert arc.branch_point.commit_pos == 1  # feat.start
 
 
 def test_merge_arc_emitted_per_cross_lane_parent() -> None:
@@ -611,11 +611,11 @@ def test_merge_arc_emitted_per_cross_lane_parent() -> None:
     layout = _layout_from(text)
 
     # --- assert -----------------------
-    merge_arcs = [a for a in layout.arcs if a.kind == "merge"]
+    merge_arcs = [a for a in layout.arcs if a.branch_point.commit_pos < a.trunk_point.commit_pos]
     assert len(merge_arcs) == 1
     arc = merge_arcs[0]
-    assert arc.from_branch_pos == 1  # feat lane
-    assert arc.to_branch_pos == 0  # main lane
+    assert arc.branch_point.branch_pos == 1  # feat lane (merged-in tip)
+    assert arc.trunk_point.branch_pos == 0  # main lane (merge commit)
 
 
 # ==================================================================================================

@@ -1,30 +1,37 @@
-"""Quarter-arc primitive — used for branch-off and merge connectors.
+"""Connector primitive — the L-shaped arc for branch-off, merge, and
+pull-request connectors.
 
-The arc connects two points on different branch-axis lanes at different
-commit-axis positions, with a single 90° corner. Two modes (parameter
-name is screen-direction in BT-canonical terms; the renderer maps to
-the active orientation):
+A connector joins a **trunk point** (where it tees laterally into an
+ongoing branch) and a **branch point** (where it aligns with a branch's
+own start or tip) on two different lanes. It draws two straight legs
+joined by a single 90° quarter-arc corner: the lateral leg runs along
+the trunk point's row, the tangent leg along the branch point's lane,
+and the elbow sits at the branch lane / trunk row.
 
-- **Horizontal-first** (`vertical_first=False`): the arc starts with a
-  segment along the branch axis (BT: horizontal), then turns to the
-  commit axis (BT: vertical). Used for **branch-off** connectors.
+Which side the branch point falls on — its commit-axis index relative to
+the trunk point — gives the connector its appearance:
 
-- **Vertical-first** (`vertical_first=True`): the arc starts with a
-  segment along the commit axis (BT: vertical), then turns to the
-  branch axis (BT: horizontal). Used for **merge** connectors.
+- **branch point above the trunk** (higher commit-axis index): a
+  branch-off. The lateral leg leaves the parent commit first, then the
+  tangent leg rises into the new branch.
+- **branch point at or below the trunk**: a merge. The tangent leg rises
+  out of the merged-in tip first, then the lateral leg tees into the
+  merge commit.
 
-In horizontal orientations (`lr`, `rl`) the screen-direction of "first
-segment" flips because the branch axis becomes vertical on screen, but
-the layout-side meaning of "branch-axis-first vs commit-axis-first"
-stays the same.
+These two are mirror images across the commit axis; the draw order and
+corner geometry are derived from the two points. In horizontal
+orientations (`lr`, `rl`) the branch axis is screen-vertical, so the
+on-screen direction of "first leg" flips while the layout-side meaning
+is unchanged.
 
-The arc's corner radius is the smaller of `theme.arc_corner_radius`
-and the two segment lengths — the corner stays a true quarter circle
-even when the two endpoints are very close.
+The corner radius is the smaller of `theme.arc_corner_radius` and the
+two segment lengths — the corner stays a true quarter circle even when
+the endpoints are very close.
 """
 
 import drawsvg as draw
 
+from gitsvg.layout import GridSlot
 from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._geometry import grid_to_pixel
 from gitsvg.render._renderer_settings import RendererSettings
@@ -39,39 +46,44 @@ _ARC_DEGENERATE_TOLERANCE_PX = 0.5  # axis-symmetric (perceptual)
 def draw_arc(
     d: draw.Drawing,
     *,
-    from_branch_pos: int,
-    from_commit_pos: int,
-    to_branch_pos: int,
-    to_commit_pos: int,
+    trunk_point: GridSlot,
+    branch_point: GridSlot,
     canvas: RenderCanvas,
     theme: RendererSettings,
     color: str,
-    vertical_first: bool,
     stroke_dasharray: str | None = None,
 ) -> None:
-    """Append a quarter-arc connector to the drawing.
+    """Append an L-shaped connector between a trunk point and a branch point.
 
     Args:
         d: The drawing to append to.
-        from_branch_pos: Source point's branch-axis index.
-        from_commit_pos: Source point's commit-axis index.
-        to_branch_pos: Target point's branch-axis index.
-        to_commit_pos: Target point's commit-axis index.
+        trunk_point: The endpoint on the ongoing branch — the parent
+            commit for a branch-off, the merge commit for a merge.
+        branch_point: The endpoint on a branch's own line — that branch's
+            start (branch-off) or tip (merge).
         canvas: Effective canvas spec, used for the geometry transform.
         theme: Resolved theme; supplies corner radius and stroke width.
-        color: Stroke colour for the arc (resolved from the theme upstream).
-        vertical_first: BT-canonical screen direction of the first
-            segment. `True` = first segment along the commit axis
-            (vertical in BT, horizontal in LR/RL). Used for merge
-            connectors. `False` = first segment along the branch axis
-            (horizontal in BT, vertical in LR/RL). Used for branch-off
-            connectors. The renderer maps this layout-side intent to
-            the active orientation's screen direction.
+        color: Stroke colour for the connector (resolved upstream).
         stroke_dasharray: Optional SVG `stroke-dasharray` value (e.g.
-            `"6,4"`). When set, the entire arc-and-line is rendered
-            with that dash pattern; used by pull-request connectors
-            to visually distinguish them from a real merge.
+            `"6,4"`). When set, the whole connector is rendered with that
+            dash pattern; pull-request connectors pass one to stand apart
+            from a real merge.
     """
+    # Derive the BT-canonical (from, to, first-leg) triple from the two
+    # role-labelled points. A branch point above the trunk (higher commit-
+    # axis index) is a branch-off: start at the trunk, run the branch-axis
+    # leg first. A branch point at or below the trunk is a merge: start at
+    # the branch point, run the commit-axis leg first. Both reproduce the
+    # exact path the earlier kind-tagged construction emitted.
+    if branch_point.commit_pos > trunk_point.commit_pos:
+        from_branch_pos, from_commit_pos = trunk_point.branch_pos, trunk_point.commit_pos
+        to_branch_pos, to_commit_pos = branch_point.branch_pos, branch_point.commit_pos
+        vertical_first = False
+    else:
+        from_branch_pos, from_commit_pos = branch_point.branch_pos, branch_point.commit_pos
+        to_branch_pos, to_commit_pos = trunk_point.branch_pos, trunk_point.commit_pos
+        vertical_first = True
+
     x1, y1 = grid_to_pixel(from_branch_pos, from_commit_pos, canvas)
     x2, y2 = grid_to_pixel(to_branch_pos, to_commit_pos, canvas)
 

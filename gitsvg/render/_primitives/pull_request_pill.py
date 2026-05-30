@@ -2,7 +2,7 @@
 
 The world anchor point is the **phantom point on the source branch's
 lane at the projected merge target's commit-axis position** —
-`(branch_pos = pr.from_branch_pos, commit_pos = pr.to_commit_pos)`.
+`(branch_pos = pr.branch_point.branch_pos, commit_pos = pr.trunk_point.commit_pos)`.
 Conceptually: the corner where the PR arc starts curving from the
 source branch toward the target branch's lane. Tracks the merge
 target row, so when the target branch progresses past the source tip
@@ -43,8 +43,8 @@ def draw_pull_request_pill(
         return
 
     x, y = offset_position(
-        anchor_branch_pos=pr.from_branch_pos,
-        anchor_commit_pos=pr.to_commit_pos,
+        anchor_branch_pos=pr.branch_point.branch_pos,
+        anchor_commit_pos=pr.trunk_point.commit_pos,
         branch_axis_offset_in_lanes=theme.pull_request_pill_offset_branch_axis_in_lanes,
         commit_axis_offset_in_rows=theme.pull_request_pill_offset_commit_axis_in_rows,
         canvas=canvas,

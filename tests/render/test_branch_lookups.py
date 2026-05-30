@@ -1,19 +1,19 @@
 """Tests for the render-side lookups derived from `Layout.branches`.
 
-`_get_color_branch_of_arc` and `_get_color_branch_of_pull_request`
-resolve a connector back to the branch whose colour the renderer
-should use — moved here when the layout DTOs dropped their
-`color_branch_id` fields. Colour attribution is now a renderer
-concern, derived from the arc's `kind` plus the layout's branch
-index.
+`_branch_through_point` resolves a connector's branch point back to the
+branch whose colour the renderer should use — the colour attribution
+that moved render-side when the layout DTOs dropped their
+`color_branch_id` fields. A branch-off's branch point is the new
+branch's start; a merge's or pull request's branch point is a row within
+the merged-in / source branch's life.
 
-`_get_occupied_lanes` enumerates the lanes the renderer draws guides
-at, derived from the same branch index.
+`_get_occupied_lanes` enumerates the lanes the renderer draws guides at,
+derived from the same branch index.
 """
 
 from gitsvg.layout import compute_layout
 from gitsvg.parse import parse_jsonl_text
-from gitsvg.render._renderer import _get_color_branch_of_arc, _get_color_branch_of_pull_request, _get_occupied_lanes
+from gitsvg.render._renderer import _branch_through_point, _get_occupied_lanes
 from gitsvg.state import apply_ops
 
 
@@ -25,26 +25,27 @@ def _layout_from(text: str):
 
 
 # ==================================================================================================
-#  _get_color_branch_of_arc — branch-off vs merge attribution
+#  _branch_through_point — colour attribution via a connector's branch point
 # ==================================================================================================
-def test_get_color_branch_of_arc_returns_target_branch_on_branch_off() -> None:
+def test_branch_through_point_resolves_new_branch_for_branch_off() -> None:
     # --- arrange ----------------------
     layout = _layout_from(
         '{"op": "branch", "name": "main"}\n'
         '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
         '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
     )
-    arc = next(a for a in layout.arcs if a.kind == "branch_off")
+    # branch-off: branch point above the trunk point.
+    arc = next(a for a in layout.arcs if a.branch_point.commit_pos > a.trunk_point.commit_pos)
     feat = next(b for b in layout.branches if b.name == "feat")
 
     # --- act --------------------------
-    resolved = _get_color_branch_of_arc(layout, arc)
+    resolved = _branch_through_point(layout, arc.branch_point)
 
     # --- assert -----------------------
     assert resolved.id == feat.id
 
 
-def test_get_color_branch_of_arc_returns_source_branch_on_merge() -> None:
+def test_branch_through_point_resolves_source_branch_for_merge() -> None:
     # --- arrange ----------------------
     layout = _layout_from(
         '{"op": "branch", "name": "main"}\n'
@@ -53,20 +54,18 @@ def test_get_color_branch_of_arc_returns_source_branch_on_merge() -> None:
         '{"op": "commit", "branch": "feat", "id": "f1", "msg": "x"}\n'
         '{"op": "merge", "from": "feat", "into": "main", "as": "m2"}\n'
     )
-    arc = next(a for a in layout.arcs if a.kind == "merge")
+    # merge: branch point below the trunk point.
+    arc = next(a for a in layout.arcs if a.branch_point.commit_pos < a.trunk_point.commit_pos)
     feat = next(b for b in layout.branches if b.name == "feat")
 
     # --- act --------------------------
-    resolved = _get_color_branch_of_arc(layout, arc)
+    resolved = _branch_through_point(layout, arc.branch_point)
 
     # --- assert -----------------------
     assert resolved.id == feat.id
 
 
-# ==================================================================================================
-#  _get_color_branch_of_pull_request — source branch attribution
-# ==================================================================================================
-def test_get_color_branch_of_pull_request_returns_source_branch() -> None:
+def test_branch_through_point_resolves_source_branch_for_pull_request() -> None:
     # --- arrange ----------------------
     layout = _layout_from(
         '{"op": "branch", "name": "main"}\n'
@@ -79,7 +78,7 @@ def test_get_color_branch_of_pull_request_returns_source_branch() -> None:
     feat = next(b for b in layout.branches if b.name == "feat")
 
     # --- act --------------------------
-    resolved = _get_color_branch_of_pull_request(layout, pr)
+    resolved = _branch_through_point(layout, pr.branch_point)
 
     # --- assert -----------------------
     assert resolved.id == feat.id
