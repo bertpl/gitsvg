@@ -1,5 +1,7 @@
 """End-to-end tests for the renderer — produces valid SVG with expected primitives."""
 
+import xml.etree.ElementTree as ET
+
 from gitsvg.layout import compute_layout
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.render import render
@@ -78,6 +80,36 @@ def test_empty_branch_emits_no_branch_line() -> None:
     # the empty branch's line were still emitted as a degenerate path the
     # count would be 5.
     assert svg_text.count("<path") == 4
+
+
+def test_connectors_are_grouped_per_branch_in_declaration_order() -> None:
+    """Each branch's connectors and line draw as one contiguous colour group.
+
+    The renderer loops branches in declaration order and draws all of a
+    branch's arcs + line + PR arcs before moving to the next, so the
+    branch-coloured `<path>` strokes appear grouped — every `main` stroke
+    before every `feature` stroke — rather than interleaved by element
+    type."""
+    # --- arrange ----------------------
+    text = (
+        '{"op": "branch", "name": "main", "color": "#111111"}\n'
+        '{"op": "commit", "branch": "main", "id": "c1", "msg": "a"}\n'
+        '{"op": "commit", "branch": "main", "id": "c2", "msg": "b"}\n'
+        '{"op": "branch", "name": "feature", "from_branch": "main", "color": "#222222"}\n'
+        '{"op": "commit", "branch": "feature", "id": "f1", "msg": "c"}\n'
+        '{"op": "commit", "branch": "feature", "id": "f2", "msg": "d"}\n'
+        '{"op": "merge", "from": "feature", "into": "main", "as": "m1", "msg": "m"}\n'
+    )
+
+    # --- act --------------------------
+    svg = _render_from(text).as_svg()
+    strokes = [el.get("stroke") for el in ET.fromstring(svg).iter() if el.tag.split("}")[-1] == "path"]
+    branch_strokes = [s for s in strokes if s in ("#111111", "#222222")]
+
+    # --- assert -----------------------
+    # main's branch line (#111111) precedes feature's branch-off arc,
+    # line, and merge arc (#222222) — grouped, not interleaved.
+    assert branch_strokes == ["#111111", "#222222", "#222222", "#222222"]
 
 
 def test_render_preserves_branch_colour_in_dot_fill() -> None:
