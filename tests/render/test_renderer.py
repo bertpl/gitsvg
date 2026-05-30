@@ -102,9 +102,19 @@ def test_connectors_are_grouped_per_branch_in_declaration_order() -> None:
     )
 
     # --- act --------------------------
+    # Collect path strokes in the line band only — everything before the
+    # first commit dot (<circle>), so the default checkmark merge tick
+    # (a branch-coloured path drawn later, in the dots layer) doesn't
+    # leak into the band-grouping assertion.
     svg = _render_from(text).as_svg()
-    strokes = [el.get("stroke") for el in ET.fromstring(svg).iter() if el.tag.split("}")[-1] == "path"]
-    branch_strokes = [s for s in strokes if s in ("#111111", "#222222")]
+    band_strokes: list[str | None] = []
+    for el in ET.fromstring(svg).iter():
+        tag = el.tag.split("}")[-1]
+        if tag == "circle":
+            break
+        if tag == "path":
+            band_strokes.append(el.get("stroke"))
+    branch_strokes = [s for s in band_strokes if s in ("#111111", "#222222")]
 
     # --- assert -----------------------
     # main's branch line (#111111) precedes feature's branch-off arc,

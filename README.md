@@ -153,7 +153,7 @@ The `pull_request` op declares a pending merge between two branches. Both endpoi
 
 ## Theming
 
-The `theme` op customises the diagram's presentational surface — spacings, sizes, fonts, the branch-colour palette, the SVG background, the orientation, and more. Each op only overrides the fields it lists; a `name` (`default`, `dark`, `compact`) selects a built-in theme to base resolution on.
+The `theme` op customises the diagram's presentational surface — spacings, sizes, fonts, the branch-colour palette, the SVG background, the orientation, and more. Each op only overrides the fields it lists; a `name` (`default`, `muted`, `dark`, `compact`) selects a built-in theme to base resolution on.
 
 ### Example 8: Recoloured palette
 
@@ -189,8 +189,9 @@ A `theme.orientation` of `lr` flips the diagram left-to-right: the commit axis g
 
 ## Named themes
 
-Beyond `default`, gitsvg ships two built-in themes:
+Beyond `default`, gitsvg ships three built-in themes:
 
+- **`muted`** — the pre-refresh default look: a softer, greyer branch palette with plain circle merge dots.
 - **`dark`** — One Dark-inspired palette on a `#282c34` canvas.
 - **`compact`** — ~30 % denser spacing with smaller fonts.
 
@@ -201,7 +202,7 @@ Selecting one is a single field on a `theme` op:
 {"op": "theme", "name": "dark"}
 ```
 
-The shipped preview below shows the three built-in themes side-by-side on the same input file:
+The shipped preview below tiles the refreshed `default` next to all three built-in themes on the same input file:
 
 ![Built-in named themes](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/10_named_themes.svg)
 

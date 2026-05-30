@@ -9,10 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- New `theme.branch_line_style` — `rounded` (default), `straight`, `bezier`, or `double_rounded` — sets the shape of branch-off, merge, and pull-request connectors; default output unchanged.
-- New `theme.merge_commit_style` — `circle` (default) or `checkmark` — marks merge commits with a checkmark inside the dot; default output unchanged.
+- New `theme.branch_line_style` — `rounded` (default), `straight`, `bezier`, or `double_rounded` — sets the shape of branch-off, merge, and pull-request connectors.
+- New `theme.merge_commit_style` — `checkmark` (default) or `circle` — marks merge commits with a checkmark inside the dot.
+- New built-in `muted` named theme — the pre-refresh default look (softer palette, rounded connectors, circle merge dots).
 
 ### Changed
+
+- Default theme refreshed: more-saturated branch palette and checkmark merge dots; select `theme: {"name": "muted"}` for the prior look.
 
 ### Deprecated
 

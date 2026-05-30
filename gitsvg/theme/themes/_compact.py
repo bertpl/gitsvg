@@ -12,6 +12,7 @@ smaller fonts, so pill proportions stay coherent without separate
 overrides. Margins anchor to spacings and shrink the same way.
 """
 
+from gitsvg.theme._branch_line_style import BranchLineStyle
 from gitsvg.theme._default_theme import DefaultTheme
 from gitsvg.theme._orientation import Orientation
 
@@ -21,11 +22,18 @@ _VERTICAL_ORIENTATIONS = frozenset({Orientation.BT, Orientation.TB})
 class CompactTheme(DefaultTheme):
     """Denser variant of `DefaultTheme`.
 
-    Overrides `_resolve_branch_spacing`, `_resolve_commit_spacing`,
-    `_resolve_label_font_size`, `_resolve_branch_label_font_size`, and
-    `_resolve_hash_font_size`. Every other field inherits from
-    `DefaultTheme`.
+    Overrides the metric resolvers (`_resolve_branch_spacing`,
+    `_resolve_commit_spacing`, the three font sizes, and the two pill
+    offsets) plus `_resolve_branch_line_style` — double-rounded
+    S-transitions distinguish the dense layout from the default's plain
+    rounded elbows. Every other field, including the refreshed palette
+    and the checkmark merge dots, inherits from `DefaultTheme`.
     """
+
+    @classmethod
+    def _resolve_branch_line_style(cls) -> BranchLineStyle:
+        """Double-rounded S-transitions between lanes — a softer connector than the default's rounded elbow."""
+        return BranchLineStyle.DOUBLE_ROUNDED
 
     @classmethod
     def _resolve_branch_spacing(cls, orientation: Orientation) -> int:

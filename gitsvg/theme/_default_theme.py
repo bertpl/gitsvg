@@ -154,8 +154,8 @@ class DefaultTheme(Theme):
 
     @classmethod
     def _resolve_merge_commit_style(cls) -> MergeCommitStyle:
-        """Merge-commit dot style — the plain circle dot."""
-        return MergeCommitStyle.CIRCLE
+        """Merge-commit dot style — a checkmark inside the dot."""
+        return MergeCommitStyle.CHECKMARK
 
     @classmethod
     def _resolve_label_offset_branch_axis_in_lanes(cls, orientation: Orientation) -> float:
@@ -378,13 +378,21 @@ class DefaultTheme(Theme):
     # --------------------------------------------------------------------------
     @classmethod
     def _resolve_colors(cls) -> dict[str, str]:
-        """Default branch-colour palette."""
+        """Default branch-colour palette.
+
+        Soft but not grey: `main` is a darkened blue-grey spine, and the
+        four `branch*` slots are gently saturated green / blue / mauve /
+        purple that stay legible without shouting. Hue is held across the
+        whole palette relative to the `muted` named theme (the
+        pre-refresh look); only `main`'s lightness and the four branches'
+        saturation differ.
+        """
         return {
-            "main": "#5c6370",
-            "branch1": "#6a9f8d",
-            "branch2": "#7b8fb2",
-            "branch3": "#b07b8f",
-            "branch4": "#9b8fb2",
+            "main": "#4a4f5a",
+            "branch1": "#56b393",
+            "branch2": "#6b8bc2",
+            "branch3": "#c06b8b",
+            "branch4": "#977fc2",
         }
 
     @classmethod
