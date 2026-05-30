@@ -5,13 +5,13 @@
 </defs>
 <path d="M118.507306,12.5 L118.507306,237.5" stroke="#b8b8b8" stroke-width="0.7" stroke-dasharray="4,4" />
 <path d="M118.507306,225.0 L118.507306,25.0" stroke="#5c6370" stroke-width="2" stroke-linecap="round" />
-<rect x="98.7653635" y="240.5" width="39.483885" height="19.0" rx="4" ry="4" fill="#5c6370" opacity="0.85" />
-<text x="118.507306" y="250.0" font-size="11.0" text-anchor="middle" dominant-baseline="middle" fill="white" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="500">main</text>
 <circle cx="118.507306" cy="225.0" r="5" fill="#5c6370" stroke="white" stroke-width="1.5" />
 <circle cx="118.507306" cy="175.0" r="5" fill="#5c6370" stroke="white" stroke-width="1.5" />
 <circle cx="118.507306" cy="125.0" r="5" fill="#5c6370" stroke="white" stroke-width="1.5" />
 <circle cx="118.507306" cy="75.0" r="7" fill="#5c6370" stroke="white" stroke-width="1.5" />
 <circle cx="118.507306" cy="25.0" r="5" fill="#5c6370" stroke="white" stroke-width="1.5" />
+<rect x="98.7653635" y="240.5" width="39.483885" height="19.0" rx="4" ry="4" fill="#5c6370" opacity="0.85" />
+<text x="118.507306" y="250.0" font-size="11.0" text-anchor="middle" dominant-baseline="middle" fill="white" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="500">main</text>
 <text x="106.507306" y="217.5" font-size="11.0" text-anchor="end" dominant-baseline="middle" fill="#383838" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">initial commit</text>
 <text x="106.507306" y="232.5" font-size="9.0" text-anchor="end" dominant-baseline="middle" fill="#707070" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">1b35060</text>
 <text x="106.507306" y="167.5" font-size="11.0" text-anchor="end" dominant-baseline="middle" fill="#383838" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">feature work</text>

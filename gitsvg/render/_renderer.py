@@ -11,25 +11,33 @@ Z-order (back to front):
 0. Canvas background (a filled rect when `theme.background_color` is
    not None; nothing otherwise — the SVG stays transparent).
 1. Branch guides (faint dashed verticals at every occupied lane).
-2. Arcs (branch-off + merge), in the order produced by the layout
-   engine.
-3. Pull-request arcs (dashed mirror of merge arcs), one per open PR.
-4. Branch lines (vertical, in branch colour).
-5. Branch-name pills (coloured rounded rectangles + branch name).
-6. Pull-request title pills (anchored at source-tip commits; only
-   when the PR has a `title`).
-7. Commit dots (ordinary commits in branch colour with white outline;
+2. Per-branch line band — looping branches in declaration order, each
+   branch's connectors and line are drawn as one colour-coherent group
+   before the next branch's: its branch-off / merge arcs, then its
+   branch line, then its pull-request arcs (dashed). Every element in
+   the band is coloured by exactly one branch (the arc colour resolver
+   attributes each connector to its branch point), so grouping keeps a
+   branch's coloured strokes contiguous along the z-axis. Crossings
+   between branches resolve by declaration order — a later-declared
+   branch paints over an earlier one.
+3. Commit dots (ordinary commits in branch colour with white outline;
    merge commits per `merge_commit_style`; enlarged when highlighted).
-8. Commit labels (`msg` primary lines + optional `hash` secondary
+   Above the line band, below every text element.
+4. Branch-name pills (coloured rounded rectangles + branch name).
+5. Pull-request title pills (anchored half a row back from the
+   projected merge row on the source branch line; only when the PR has
+   a `title`).
+6. Commit labels (`msg` primary lines + optional `hash` secondary
    line, on the side indicated by `label_side`; bold msg when
    highlighted).
 """
 
 import copy
+from collections import defaultdict
 
 import drawsvg as draw
 
-from gitsvg.layout import GridSlot, Layout, LayoutBranch
+from gitsvg.layout import GridSlot, Layout, LayoutArc, LayoutBranch, LayoutPullRequest
 from gitsvg.render._canvas import compute_canvas
 from gitsvg.render._colors import resolve_branch_color
 from gitsvg.render._primitives.arc import draw_arc
@@ -121,33 +129,39 @@ def render(layout: Layout, theme: RendererSettings | None = None) -> draw.Drawin
     for lane in _get_occupied_lanes(layout):
         draw_branch_guide(d, lane, canvas, theme)
 
-    # --- Arcs (branch-off + merge) --------------
+    # --- Per-branch line band -------------------
+    # Bucket every connector under the branch whose colour it carries
+    # (its branch point), so each branch's arcs + line + PR arcs draw as
+    # one contiguous colour-coherent group, in declaration order.
+    arcs_by_branch: dict[str, list[LayoutArc]] = defaultdict(list)
     for arc in layout.arcs:
-        arc_branch = _branch_through_point(layout, arc.branch_point)
-        draw_arc(
-            d,
-            trunk_point=arc.trunk_point,
-            branch_point=arc.branch_point,
-            canvas=canvas,
-            theme=theme,
-            color=color_for(arc_branch.id),
-        )
+        arcs_by_branch[_branch_through_point(layout, arc.branch_point).id].append(arc)
 
-    # --- Pull-request arcs (dashed) -------------
+    prs_by_branch: dict[str, list[LayoutPullRequest]] = defaultdict(list)
     for pr in layout.pull_requests:
-        draw_arc(
-            d,
-            trunk_point=pr.trunk_point,
-            branch_point=pr.branch_point,
-            canvas=canvas,
-            theme=theme,
-            color=color_for(_branch_through_point(layout, pr.branch_point).id),
-            stroke_dasharray=theme.pull_request_dash,
-        )
+        prs_by_branch[_branch_through_point(layout, pr.branch_point).id].append(pr)
 
-    # --- Branch lines ---------------------------
     for branch in layout.branches:
-        draw_branch_line(d, branch, color_for(branch.id), canvas, theme)
+        color = color_for(branch.id)
+        for arc in arcs_by_branch[branch.id]:
+            draw_arc(
+                d, trunk_point=arc.trunk_point, branch_point=arc.branch_point, canvas=canvas, theme=theme, color=color
+            )
+        draw_branch_line(d, branch, color, canvas, theme)
+        for pr in prs_by_branch[branch.id]:
+            draw_arc(
+                d,
+                trunk_point=pr.trunk_point,
+                branch_point=pr.branch_point,
+                canvas=canvas,
+                theme=theme,
+                color=color,
+                stroke_dasharray=theme.pull_request_dash,
+            )
+
+    # --- Commit dots ----------------------------
+    for commit in layout.commits.values():
+        draw_commit_dot(d, commit, color_for(commit.branch_id), canvas, theme)
 
     # --- Branch-name pills ----------------------
     for branch in layout.branches:
@@ -156,10 +170,6 @@ def render(layout: Layout, theme: RendererSettings | None = None) -> draw.Drawin
     # --- Pull-request title pills ---------------
     for pr in layout.pull_requests:
         draw_pull_request_pill(d, pr, color_for(_branch_through_point(layout, pr.branch_point).id), canvas, theme)
-
-    # --- Commit dots ----------------------------
-    for commit in layout.commits.values():
-        draw_commit_dot(d, commit, color_for(commit.branch_id), canvas, theme)
 
     # --- Commit labels --------------------------
     for commit in layout.commits.values():
