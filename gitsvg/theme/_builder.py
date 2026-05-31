@@ -55,6 +55,12 @@ class ThemeBuilder:
         user_set: Mapping from theme-field name to the value the user
             explicitly supplied via a `theme:` op. Fields the user
             didn't touch are absent.
+        user_set_lines: Mapping from theme-field name to the
+            `(file, line)` of the `theme:` op that last set it. Kept in
+            step with `user_set` (set together, cleared together) so a
+            semantic check at end-of-apply can attribute an error to the
+            originating op's line — e.g. E222 for a `merge_lane_clearance`
+            that has no effect with `auto_lane_change` off.
         branch_color_overrides: Hex-colour overrides keyed by
             `BranchState.id`, populated as `branch:` ops with `color`
             apply and pruned when their branch is removed.
@@ -65,6 +71,7 @@ class ThemeBuilder:
 
     theme_cls: type[Theme] = DefaultTheme
     user_set: dict[str, Any] = field(default_factory=dict)
+    user_set_lines: dict[str, tuple[str | None, int]] = field(default_factory=dict)
     branch_color_overrides: dict[str, str] = field(default_factory=dict)
     branch_label_side_overrides: dict[str, LabelSide] = field(default_factory=dict)
 
@@ -93,6 +100,7 @@ class ThemeBuilder:
         syntactic way to clear them.
         """
         self.user_set = {}
+        self.user_set_lines = {}
         self.branch_color_overrides = {}
         self.branch_label_side_overrides = {}
 
