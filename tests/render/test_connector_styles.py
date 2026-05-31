@@ -5,6 +5,8 @@ representative connector. End-to-end: every (orientation, style) pair
 renders cleanly.
 """
 
+import re
+
 import drawsvg as draw
 import pytest
 
@@ -13,6 +15,7 @@ from gitsvg.parse import parse_jsonl_text
 from gitsvg.render import render
 from gitsvg.render._primitives._connector_styles import (
     _build_bezier,
+    _build_double_bezier,
     _build_double_rounded,
     _build_rounded,
     _build_straight,
@@ -35,12 +38,33 @@ _GEOM = _ConnectorGeometry(
     trunk_is_start=True,
 )
 
+# The merge mirror of `_GEOM`: same endpoints, but the branch point is the
+# from-point (the connector arrives at the trunk, which is the to-point).
+_GEOM_MERGE = _ConnectorGeometry(
+    x1=0.0,
+    y1=0.0,
+    x2=100.0,
+    y2=50.0,
+    dx=1,
+    dy=1,
+    corner_radius=20.0,
+    screen_y_first=True,
+    commit_axis_vertical=True,
+    trunk_is_start=False,
+)
+
 
 def _path_d(builder, geom: _ConnectorGeometry) -> str:
     """Run `builder` on a fresh path and return its `d` string (the builder opens it)."""
     path = draw.Path()
     builder(path, geom)
     return path.args["d"]
+
+
+def _first_cubic_control_points(d: str) -> tuple[tuple[float, float], tuple[float, float]]:
+    """Return the two control points of the first `C` command in path `d`."""
+    nums = [float(n) for n in re.findall(r"-?\d+\.?\d*", d.split("C", 1)[1])][:6]
+    return (nums[0], nums[1]), (nums[2], nums[3])
 
 
 # ==================================================================================================
@@ -66,6 +90,34 @@ def test_rounded_emits_one_quarter_arc() -> None:
 def test_bezier_emits_a_cubic_curve() -> None:
     # --- act --------------------------
     d = _path_d(_build_bezier, _GEOM)
+
+    # --- assert -----------------------
+    assert "C" in d
+
+
+def test_bezier_control_points_coincident_on_branch_point_lane_branch_off() -> None:
+    """Branch-off: both control points coincide on the branch point's lane (the to-point, `x2`)."""
+    # --- act --------------------------
+    cp1, cp2 = _first_cubic_control_points(_path_d(_build_bezier, _GEOM))
+
+    # --- assert -----------------------
+    assert cp1 == cp2  # coincident
+    assert cp1[0] == _GEOM.x2  # branch point is the to-point under trunk_is_start
+
+
+def test_bezier_control_points_coincident_on_branch_point_lane_merge() -> None:
+    """Merge: the branch point is the from-point, so the control points sit on `x1`."""
+    # --- act --------------------------
+    cp1, cp2 = _first_cubic_control_points(_path_d(_build_bezier, _GEOM_MERGE))
+
+    # --- assert -----------------------
+    assert cp1 == cp2  # coincident
+    assert cp1[0] == _GEOM_MERGE.x1  # branch point is the from-point when not trunk_is_start
+
+
+def test_double_bezier_emits_a_cubic_curve() -> None:
+    # --- act --------------------------
+    d = _path_d(_build_double_bezier, _GEOM)
 
     # --- assert -----------------------
     assert "C" in d

@@ -13,7 +13,7 @@ endpoints and the orientation-mapped leg order), creates the SVG path, and
 dispatches to the builder registered for `theme.branch_line_style` in
 `_connector_styles` — the builder draws the whole connector (opening `M`
 included). The per-style geometry (rounded / straight / bezier /
-double_rounded) lives there.
+double_rounded / double_bezier) lives there.
 
 Whether the branch point sits above or below the trunk point (its
 commit-axis index) gives a connector its branch-off vs merge appearance —
@@ -45,7 +45,7 @@ def draw_arc(
 
     Branch-off / merge / pull-request connectors take their shape from
     `theme.branch_line_style` (`rounded` / `straight` / `bezier` /
-    `double_rounded`), dispatched through the `_connector_styles`
+    `double_rounded` / `double_bezier`), dispatched through the `_connector_styles`
     registry. `rounded` is the default and renders byte-identically to
     prior versions.
 

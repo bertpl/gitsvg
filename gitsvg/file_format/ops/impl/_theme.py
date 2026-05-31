@@ -139,7 +139,7 @@ class ThemeOp(OpBase):
     )
     branch_line_style: BranchLineStyle | None = Field(
         default=None,
-        description="Shape of the connectors between lanes (branch-off, merge, pull-request): `rounded` (default; two straight legs joined by a single quarter-arc corner), `straight` (a direct line), `bezier` (a smooth cubic-Bézier S), or `double_rounded` (a stepped connector — two quarter-arcs around an orthogonal crossing near the trunk).",
+        description="Shape of the connectors between lanes (branch-off, merge, pull-request): `rounded` (default; two straight legs joined by a single quarter-arc corner), `straight` (a direct line), `bezier` (a single flowing curve that runs along a branch's own lane where it joins that branch, then sweeps diagonally across to the connecting commit, with no flat perpendicular leg), `double_rounded` (a stepped connector — two quarter-arcs around an orthogonal crossing near the trunk), or `double_bezier` (a smooth cubic-Bézier S, tangent to the commit axis at both ends).",
     )
     merge_commit_style: MergeCommitStyle | None = Field(
         default=None,

@@ -8,11 +8,14 @@ the two points are connected:
 - `rounded` — two straight legs joined by a single quarter-arc corner
   (the default).
 - `straight` — a direct line between the two points (no arc).
-- `bezier` — a smooth cubic-Bézier S, tangent to the commit axis at both
-  ends.
+- `bezier` — a single flowing cubic curve: both control points coincident
+  on the branch point's lane, so it joins that branch's line flush and
+  sweeps across to the trunk, with no flat perpendicular leg.
 - `double_rounded` — a stepped connector: leave the trunk parallel to its
   lane, two quarter-arcs around an orthogonal crossing one radius from the
   trunk, then a parallel run to the branch.
+- `double_bezier` — a smooth cubic-Bézier S, tangent to the commit axis at
+  both ends.
 
 Each style is a `_build_<style>(path, geometry)` function that owns its
 whole path, opening `M` included. `_connector_geometry` derives the shared
@@ -39,12 +42,19 @@ from gitsvg.theme._orientation import Orientation
 # to a straight line). Pure numerical-precision guard; never scales.
 _ARC_DEGENERATE_TOLERANCE_PX = 0.5  # axis-symmetric (perceptual)
 
-# `bezier` tangent strength: cubic control-point handle length along the
-# commit axis, as a fraction of the connector's commit-axis span. 0.5 places
-# the handles at the midpoint (a gentle S); 1.0 reaches the opposite
+# `double_bezier` tangent strength: cubic control-point handle length along
+# the commit axis, as a fraction of the connector's commit-axis span. 0.5
+# places the handles at the midpoint (a gentle S); 1.0 reaches the opposite
 # endpoint's row (parallel to the lanes longest, but starts to over-curve).
 # 0.75 is the tuned sweet spot.
-_BEZIER_TANGENT_STRENGTH = 0.75  # axis-symmetric (perceptual)
+_DOUBLE_BEZIER_TANGENT_STRENGTH = 0.75  # axis-symmetric (perceptual)
+
+# `bezier` hug strength: how far along the branch point's lane (as a
+# fraction of the commit-axis span, measured toward the trunk) the single
+# shared control point sits. Higher hugs that lane longer before sweeping
+# across to the trunk; lower spreads the sweep into a more evenly diagonal
+# line. Tuned by eye against `rounded`.
+_BEZIER_HUG_STRENGTH = 0.75  # axis-symmetric (perceptual)
 
 
 @dataclass(frozen=True, slots=True)
@@ -175,12 +185,18 @@ def _build_straight(path: draw.Path, g: _ConnectorGeometry) -> None:
 
 
 def _build_bezier(path: draw.Path, g: _ConnectorGeometry) -> None:
-    """A smooth cubic-Bézier S, tangent to the commit axis at both ends.
+    """A single flowing cubic curve that hugs the branch point's lane, then sweeps to the trunk.
 
-    The control points sit on the commit-axis line through each endpoint,
-    `_BEZIER_TANGENT_STRENGTH` of the commit-axis span away — so the curve
-    leaves and arrives parallel to the branch lines. Degenerate (same row or
-    column) collapses to a straight segment.
+    Both control points are coincident at one point on the **branch
+    point's** lane (a branch's own start / tip), `_BEZIER_HUG_STRENGTH` of
+    the commit-axis span toward the trunk. The tangent at the branch point
+    is therefore along that branch's lane, so the curve joins the branch
+    line flush — the new branch rises out of a branch-off, the feature line
+    descends into a merge — while the coincident control points concentrate
+    the cross-lane sweep toward the trunk, leaving no flat perpendicular
+    leg. Which endpoint is the branch point flips with `trunk_is_start`
+    (branch-off vs merge / PR). Degenerate (same row or column) collapses to
+    a straight segment.
     """
     path.M(g.x1, g.y1)
     if abs(g.y2 - g.y1) < _ARC_DEGENERATE_TOLERANCE_PX:
@@ -190,7 +206,35 @@ def _build_bezier(path: draw.Path, g: _ConnectorGeometry) -> None:
         path.L(g.x1, g.y2)
         return
 
-    s = _BEZIER_TANGENT_STRENGTH
+    # `trunk_is_start` ⇒ branch-off (branch point is the to-point); else the
+    # branch point is the from-point (merge / PR). The shared control point
+    # sits on the branch point's lane, `s` of the way toward the trunk.
+    s = _BEZIER_HUG_STRENGTH
+    bx, by, tx, ty = (g.x2, g.y2, g.x1, g.y1) if g.trunk_is_start else (g.x1, g.y1, g.x2, g.y2)
+    if g.commit_axis_vertical:
+        cx, cy = bx, by + s * (ty - by)
+    else:
+        cx, cy = bx + s * (tx - bx), by
+    path.C(cx, cy, cx, cy, g.x2, g.y2)
+
+
+def _build_double_bezier(path: draw.Path, g: _ConnectorGeometry) -> None:
+    """A smooth cubic-Bézier S, tangent to the commit axis at both ends.
+
+    The control points sit on the commit-axis line through each endpoint,
+    `_DOUBLE_BEZIER_TANGENT_STRENGTH` of the commit-axis span away — so the
+    curve leaves and arrives parallel to the branch lines. Degenerate (same
+    row or column) collapses to a straight segment.
+    """
+    path.M(g.x1, g.y1)
+    if abs(g.y2 - g.y1) < _ARC_DEGENERATE_TOLERANCE_PX:
+        path.L(g.x2, g.y1)
+        return
+    if abs(g.x2 - g.x1) < _ARC_DEGENERATE_TOLERANCE_PX:
+        path.L(g.x1, g.y2)
+        return
+
+    s = _DOUBLE_BEZIER_TANGENT_STRENGTH
     if g.commit_axis_vertical:
         span = g.y2 - g.y1
         path.C(g.x1, g.y1 + s * span, g.x2, g.y2 - s * span, g.x2, g.y2)
@@ -238,4 +282,5 @@ _CONNECTOR_BUILDERS: dict[BranchLineStyle, Callable[[draw.Path, _ConnectorGeomet
     BranchLineStyle.STRAIGHT: _build_straight,
     BranchLineStyle.BEZIER: _build_bezier,
     BranchLineStyle.DOUBLE_ROUNDED: _build_double_rounded,
+    BranchLineStyle.DOUBLE_BEZIER: _build_double_bezier,
 }
