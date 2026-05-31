@@ -11,27 +11,30 @@ from gitsvg.render._renderer_settings import RendererSettings
 def draw_branch_line(
     d: draw.Drawing, branch: LayoutBranch, color: str, canvas: RenderCanvas, theme: RendererSettings
 ) -> None:
-    """Append a branch line to the drawing.
+    """Append a branch's line to the drawing — one straight run per lane segment.
 
-    The line spans from the branch's `start` (oldest end) to its `end`
-    (newest commit on the branch). Skipped entirely for empty branches
-    (`start == end`): the line would collapse to an invisible
-    zero-length path, so emission is suppressed to keep the output
-    free of degenerate elements. The branch's name pill is still
-    drawn beside it. Screen direction (vertical vs horizontal) is
-    decided by the geometry helper based on `theme.orientation`.
+    Each segment spans from its `start` (oldest end) to its `end` (newest
+    end) on its own lane. A zero-length segment (`start == end`) is
+    skipped: the line would collapse to an invisible zero-length path, so
+    emission is suppressed to keep the output free of degenerate elements
+    — this also covers an empty branch (a single zero-length segment),
+    whose name pill is still drawn beside it. The connectors bridging two
+    adjacent segments (lane changes) are emitted separately as arcs.
+    Screen direction (vertical vs horizontal) is decided by the geometry
+    helper based on `theme.orientation`.
     """
-    if branch.start == branch.end:
-        return
-    (x_start, y_start), (x_end, y_end) = branch_line_endpoints(branch.branch_pos, branch.start, branch.end, canvas)
-    d.append(
-        draw.Line(
-            x_start,
-            y_start,
-            x_end,
-            y_end,
-            stroke=color,
-            stroke_width=theme.branch_line_width,
-            stroke_linecap="round",
+    for segment in branch.segments:
+        if segment.start == segment.end:
+            continue
+        (x_start, y_start), (x_end, y_end) = branch_line_endpoints(segment.lane, segment.start, segment.end, canvas)
+        d.append(
+            draw.Line(
+                x_start,
+                y_start,
+                x_end,
+                y_end,
+                stroke=color,
+                stroke_width=theme.branch_line_width,
+                stroke_linecap="round",
+            )
         )
-    )

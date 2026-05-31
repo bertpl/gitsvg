@@ -7,7 +7,7 @@ import pytest
 
 from gitsvg.errors import ValidationReport
 from gitsvg.imports import resolve_imports
-from gitsvg.layout import Layout, compute_layout
+from gitsvg.layout import LaneSegment, Layout, LayoutArcKind, LayoutBranch, compute_layout
 from gitsvg.parse import parse_jsonl_file, parse_jsonl_text
 from gitsvg.state import apply_ops
 
@@ -28,7 +28,7 @@ def test_first_branch_gets_branch_pos_zero() -> None:
 
     # --- assert -----------------------
     assert layout.branches[0].name == "main"
-    assert layout.branches[0].branch_pos == 0
+    assert layout.branches[0].segments[0].lane == 0
 
 
 def test_branch_pos_increments_in_declaration_order() -> None:
@@ -44,9 +44,9 @@ def test_branch_pos_increments_in_declaration_order() -> None:
 
     # --- assert -----------------------
     by_name = {b.name: b for b in layout.branches}
-    assert by_name["main"].branch_pos == 0
-    assert by_name["feat"].branch_pos == 1
-    assert by_name["docs"].branch_pos == 2
+    assert by_name["main"].segments[0].lane == 0
+    assert by_name["feat"].segments[0].lane == 1
+    assert by_name["docs"].segments[0].lane == 2
 
 
 # ==================================================================================================
@@ -63,8 +63,8 @@ def test_branch_pos_override_pins_lane_verbatim() -> None:
 
     # --- assert -----------------------
     by_name = {b.name: b for b in layout.branches}
-    assert by_name["main"].branch_pos == 0
-    assert by_name["feat"].branch_pos == 7
+    assert by_name["main"].segments[0].lane == 0
+    assert by_name["feat"].segments[0].lane == 7
 
 
 def test_branch_pos_override_to_zero_passes_through_lenient() -> None:
@@ -80,7 +80,7 @@ def test_branch_pos_override_to_zero_passes_through_lenient() -> None:
 
     # --- assert -----------------------
     by_name = {b.name: b for b in layout.branches}
-    assert by_name["feat"].branch_pos == 0
+    assert by_name["feat"].segments[0].lane == 0
 
 
 def test_branch_pos_override_pinned_lane_blocks_subsequent_heuristic_choices() -> None:
@@ -102,12 +102,12 @@ def test_branch_pos_override_pinned_lane_blocks_subsequent_heuristic_choices() -
 
     # --- assert -----------------------
     by_name = {b.name: b for b in layout.branches}
-    assert by_name["main"].branch_pos == 0
-    assert by_name["feat"].branch_pos == 5
+    assert by_name["main"].segments[0].lane == 0
+    assert by_name["feat"].segments[0].lane == 5
     # `feat` has a commit at row 2 on lane 5; rows ≥ 2 on lane 5 are blocked.
     # `docs` parents on main at row 0 → threshold = 1; lanes 1..4 are free
     # of any commits, so docs reclaims the lowest free lane: 1.
-    assert by_name["docs"].branch_pos == 1
+    assert by_name["docs"].segments[0].lane == 1
 
 
 # ==================================================================================================
@@ -134,11 +134,11 @@ def test_lane_reclaimed_after_sibling_branch_removed() -> None:
 
     # --- assert -----------------------
     by_name = {b.name: b for b in layout.branches}
-    assert by_name["main"].branch_pos == 0
-    assert by_name["old_exp"].branch_pos == 1
+    assert by_name["main"].segments[0].lane == 0
+    assert by_name["old_exp"].segments[0].lane == 1
     # new_exp parents on main at m3 (row 3) → threshold 4. old_exp on
     # lane 1 has its only commit at row 2; lane 1 is free at row ≥ 4.
-    assert by_name["new_exp"].branch_pos == 1
+    assert by_name["new_exp"].segments[0].lane == 1
 
 
 def test_lane_skipped_when_existing_branch_has_recent_commits() -> None:
@@ -164,8 +164,8 @@ def test_lane_skipped_when_existing_branch_has_recent_commits() -> None:
     # Per the chain-only commit_pos rule: m1=0, o1=1, o2=2, m2=1 (chain
     # parent m1 only). main.tip = m2 (last in commit_ids), so new.start
     # = 2 → threshold 2. Lane 1: o2 at row 2 ≥ 2 → blocked.
-    assert by_name["ongoing"].branch_pos == 1
-    assert by_name["new"].branch_pos == 2
+    assert by_name["ongoing"].segments[0].lane == 1
+    assert by_name["new"].segments[0].lane == 2
 
 
 def test_lane_skipped_when_blocked_at_or_above_threshold() -> None:
@@ -187,10 +187,10 @@ def test_lane_skipped_when_blocked_at_or_above_threshold() -> None:
 
     # --- assert -----------------------
     by_name = {b.name: b for b in layout.branches}
-    assert by_name["first"].branch_pos == 1
+    assert by_name["first"].segments[0].lane == 1
     # second's threshold = m1.commit_pos + 1 = 1; first has f1 at row 1 on
     # lane 1 → blocked. Skip to lane 2.
-    assert by_name["second"].branch_pos == 2
+    assert by_name["second"].segments[0].lane == 2
 
 
 def test_empty_branch_pseudo_commit_blocks_lane_at_start_position() -> None:
@@ -212,10 +212,10 @@ def test_empty_branch_pseudo_commit_blocks_lane_at_start_position() -> None:
     # --- assert -----------------------
     by_name = {b.name: b for b in layout.branches}
     # ghost is empty with start = m2.commit_pos + 1 = 2. On lane 1.
-    assert by_name["ghost"].branch_pos == 1
+    assert by_name["ghost"].segments[0].lane == 1
     # active's threshold = m2.commit_pos + 1 = 2. Lane 1 has ghost's
     # pseudo-commit at start = 2 ≥ 2 → blocked. Skip to lane 2.
-    assert by_name["active"].branch_pos == 2
+    assert by_name["active"].segments[0].lane == 2
 
 
 def test_empty_branch_does_not_block_lane_below_its_start() -> None:
@@ -241,10 +241,10 @@ def test_empty_branch_does_not_block_lane_below_its_start() -> None:
 
     # --- assert -----------------------
     by_name = {b.name: b for b in layout.branches}
-    assert by_name["ghost"].branch_pos == 1
+    assert by_name["ghost"].segments[0].lane == 1
     # early's parent is m1 at row 0 → threshold 1. Lane 1's ghost has
     # pseudo-commit at row 3 ≥ 1 → blocked. early skips to lane 2.
-    assert by_name["early"].branch_pos == 2
+    assert by_name["early"].segments[0].lane == 2
 
 
 def test_first_branch_with_no_parent_gets_lane_zero() -> None:
@@ -255,7 +255,7 @@ def test_first_branch_with_no_parent_gets_lane_zero() -> None:
     layout = _layout_from(text)
 
     # --- assert -----------------------
-    assert layout.branches[0].branch_pos == 0
+    assert layout.branches[0].segments[0].lane == 0
 
 
 def test_branch_pos_override_short_circuits_heuristic() -> None:
@@ -273,7 +273,7 @@ def test_branch_pos_override_short_circuits_heuristic() -> None:
 
     # --- assert -----------------------
     by_name = {b.name: b for b in layout.branches}
-    assert by_name["feat"].branch_pos == 0
+    assert by_name["feat"].segments[0].lane == 0
 
 
 def test_forward_reference_to_later_declared_branch_is_resolved() -> None:
@@ -304,7 +304,7 @@ def test_forward_reference_to_later_declared_branch_is_resolved() -> None:
     # X must have a coherent lane > Y_new's lane (since X's parent is on
     # Y_new). The exact value depends on the heuristic, but the key thing
     # is that lane assignment didn't crash and X is on a higher lane than Y.
-    assert by_name["X"].branch_pos > by_name["Y"].branch_pos
+    assert by_name["X"].segments[0].lane > by_name["Y"].segments[0].lane
 
 
 # ==================================================================================================
@@ -588,7 +588,7 @@ def test_branch_off_arc_emitted_for_each_non_root_branch() -> None:
     layout = _layout_from(text)
 
     # --- assert -----------------------
-    branch_off_arcs = [a for a in layout.arcs if a.branch_point.commit_pos > a.trunk_point.commit_pos]
+    branch_off_arcs = [a for a in layout.arcs if a.kind is LayoutArcKind.BRANCH_OFF]
     assert len(branch_off_arcs) == 1
     arc = branch_off_arcs[0]
     assert arc.trunk_point.branch_pos == 0  # main lane
@@ -611,11 +611,49 @@ def test_merge_arc_emitted_per_cross_lane_parent() -> None:
     layout = _layout_from(text)
 
     # --- assert -----------------------
-    merge_arcs = [a for a in layout.arcs if a.branch_point.commit_pos < a.trunk_point.commit_pos]
+    merge_arcs = [a for a in layout.arcs if a.kind is LayoutArcKind.MERGE]
     assert len(merge_arcs) == 1
     arc = merge_arcs[0]
     assert arc.branch_point.branch_pos == 1  # feat lane (merged-in tip)
     assert arc.trunk_point.branch_pos == 0  # main lane (merge commit)
+
+
+# ==================================================================================================
+#  Lane segments
+# ==================================================================================================
+def test_each_branch_emits_one_segment_spanning_its_life() -> None:
+    """Without lane migration every branch is a single segment on its lane."""
+    # --- arrange ----------------------
+    text = (
+        '{"op": "branch", "name": "main"}\n'
+        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
+        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
+        '{"op": "commit", "branch": "feat", "id": "f1", "msg": "x"}\n'
+    )
+
+    # --- act --------------------------
+    layout = _layout_from(text)
+
+    # --- assert -----------------------
+    by_name = {b.name: b for b in layout.branches}
+    assert by_name["main"].segments == [LaneSegment(lane=0, start=0, end=0)]
+    assert by_name["feat"].segments == [LaneSegment(lane=1, start=1, end=1)]
+
+
+def test_lane_at_clamps_below_and_above_segments() -> None:
+    """`lane_at` resolves within segments and clamps past either end."""
+    # --- arrange ----------------------
+    branch = LayoutBranch(
+        id="b",
+        name="b",
+        segments=[LaneSegment(lane=2, start=1, end=3), LaneSegment(lane=1, start=4, end=6)],
+    )
+
+    # --- act / assert -----------------
+    assert branch.lane_at(0) == 2  # below first segment → clamp low
+    assert branch.lane_at(3) == 2  # within first segment
+    assert branch.lane_at(4) == 1  # within second segment
+    assert branch.lane_at(9) == 1  # past last segment → clamp high
 
 
 # ==================================================================================================
@@ -722,7 +760,7 @@ def test_layout_completes_for_every_corpus_file(path: Path) -> None:
     for branch in layout.branches:
         assert branch.start >= 0
         assert branch.end >= branch.start
-        assert branch.branch_pos >= 0
+        assert branch.segments[0].lane >= 0
         assert branch.id
     assert layout.grid.n_commits > 0
     assert layout.grid.n_branches > 0

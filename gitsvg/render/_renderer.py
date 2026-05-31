@@ -57,8 +57,9 @@ def _branch_through_point(layout: Layout, point: GridSlot) -> LayoutBranch:
     A connector takes its colour from the branch at its branch point —
     the new branch for a branch-off (the point is that branch's start),
     or the merged-in / source branch for a merge or pull request (the
-    point is a row within that branch's life). Matched by lane plus a
-    row inside the branch's `[start, end]` span.
+    point is a row within that branch's life). Matched against each
+    branch's lane segments: some segment must sit on the point's lane and
+    cover its row.
 
     Args:
         layout: The resolved layout.
@@ -72,14 +73,15 @@ def _branch_through_point(layout: Layout, point: GridSlot) -> LayoutBranch:
             valid layout, so the error is a defensive guard.
     """
     for branch in layout.branches:
-        if branch.branch_pos == point.branch_pos and branch.start <= point.commit_pos <= branch.end:
-            return branch
+        for segment in branch.segments:
+            if segment.lane == point.branch_pos and segment.start <= point.commit_pos <= segment.end:
+                return branch
     raise LookupError(f"no branch passes through {point!r}")
 
 
 def _get_occupied_lanes(layout: Layout) -> list[int]:
-    """Return the sorted, deduplicated lane indices occupied by any branch."""
-    return sorted({branch.branch_pos for branch in layout.branches})
+    """Return the sorted, deduplicated lane indices occupied by any branch segment."""
+    return sorted({segment.lane for branch in layout.branches for segment in branch.segments})
 
 
 def render(layout: Layout, theme: RendererSettings | None = None) -> draw.Drawing:

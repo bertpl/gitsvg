@@ -4,7 +4,7 @@ import re
 
 import drawsvg as draw
 
-from gitsvg.layout import LayoutBranch, compute_layout
+from gitsvg.layout import LaneSegment, LayoutBranch, compute_layout
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.render import render
 from gitsvg.render._canvas import RenderCanvas
@@ -40,9 +40,7 @@ def test_empty_branch_emits_no_line() -> None:
     empty_branch = LayoutBranch(
         id="b1",
         name="lonely",
-        branch_pos=1,
-        start=2,
-        end=2,
+        segments=[LaneSegment(lane=1, start=2, end=2)],
     )
 
     # --- act --------------------------
@@ -62,9 +60,7 @@ def test_non_empty_branch_emits_a_line() -> None:
     branch = LayoutBranch(
         id="b1",
         name="b",
-        branch_pos=1,
-        start=0,
-        end=2,
+        segments=[LaneSegment(lane=1, start=0, end=2)],
     )
 
     # --- act --------------------------

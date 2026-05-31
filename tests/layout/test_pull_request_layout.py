@@ -54,11 +54,11 @@ def test_pr_endpoints_track_current_branch_tips() -> None:
     main = by_name["main"]
 
     # Arc starts at source tip — the row of feat's latest commit (f1).
-    assert pr.branch_point.branch_pos == feat.branch_pos
+    assert pr.branch_point.branch_pos == feat.lane_at(feat.end)
     assert pr.branch_point.commit_pos == feat.end
 
     # Arc lands on into's lane at the projected merge row.
-    assert pr.trunk_point.branch_pos == main.branch_pos
+    assert pr.trunk_point.branch_pos == main.lane_at(pr.trunk_point.commit_pos)
     assert pr.trunk_point.commit_pos == max(feat.end, main.end) + 1
 
 
