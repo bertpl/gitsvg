@@ -1,0 +1,99 @@
+{
+  "branches": [
+    {
+      "name": "main",
+      "head_commit_id": "m3"
+    },
+    {
+      "name": "auth",
+      "head_commit_id": "a2"
+    },
+    {
+      "name": "ui",
+      "head_commit_id": "u3"
+    }
+  ],
+  "commits": [
+    {
+      "id": "m1",
+      "branch": "main",
+      "hash": "7b14e2d",
+      "msg": "project start",
+      "highlight": false,
+      "parents": []
+    },
+    {
+      "id": "a1",
+      "branch": "auth",
+      "hash": "1798b1d",
+      "msg": "login form",
+      "highlight": false,
+      "parents": [
+        "m1"
+      ]
+    },
+    {
+      "id": "u1",
+      "branch": "ui",
+      "hash": "d98fe27",
+      "msg": "navbar",
+      "highlight": false,
+      "parents": [
+        "m1"
+      ]
+    },
+    {
+      "id": "a2",
+      "branch": "auth",
+      "hash": "c3ce0e7",
+      "msg": "oauth",
+      "highlight": false,
+      "parents": [
+        "a1"
+      ]
+    },
+    {
+      "id": "u2",
+      "branch": "ui",
+      "hash": "760a4e8",
+      "msg": "dark mode",
+      "highlight": false,
+      "parents": [
+        "u1"
+      ]
+    },
+    {
+      "id": "m2",
+      "branch": "main",
+      "hash": "64be3f4",
+      "msg": "merge auth",
+      "highlight": false,
+      "parents": [
+        "m1",
+        "a2"
+      ]
+    },
+    {
+      "id": "u3",
+      "branch": "ui",
+      "hash": "0c1e94a",
+      "msg": "polish",
+      "highlight": false,
+      "parents": [
+        "u2"
+      ]
+    },
+    {
+      "id": "m3",
+      "branch": "main",
+      "hash": "bf4f8b8",
+      "msg": "merge ui",
+      "highlight": false,
+      "parents": [
+        "m2",
+        "u3"
+      ]
+    }
+  ],
+  "pull_requests": []
+}

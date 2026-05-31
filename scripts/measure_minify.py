@@ -33,8 +33,8 @@ def _render_at_level(input_path: Path, level: int) -> str:
         for err in report.errors:
             print(f"  {err.format()}", file=sys.stderr)
         raise SystemExit(f"{input_path} did not validate cleanly")
-    layout = compute_layout(state)
-    _, renderer_settings = theme.split()
+    layout_settings, renderer_settings = theme.split()
+    layout = compute_layout(state, layout_settings)
     drawing = render(layout, renderer_settings)
     config = compute_minify_config(level)
     if config.level == 0:

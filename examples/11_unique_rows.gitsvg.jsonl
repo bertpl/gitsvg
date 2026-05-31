@@ -1,0 +1,12 @@
+{"op": "branch", "name": "main", "label_side": "before"}
+{"op": "commit", "branch": "main", "id": "m1", "msg": "project start", "hash": "auto"}
+{"op": "branch", "name": "auth", "from_branch": "main"}
+{"op": "commit", "branch": "auth", "id": "a1", "msg": "login form", "hash": "auto"}
+{"op": "branch", "name": "ui", "from_branch": "main"}
+{"op": "commit", "branch": "ui", "id": "u1", "msg": "navbar", "hash": "auto"}
+{"op": "commit", "branch": "auth", "id": "a2", "msg": "oauth", "hash": "auto"}
+{"op": "commit", "branch": "ui", "id": "u2", "msg": "dark mode", "hash": "auto"}
+{"op": "merge", "from": "auth", "into": "main", "as": "m2", "msg": "merge auth", "hash": "auto"}
+{"op": "commit", "branch": "ui", "id": "u3", "msg": "polish", "hash": "auto"}
+{"op": "merge", "from": "ui", "into": "main", "as": "m3", "msg": "merge ui", "hash": "auto"}
+{"op": "theme", "commit_row_mode": "unique"}

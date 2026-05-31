@@ -1,0 +1,142 @@
+{
+  "grid": {
+    "n_commits": 8,
+    "n_branches": 3
+  },
+  "branches": [
+    {
+      "id": "b0",
+      "name": "main",
+      "branch_pos": 0,
+      "start": 0,
+      "end": 7
+    },
+    {
+      "id": "b1",
+      "name": "auth",
+      "branch_pos": 1,
+      "start": 1,
+      "end": 3
+    },
+    {
+      "id": "b2",
+      "name": "ui",
+      "branch_pos": 2,
+      "start": 1,
+      "end": 6
+    }
+  ],
+  "commits": [
+    {
+      "id": "m1",
+      "branch_id": "b0",
+      "branch_pos": 0,
+      "commit_pos": 0,
+      "msg": "project start",
+      "hash": "7b14e2d",
+      "highlight": false,
+      "is_merge": false
+    },
+    {
+      "id": "a1",
+      "branch_id": "b1",
+      "branch_pos": 1,
+      "commit_pos": 1,
+      "msg": "login form",
+      "hash": "1798b1d",
+      "highlight": false,
+      "is_merge": false
+    },
+    {
+      "id": "u1",
+      "branch_id": "b2",
+      "branch_pos": 2,
+      "commit_pos": 2,
+      "msg": "navbar",
+      "hash": "d98fe27",
+      "highlight": false,
+      "is_merge": false
+    },
+    {
+      "id": "a2",
+      "branch_id": "b1",
+      "branch_pos": 1,
+      "commit_pos": 3,
+      "msg": "oauth",
+      "hash": "c3ce0e7",
+      "highlight": false,
+      "is_merge": false
+    },
+    {
+      "id": "u2",
+      "branch_id": "b2",
+      "branch_pos": 2,
+      "commit_pos": 4,
+      "msg": "dark mode",
+      "hash": "760a4e8",
+      "highlight": false,
+      "is_merge": false
+    },
+    {
+      "id": "m2",
+      "branch_id": "b0",
+      "branch_pos": 0,
+      "commit_pos": 5,
+      "msg": "merge auth",
+      "hash": "64be3f4",
+      "highlight": false,
+      "is_merge": true
+    },
+    {
+      "id": "u3",
+      "branch_id": "b2",
+      "branch_pos": 2,
+      "commit_pos": 6,
+      "msg": "polish",
+      "hash": "0c1e94a",
+      "highlight": false,
+      "is_merge": false
+    },
+    {
+      "id": "m3",
+      "branch_id": "b0",
+      "branch_pos": 0,
+      "commit_pos": 7,
+      "msg": "merge ui",
+      "hash": "bf4f8b8",
+      "highlight": false,
+      "is_merge": true
+    }
+  ],
+  "arcs": [
+    {
+      "kind": "branch_off",
+      "from_branch_pos": 0,
+      "from_commit_pos": 0,
+      "to_branch_pos": 1,
+      "to_commit_pos": 1
+    },
+    {
+      "kind": "branch_off",
+      "from_branch_pos": 0,
+      "from_commit_pos": 0,
+      "to_branch_pos": 2,
+      "to_commit_pos": 1
+    },
+    {
+      "kind": "merge",
+      "from_branch_pos": 1,
+      "from_commit_pos": 3,
+      "to_branch_pos": 0,
+      "to_commit_pos": 5
+    },
+    {
+      "kind": "merge",
+      "from_branch_pos": 2,
+      "from_commit_pos": 6,
+      "to_branch_pos": 0,
+      "to_commit_pos": 7
+    }
+  ],
+  "pull_requests": []
+}

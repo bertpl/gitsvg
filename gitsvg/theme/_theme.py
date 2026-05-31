@@ -35,6 +35,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 from gitsvg.file_format import LabelSide
 from gitsvg.theme._box_anchor import BoxAnchor, validate_box_anchor
 from gitsvg.theme._branch_line_style import BranchLineStyle
+from gitsvg.theme._commit_row_mode import CommitRowMode
 from gitsvg.theme._merge_commit_style import MergeCommitStyle
 from gitsvg.theme._orientation import Orientation
 
@@ -56,6 +57,11 @@ class Theme(BaseModel):
     #  Orientation
     # --------------------------------------------------------------------------
     orientation: Orientation | None = None  # axis-symmetric (input-side selector)
+
+    # --------------------------------------------------------------------------
+    #  Layout policy (consumed by the layout stage via `LayoutSettings`)
+    # --------------------------------------------------------------------------
+    commit_row_mode: CommitRowMode | None = None  # axis-bound: commit-axis (row packing)
 
     # --------------------------------------------------------------------------
     #  Spacing (px)
@@ -246,11 +252,10 @@ class Theme(BaseModel):
         that `gitsvg/layout/` and `gitsvg/render/` keep their imports
         narrow.
 
-        Today `LayoutSettings` is empty (the layout engine reads no
-        theme fields) and `RendererSettings` carries every theme field.
-        Future layout-affecting fields move to `LayoutSettings`,
-        narrowing the renderer slice without changing the pipeline
-        shape.
+        `LayoutSettings` carries the layout-policy fields (today just
+        `commit_row_mode`); `RendererSettings` structurally mirrors
+        `Theme` and carries every field — the layout-policy ones ride
+        along unused on the renderer slice.
 
         Returns:
             A `(layout_settings, renderer_settings)` pair carrying the
@@ -262,7 +267,7 @@ class Theme(BaseModel):
         from gitsvg.layout._layout_settings import LayoutSettings
         from gitsvg.render._renderer_settings import RendererSettings
 
-        return LayoutSettings(), RendererSettings(**self.model_dump())
+        return LayoutSettings(commit_row_mode=self.commit_row_mode), RendererSettings(**self.model_dump())
 
     # --------------------------------------------------------------------------
     #  Resolved-pixel accessors for ratio-stored fields

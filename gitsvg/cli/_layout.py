@@ -98,12 +98,13 @@ def _layout_to_stdout(input_path: Path) -> int:
         0 on clean validation (after emitting the JSON), 1 when
         validation failed (after writing errors to stderr).
     """
-    state, report, _theme = run_validate_pipeline(input_path)
+    state, report, theme = run_validate_pipeline(input_path)
     if not report.is_clean():
         for err in report.errors:
             click.echo(err.format(), err=True)
         return 1
-    layout = compute_layout(state)
+    layout_settings, _ = theme.split()
+    layout = compute_layout(state, layout_settings)
     click.echo(json.dumps(layout_to_json(layout), indent=2))
     return 0
 
@@ -119,9 +120,10 @@ def _layout_to_file(input_path: Path, output_path: Path) -> ValidationReport:
         The validation report. On clean reports the file has been
         written; on dirty reports no file is created.
     """
-    state, report, _theme = run_validate_pipeline(input_path)
+    state, report, theme = run_validate_pipeline(input_path)
     if not report.is_clean():
         return report
-    layout = compute_layout(state)
+    layout_settings, _ = theme.split()
+    layout = compute_layout(state, layout_settings)
     output_path.write_text(json.dumps(layout_to_json(layout), indent=2) + "\n")
     return report
