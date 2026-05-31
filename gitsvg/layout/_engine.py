@@ -56,22 +56,30 @@ from gitsvg.layout._layout import (
     LayoutGrid,
     LayoutPullRequest,
 )
+from gitsvg.layout._layout_settings import LayoutSettings
 from gitsvg.layout._occupancy import Occupancy
 from gitsvg.state import State
 
 
-def compute_layout(state: State) -> Layout:
+def compute_layout(state: State, layout_settings: LayoutSettings | None = None) -> Layout:
     """Compute a render-ready `Layout` from a fully-built `State`.
 
     Args:
         state: The state engine's output. Must be a clean validation
             (any errors would have been caught before this point); the
             layout engine does not re-validate.
+        layout_settings: The layout stage's slice of the resolved theme,
+            produced by `Theme.split()`. Defaults to `LayoutSettings()`
+            (every layout-policy field at its default) when omitted, so
+            callers without a resolved theme — and tests — can compute a
+            layout from `state` alone.
 
     Returns:
         A `Layout` with positions, pre-computed arcs, and the grid
         extent.
     """
+    if layout_settings is None:
+        layout_settings = LayoutSettings()
     # --- Phase 1: commit positions --------------
     chain_parent: dict[str, str | None] = _compute_chain_parents(state)
     commit_pos_by_id: dict[str, int] = {}

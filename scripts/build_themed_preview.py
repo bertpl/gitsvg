@@ -77,8 +77,8 @@ def _render_through_theme(state, source_theme: Theme, theme_name: str) -> draw.D
     theme = NAMED_THEMES[theme_name].build({})
     theme.branch_color_overrides = dict(source_theme.branch_color_overrides)
     theme.branch_label_side_overrides = dict(source_theme.branch_label_side_overrides)
-    _, renderer_settings = theme.split()
-    layout = compute_layout(state)
+    layout_settings, renderer_settings = theme.split()
+    layout = compute_layout(state, layout_settings)
     return render(layout, renderer_settings)
 
 

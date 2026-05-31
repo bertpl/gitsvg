@@ -94,8 +94,8 @@ def _render_one(input_path: Path, output_path: Path, minify_level: int) -> Valid
     if not report.is_clean():
         return report
 
-    layout = compute_layout(state)
-    _, renderer_settings = theme.split()
+    layout_settings, renderer_settings = theme.split()
+    layout = compute_layout(state, layout_settings)
     drawing = render(layout, renderer_settings)
     config = compute_minify_config(minify_level)
     if config.level == 0:
