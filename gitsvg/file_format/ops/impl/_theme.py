@@ -13,6 +13,7 @@ from gitsvg.file_format.ops.framework._types import (
 )
 from gitsvg.theme._box_anchor import BoxAnchor, validate_box_anchor
 from gitsvg.theme._branch_line_style import BranchLineStyle
+from gitsvg.theme._commit_row_mode import CommitRowMode
 from gitsvg.theme._merge_commit_style import MergeCommitStyle
 from gitsvg.theme._orientation import Orientation, normalize_orientation
 
@@ -72,6 +73,12 @@ class ThemeOp(OpBase):
             "CSS-style `ltr` (≡ `lr`) and `rtl` (≡ `rl`), the four explicit `<dir>_to_<dir>` "
             "long forms (e.g. `bottom_to_top`), and the vernacular `top_down` / `bottom_up`."
         ),
+    )
+
+    # --- Layout policy ----------------------------------
+    commit_row_mode: CommitRowMode | None = Field(
+        default=None,
+        description="How commits pack along the commit axis: `shared` (default; commits on different branches may share a row, keeping the diagram compact) or `unique` (every commit gets its own row, assigned in authoring order, so vertical position strictly encodes the order events were declared).",
     )
 
     # --- Spacing (px) -----------------------------------

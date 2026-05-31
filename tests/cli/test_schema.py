@@ -197,3 +197,5 @@ def test_schema_theme_without_name_still_emits_op_schema() -> None:
     # `keep_prior_overrides` is a `theme` op field — sanity check we're
     # looking at the op schema and not the resolved-theme JSON.
     assert "keep_prior_overrides" in payload["properties"]
+    # The layout-policy field surfaces on the op schema with its description.
+    assert "commit_row_mode" in payload["properties"]

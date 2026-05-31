@@ -42,9 +42,10 @@ def test_example_layout_matches_snapshot(path: Path) -> None:
     )
 
     # --- act --------------------------
-    state, report, _theme = run_validate_pipeline(path)
+    state, report, theme = run_validate_pipeline(path)
     assert report.is_clean(), f"{path.name}: unexpected validation errors"
-    produced = json.dumps(layout_to_json(compute_layout(state)), indent=2) + "\n"
+    layout_settings, _ = theme.split()
+    produced = json.dumps(layout_to_json(compute_layout(state, layout_settings)), indent=2) + "\n"
 
     # --- assert -----------------------
     expected = snapshot_path.read_text()

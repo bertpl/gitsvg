@@ -22,6 +22,7 @@ from typing import Any, Self
 
 from gitsvg.theme._box_anchor import BoxAnchor
 from gitsvg.theme._branch_line_style import BranchLineStyle
+from gitsvg.theme._commit_row_mode import CommitRowMode
 from gitsvg.theme._merge_commit_style import MergeCommitStyle
 from gitsvg.theme._orientation import Orientation
 from gitsvg.theme._theme import Theme
@@ -42,6 +43,14 @@ class DefaultTheme(Theme):
     def _resolve_orientation(cls) -> Orientation:
         """Default orientation — bottom-to-top."""
         return Orientation.BT
+
+    # --------------------------------------------------------------------------
+    #  Layout policy
+    # --------------------------------------------------------------------------
+    @classmethod
+    def _resolve_commit_row_mode(cls) -> CommitRowMode:
+        """Commit-row packing — `shared` (commits on different branches may share a row)."""
+        return CommitRowMode.SHARED
 
     # --------------------------------------------------------------------------
     #  Spacings
@@ -476,6 +485,7 @@ class DefaultTheme(Theme):
 
         return cls(
             orientation=orientation,
+            commit_row_mode=pick("commit_row_mode", cls._resolve_commit_row_mode),
             branch_spacing=branch_spacing,
             commit_spacing=commit_spacing,
             margin_left=pick("margin_left", cls._resolve_margin_left, orientation, branch_spacing, commit_spacing),

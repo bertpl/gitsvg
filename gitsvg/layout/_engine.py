@@ -59,6 +59,7 @@ from gitsvg.layout._layout import (
 from gitsvg.layout._layout_settings import LayoutSettings
 from gitsvg.layout._occupancy import Occupancy
 from gitsvg.state import State
+from gitsvg.theme._commit_row_mode import CommitRowMode
 
 
 def compute_layout(state: State, layout_settings: LayoutSettings | None = None) -> Layout:
@@ -86,9 +87,19 @@ def compute_layout(state: State, layout_settings: LayoutSettings | None = None) 
     branch_starts: dict[str, int] = {}
     branch_ends: dict[str, int] = {}
 
+    # In `unique` mode every commit claims its own row, assigned in
+    # declaration order: `next_row` tracks the lowest unclaimed row, so a
+    # commit lands at `max(its shared row, next_row + gap)` — still below
+    # its parents, but never sharing a row with another branch's commit.
+    unique_rows = layout_settings.commit_row_mode is CommitRowMode.UNIQUE
+    next_row = 0
+
     for cid, cstate in state.commits.items():
         _ensure_branch_start(cstate.branch, state, commit_pos_by_id, branch_starts, branch_ends)
         commit_pos = _compute_commit_pos(cid, cstate, chain_parent, commit_pos_by_id, branch_starts)
+        if unique_rows:
+            commit_pos = max(commit_pos, next_row + cstate.gap)
+            next_row = commit_pos + 1
         commit_pos_by_id[cid] = commit_pos
         branch_ends[cstate.branch] = max(branch_ends[cstate.branch], commit_pos)
 

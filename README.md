@@ -187,6 +187,27 @@ A `theme.orientation` of `lr` flips the diagram left-to-right: the commit axis g
 {"op": "theme", "orientation": "lr"}
 ```
 
+### Example 11: Unique commit rows
+
+By default (`commit_row_mode: shared`) commits on different branches may share a row, which keeps diagrams compact. Setting `theme.commit_row_mode` to `unique` gives every commit its own row, assigned in authoring order — so reading along the commit axis recovers the exact order events were declared, even when work on several branches interleaves. Useful for storytelling diagrams where the sequence of events is the point.
+
+![Unique commit rows](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/11_unique_rows.svg)
+
+```jsonl
+{"op": "branch", "name": "main", "label_side": "before"}
+{"op": "commit", "branch": "main", "id": "m1", "msg": "project start", "hash": "auto"}
+{"op": "branch", "name": "auth", "from_branch": "main"}
+{"op": "commit", "branch": "auth", "id": "a1", "msg": "login form", "hash": "auto"}
+{"op": "branch", "name": "ui", "from_branch": "main"}
+{"op": "commit", "branch": "ui", "id": "u1", "msg": "navbar", "hash": "auto"}
+{"op": "commit", "branch": "auth", "id": "a2", "msg": "oauth", "hash": "auto"}
+{"op": "commit", "branch": "ui", "id": "u2", "msg": "dark mode", "hash": "auto"}
+{"op": "merge", "from": "auth", "into": "main", "as": "m2", "msg": "merge auth", "hash": "auto"}
+{"op": "commit", "branch": "ui", "id": "u3", "msg": "polish", "hash": "auto"}
+{"op": "merge", "from": "ui", "into": "main", "as": "m3", "msg": "merge ui", "hash": "auto"}
+{"op": "theme", "commit_row_mode": "unique"}
+```
+
 ## Named themes
 
 Beyond `default`, gitsvg ships three built-in themes:

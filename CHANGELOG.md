@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- New `theme.commit_row_mode` — `shared` (default) or `unique` — `unique` gives every commit its own commit-axis row, assigned in authoring order, so vertical position encodes the order events were declared; default output unchanged.
+
 ### Changed
 
 ### Deprecated
