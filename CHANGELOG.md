@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## 0.2.5 (2026-05-31)
 
 ### Added
 
@@ -18,15 +18,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `gitsvg layout` JSON now carries a per-branch `segments` array (the lane / start / end breakdown of each branch's life) — one entry for a static branch, several when it migrates under `auto_lane_change`.
 - **Breaking:** `theme.branch_line_style: "bezier"` is redefined as a single flowing curve that runs along a branch's own lane and sweeps diagonally across to the connecting commit; the prior cubic-Bézier S is now the separate value `"double_bezier"`. Migration: rename `"bezier"` → `"double_bezier"` to keep the S.
 - Refreshed the `default`, `dark`, and `compact` named themes.
-
-### Deprecated
-
-### Removed
-
-### Fixed
-
-### Security
-
 ## 0.2.4 (2026-05-31)
 
 ### Added
