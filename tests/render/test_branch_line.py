@@ -41,8 +41,6 @@ def test_empty_branch_emits_no_line() -> None:
         id="b1",
         name="lonely",
         segments=[LaneSegment(lane=1, start=2, end=2)],
-        start=2,
-        end=2,
     )
 
     # --- act --------------------------
@@ -63,8 +61,6 @@ def test_non_empty_branch_emits_a_line() -> None:
         id="b1",
         name="b",
         segments=[LaneSegment(lane=1, start=0, end=2)],
-        start=0,
-        end=2,
     )
 
     # --- act --------------------------

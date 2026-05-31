@@ -635,8 +635,9 @@ def test_each_branch_emits_one_segment_spanning_its_life() -> None:
     layout = _layout_from(text)
 
     # --- assert -----------------------
-    for branch in layout.branches:
-        assert branch.segments == [LaneSegment(lane=branch.lane_at(branch.start), start=branch.start, end=branch.end)]
+    by_name = {b.name: b for b in layout.branches}
+    assert by_name["main"].segments == [LaneSegment(lane=0, start=0, end=0)]
+    assert by_name["feat"].segments == [LaneSegment(lane=1, start=1, end=1)]
 
 
 def test_lane_at_clamps_below_and_above_segments() -> None:
@@ -646,8 +647,6 @@ def test_lane_at_clamps_below_and_above_segments() -> None:
         id="b",
         name="b",
         segments=[LaneSegment(lane=2, start=1, end=3), LaneSegment(lane=1, start=4, end=6)],
-        start=1,
-        end=6,
     )
 
     # --- act / assert -----------------

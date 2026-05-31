@@ -52,7 +52,7 @@ def _branch_to_json(branch: LayoutBranch) -> dict[str, Any]:
     return {
         "id": branch.id,
         "name": branch.name,
-        "branch_pos": branch.lane_at(branch.start),
+        "branch_pos": branch.start_lane,
         "start": branch.start,
         "end": branch.end,
     }
@@ -72,11 +72,17 @@ def _arc_to_json(arc: LayoutArc) -> dict[str, Any]:
     Returns:
         A dict with `kind`, `from_branch_pos`, `from_commit_pos`,
         `to_branch_pos`, `to_commit_pos`.
+
+    Raises:
+        ValueError: If `arc.kind` is a kind this serialiser does not yet
+            map to a `from` / `to` orientation.
     """
     if arc.kind is LayoutArcKind.BRANCH_OFF:
         from_point, to_point = arc.trunk_point, arc.branch_point
-    else:
+    elif arc.kind is LayoutArcKind.MERGE:
         from_point, to_point = arc.branch_point, arc.trunk_point
+    else:
+        raise ValueError(f"_arc_to_json does not handle arc kind {arc.kind!r}")
     return {
         "kind": str(arc.kind),
         "from_branch_pos": from_point.branch_pos,

@@ -85,27 +85,39 @@ class LaneSegment:
 class LayoutBranch:
     """One branch as the renderer should draw it.
 
+    The branch's commit-axis span (`start` / `end`) and its starting lane
+    (`start_lane`) are derived from `segments`, which is the single source
+    of truth for where the branch sits on the grid.
+
     Attributes:
         id: Stable opaque branch id matching `BranchState.id`. The
             renderer uses this to look up per-branch presentational
             overrides (colour, label-side) on the resolved theme.
         name: Branch name (used to draw the name pill).
         segments: The lanes this branch occupies over its life, ordered
-            along the commit axis and jointly covering `[start, end]`. A
+            along the commit axis and jointly covering its span. A
             static-lane branch has exactly one segment; a migrating
             branch has one per lane stretch.
-        start: Commit-axis position where the branch begins (the
-            branch-off point — for non-root branches this is one slot
-            above the parent commit's `commit_pos`).
-        end: Commit-axis position of the latest commit on this branch,
-            or `start` when the branch has no commits yet.
     """
 
     id: str
     name: str
-    segments: list["LaneSegment"]
-    start: int  # axis-bound: commit-axis (slot index)
-    end: int  # axis-bound: commit-axis (slot index)
+    segments: list[LaneSegment]
+
+    @property
+    def start(self) -> int:
+        """Commit-axis position where the branch begins (its first segment's start)."""
+        return self.segments[0].start
+
+    @property
+    def end(self) -> int:
+        """Commit-axis position of the branch's newest end (its last segment's end)."""
+        return self.segments[-1].end
+
+    @property
+    def start_lane(self) -> int:
+        """Lane the branch occupies at its start row (its first segment's lane)."""
+        return self.segments[0].lane
 
     def lane_at(self, row: int) -> int:
         """Return the lane this branch occupies at commit-axis `row`.

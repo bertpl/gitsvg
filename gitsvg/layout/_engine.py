@@ -132,8 +132,6 @@ def compute_layout(state: State, layout_settings: LayoutSettings | None = None) 
             id=state.branches[name].id,
             name=name,
             segments=[LaneSegment(lane=branch_pos_by_name[name], start=branch_starts[name], end=branch_ends[name])],
-            start=branch_starts[name],
-            end=branch_ends[name],
         )
         for name in state.branch_order
     ]
@@ -419,7 +417,7 @@ def _branch_off_arcs(
             LayoutArc(
                 kind=LayoutArcKind.BRANCH_OFF,
                 trunk_point=GridSlot(parent_layout.branch_pos, parent_layout.commit_pos),
-                branch_point=GridSlot(branch_layout.lane_at(branch_layout.start), branch_layout.start),
+                branch_point=GridSlot(branch_layout.start_lane, branch_layout.start),
             )
         )
     return arcs

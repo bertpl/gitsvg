@@ -201,7 +201,7 @@ def _auto_fit_branch_axis_edge(layout: Layout, theme: RendererSettings, *, edge:
 
     needed: float = 0.0
     for branch in branches:
-        if branch.lane_at(branch.start) == target_lane:
+        if branch.start_lane == target_lane:
             extent = (pill_width(branch.name, theme) / 2) if is_vertical else (pill_height / 2)
             needed = max(needed, extent + _AUTO_FIT_EDGE_PAD_PX)
     for commit in commit_layouts.values():
