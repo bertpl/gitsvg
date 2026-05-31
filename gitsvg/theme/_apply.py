@@ -155,6 +155,7 @@ def apply_theme_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, report
         value = getattr(op, name)
         if name == "orientation" and value is None:
             builder.user_set.pop("orientation", None)
+            builder.user_set_lines.pop("orientation", None)
             continue
         constraint = _FIELD_CONSTRAINTS.get(name)
         if constraint is not None:
@@ -171,3 +172,4 @@ def apply_theme_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, report
                 )
                 continue
         builder.user_set[name] = copy.deepcopy(value)
+        builder.user_set_lines[name] = (file, line)

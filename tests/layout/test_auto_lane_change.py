@@ -5,6 +5,8 @@ the off path is the byte-identical single-segment behavior covered by
 `test_engine.py` and the example snapshots.
 """
 
+import pytest
+
 from gitsvg.layout import LayoutArcKind, compute_layout
 from gitsvg.layout._layout_settings import LayoutSettings
 from gitsvg.parse import parse_jsonl_text
@@ -28,12 +30,17 @@ _MIGRATION_TEXT = (
 )
 
 
-def _layout(text: str, *, auto_lane_change: bool):
-    """Parse → state → layout with the given `auto_lane_change` setting."""
+def _state(text: str):
+    """Parse → apply into a clean `State` (for tests passing custom `LayoutSettings`)."""
     parsed, report = parse_jsonl_text(text, file="x.jsonl")
     state, _theme = apply_ops(parsed, report)
     assert report.is_clean()
-    return compute_layout(state, LayoutSettings(auto_lane_change=auto_lane_change))
+    return state
+
+
+def _layout(text: str, *, auto_lane_change: bool):
+    """Parse → state → layout with the given `auto_lane_change` setting."""
+    return compute_layout(_state(text), LayoutSettings(auto_lane_change=auto_lane_change))
 
 
 def _segments(layout, name: str) -> list[tuple[int, int, int]]:
@@ -297,3 +304,56 @@ def test_composes_with_unique_commit_rows() -> None:
     # --- assert -----------------------
     # C still migrates (more than one segment) with unique rows in force.
     assert len(next(b for b in layout.branches if b.name == "C").segments) > 1
+
+
+# ==================================================================================================
+#  merge_lane_clearance — how far a merged source holds its lane
+# ==================================================================================================
+# `A` merges into `main`; `C` (longer-lived) migrates into the lane `A`
+# frees. `C` reclaims that lane at `merge_row + clearance`. Gaps keep `C`
+# alive well past the widest clearance under test and keep `main` on lane 0.
+_CLEARANCE_TEXT = (
+    '{"op": "branch", "name": "main"}\n'
+    '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
+    '{"op": "branch", "name": "A", "from_branch": "main"}\n'
+    '{"op": "commit", "branch": "A", "id": "a1", "msg": "x"}\n'
+    '{"op": "branch", "name": "C", "from_branch": "main"}\n'
+    '{"op": "commit", "branch": "C", "id": "c1", "msg": "x"}\n'
+    '{"op": "merge", "from": "A", "into": "main", "as": "mA", "msg": "x"}\n'
+    '{"op": "commit", "branch": "C", "id": "c2", "msg": "x", "gap": 1}\n'
+    '{"op": "commit", "branch": "C", "id": "c3", "msg": "x"}\n'
+    '{"op": "commit", "branch": "C", "id": "c4", "msg": "x"}\n'
+    '{"op": "commit", "branch": "main", "id": "m2", "msg": "x", "gap": 5}\n'
+)
+
+
+@pytest.mark.parametrize("clearance", [0, 1, 2])
+def test_sibling_reclaims_freed_lane_at_merge_row_plus_clearance(clearance: int) -> None:
+    """`C` reclaims `A`'s lane exactly `clearance` rows past the merge."""
+    # --- act --------------------------
+    layout = compute_layout(
+        _state(_CLEARANCE_TEXT),
+        LayoutSettings(auto_lane_change=True, merge_lane_clearance=clearance),
+    )
+
+    # --- assert -----------------------
+    merge_row = layout.commits["mA"].commit_pos
+    a_lane = next(b for b in layout.branches if b.name == "A").start_lane
+    c = next(b for b in layout.branches if b.name == "C")
+    reclaimed = [s for s in c.segments if s.lane == a_lane]
+    assert len(reclaimed) == 1
+    assert reclaimed[0].start == merge_row + clearance
+    _assert_no_two_lines_share_a_cell(layout)
+
+
+def test_default_clearance_matches_explicit_one() -> None:
+    """Omitting `merge_lane_clearance` is identical to setting it to `1`."""
+    # --- arrange ----------------------
+    state = _state(_CLEARANCE_TEXT)
+
+    # --- act --------------------------
+    default = compute_layout(state, LayoutSettings(auto_lane_change=True))
+    explicit_one = compute_layout(state, LayoutSettings(auto_lane_change=True, merge_lane_clearance=1))
+
+    # --- assert -----------------------
+    assert _segments(default, "C") == _segments(explicit_one, "C")

@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - New `theme.auto_lane_change` (default off) — branches migrate toward lower lane indices as lower lanes free up, so live branches always occupy the lowest lanes; conflicts with a `branch.branch_pos` pin (new error `E221`).
+- New `theme.merge_lane_clearance` (default `1`) — under `auto_lane_change`, the row margin kept between a merged or pull-requested branch and a neighboring branch migrating into the lane it vacates; setting it with `auto_lane_change` off is rejected (new error `E222`).
 
 ### Changed
 

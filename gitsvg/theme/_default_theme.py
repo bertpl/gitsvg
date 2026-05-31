@@ -57,6 +57,11 @@ class DefaultTheme(Theme):
         """Branch-lane migration — off (each branch keeps its lane for its whole life)."""
         return False
 
+    @classmethod
+    def _resolve_merge_lane_clearance(cls) -> int:
+        """Rows a merged / PR'd source holds its lane past its line — one (reserve through the merge row)."""
+        return 1
+
     # --------------------------------------------------------------------------
     #  Spacings
     # --------------------------------------------------------------------------
@@ -492,6 +497,7 @@ class DefaultTheme(Theme):
             orientation=orientation,
             commit_row_mode=pick("commit_row_mode", cls._resolve_commit_row_mode),
             auto_lane_change=pick("auto_lane_change", cls._resolve_auto_lane_change),
+            merge_lane_clearance=pick("merge_lane_clearance", cls._resolve_merge_lane_clearance),
             branch_spacing=branch_spacing,
             commit_spacing=commit_spacing,
             margin_left=pick("margin_left", cls._resolve_margin_left, orientation, branch_spacing, commit_spacing),

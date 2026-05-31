@@ -10,6 +10,7 @@ from gitsvg.file_format.ops.framework._types import (
     IdStr,
     NonEmptyStr,
     NonNegativeFloat,
+    NonNegativeInt,
 )
 from gitsvg.theme._box_anchor import BoxAnchor, validate_box_anchor
 from gitsvg.theme._branch_line_style import BranchLineStyle
@@ -83,6 +84,10 @@ class ThemeOp(OpBase):
     auto_lane_change: bool | None = Field(
         default=None,
         description="When `true`, a branch migrates toward lower lane indices as lower lanes free up (a lower-lane branch ends), so live branches always occupy the lowest lanes; when `false` (default) a branch keeps its assigned lane for its whole life. Mutually exclusive with any `branch:` op that sets `branch_pos` (E221).",
+    )
+    merge_lane_clearance: NonNegativeInt | None = Field(
+        default=None,
+        description="Rows a merged or pull-requested source branch keeps its lane reserved past the end of its drawn line. `1` (default) reserves through the merge row, so a migrating sibling reclaims the freed lane one row after the merge; `0` lets a sibling land on the merge row itself; `2`+ leaves more breathing room. Only has effect under `auto_lane_change` — setting it while that flag is off is rejected (E222).",
     )
 
     # --- Spacing (px) -----------------------------------

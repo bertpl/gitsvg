@@ -63,6 +63,7 @@ class Theme(BaseModel):
     # --------------------------------------------------------------------------
     commit_row_mode: CommitRowMode | None = None  # axis-bound: commit-axis (row packing)
     auto_lane_change: bool | None = None  # axis-bound: branch-axis (mid-life lane migration)
+    merge_lane_clearance: int | None = None  # axis-bound: commit-axis (rows a merged source holds its lane)
 
     # --------------------------------------------------------------------------
     #  Spacing (px)
@@ -195,6 +196,14 @@ class Theme(BaseModel):
             raise ValueError("must be > 0")
         return v
 
+    @field_validator("merge_lane_clearance")
+    @classmethod
+    def _merge_lane_clearance_non_negative(cls, v: int | None) -> int | None:
+        """Reject negative clearance — a lane can't be reserved for fewer than zero rows."""
+        if v is not None and v < 0:
+            raise ValueError("must be >= 0")
+        return v
+
     @field_validator("branch_label_bg_opacity")
     @classmethod
     def _opacity_in_unit_range(cls, v: float | None) -> float | None:
@@ -254,9 +263,10 @@ class Theme(BaseModel):
         narrow.
 
         `LayoutSettings` carries the layout-policy fields
-        (`commit_row_mode`, `auto_lane_change`); `RendererSettings`
-        structurally mirrors `Theme` and carries every field — the
-        layout-policy ones ride along unused on the renderer slice.
+        (`commit_row_mode`, `auto_lane_change`, `merge_lane_clearance`);
+        `RendererSettings` structurally mirrors `Theme` and carries every
+        field — the layout-policy ones ride along unused on the renderer
+        slice.
 
         Returns:
             A `(layout_settings, renderer_settings)` pair carrying the
@@ -269,7 +279,11 @@ class Theme(BaseModel):
         from gitsvg.render._renderer_settings import RendererSettings
 
         return (
-            LayoutSettings(commit_row_mode=self.commit_row_mode, auto_lane_change=self.auto_lane_change),
+            LayoutSettings(
+                commit_row_mode=self.commit_row_mode,
+                auto_lane_change=self.auto_lane_change,
+                merge_lane_clearance=self.merge_lane_clearance,
+            ),
             RendererSettings(**self.model_dump()),
         )
 
