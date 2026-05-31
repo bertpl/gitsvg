@@ -208,6 +208,31 @@ By default (`commit_row_mode: shared`) commits on different branches may share a
 {"op": "theme", "commit_row_mode": "unique"}
 ```
 
+### Example 12: Auto lane change
+
+By default a branch keeps its lane for its whole life, so once an inner branch merges its lane sits empty while outer branches stay stranded. Setting `theme.auto_lane_change` to `true` compacts the graph the way real git tools do: as each lower lane frees up, the surviving branches migrate inward, so the live branches always occupy the lowest lanes. The shift is drawn as a short connector in the branch line's own style — here `feat-b` slides into the lane `feat-a` vacates, and `feat-c` follows into `feat-b`'s.
+
+![Auto lane change](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/12_auto_lane_change.svg)
+
+```jsonl
+{"op": "branch", "name": "main", "label_side": "before"}
+{"op": "commit", "branch": "main", "id": "m1", "msg": "project start", "hash": "auto"}
+{"op": "branch", "name": "feat-a", "from_branch": "main"}
+{"op": "commit", "branch": "feat-a", "id": "a1", "msg": "feature a", "hash": "auto"}
+{"op": "branch", "name": "feat-b", "from_branch": "main"}
+{"op": "commit", "branch": "feat-b", "id": "b1", "msg": "feature b", "hash": "auto"}
+{"op": "branch", "name": "feat-c", "from_branch": "main"}
+{"op": "commit", "branch": "feat-c", "id": "c1", "msg": "feature c", "hash": "auto"}
+{"op": "merge", "from": "feat-a", "into": "main", "as": "ma", "msg": "merge a", "hash": "auto"}
+{"op": "commit", "branch": "feat-b", "id": "b2", "msg": "more b", "hash": "auto", "gap": 1}
+{"op": "commit", "branch": "feat-c", "id": "c2", "msg": "more c", "hash": "auto"}
+{"op": "merge", "from": "feat-b", "into": "main", "as": "mb", "msg": "merge b", "hash": "auto"}
+{"op": "commit", "branch": "feat-c", "id": "c3", "msg": "polish c", "hash": "auto", "gap": 1}
+{"op": "merge", "from": "feat-c", "into": "main", "as": "mc", "msg": "merge c", "hash": "auto"}
+{"op": "commit", "branch": "main", "id": "m2", "msg": "release", "hash": "auto"}
+{"op": "theme", "auto_lane_change": true}
+```
+
 ## Named themes
 
 Beyond `default`, gitsvg ships three built-in themes:

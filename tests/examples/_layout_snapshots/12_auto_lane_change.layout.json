@@ -1,0 +1,245 @@
+{
+  "grid": {
+    "n_commits": 7,
+    "n_branches": 4
+  },
+  "branches": [
+    {
+      "id": "b0",
+      "name": "main",
+      "branch_pos": 0,
+      "segments": [
+        {
+          "lane": 0,
+          "start": 0,
+          "end": 6
+        }
+      ],
+      "start": 0,
+      "end": 6
+    },
+    {
+      "id": "b1",
+      "name": "feat-a",
+      "branch_pos": 1,
+      "segments": [
+        {
+          "lane": 1,
+          "start": 1,
+          "end": 1
+        }
+      ],
+      "start": 1,
+      "end": 1
+    },
+    {
+      "id": "b2",
+      "name": "feat-b",
+      "branch_pos": 2,
+      "segments": [
+        {
+          "lane": 2,
+          "start": 1,
+          "end": 2
+        },
+        {
+          "lane": 1,
+          "start": 3,
+          "end": 3
+        }
+      ],
+      "start": 1,
+      "end": 3
+    },
+    {
+      "id": "b3",
+      "name": "feat-c",
+      "branch_pos": 3,
+      "segments": [
+        {
+          "lane": 3,
+          "start": 1,
+          "end": 2
+        },
+        {
+          "lane": 2,
+          "start": 3,
+          "end": 4
+        }
+      ],
+      "start": 1,
+      "end": 4
+    }
+  ],
+  "commits": [
+    {
+      "id": "m1",
+      "branch_id": "b0",
+      "branch_pos": 0,
+      "commit_pos": 0,
+      "msg": "project start",
+      "hash": "7b14e2d",
+      "highlight": false,
+      "is_merge": false
+    },
+    {
+      "id": "a1",
+      "branch_id": "b1",
+      "branch_pos": 1,
+      "commit_pos": 1,
+      "msg": "feature a",
+      "hash": "1798b1d",
+      "highlight": false,
+      "is_merge": false
+    },
+    {
+      "id": "b1",
+      "branch_id": "b2",
+      "branch_pos": 2,
+      "commit_pos": 1,
+      "msg": "feature b",
+      "hash": "d771b44",
+      "highlight": false,
+      "is_merge": false
+    },
+    {
+      "id": "c1",
+      "branch_id": "b3",
+      "branch_pos": 3,
+      "commit_pos": 1,
+      "msg": "feature c",
+      "hash": "4a362a0",
+      "highlight": false,
+      "is_merge": false
+    },
+    {
+      "id": "ma",
+      "branch_id": "b0",
+      "branch_pos": 0,
+      "commit_pos": 2,
+      "msg": "merge a",
+      "hash": "199f97c",
+      "highlight": false,
+      "is_merge": true
+    },
+    {
+      "id": "b2",
+      "branch_id": "b2",
+      "branch_pos": 1,
+      "commit_pos": 3,
+      "msg": "more b",
+      "hash": "12f60f6",
+      "highlight": false,
+      "is_merge": false
+    },
+    {
+      "id": "c2",
+      "branch_id": "b3",
+      "branch_pos": 3,
+      "commit_pos": 2,
+      "msg": "more c",
+      "hash": "b1e760e",
+      "highlight": false,
+      "is_merge": false
+    },
+    {
+      "id": "mb",
+      "branch_id": "b0",
+      "branch_pos": 0,
+      "commit_pos": 4,
+      "msg": "merge b",
+      "hash": "e4f45b5",
+      "highlight": false,
+      "is_merge": true
+    },
+    {
+      "id": "c3",
+      "branch_id": "b3",
+      "branch_pos": 2,
+      "commit_pos": 4,
+      "msg": "polish c",
+      "hash": "62a6989",
+      "highlight": false,
+      "is_merge": false
+    },
+    {
+      "id": "mc",
+      "branch_id": "b0",
+      "branch_pos": 0,
+      "commit_pos": 5,
+      "msg": "merge c",
+      "hash": "0ea7150",
+      "highlight": false,
+      "is_merge": true
+    },
+    {
+      "id": "m2",
+      "branch_id": "b0",
+      "branch_pos": 0,
+      "commit_pos": 6,
+      "msg": "release",
+      "hash": "3e9678b",
+      "highlight": false,
+      "is_merge": false
+    }
+  ],
+  "arcs": [
+    {
+      "kind": "branch_off",
+      "from_branch_pos": 0,
+      "from_commit_pos": 0,
+      "to_branch_pos": 1,
+      "to_commit_pos": 1
+    },
+    {
+      "kind": "branch_off",
+      "from_branch_pos": 0,
+      "from_commit_pos": 0,
+      "to_branch_pos": 2,
+      "to_commit_pos": 1
+    },
+    {
+      "kind": "branch_off",
+      "from_branch_pos": 0,
+      "from_commit_pos": 0,
+      "to_branch_pos": 3,
+      "to_commit_pos": 1
+    },
+    {
+      "kind": "merge",
+      "from_branch_pos": 1,
+      "from_commit_pos": 1,
+      "to_branch_pos": 0,
+      "to_commit_pos": 2
+    },
+    {
+      "kind": "merge",
+      "from_branch_pos": 1,
+      "from_commit_pos": 3,
+      "to_branch_pos": 0,
+      "to_commit_pos": 4
+    },
+    {
+      "kind": "merge",
+      "from_branch_pos": 2,
+      "from_commit_pos": 4,
+      "to_branch_pos": 0,
+      "to_commit_pos": 5
+    },
+    {
+      "kind": "lane_change",
+      "from_branch_pos": 2,
+      "from_commit_pos": 2,
+      "to_branch_pos": 1,
+      "to_commit_pos": 3
+    },
+    {
+      "kind": "lane_change",
+      "from_branch_pos": 3,
+      "from_commit_pos": 2,
+      "to_branch_pos": 2,
+      "to_commit_pos": 3
+    }
+  ],
+  "pull_requests": []
+}
