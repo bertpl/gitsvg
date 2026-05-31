@@ -12,8 +12,14 @@ dependence on lane assignment. Phase 2 walks branches in declaration
 order and picks each branch's lane: an explicit `branch_pos:` override
 takes precedence; otherwise the lane-reuse heuristic walks `K+1, K+2,
 …` and picks the first lane free of commits at positions `≥ L+1`,
-where `(K, L)` is the parent commit's position. Phase 3 builds the
-`Layout` dataclasses with both axes filled in.
+where `(K, L)` is the parent commit's position. Each branch becomes a
+single lane segment spanning its whole life. Under
+`auto_lane_change` Phase 2 instead runs an event-sweep
+(`_assign_lane_segments`) that packs the live branches into the lowest
+lanes at every row, so a branch migrates downward as lower lanes free up
+— yielding multiple lane segments per branch and a lane-change connector
+at each transition. Phase 3 builds the `Layout` dataclasses with both
+axes filled in.
 
 Heuristic notes:
 
@@ -35,17 +41,22 @@ Heuristic notes:
   (the first commit on a branch), the formula reduces to
   `start + gap`. Merge commits and squash commits fall out as special
   cases of this rule with no extra logic.
-- **Branch line span**: from `start` to `max(commit_pos for commit in
-  branch.commits)`, or just `start` for empty branches.
-- **Branch-off arcs**: one per non-root branch, with the parent commit
-  as the trunk point and the branch's start as the branch point.
-- **Merge arcs**: one per cross-lane parent on any commit with
-  `len(parents) >= 2`, with the merge commit as the trunk point and the
-  merged-in tip as the branch point.
+- **Branch line span**: from `start` to the branch's `line_end` — its
+  last commit, extended to one row below any merge / pull request it
+  feeds (see `_line_ends`). Empty branches span just `start`.
+- **Connectors are single-row hops.** Every connector spans one commit
+  row; the branch *line* carries all the long-distance vertical travel.
+  - **Branch-off arcs**: one per non-root branch — parent commit (trunk)
+    → the branch's start one row later (branch point).
+  - **Merge arcs**: one per merged-in parent on a commit with
+    `len(parents) >= 2` — the merge commit (trunk) → the source branch's
+    line at `merge_row - 1` (branch point).
 - **Grid extent**: `n_commits` / `n_branches` honour pinned values on
   `state.grid` when set; otherwise auto-fit from the visible content
   (including any open pull-request's projected merge row).
 """
+
+from collections.abc import Iterator
 
 from gitsvg.layout._layout import (
     GridSlot,
@@ -108,16 +119,39 @@ def compute_layout(state: State, layout_settings: LayoutSettings | None = None) 
     for name in state.branch_order:
         _ensure_branch_start(name, state, commit_pos_by_id, branch_starts, branch_ends)
 
-    # --- Phase 2: branch lanes ------------------
-    occupancy = Occupancy()
-    branch_pos_by_name: dict[str, int] = _assign_branch_lanes(state, commit_pos_by_id, branch_starts, occupancy)
+    # --- Phase 2: line / occupancy extents & lanes ----------
+    # `line_end` is how far a branch's line is *drawn* — its last commit,
+    # extended to one row below any merge / PR it feeds (those connectors
+    # are single-row hops, so the line carries the vertical travel).
+    # `occ_end` is how far the lane is *reserved*: one row further for a
+    # merged / PR'd source, because the connector climbs the source lane
+    # through the merge row, so a sibling may only reclaim the lane after
+    # it. The gap between the two is always a single row.
+    line_ends, occ_ends = _branch_extents(state, commit_pos_by_id, branch_ends)
+    if layout_settings.auto_lane_change:
+        segments_by_name = _assign_lane_segments(state, branch_starts, line_ends, occ_ends)
+    else:
+        occupancy = Occupancy()
+        branch_pos_by_name = _assign_branch_lanes(state, commit_pos_by_id, branch_starts, occupancy)
+        segments_by_name = {
+            name: [LaneSegment(lane=branch_pos_by_name[name], start=branch_starts[name], end=line_ends[name])]
+            for name in state.branch_order
+        }
 
     # --- Phase 3: build layout dataclasses ------
+    # Branches first, so each commit can resolve its lane from the
+    # segment covering its row (`lane_at`) — the migrating-branch case.
+    branches: list[LayoutBranch] = [
+        LayoutBranch(id=state.branches[name].id, name=name, segments=segments_by_name[name])
+        for name in state.branch_order
+    ]
+    branch_by_name: dict[str, LayoutBranch] = {b.name: b for b in branches}
+
     commit_layouts: dict[str, LayoutCommit] = {
         cid: LayoutCommit(
             id=cid,
             branch_id=state.branches[cstate.branch].id,
-            branch_pos=branch_pos_by_name[cstate.branch],
+            branch_pos=branch_by_name[cstate.branch].lane_at(commit_pos_by_id[cid]),
             commit_pos=commit_pos_by_id[cid],
             msg=cstate.msg,
             hash=cstate.hash,
@@ -127,23 +161,15 @@ def compute_layout(state: State, layout_settings: LayoutSettings | None = None) 
         for cid, cstate in state.commits.items()
     }
 
-    branches: list[LayoutBranch] = [
-        LayoutBranch(
-            id=state.branches[name].id,
-            name=name,
-            segments=[LaneSegment(lane=branch_pos_by_name[name], start=branch_starts[name], end=branch_ends[name])],
-        )
-        for name in state.branch_order
-    ]
-
     # --- Build arc list -------------------------
     arcs: list[LayoutArc] = [
         *_branch_off_arcs(state, branches, commit_layouts),
-        *_merge_arcs(state, commit_layouts),
+        *_merge_arcs(state, branch_by_name, commit_layouts),
+        *_lane_change_arcs(branches),
     ]
 
     # --- Build pull-request list ----------------
-    pull_requests = _build_pull_requests(state, branches)
+    pull_requests = _build_pull_requests(state, branch_by_name, branch_ends)
 
     # --- Compute grid extent --------------------
     grid = _compute_grid(state, branches, commit_layouts, pull_requests)
@@ -229,6 +255,179 @@ def _compute_commit_pos(
 # ==================================================================================================
 #  Helpers — branch lane assignment
 # ==================================================================================================
+def _assign_lane_segments(
+    state: State,
+    branch_starts: dict[str, int],
+    line_ends: dict[str, int],
+    occ_ends: dict[str, int],
+) -> dict[str, list[LaneSegment]]:
+    """Assign each branch a sequence of lane segments under `auto_lane_change`.
+
+    Event-sweep packing. A branch *occupies* a lane over `[start, occ_end]`
+    and migrates toward lane 0 as lower lanes free, in a fixed priority
+    order `(start_row, declaration_index)`. It is a migrating line over
+    `[start, line_end]`, then holds that lane for the single-row
+    `(line_end, occ_end]` tail — the row its merge / PR connector reserves
+    (climbing the source lane through the merge row, so a sibling may only
+    reclaim the lane after it). The occupying set changes only at
+    *boundaries* — a branch's `start`, its `line_end + 1` (stops
+    migrating), or its `occ_end + 1` (frees its lane). Coalescing
+    equal-lane runs over `[start, line_end]` yields the drawn segments;
+    the tail is not drawn (the connector covers it).
+
+    Because the order is fixed and lanes only free, a branch's lane is
+    non-increasing (downward migration only), and the live branches fill a
+    dense block of the lowest lanes. The freeze is always at most one row
+    (`occ_end - line_end <= 1`), since the line carries all the long
+    travel up to the merge — a far cry from the multi-row tails an
+    earlier design had to reason about.
+
+    Args:
+        state: The validated state to lay out.
+        branch_starts: Commit-axis branch starts from Phase 1.
+        line_ends: Row each branch's line is drawn to (from `_branch_extents`).
+        occ_ends: Row each branch reserves its lane through (`>= line_end`,
+            one further when it feeds a merge / PR).
+
+    Returns:
+        Contiguous, ordered `LaneSegment`s per branch name, jointly
+        covering each branch's `[start, line_end]` span.
+    """
+    declaration_index = {name: i for i, name in enumerate(state.branch_order)}
+
+    def priority(name: str) -> tuple[int, int]:
+        """Stack key — earlier-born sits lower; declaration order breaks ties."""
+        return (branch_starts[name], declaration_index[name])
+
+    boundaries = sorted(
+        {branch_starts[name] for name in state.branch_order}
+        | {line_ends[name] + 1 for name in state.branch_order}  # migrating → frozen tail
+        | {occ_ends[name] + 1 for name in state.branch_order}  # frees its lane
+    )
+
+    # Forward sweep low→high so a branch's frozen lane is known before its
+    # (single-row) tail is reached.
+    frozen_lane: dict[str, int] = {}
+    lane_at_boundary: dict[int, dict[str, int]] = {}
+    for row in boundaries:
+        occupants = sorted(
+            (name for name in state.branch_order if branch_starts[name] <= row <= occ_ends[name]),
+            key=priority,
+        )
+        assigned: dict[str, int] = {}
+        next_lane = 0
+        for name in occupants:
+            if row > line_ends[name]:  # connector-reserved tail → hold the line-end lane
+                assigned[name] = frozen_lane[name]
+                next_lane = max(next_lane, frozen_lane[name] + 1)
+            else:  # migrating along its own line → take the next free lane
+                assigned[name] = next_lane
+                next_lane += 1
+        lane_at_boundary[row] = assigned
+        for name, lane in assigned.items():
+            if row <= line_ends[name]:
+                frozen_lane[name] = lane  # remember the lane to hold across the tail
+
+    segments_by_name: dict[str, list[LaneSegment]] = {}
+    for name in state.branch_order:
+        start, end = branch_starts[name], line_ends[name]
+        in_interval = [row for row in boundaries if start <= row <= end]
+        segments: list[LaneSegment] = []
+        for index, row in enumerate(in_interval):
+            seg_end = in_interval[index + 1] - 1 if index + 1 < len(in_interval) else end
+            lane = lane_at_boundary[row][name]
+            if segments and segments[-1].lane == lane:
+                segments[-1].end = seg_end  # coalesce a same-lane run across a boundary
+            else:
+                segments.append(LaneSegment(lane=lane, start=row, end=seg_end))
+        segments_by_name[name] = segments
+    return segments_by_name
+
+
+def _branch_extents(
+    state: State,
+    commit_pos_by_id: dict[str, int],
+    branch_ends: dict[str, int],
+) -> tuple[dict[str, int], dict[str, int]]:
+    """Per-branch line-draw extent and lane-occupancy extent.
+
+    Both start at the branch's last commit and are pushed out by the
+    merge / PR connectors it touches (see `_outgoing_connectors`):
+
+    - **`line_end`** — how far the *line* is drawn. The connector's
+      **source** reaches `landing_row - 1` (then hops across); its
+      **target** reaches `landing_row` (where the connector arrives — a
+      no-op for a real merge, whose commit is already there; for an open
+      PR it extends the target line to the projected merge point).
+    - **`occ_end`** — how far the *lane* is reserved. The **source**
+      reserves through `landing_row` itself, because the connector climbs
+      the source lane through the merge row; a sibling may reclaim the
+      lane only afterwards. So `occ_end` is `line_end` for everyone except
+      a connector source, where it is one row further.
+
+    Args:
+        state: The validated state (commits, parents, open PRs).
+        commit_pos_by_id: Commit-axis positions from Phase 1.
+        branch_ends: Each branch's last-commit row.
+
+    Returns:
+        `(line_ends, occ_ends)`, each keyed by branch name, with
+        `occ_end >= line_end >= branch_ends`.
+    """
+    line_end = dict(branch_ends)
+    occ_end = dict(branch_ends)
+    for source, target, landing_row in _outgoing_connectors(state, commit_pos_by_id, branch_ends):
+        line_end[source] = max(line_end[source], landing_row - 1)
+        line_end[target] = max(line_end[target], landing_row)
+        occ_end[source] = max(occ_end[source], landing_row)
+        occ_end[target] = max(occ_end[target], landing_row)
+    return line_end, occ_end
+
+
+def _outgoing_connectors(
+    state: State,
+    commit_pos_by_id: dict[str, int],
+    branch_ends: dict[str, int],
+) -> Iterator[tuple[str, str, int]]:
+    """Yield `(source_branch, target_branch, landing_row)` per merge / PR.
+
+    Each is a single-row hop from the source branch's line (one row below
+    `landing_row`) onto the target branch at `landing_row`:
+
+    - **Merge** — a merge commit (2+ parents); each merged-in parent's
+      branch is a source, the merge commit's branch the target, landing at
+      the merge commit's row.
+    - **Pull request** — an open PR; `from` is the source, `into` the
+      target, landing at the projected merge row (`max(from.end, into.end)
+      + 1`, the row a real merge would land at).
+
+    Branch-off connectors are already single-row (parent commit → child
+    start one row later) and need no line extension, so they are absent
+    here.
+
+    Args:
+        state: The validated state (commits, parents, open PRs).
+        commit_pos_by_id: Commit-axis positions from Phase 1.
+        branch_ends: Each branch's last-commit row (for the PR projection).
+
+    Yields:
+        `(source_branch, target_branch, landing_row)` triples.
+    """
+    for cid, cstate in state.commits.items():
+        if len(cstate.parents) < 2:
+            continue
+        landing_row = commit_pos_by_id.get(cid)
+        if landing_row is None:
+            continue
+        for parent_id in cstate.parents:
+            parent = state.commits.get(parent_id)
+            if parent is not None and parent.branch != cstate.branch:
+                yield parent.branch, cstate.branch, landing_row
+    for pr in state.pull_requests.values():
+        if pr.from_branch in branch_ends and pr.into_branch in branch_ends:
+            yield pr.from_branch, pr.into_branch, max(branch_ends[pr.from_branch], branch_ends[pr.into_branch]) + 1
+
+
 def _assign_branch_lanes(
     state: State,
     commit_pos_by_id: dict[str, int],
@@ -425,23 +624,59 @@ def _branch_off_arcs(
 
 def _merge_arcs(
     state: State,
+    branch_by_name: dict[str, LayoutBranch],
     commit_layouts: dict[str, LayoutCommit],
 ) -> list[LayoutArc]:
-    """One merge arc per parent on a different lane than its child commit."""
+    """One merge arc per merged-in parent — a single-row hop into the merge commit.
+
+    The merged-in branch's line has been extended to one row below the
+    merge commit (`_line_ends`), so the arc hops from there — on that
+    branch's lane at `merge_row - 1` — to the merge commit. The chain
+    parent (same branch as the merge commit) is the branch's own
+    continuation, not a merge edge, so it is skipped.
+    """
     arcs: list[LayoutArc] = []
     for cid, cstate in state.commits.items():
-        commit_layout = commit_layouts.get(cid)
-        if commit_layout is None or len(cstate.parents) < 2:
+        merge_layout = commit_layouts.get(cid)
+        if merge_layout is None or len(cstate.parents) < 2:
             continue
+        landing_row = merge_layout.commit_pos
         for parent_id in cstate.parents:
-            parent_layout = commit_layouts.get(parent_id)
-            if parent_layout is None or parent_layout.branch_pos == commit_layout.branch_pos:
+            parent = state.commits.get(parent_id)
+            if parent is None or parent.branch == cstate.branch:
+                continue
+            source = branch_by_name.get(parent.branch)
+            if source is None:
                 continue
             arcs.append(
                 LayoutArc(
                     kind=LayoutArcKind.MERGE,
-                    trunk_point=GridSlot(commit_layout.branch_pos, commit_layout.commit_pos),
-                    branch_point=GridSlot(parent_layout.branch_pos, parent_layout.commit_pos),
+                    trunk_point=GridSlot(merge_layout.branch_pos, landing_row),
+                    branch_point=GridSlot(source.lane_at(landing_row - 1), landing_row - 1),
+                )
+            )
+    return arcs
+
+
+def _lane_change_arcs(branches: list[LayoutBranch]) -> list[LayoutArc]:
+    """One lane-change arc per adjacent segment pair on a migrating branch.
+
+    A branch that occupies more than one lane has a connector bridging
+    each pair of consecutive segments. Both endpoints lie on the branch's
+    own line: the `trunk_point` is the old-lane tail (`prev.lane,
+    prev.end`) and the `branch_point` is the new-lane head (`next.lane,
+    next.start`, one row later). The renderer attributes the connector's
+    colour from its `branch_point`, so using the new-lane end keeps the
+    arc on the migrating branch.
+    """
+    arcs: list[LayoutArc] = []
+    for branch in branches:
+        for prev, nxt in zip(branch.segments, branch.segments[1:]):
+            arcs.append(
+                LayoutArc(
+                    kind=LayoutArcKind.LANE_CHANGE,
+                    trunk_point=GridSlot(prev.lane, prev.end),
+                    branch_point=GridSlot(nxt.lane, nxt.start),
                 )
             )
     return arcs
@@ -450,34 +685,37 @@ def _merge_arcs(
 # ==================================================================================================
 #  Helpers — pull requests
 # ==================================================================================================
-def _build_pull_requests(state: State, branches: list[LayoutBranch]) -> list[LayoutPullRequest]:
-    """Build one `LayoutPullRequest` per open PR in state.
+def _build_pull_requests(
+    state: State,
+    branch_by_name: dict[str, LayoutBranch],
+    branch_ends: dict[str, int],
+) -> list[LayoutPullRequest]:
+    """Build one `LayoutPullRequest` per open PR — a single-row hop to the projected merge.
 
-    Endpoints are resolved from the current branch tips:
+    The projected merge row is `max(from.end, into.end) + 1` (the row a
+    real `merge` would land at), using the branches' last-commit rows
+    (`branch_ends`) — not the extended line ends, which already fold the
+    projection in, so the formula doesn't feed back on itself. The source
+    branch's line is extended to one row below the projection, and the PR
+    connector hops from there (on the source lane) to the projected merge
+    point on the target lane.
 
-    - the `branch_point` is the source branch's tip — its `end` (latest
-      commit row, or `start` for empty branches) on the source lane.
-    - the `trunk_point` is the projected merge-commit row on the target
-      lane, computed with the same anchor formula a real `merge` would
-      use: `max(from.end, into.end) + 1`.
-
-    Branches that no longer exist in `branches` (a clean state should
-    never produce this; defensive against partial-validation calls)
-    cause the PR to be skipped silently.
+    Branches that no longer exist (a clean state should never produce
+    this; defensive against partial-validation calls) cause the PR to be
+    skipped silently.
     """
-    branches_by_name = {b.name: b for b in branches}
     pull_requests: list[LayoutPullRequest] = []
     for pr_id, pr_state in state.pull_requests.items():
-        from_branch = branches_by_name.get(pr_state.from_branch)
-        into_branch = branches_by_name.get(pr_state.into_branch)
+        from_branch = branch_by_name.get(pr_state.from_branch)
+        into_branch = branch_by_name.get(pr_state.into_branch)
         if from_branch is None or into_branch is None:
             continue
-        projected_merge_pos = max(from_branch.end, into_branch.end) + 1
+        projected = max(branch_ends[pr_state.from_branch], branch_ends[pr_state.into_branch]) + 1
         pull_requests.append(
             LayoutPullRequest(
                 id=pr_id,
-                trunk_point=GridSlot(into_branch.lane_at(projected_merge_pos), projected_merge_pos),
-                branch_point=GridSlot(from_branch.lane_at(from_branch.end), from_branch.end),
+                trunk_point=GridSlot(into_branch.lane_at(projected), projected),
+                branch_point=GridSlot(from_branch.lane_at(projected - 1), projected - 1),
                 title=pr_state.title,
             )
         )

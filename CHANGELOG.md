@@ -9,7 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- New `theme.auto_lane_change` (default off) — branches migrate toward lower lane indices as lower lanes free up, so live branches always occupy the lowest lanes; conflicts with a `branch.branch_pos` pin (new error `E221`).
+
 ### Changed
+
+- Merge and pull-request connectors are now single-row hops: a branch line runs up to one row below the merge, then a short connector crosses in. Default `rounded` output is visually unchanged; `straight` / `bezier` / `double_rounded` render merges and PRs more tightly.
+- `gitsvg layout` JSON now carries a per-branch `segments` array (the lane / start / end breakdown of each branch's life) — one entry for a static branch, several when it migrates under `auto_lane_change`.
 
 ### Deprecated
 

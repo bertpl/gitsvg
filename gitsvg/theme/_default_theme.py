@@ -52,6 +52,11 @@ class DefaultTheme(Theme):
         """Commit-row packing — `shared` (commits on different branches may share a row)."""
         return CommitRowMode.SHARED
 
+    @classmethod
+    def _resolve_auto_lane_change(cls) -> bool:
+        """Branch-lane migration — off (each branch keeps its lane for its whole life)."""
+        return False
+
     # --------------------------------------------------------------------------
     #  Spacings
     # --------------------------------------------------------------------------
@@ -486,6 +491,7 @@ class DefaultTheme(Theme):
         return cls(
             orientation=orientation,
             commit_row_mode=pick("commit_row_mode", cls._resolve_commit_row_mode),
+            auto_lane_change=pick("auto_lane_change", cls._resolve_auto_lane_change),
             branch_spacing=branch_spacing,
             commit_spacing=commit_spacing,
             margin_left=pick("margin_left", cls._resolve_margin_left, orientation, branch_spacing, commit_spacing),

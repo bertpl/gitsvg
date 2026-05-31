@@ -8,6 +8,13 @@
       "id": "b0",
       "name": "main",
       "branch_pos": 0,
+      "segments": [
+        {
+          "lane": 0,
+          "start": 0,
+          "end": 7
+        }
+      ],
       "start": 0,
       "end": 7
     },
@@ -15,13 +22,27 @@
       "id": "b1",
       "name": "auth",
       "branch_pos": 1,
+      "segments": [
+        {
+          "lane": 1,
+          "start": 1,
+          "end": 4
+        }
+      ],
       "start": 1,
-      "end": 3
+      "end": 4
     },
     {
       "id": "b2",
       "name": "ui",
       "branch_pos": 2,
+      "segments": [
+        {
+          "lane": 2,
+          "start": 1,
+          "end": 6
+        }
+      ],
       "start": 1,
       "end": 6
     }
@@ -126,7 +147,7 @@
     {
       "kind": "merge",
       "from_branch_pos": 1,
-      "from_commit_pos": 3,
+      "from_commit_pos": 4,
       "to_branch_pos": 0,
       "to_commit_pos": 5
     },

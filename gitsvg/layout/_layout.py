@@ -173,11 +173,13 @@ class LayoutCommit:
 class LayoutArc:
     """One connector between a trunk point and a branch point on two lanes.
 
-    Used for branch-off connectors (trunk = the parent commit on the
-    ongoing branch; branch = the start of the new branch) and merge
-    connectors (trunk = the merge commit on the ongoing branch; branch =
-    the merged-in tip). The renderer derives every presentational
-    decision from the two points:
+    Every connector spans a single commit row — the branch *lines* carry
+    the long-distance travel. Used for branch-off connectors (trunk = the
+    parent commit; branch = the new branch's start one row later), merge
+    connectors (trunk = the merge commit; branch = the merged-in branch's
+    line one row below the merge), and lane-change connectors (both ends
+    on the migrating branch's own line). The renderer derives every
+    presentational decision from the two points:
 
     - the **elbow** sits at `(branch_point lane, trunk_point row)`;
     - the **branch-off vs merge look** is `sign(branch_point.commit_pos

@@ -8,13 +8,27 @@
       "id": "b0",
       "name": "main",
       "branch_pos": 0,
+      "segments": [
+        {
+          "lane": 0,
+          "start": 0,
+          "end": 6
+        }
+      ],
       "start": 0,
-      "end": 5
+      "end": 6
     },
     {
       "id": "b1",
       "name": "feature",
       "branch_pos": 1,
+      "segments": [
+        {
+          "lane": 1,
+          "start": 2,
+          "end": 3
+        }
+      ],
       "start": 2,
       "end": 3
     },
@@ -22,8 +36,15 @@
       "id": "b2",
       "name": "docs",
       "branch_pos": 2,
+      "segments": [
+        {
+          "lane": 2,
+          "start": 2,
+          "end": 5
+        }
+      ],
       "start": 2,
-      "end": 2
+      "end": 5
     }
   ],
   "commits": [
@@ -125,7 +146,7 @@
     {
       "id": "pr1",
       "from_branch_pos": 2,
-      "from_commit_pos": 2,
+      "from_commit_pos": 5,
       "to_branch_pos": 0,
       "to_commit_pos": 6,
       "title": "PR 1: docs update"

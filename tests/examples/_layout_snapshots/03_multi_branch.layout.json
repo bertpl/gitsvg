@@ -8,6 +8,13 @@
       "id": "b0",
       "name": "main",
       "branch_pos": 0,
+      "segments": [
+        {
+          "lane": 0,
+          "start": 0,
+          "end": 6
+        }
+      ],
       "start": 0,
       "end": 6
     },
@@ -15,6 +22,13 @@
       "id": "b1",
       "name": "feature-a",
       "branch_pos": 1,
+      "segments": [
+        {
+          "lane": 1,
+          "start": 1,
+          "end": 1
+        }
+      ],
       "start": 1,
       "end": 1
     },
@@ -22,13 +36,27 @@
       "id": "b2",
       "name": "bugfix",
       "branch_pos": 2,
+      "segments": [
+        {
+          "lane": 2,
+          "start": 1,
+          "end": 2
+        }
+      ],
       "start": 1,
-      "end": 1
+      "end": 2
     },
     {
       "id": "b3",
       "name": "feature-b",
       "branch_pos": 1,
+      "segments": [
+        {
+          "lane": 1,
+          "start": 5,
+          "end": 5
+        }
+      ],
       "start": 5,
       "end": 5
     }
@@ -147,7 +175,7 @@
     {
       "kind": "merge",
       "from_branch_pos": 2,
-      "from_commit_pos": 1,
+      "from_commit_pos": 2,
       "to_branch_pos": 0,
       "to_commit_pos": 3
     },

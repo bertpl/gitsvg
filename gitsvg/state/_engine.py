@@ -23,7 +23,7 @@ leftover `ImportOp` (e.g. when a caller skips the resolver) is treated
 as a no-op here.
 """
 
-from gitsvg.errors import ValidationReport
+from gitsvg.errors import ValidationError, ValidationReport
 from gitsvg.file_format.ops import (
     BranchOp,
     CommitOp,
@@ -79,7 +79,41 @@ def apply_ops(parsed_ops: list[ParsedOp], report: ValidationReport) -> tuple[Sta
     for parsed in parsed_ops:
         _apply_one(state, builder, parsed, report)
     theme = builder.build()
+    _check_auto_lane_change_conflicts(state, theme, report)
     return state, theme
+
+
+def _check_auto_lane_change_conflicts(state: State, theme: Theme, report: ValidationReport) -> None:
+    """Emit E221 for each `branch_pos:` pin when `auto_lane_change` is on.
+
+    A pin fixes a branch's lane for life; `auto_lane_change` keeps lanes
+    free to migrate. The two are mutually exclusive. This is the one
+    semantic check that needs both the resolved `Theme` (the flag) and
+    `State` (the per-branch pins), so it lives here at the `apply_ops`
+    orchestration point rather than in the state-only end-of-file pass.
+
+    Args:
+        state: The fully-applied state, carrying per-branch pins.
+        theme: The resolved theme, carrying `auto_lane_change`.
+        report: Receives one E221 per pinned branch.
+    """
+    if not theme.auto_lane_change:
+        return
+    for branch in state.branches.values():
+        if branch.branch_pos is None:
+            continue
+        report.add(
+            ValidationError(
+                file=branch.declaration_file,
+                line=branch.declaration_line,
+                code="E221",
+                message=(
+                    f"branch {branch.name!r} sets branch_pos, which conflicts with "
+                    f"theme.auto_lane_change (a pinned lane cannot also migrate)"
+                ),
+                field="branch_pos",
+            )
+        )
 
 
 def _apply_one(state: State, builder: ThemeBuilder, parsed: ParsedOp, report: ValidationReport) -> None:

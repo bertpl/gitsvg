@@ -40,19 +40,23 @@ from gitsvg.layout._layout_arc_kind import LayoutArcKind
 def _branch_to_json(branch: LayoutBranch) -> dict[str, Any]:
     """Map a branch to the public id/name/lane/start/end schema.
 
-    `branch_pos` is the lane the branch occupies at its start row — for a
-    static-lane branch (every branch today) this is its single lane.
+    `branch_pos` is the lane the branch occupies at its start row; for a
+    static-lane branch it is the single lane. `segments` carries the full
+    per-lane breakdown — one entry for a static branch, several when the
+    branch migrated lanes under `auto_lane_change`.
 
     Args:
         branch: The branch to serialise.
 
     Returns:
-        A dict with `id`, `name`, `branch_pos`, `start`, `end`.
+        A dict with `id`, `name`, `branch_pos`, `segments`, `start`,
+        `end`.
     """
     return {
         "id": branch.id,
         "name": branch.name,
         "branch_pos": branch.start_lane,
+        "segments": [{"lane": s.lane, "start": s.start, "end": s.end} for s in branch.segments],
         "start": branch.start,
         "end": branch.end,
     }
@@ -64,7 +68,9 @@ def _arc_to_json(arc: LayoutArc) -> dict[str, Any]:
     `kind` comes straight off the connector. For a branch-off the `from`
     end is the parent commit (the trunk) and the `to` end is the new
     branch's start; for a merge the `from` end is the merged-in tip (the
-    branch point) and the `to` end is the merge commit.
+    branch point) and the `to` end is the merge commit; for a lane-change
+    the `from` end is the old-lane tail (the trunk) and the `to` end is
+    the new-lane head (the branch point).
 
     Args:
         arc: The connector to serialise.
@@ -74,13 +80,13 @@ def _arc_to_json(arc: LayoutArc) -> dict[str, Any]:
         `to_branch_pos`, `to_commit_pos`.
 
     Raises:
-        ValueError: If `arc.kind` is a kind this serialiser does not yet
-            map to a `from` / `to` orientation.
+        ValueError: If `arc.kind` is a kind this serialiser does not map
+            to a `from` / `to` orientation.
     """
-    if arc.kind is LayoutArcKind.BRANCH_OFF:
-        from_point, to_point = arc.trunk_point, arc.branch_point
-    elif arc.kind is LayoutArcKind.MERGE:
+    if arc.kind is LayoutArcKind.MERGE:
         from_point, to_point = arc.branch_point, arc.trunk_point
+    elif arc.kind in (LayoutArcKind.BRANCH_OFF, LayoutArcKind.LANE_CHANGE):
+        from_point, to_point = arc.trunk_point, arc.branch_point
     else:
         raise ValueError(f"_arc_to_json does not handle arc kind {arc.kind!r}")
     return {
