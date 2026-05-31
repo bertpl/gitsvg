@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Merge and pull-request connectors are now single-row hops: a branch line runs up to one row below the merge, then a short connector crosses in. Default `rounded` output is visually unchanged; `straight` / `double_rounded` / `double_bezier` render merges and PRs more tightly.
+- Merge and pull-request connectors are now single-row hops: a branch line runs up to one row below the merge, then a short connector crosses in. The `rounded` style's output is visually unchanged; `straight` / `double_rounded` / `double_bezier` render merges and PRs more tightly.
 - `gitsvg layout` JSON now carries a per-branch `segments` array (the lane / start / end breakdown of each branch's life) — one entry for a static branch, several when it migrates under `auto_lane_change`.
 - **Breaking:** `theme.branch_line_style: "bezier"` is redefined as a single flowing curve that runs along a branch's own lane and sweeps diagonally across to the connecting commit; the prior cubic-Bézier S is now the separate value `"double_bezier"`. Migration: rename `"bezier"` → `"double_bezier"` to keep the S.
 - Refreshed the `default`, `dark`, and `compact` named themes.
