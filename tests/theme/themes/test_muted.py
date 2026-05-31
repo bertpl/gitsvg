@@ -1,7 +1,7 @@
 """Tests for `MutedTheme` — the pre-refresh default look, preserved as a named theme.
 
 Covers the two halves of the refresh: that the package `default` now
-resolves to the refreshed values (saturated palette, rounded connectors,
+resolves to the refreshed values (saturated palette, bezier connectors,
 checkmark merge dots), and that `muted` pins exactly those three fields
 back so it reproduces the pre-refresh default everywhere else.
 """
@@ -32,13 +32,13 @@ _REFRESHED_PALETTE = {
 #  Refreshed default carries the new vocabulary
 # ==================================================================================================
 def test_default_theme_uses_refreshed_palette_and_styles() -> None:
-    """The package default resolves to the saturated palette, rounded connectors, and checkmark merge dots."""
+    """The package default resolves to the saturated palette, bezier connectors, and checkmark merge dots."""
     # --- arrange / act ----------------
     theme = DEFAULT_THEME
 
     # --- assert -----------------------
     assert theme.colors == _REFRESHED_PALETTE
-    assert theme.branch_line_style == BranchLineStyle.ROUNDED
+    assert theme.branch_line_style == BranchLineStyle.BEZIER
     assert theme.merge_commit_style == MergeCommitStyle.CHECKMARK
 
 
@@ -66,14 +66,14 @@ def test_muted_theme_matches_default_on_every_other_field() -> None:
     muted = MutedTheme.build({}).model_dump()
     default = DEFAULT_THEME.model_dump()
     # `muted` pins three resolvers; any field it diverges from the default
-    # on must lie within that set. (`branch_line_style` happens to coincide
-    # — both resolve `rounded` — so it need not appear in `differing`.)
+    # on must lie within that set. All three genuinely differ now: muted
+    # keeps the pre-refresh palette, `rounded` connectors, and circle merge
+    # dots, against the default's saturated palette, `bezier`, and checkmark.
     pinned = {"colors", "branch_line_style", "merge_commit_style"}
 
     # --- assert -----------------------
     differing = {key for key in default if muted[key] != default[key]}
-    assert differing <= pinned
-    assert "colors" in differing and "merge_commit_style" in differing
+    assert differing == pinned
 
 
 def test_muted_theme_inherits_non_refresh_defaults() -> None:

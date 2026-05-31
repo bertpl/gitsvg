@@ -7,12 +7,12 @@
 <path d="M75.0,176.406239 L600.0,176.406239" stroke="#b8b8b8" stroke-width="0.7" stroke-dasharray="4,4" />
 <path d="M75.0,251.406239 L600.0,251.406239" stroke="#b8b8b8" stroke-width="0.7" stroke-dasharray="4,4" />
 <path d="M112.5,101.406239 L562.5,101.406239" stroke="#4a4f5a" stroke-width="2" stroke-linecap="round" />
-<path d="M187.5,101.406239 L187.5,146.406239 A30,30,0,0,0,217.5,176.406239 L262.5,176.406239" stroke="#56b393" stroke-width="2" fill="none" stroke-linecap="round" />
-<path d="M337.5,176.406239 L382.5,176.406239 A30,30,0,0,0,412.5,146.406239 L412.5,101.406239" stroke="#56b393" stroke-width="2" fill="none" stroke-linecap="round" />
+<path d="M187.5,101.406239 C206.25,176.406239,206.25,176.406239,262.5,176.406239" stroke="#56b393" stroke-width="2" fill="none" stroke-linecap="round" />
+<path d="M337.5,176.406239 C393.75,176.406239,393.75,176.406239,412.5,101.406239" stroke="#56b393" stroke-width="2" fill="none" stroke-linecap="round" />
 <path d="M262.5,176.406239 L337.5,176.406239" stroke="#56b393" stroke-width="2" stroke-linecap="round" />
-<path d="M187.5,101.406239 L187.5,221.406239 A30,30,0,0,0,217.5,251.406239 L262.5,251.406239" stroke="#6b8bc2" stroke-width="2" fill="none" stroke-linecap="round" />
+<path d="M187.5,101.406239 C206.25,251.406239,206.25,251.406239,262.5,251.406239" stroke="#6b8bc2" stroke-width="2" fill="none" stroke-linecap="round" />
 <path d="M262.5,251.406239 L487.5,251.406239" stroke="#6b8bc2" stroke-width="2" stroke-linecap="round" />
-<path d="M487.5,251.406239 L532.5,251.406239 A30,30,0,0,0,562.5,221.406239 L562.5,101.406239" stroke="#6b8bc2" stroke-width="2" fill="none" stroke-linecap="round" stroke-dasharray="2,6" />
+<path d="M487.5,251.406239 C543.75,251.406239,543.75,251.406239,562.5,101.406239" stroke="#6b8bc2" stroke-width="2" fill="none" stroke-linecap="round" stroke-dasharray="2,6" />
 <circle cx="112.5" cy="101.406239" r="5" fill="#4a4f5a" stroke="white" stroke-width="1.5" />
 <circle cx="187.5" cy="101.406239" r="7" fill="#4a4f5a" stroke="white" stroke-width="1.5" />
 <circle cx="262.5" cy="176.406239" r="5" fill="#56b393" stroke="white" stroke-width="1.5" />

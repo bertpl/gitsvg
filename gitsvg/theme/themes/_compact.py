@@ -5,14 +5,13 @@ diagram while keeping the same visual vocabulary. Colours, anchors,
 label angles, and pull-request visuals inherit unchanged — only the
 metrics that govern density change.
 
-The reduction is moderate (~30 % tighter spacing, ~10 % smaller fonts)
+The reduction is moderate (~25-30 % tighter spacing, ~10 % smaller fonts)
 to keep text readable at the new scale. Font-anchored ratios
 (pill padding, label line padding) automatically shrink with the
 smaller fonts, so pill proportions stay coherent without separate
 overrides. Margins anchor to spacings and shrink the same way.
 """
 
-from gitsvg.theme._branch_line_style import BranchLineStyle
 from gitsvg.theme._default_theme import DefaultTheme
 from gitsvg.theme._orientation import Orientation
 
@@ -24,27 +23,35 @@ class CompactTheme(DefaultTheme):
 
     Overrides the metric resolvers (`_resolve_branch_spacing`,
     `_resolve_commit_spacing`, the three font sizes, and the two pill
-    offsets) plus `_resolve_branch_line_style` — double-rounded
-    S-transitions distinguish the dense layout from the default's plain
-    rounded elbows. Every other field, including the refreshed palette
-    and the checkmark merge dots, inherits from `DefaultTheme`.
+    offsets) plus the layout-policy resolvers that suit a dense layout:
+    `_resolve_auto_lane_change` (on, so branches compact into the lowest
+    lanes) and `_resolve_merge_lane_clearance` (`0`, the tightest packing).
+    `_resolve_branch_line_style` keeps the same bezier connector as the
+    default. Every other field, including the refreshed palette and the
+    checkmark merge dots, inherits from `DefaultTheme`.
     """
 
     @classmethod
-    def _resolve_branch_line_style(cls) -> BranchLineStyle:
-        """Double-rounded S-transitions between lanes — a softer connector than the default's rounded elbow."""
-        return BranchLineStyle.DOUBLE_ROUNDED
+    def _resolve_auto_lane_change(cls) -> bool:
+        """Compact the graph — branches migrate into the lowest free lanes (dense layouts want this on)."""
+        return True
+
+    @classmethod
+    def _resolve_merge_lane_clearance(cls) -> int:
+        """No clearance past a merge — the tightest packing; the bezier connector reads cleanly even so."""
+        return 0
 
     @classmethod
     def _resolve_branch_spacing(cls, orientation: Orientation) -> int:
-        """Per-orientation `branch_spacing` (px) — ~30 % tighter than `DefaultTheme`.
+        """Per-orientation `branch_spacing` (px) — tighter than `DefaultTheme`.
 
-        Vertical orientations: `70` (was `100`). Horizontal
-        orientations: `55` (was `75`) — kept equal to `commit_spacing`
-        so the horizontal layout stays symmetric, matching the
-        `DefaultTheme` invariant.
+        Vertical orientations: `75` (was `100`) — wide enough that a
+        commit label clears the adjacent lane once `auto_lane_change`
+        packs branches together. Horizontal orientations: `55` (was `75`)
+        — kept equal to `commit_spacing` so the horizontal layout stays
+        symmetric, matching the `DefaultTheme` invariant.
         """
-        return 70 if orientation in _VERTICAL_ORIENTATIONS else 55
+        return 75 if orientation in _VERTICAL_ORIENTATIONS else 55
 
     @classmethod
     def _resolve_commit_spacing(cls, orientation: Orientation) -> int:

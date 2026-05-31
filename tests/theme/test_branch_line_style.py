@@ -3,12 +3,12 @@
 from gitsvg.theme import BranchLineStyle, DefaultTheme
 
 
-def test_default_branch_line_style_is_rounded() -> None:
+def test_default_branch_line_style_is_bezier() -> None:
     # --- arrange / act ----------------
     theme = DefaultTheme.build({})
 
     # --- assert -----------------------
-    assert theme.branch_line_style is BranchLineStyle.ROUNDED
+    assert theme.branch_line_style is BranchLineStyle.BEZIER
 
 
 def test_explicit_branch_line_style_overrides_default() -> None:

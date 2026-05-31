@@ -19,7 +19,7 @@ def test_compact_theme_build_resolves_overridden_metrics_vertical() -> None:
 
     # --- assert -----------------------
     assert theme.orientation == Orientation.BT
-    assert theme.branch_spacing == 70
+    assert theme.branch_spacing == 75
     assert theme.commit_spacing == 35
     assert theme.label_font_size == 9.5
     assert theme.branch_label_font_size == 10
@@ -53,15 +53,17 @@ def test_compact_theme_inherits_default_palette() -> None:
     assert theme.commit_stroke_color == "white"
 
 
-def test_compact_theme_uses_double_rounded_connectors_but_inherits_checkmark_merges() -> None:
-    """`CompactTheme` pins `branch_line_style` to double-rounded to set the
-    dense layout apart from the default's plain rounded elbow, while
-    inheriting the refreshed default's checkmark merge dots."""
+def test_compact_theme_packs_tightly_and_inherits_bezier_checkmark() -> None:
+    """`CompactTheme` turns on `auto_lane_change` with zero merge-lane clearance
+    for the tightest packing, while inheriting the default's bezier connectors
+    and checkmark merge dots."""
     # --- arrange / act ----------------
     theme = CompactTheme.build({})
 
     # --- assert -----------------------
-    assert theme.branch_line_style is BranchLineStyle.DOUBLE_ROUNDED
+    assert theme.auto_lane_change is True
+    assert theme.merge_lane_clearance == 0
+    assert theme.branch_line_style is BranchLineStyle.BEZIER  # inherited from DefaultTheme
     assert theme.merge_commit_style is MergeCommitStyle.CHECKMARK
 
 
@@ -87,7 +89,7 @@ def test_theme_op_name_compact_resolves_through_apply() -> None:
 
     # --- assert -----------------------
     assert report.is_clean()
-    assert theme.branch_spacing == 70
+    assert theme.branch_spacing == 75
     assert theme.label_font_size == 9.5
 
 

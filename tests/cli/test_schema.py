@@ -146,7 +146,7 @@ def test_schema_theme_default_emits_refreshed_palette_and_styles() -> None:
     payload = json.loads(result.output)
     assert payload["colors"]["main"] == "#4a4f5a"
     assert payload["colors"]["branch1"] == "#56b393"
-    assert payload["branch_line_style"] == "rounded"
+    assert payload["branch_line_style"] == "bezier"
     assert payload["merge_commit_style"] == "checkmark"
 
 
@@ -160,7 +160,7 @@ def test_schema_theme_compact_emits_tighter_metrics() -> None:
     # --- assert -----------------------
     assert result.exit_code == 0
     payload = json.loads(result.output)
-    assert payload["branch_spacing"] == 70
+    assert payload["branch_spacing"] == 75
     assert payload["commit_spacing"] == 35
     assert payload["label_font_size"] == 9.5
 
