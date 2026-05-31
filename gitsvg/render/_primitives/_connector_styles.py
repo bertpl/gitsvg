@@ -243,15 +243,35 @@ def _build_double_bezier(path: draw.Path, g: _ConnectorGeometry) -> None:
         path.C(g.x1 + s * span, g.y1, g.x2 - s * span, g.y2, g.x2, g.y2)
 
 
-def _build_double_rounded(path: draw.Path, g: _ConnectorGeometry) -> None:
-    """A stepped connector: two quarter-arcs around an orthogonal crossing.
+def _step_radius(g: _ConnectorGeometry) -> float:
+    """Corner radius for a stepped connector — clamped so both the cross leg and each parallel leg stay ≥ 0.
 
-    Drawn from the trunk: leave it parallel to its lane, arc to orthogonal,
-    cross the lane gap one radius from the trunk, arc back to parallel, then
-    run parallel the rest of the way to the branch. The corner radius clamps
-    to half each span so both the orthogonal leg and the final parallel leg
-    stay ≥ 0 (so `≤ ½` the commit span for a one-row connector). Degenerate
-    (same row or column) collapses to a straight segment.
+    Clamps `corner_radius` to half the branch-axis span and half the
+    commit-axis span (so `≤ ½` the commit span for a one-row connector).
+    """
+    return min(g.corner_radius, abs(g.x2 - g.x1) / 2, abs(g.y2 - g.y1) / 2)
+
+
+def _stepped_path(path: draw.Path, g: _ConnectorGeometry, *, lead: float) -> None:
+    """Draw a stepped connector — parallel legs joined by two quarter-arcs around an orthogonal crossing.
+
+    Shared core of the rounded-family stepped shapes. `lead` is the
+    straight parallel leg run from the trunk *before* the first arc; the
+    crossing then sits `lead + r` along the commit axis from the trunk:
+
+    - `lead = 0` ⇒ crossing one radius from the trunk, the long parallel
+      run on the branch side (the asymmetric `double_rounded` tee).
+    - `lead = span/2 − r` ⇒ crossing centered between the two rows, with
+      equal straight legs each side (the symmetric lane-change).
+
+    Drawn from the trunk; the branch point is the opposite endpoint
+    (`trunk_is_start` selects which). Degenerate (same row or column)
+    collapses to a straight segment.
+
+    Args:
+        path: The path to draw into (this opens it with `M`).
+        g: The connector geometry.
+        lead: Commit-axis length of the straight leg before the first arc.
     """
     tx, ty, bx, by = (g.x1, g.y1, g.x2, g.y2) if g.trunk_is_start else (g.x2, g.y2, g.x1, g.y1)
     path.M(tx, ty)
@@ -261,20 +281,37 @@ def _build_double_rounded(path: draw.Path, g: _ConnectorGeometry) -> None:
 
     sx = 1 if bx > tx else -1
     sy = 1 if by > ty else -1
-    r = min(g.corner_radius, abs(bx - tx) / 2, abs(by - ty) / 2)
+    r = _step_radius(g)
 
     if g.commit_axis_vertical:
-        # Parallel = screen-y, orthogonal = screen-x; crossing one radius up.
-        path.A(r, r, 0, 0, 1 if sx * sy < 0 else 0, tx + sx * r, ty + sy * r)
-        path.L(bx - sx * r, ty + sy * r)
-        path.A(r, r, 0, 0, 1 if sx * sy > 0 else 0, bx, ty + 2 * sy * r)
+        # Parallel = screen-y, orthogonal = screen-x; crossing `lead + r` up.
+        if lead:
+            path.L(tx, ty + sy * lead)
+        y0 = ty + sy * lead
+        path.A(r, r, 0, 0, 1 if sx * sy < 0 else 0, tx + sx * r, y0 + sy * r)
+        path.L(bx - sx * r, y0 + sy * r)
+        path.A(r, r, 0, 0, 1 if sx * sy > 0 else 0, bx, y0 + 2 * sy * r)
         path.L(bx, by)
     else:
-        # Parallel = screen-x, orthogonal = screen-y; crossing one radius over.
-        path.A(r, r, 0, 0, 1 if sx * sy > 0 else 0, tx + sx * r, ty + sy * r)
-        path.L(tx + sx * r, by - sy * r)
-        path.A(r, r, 0, 0, 1 if sx * sy < 0 else 0, tx + 2 * sx * r, by)
+        # Parallel = screen-x, orthogonal = screen-y; crossing `lead + r` over.
+        if lead:
+            path.L(tx + sx * lead, ty)
+        x0 = tx + sx * lead
+        path.A(r, r, 0, 0, 1 if sx * sy > 0 else 0, x0 + sx * r, ty + sy * r)
+        path.L(x0 + sx * r, by - sy * r)
+        path.A(r, r, 0, 0, 1 if sx * sy < 0 else 0, x0 + 2 * sx * r, by)
         path.L(bx, by)
+
+
+def _build_double_rounded(path: draw.Path, g: _ConnectorGeometry) -> None:
+    """A stepped connector with its orthogonal crossing one radius from the trunk.
+
+    Leaves the trunk parallel to its lane, arcs to orthogonal, crosses the
+    lane gap one radius from the trunk, arcs back to parallel, then runs
+    parallel the rest of the way to the branch. `lead = 0` case of
+    `_stepped_path`.
+    """
+    _stepped_path(path, g, lead=0.0)
 
 
 _CONNECTOR_BUILDERS: dict[BranchLineStyle, Callable[[draw.Path, _ConnectorGeometry], None]] = {
@@ -282,5 +319,37 @@ _CONNECTOR_BUILDERS: dict[BranchLineStyle, Callable[[draw.Path, _ConnectorGeomet
     BranchLineStyle.STRAIGHT: _build_straight,
     BranchLineStyle.BEZIER: _build_bezier,
     BranchLineStyle.DOUBLE_ROUNDED: _build_double_rounded,
+    BranchLineStyle.DOUBLE_BEZIER: _build_double_bezier,
+}
+
+
+# ==================================================================================================
+#  Lane-change builders — a branch's own line shifting lanes (both endpoints on that branch)
+# ==================================================================================================
+# A lane-change connector has both endpoints on the *same* migrating branch,
+# one row apart, so it reads as "this branch shifted over" rather than a tee.
+# It is symmetric — no trunk / branch role — so each style draws its
+# both-ends-parallel double-bend: the curved styles (`bezier` /
+# `double_bezier`) reuse the already-symmetric `_build_double_bezier` S;
+# `straight` keeps its direct diagonal; the rounded family gets a centered
+# stepped shape (crossing in the middle, equal straight legs each side),
+# distinct from `double_rounded`'s trunk-biased tee.
+def _build_lane_change_stepped(path: draw.Path, g: _ConnectorGeometry) -> None:
+    """A symmetric stepped lane-change — crossing centered between the two rows, equal straight legs each side.
+
+    The `lead = span/2 − r` case of `_stepped_path`, where `span` is the
+    commit-axis distance between the endpoints. Used for `rounded` and
+    `double_rounded` lane changes (their tees differ, but a lane change
+    reads the same for both).
+    """
+    span = abs(g.y2 - g.y1) if g.commit_axis_vertical else abs(g.x2 - g.x1)
+    _stepped_path(path, g, lead=span / 2 - _step_radius(g))
+
+
+_LANE_CHANGE_BUILDERS: dict[BranchLineStyle, Callable[[draw.Path, _ConnectorGeometry], None]] = {
+    BranchLineStyle.STRAIGHT: _build_straight,
+    BranchLineStyle.ROUNDED: _build_lane_change_stepped,
+    BranchLineStyle.DOUBLE_ROUNDED: _build_lane_change_stepped,
+    BranchLineStyle.BEZIER: _build_double_bezier,
     BranchLineStyle.DOUBLE_BEZIER: _build_double_bezier,
 }

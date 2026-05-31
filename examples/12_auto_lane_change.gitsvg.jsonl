@@ -1,0 +1,16 @@
+{"op": "branch", "name": "main", "label_side": "before"}
+{"op": "commit", "branch": "main", "id": "m1", "msg": "project start", "hash": "auto"}
+{"op": "branch", "name": "feat-a", "from_branch": "main"}
+{"op": "commit", "branch": "feat-a", "id": "a1", "msg": "feature a", "hash": "auto"}
+{"op": "branch", "name": "feat-b", "from_branch": "main"}
+{"op": "commit", "branch": "feat-b", "id": "b1", "msg": "feature b", "hash": "auto"}
+{"op": "branch", "name": "feat-c", "from_branch": "main"}
+{"op": "commit", "branch": "feat-c", "id": "c1", "msg": "feature c", "hash": "auto"}
+{"op": "merge", "from": "feat-a", "into": "main", "as": "ma", "msg": "merge a", "hash": "auto"}
+{"op": "commit", "branch": "feat-b", "id": "b2", "msg": "more b", "hash": "auto", "gap": 1}
+{"op": "commit", "branch": "feat-c", "id": "c2", "msg": "more c", "hash": "auto"}
+{"op": "merge", "from": "feat-b", "into": "main", "as": "mb", "msg": "merge b", "hash": "auto"}
+{"op": "commit", "branch": "feat-c", "id": "c3", "msg": "polish c", "hash": "auto", "gap": 1}
+{"op": "merge", "from": "feat-c", "into": "main", "as": "mc", "msg": "merge c", "hash": "auto"}
+{"op": "commit", "branch": "main", "id": "m2", "msg": "release", "hash": "auto"}
+{"op": "theme", "auto_lane_change": true}

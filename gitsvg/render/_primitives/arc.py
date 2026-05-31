@@ -25,9 +25,12 @@ import drawsvg as draw
 
 from gitsvg.layout import GridSlot, LayoutArcKind
 from gitsvg.render._canvas import RenderCanvas
-from gitsvg.render._primitives._connector_styles import _CONNECTOR_BUILDERS, _connector_geometry
+from gitsvg.render._primitives._connector_styles import (
+    _CONNECTOR_BUILDERS,
+    _LANE_CHANGE_BUILDERS,
+    _connector_geometry,
+)
 from gitsvg.render._renderer_settings import RendererSettings
-from gitsvg.theme._branch_line_style import BranchLineStyle
 
 
 def draw_arc(
@@ -49,10 +52,11 @@ def draw_arc(
     registry. `rounded` is the default and renders byte-identically to
     prior versions.
 
-    A lane-change connector (`kind=LANE_CHANGE`) renders as a straight
-    segment regardless of `theme.branch_line_style` — an interim shape;
-    per-style lane-change geometry becomes first-class when the
-    `_LANE_CHANGE_BUILDERS` registry lands.
+    A lane-change connector (`kind=LANE_CHANGE`) — both endpoints on one
+    migrating branch — dispatches through the `_LANE_CHANGE_BUILDERS`
+    registry instead, so each style draws its own both-ends-parallel
+    double-bend (the lane-change idiom) rather than its branch-off / merge
+    tee.
 
     Args:
         d: The drawing to append to.
@@ -70,9 +74,10 @@ def draw_arc(
             `"6,4"`). When set, the whole connector is rendered with that
             dash pattern; pull-request connectors pass one to stand apart
             from a real merge.
-        kind: The connector's role. `LANE_CHANGE` forces the straight
-            builder; every other value (and `None`, for pull requests)
-            dispatches on `theme.branch_line_style`.
+        kind: The connector's role. `LANE_CHANGE` dispatches through
+            `_LANE_CHANGE_BUILDERS`; every other value (and `None`, for
+            pull requests) dispatches through `_CONNECTOR_BUILDERS`. Both
+            key on `theme.branch_line_style`.
     """
     geom = _connector_geometry(trunk_point, branch_point, canvas, theme)
 
@@ -86,6 +91,6 @@ def draw_arc(
         path_kwargs["stroke_dasharray"] = stroke_dasharray
 
     path = draw.Path(**path_kwargs)
-    style = BranchLineStyle.STRAIGHT if kind is LayoutArcKind.LANE_CHANGE else theme.branch_line_style
-    _CONNECTOR_BUILDERS[style](path, geom)
+    builders = _LANE_CHANGE_BUILDERS if kind is LayoutArcKind.LANE_CHANGE else _CONNECTOR_BUILDERS
+    builders[theme.branch_line_style](path, geom)
     d.append(path)

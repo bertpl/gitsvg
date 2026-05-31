@@ -1,0 +1,134 @@
+{
+  "branches": [
+    {
+      "name": "main",
+      "head_commit_id": "m2"
+    },
+    {
+      "name": "feat-a",
+      "head_commit_id": "a1"
+    },
+    {
+      "name": "feat-b",
+      "head_commit_id": "b2"
+    },
+    {
+      "name": "feat-c",
+      "head_commit_id": "c3"
+    }
+  ],
+  "commits": [
+    {
+      "id": "m1",
+      "branch": "main",
+      "hash": "7b14e2d",
+      "msg": "project start",
+      "highlight": false,
+      "parents": []
+    },
+    {
+      "id": "a1",
+      "branch": "feat-a",
+      "hash": "1798b1d",
+      "msg": "feature a",
+      "highlight": false,
+      "parents": [
+        "m1"
+      ]
+    },
+    {
+      "id": "b1",
+      "branch": "feat-b",
+      "hash": "d771b44",
+      "msg": "feature b",
+      "highlight": false,
+      "parents": [
+        "m1"
+      ]
+    },
+    {
+      "id": "c1",
+      "branch": "feat-c",
+      "hash": "4a362a0",
+      "msg": "feature c",
+      "highlight": false,
+      "parents": [
+        "m1"
+      ]
+    },
+    {
+      "id": "ma",
+      "branch": "main",
+      "hash": "199f97c",
+      "msg": "merge a",
+      "highlight": false,
+      "parents": [
+        "m1",
+        "a1"
+      ]
+    },
+    {
+      "id": "b2",
+      "branch": "feat-b",
+      "hash": "12f60f6",
+      "msg": "more b",
+      "highlight": false,
+      "parents": [
+        "b1"
+      ]
+    },
+    {
+      "id": "c2",
+      "branch": "feat-c",
+      "hash": "b1e760e",
+      "msg": "more c",
+      "highlight": false,
+      "parents": [
+        "c1"
+      ]
+    },
+    {
+      "id": "mb",
+      "branch": "main",
+      "hash": "e4f45b5",
+      "msg": "merge b",
+      "highlight": false,
+      "parents": [
+        "ma",
+        "b2"
+      ]
+    },
+    {
+      "id": "c3",
+      "branch": "feat-c",
+      "hash": "62a6989",
+      "msg": "polish c",
+      "highlight": false,
+      "parents": [
+        "c2"
+      ]
+    },
+    {
+      "id": "mc",
+      "branch": "main",
+      "hash": "0ea7150",
+      "msg": "merge c",
+      "highlight": false,
+      "parents": [
+        "mb",
+        "c3"
+      ]
+    },
+    {
+      "id": "m2",
+      "branch": "main",
+      "hash": "3e9678b",
+      "msg": "release",
+      "highlight": false,
+      "parents": [
+        "mc"
+      ]
+    }
+  ],
+  "pull_requests": []
+}

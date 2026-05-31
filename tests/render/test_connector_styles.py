@@ -14,9 +14,11 @@ from gitsvg.layout import compute_layout
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.render import render
 from gitsvg.render._primitives._connector_styles import (
+    _LANE_CHANGE_BUILDERS,
     _build_bezier,
     _build_double_bezier,
     _build_double_rounded,
+    _build_lane_change_stepped,
     _build_rounded,
     _build_straight,
     _ConnectorGeometry,
@@ -129,6 +131,32 @@ def test_double_rounded_emits_two_arcs() -> None:
 
     # --- assert -----------------------
     assert d.count("A") == 2
+
+
+# ==================================================================================================
+#  Lane-change builders — symmetric double-bend, one per style
+# ==================================================================================================
+def test_lane_change_registry_delegates_per_family() -> None:
+    """straight → diagonal; bezier family → the symmetric S; rounded family → the centered step."""
+    # --- assert -----------------------
+    assert _LANE_CHANGE_BUILDERS[BranchLineStyle.STRAIGHT] is _build_straight
+    assert _LANE_CHANGE_BUILDERS[BranchLineStyle.BEZIER] is _build_double_bezier
+    assert _LANE_CHANGE_BUILDERS[BranchLineStyle.DOUBLE_BEZIER] is _build_double_bezier
+    assert _LANE_CHANGE_BUILDERS[BranchLineStyle.ROUNDED] is _build_lane_change_stepped
+    assert _LANE_CHANGE_BUILDERS[BranchLineStyle.DOUBLE_ROUNDED] is _build_lane_change_stepped
+
+
+def test_lane_change_stepped_centers_the_crossing() -> None:
+    """The stepped lane-change centers its crossing at the row midpoint — unlike the trunk-biased tee."""
+    # --- act --------------------------
+    d = _path_d(_build_lane_change_stepped, _GEOM)
+
+    # --- assert -----------------------
+    midpoint_y = (_GEOM.y1 + _GEOM.y2) / 2  # 25.0 — commit axis is vertical here
+    numbers = [float(n) for n in re.findall(r"-?\d+\.?\d*", d)]
+    assert d.count("A") == 2
+    assert midpoint_y in numbers  # crossing sits at the midpoint
+    assert _path_d(_build_double_rounded, _GEOM) != d  # the tee is trunk-biased, not centered
 
 
 # ==================================================================================================
