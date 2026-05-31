@@ -8,6 +8,13 @@
       "id": "b0",
       "name": "main",
       "branch_pos": 0,
+      "segments": [
+        {
+          "lane": 0,
+          "start": 0,
+          "end": 4
+        }
+      ],
       "start": 0,
       "end": 4
     }

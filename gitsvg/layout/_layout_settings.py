@@ -8,8 +8,8 @@ land here. The pipeline-split meta-test enforces that `gitsvg/layout/`
 keeps consuming only this class (and `State`), never `Theme`.
 
 Constructed by `Theme.split()` and handed to `compute_layout` alongside
-`State`. It is the architectural home for layout-policy fields (today
-`commit_row_mode`; future tenants include lane-reuse policy, branch-axis
+`State`. It is the architectural home for layout-policy fields (`commit_row_mode`,
+`auto_lane_change`; future tenants include lane-reuse policy, branch-axis
 hints, and pin policy for the rebase-rebuild pattern).
 """
 
@@ -29,3 +29,4 @@ class LayoutSettings(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     commit_row_mode: CommitRowMode = CommitRowMode.SHARED
+    auto_lane_change: bool = False

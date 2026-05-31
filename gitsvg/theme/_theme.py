@@ -62,6 +62,7 @@ class Theme(BaseModel):
     #  Layout policy (consumed by the layout stage via `LayoutSettings`)
     # --------------------------------------------------------------------------
     commit_row_mode: CommitRowMode | None = None  # axis-bound: commit-axis (row packing)
+    auto_lane_change: bool | None = None  # axis-bound: branch-axis (mid-life lane migration)
 
     # --------------------------------------------------------------------------
     #  Spacing (px)
@@ -252,10 +253,10 @@ class Theme(BaseModel):
         that `gitsvg/layout/` and `gitsvg/render/` keep their imports
         narrow.
 
-        `LayoutSettings` carries the layout-policy fields (today just
-        `commit_row_mode`); `RendererSettings` structurally mirrors
-        `Theme` and carries every field — the layout-policy ones ride
-        along unused on the renderer slice.
+        `LayoutSettings` carries the layout-policy fields
+        (`commit_row_mode`, `auto_lane_change`); `RendererSettings`
+        structurally mirrors `Theme` and carries every field — the
+        layout-policy ones ride along unused on the renderer slice.
 
         Returns:
             A `(layout_settings, renderer_settings)` pair carrying the
@@ -267,7 +268,10 @@ class Theme(BaseModel):
         from gitsvg.layout._layout_settings import LayoutSettings
         from gitsvg.render._renderer_settings import RendererSettings
 
-        return LayoutSettings(commit_row_mode=self.commit_row_mode), RendererSettings(**self.model_dump())
+        return (
+            LayoutSettings(commit_row_mode=self.commit_row_mode, auto_lane_change=self.auto_lane_change),
+            RendererSettings(**self.model_dump()),
+        )
 
     # --------------------------------------------------------------------------
     #  Resolved-pixel accessors for ratio-stored fields

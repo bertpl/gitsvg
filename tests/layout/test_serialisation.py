@@ -140,6 +140,7 @@ def test_branch_carries_id_name_and_grid_positions() -> None:
 
     # --- assert -----------------------
     branch = payload["branches"][0]
-    assert set(branch.keys()) == {"id", "name", "branch_pos", "start", "end"}
+    assert set(branch.keys()) == {"id", "name", "branch_pos", "segments", "start", "end"}
     assert branch["id"] == "b0"
     assert branch["name"] == "main"
+    assert branch["segments"] == [{"lane": 0, "start": 0, "end": 0}]

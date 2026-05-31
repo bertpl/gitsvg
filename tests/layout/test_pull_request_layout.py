@@ -53,13 +53,16 @@ def test_pr_endpoints_track_current_branch_tips() -> None:
     feat = by_name["feat"]
     main = by_name["main"]
 
-    # Arc starts at source tip — the row of feat's latest commit (f1).
-    assert pr.branch_point.branch_pos == feat.lane_at(feat.end)
-    assert pr.branch_point.commit_pos == feat.end
+    # Projected merge row = one past the latest of the two branches' last
+    # commits — derived from commit rows, not the (PR-extended) branch ends.
+    projected = max(layout.commits["f1"].commit_pos, layout.commits["m1"].commit_pos) + 1
 
-    # Arc lands on into's lane at the projected merge row.
-    assert pr.trunk_point.branch_pos == main.lane_at(pr.trunk_point.commit_pos)
-    assert pr.trunk_point.commit_pos == max(feat.end, main.end) + 1
+    # The connector is a single-row hop: it lands on into's lane at the
+    # projected row, and starts one row below on the source lane.
+    assert pr.trunk_point.commit_pos == projected
+    assert pr.trunk_point.branch_pos == main.lane_at(projected)
+    assert pr.branch_point.commit_pos == projected - 1
+    assert pr.branch_point.branch_pos == feat.lane_at(projected - 1)
 
 
 def test_pr_without_title_has_none_title() -> None:

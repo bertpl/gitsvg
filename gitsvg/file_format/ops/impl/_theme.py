@@ -80,6 +80,10 @@ class ThemeOp(OpBase):
         default=None,
         description="How commits pack along the commit axis: `shared` (default; commits on different branches may share a row, keeping the diagram compact) or `unique` (every commit gets its own row, assigned in authoring order, so vertical position strictly encodes the order events were declared).",
     )
+    auto_lane_change: bool | None = Field(
+        default=None,
+        description="When `true`, a branch migrates toward lower lane indices as lower lanes free up (a lower-lane branch ends), so live branches always occupy the lowest lanes; when `false` (default) a branch keeps its assigned lane for its whole life. Mutually exclusive with any `branch:` op that sets `branch_pos` (E221).",
+    )
 
     # --- Spacing (px) -----------------------------------
     branch_spacing: NonNegativeFloat | None = Field(

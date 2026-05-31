@@ -147,7 +147,13 @@ def render(layout: Layout, theme: RendererSettings | None = None) -> draw.Drawin
         color = color_for(branch.id)
         for arc in arcs_by_branch[branch.id]:
             draw_arc(
-                d, trunk_point=arc.trunk_point, branch_point=arc.branch_point, canvas=canvas, theme=theme, color=color
+                d,
+                trunk_point=arc.trunk_point,
+                branch_point=arc.branch_point,
+                canvas=canvas,
+                theme=theme,
+                color=color,
+                kind=arc.kind,
             )
         draw_branch_line(d, branch, color, canvas, theme)
         for pr in prs_by_branch[branch.id]:

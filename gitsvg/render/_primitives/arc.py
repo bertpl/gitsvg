@@ -23,10 +23,11 @@ mapping handles `lr` / `rl` (where the branch axis is screen-vertical).
 
 import drawsvg as draw
 
-from gitsvg.layout import GridSlot
+from gitsvg.layout import GridSlot, LayoutArcKind
 from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._primitives._connector_styles import _CONNECTOR_BUILDERS, _connector_geometry
 from gitsvg.render._renderer_settings import RendererSettings
+from gitsvg.theme._branch_line_style import BranchLineStyle
 
 
 def draw_arc(
@@ -38,20 +39,29 @@ def draw_arc(
     theme: RendererSettings,
     color: str,
     stroke_dasharray: str | None = None,
+    kind: LayoutArcKind | None = None,
 ) -> None:
     """Append a connector between a trunk point and a branch point.
 
-    The connector's shape is `theme.branch_line_style` (`rounded` /
-    `straight` / `bezier` / `double_rounded`), dispatched through the
-    `_connector_styles` registry. `rounded` is the default and renders
-    byte-identically to prior versions.
+    Branch-off / merge / pull-request connectors take their shape from
+    `theme.branch_line_style` (`rounded` / `straight` / `bezier` /
+    `double_rounded`), dispatched through the `_connector_styles`
+    registry. `rounded` is the default and renders byte-identically to
+    prior versions.
+
+    A lane-change connector (`kind=LANE_CHANGE`) renders as a straight
+    segment regardless of `theme.branch_line_style` — an interim shape;
+    per-style lane-change geometry becomes first-class when the
+    `_LANE_CHANGE_BUILDERS` registry lands.
 
     Args:
         d: The drawing to append to.
         trunk_point: The endpoint on the ongoing branch — the parent
-            commit for a branch-off, the merge commit for a merge.
+            commit for a branch-off, the merge commit for a merge, the
+            old-lane tail for a lane-change.
         branch_point: The endpoint on a branch's own line — that branch's
-            start (branch-off) or tip (merge).
+            start (branch-off), tip (merge), or new-lane head
+            (lane-change).
         canvas: Effective canvas spec, used for the geometry transform.
         theme: Resolved theme; supplies the connector style, corner
             radius, and stroke width.
@@ -60,6 +70,9 @@ def draw_arc(
             `"6,4"`). When set, the whole connector is rendered with that
             dash pattern; pull-request connectors pass one to stand apart
             from a real merge.
+        kind: The connector's role. `LANE_CHANGE` forces the straight
+            builder; every other value (and `None`, for pull requests)
+            dispatches on `theme.branch_line_style`.
     """
     geom = _connector_geometry(trunk_point, branch_point, canvas, theme)
 
@@ -73,5 +86,6 @@ def draw_arc(
         path_kwargs["stroke_dasharray"] = stroke_dasharray
 
     path = draw.Path(**path_kwargs)
-    _CONNECTOR_BUILDERS[theme.branch_line_style](path, geom)
+    style = BranchLineStyle.STRAIGHT if kind is LayoutArcKind.LANE_CHANGE else theme.branch_line_style
+    _CONNECTOR_BUILDERS[style](path, geom)
     d.append(path)
