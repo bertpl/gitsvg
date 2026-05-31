@@ -7,13 +7,13 @@
 <path d="M206.49217099999998,12.5 L206.49217099999998,337.5" stroke="#b8b8b8" stroke-width="0.7" stroke-dasharray="4,4" />
 <path d="M306.492171,12.5 L306.492171,337.5" stroke="#b8b8b8" stroke-width="0.7" stroke-dasharray="4,4" />
 <path d="M106.492171,325.0 L106.492171,25.0" stroke="#4a4f5a" stroke-width="2" stroke-linecap="round" />
-<path d="M106.492171,325.0 L186.49217099999998,325.0 A20,20,0,0,0,206.49217099999998,305.0 L206.49217099999998,275.0" stroke="#56b393" stroke-width="2" fill="none" stroke-linecap="round" />
-<path d="M206.49217099999998,275.0 L206.49217099999998,245.0 A20,20,0,0,0,186.49217099999998,225.0 L106.492171,225.0" stroke="#56b393" stroke-width="2" fill="none" stroke-linecap="round" />
-<path d="M106.492171,325.0 L286.492171,325.0 A20,20,0,0,0,306.492171,305.0 L306.492171,275.0" stroke="#6b8bc2" stroke-width="2" fill="none" stroke-linecap="round" />
-<path d="M306.492171,225.0 L306.492171,195.0 A20,20,0,0,0,286.492171,175.0 L106.492171,175.0" stroke="#6b8bc2" stroke-width="2" fill="none" stroke-linecap="round" />
+<path d="M106.492171,325.0 C206.49217099999998,312.5,206.49217099999998,312.5,206.49217099999998,275.0" stroke="#56b393" stroke-width="2" fill="none" stroke-linecap="round" />
+<path d="M206.49217099999998,275.0 C206.49217099999998,237.5,206.49217099999998,237.5,106.492171,225.0" stroke="#56b393" stroke-width="2" fill="none" stroke-linecap="round" />
+<path d="M106.492171,325.0 C306.492171,312.5,306.492171,312.5,306.492171,275.0" stroke="#6b8bc2" stroke-width="2" fill="none" stroke-linecap="round" />
+<path d="M306.492171,225.0 C306.492171,187.5,306.492171,187.5,106.492171,175.0" stroke="#6b8bc2" stroke-width="2" fill="none" stroke-linecap="round" />
 <path d="M306.492171,275.0 L306.492171,225.0" stroke="#6b8bc2" stroke-width="2" stroke-linecap="round" />
-<path d="M106.492171,125.0 L186.49217099999998,125.0 A20,20,0,0,0,206.49217099999998,105.0 L206.49217099999998,75.0" stroke="#c06b8b" stroke-width="2" fill="none" stroke-linecap="round" />
-<path d="M206.49217099999998,75.0 L206.49217099999998,45.0 A20,20,0,0,0,186.49217099999998,25.0 L106.492171,25.0" stroke="#c06b8b" stroke-width="2" fill="none" stroke-linecap="round" />
+<path d="M106.492171,125.0 C206.49217099999998,112.5,206.49217099999998,112.5,206.49217099999998,75.0" stroke="#c06b8b" stroke-width="2" fill="none" stroke-linecap="round" />
+<path d="M206.49217099999998,75.0 C206.49217099999998,37.5,206.49217099999998,37.5,106.492171,25.0" stroke="#c06b8b" stroke-width="2" fill="none" stroke-linecap="round" />
 <circle cx="106.492171" cy="325.0" r="5" fill="#4a4f5a" stroke="white" stroke-width="1.5" />
 <circle cx="206.49217099999998" cy="275.0" r="5" fill="#56b393" stroke="white" stroke-width="1.5" />
 <circle cx="306.492171" cy="275.0" r="5" fill="#6b8bc2" stroke="white" stroke-width="1.5" />

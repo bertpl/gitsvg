@@ -4,7 +4,7 @@ from gitsvg.layout import compute_layout
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.render import render
 from gitsvg.state import apply_ops
-from gitsvg.theme import Orientation
+from gitsvg.theme import BranchLineStyle, Orientation
 from gitsvg.theme.themes import DarkTheme
 
 
@@ -45,6 +45,7 @@ def test_dark_theme_inherits_non_colour_defaults() -> None:
     assert theme.commit_radius == 5
     assert theme.commit_stroke_width == 1.5
     assert theme.default_branch_color_cycle == ["branch1", "branch2", "branch3", "branch4"]
+    assert theme.branch_line_style is BranchLineStyle.BEZIER  # inherits the default bezier connector
 
 
 def test_dark_theme_build_with_user_overrides_layers_on_palette() -> None:

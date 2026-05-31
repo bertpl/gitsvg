@@ -6,9 +6,9 @@
 <path d="M100.0,12.5 L100.0,187.5" stroke="#b8b8b8" stroke-width="0.7" stroke-dasharray="4,4" />
 <path d="M200.0,12.5 L200.0,187.5" stroke="#b8b8b8" stroke-width="0.7" stroke-dasharray="4,4" />
 <path d="M100.0,175.0 L100.0,25.0" stroke="#4a4f5a" stroke-width="2" stroke-linecap="round" />
-<path d="M100.0,175.0 L180.0,175.0 A20,20,0,0,0,200.0,155.0 L200.0,125.0" stroke="#56b393" stroke-width="2" fill="none" stroke-linecap="round" />
+<path d="M100.0,175.0 C200.0,162.5,200.0,162.5,200.0,125.0" stroke="#56b393" stroke-width="2" fill="none" stroke-linecap="round" />
 <path d="M200.0,125.0 L200.0,75.0" stroke="#56b393" stroke-width="2" stroke-linecap="round" />
-<path d="M200.0,75.0 L200.0,45.0 A20,20,0,0,0,180.0,25.0 L100.0,25.0" stroke="#56b393" stroke-width="2" fill="none" stroke-linecap="round" stroke-dasharray="2,6" />
+<path d="M200.0,75.0 C200.0,37.5,200.0,37.5,100.0,25.0" stroke="#56b393" stroke-width="2" fill="none" stroke-linecap="round" stroke-dasharray="2,6" />
 <circle cx="100.0" cy="175.0" r="5" fill="#4a4f5a" stroke="white" stroke-width="1.5" />
 <circle cx="200.0" cy="125.0" r="5" fill="#56b393" stroke="white" stroke-width="1.5" />
 <circle cx="200.0" cy="75.0" r="5" fill="#56b393" stroke="white" stroke-width="1.5" />

@@ -168,8 +168,8 @@ class DefaultTheme(Theme):
 
     @classmethod
     def _resolve_branch_line_style(cls) -> BranchLineStyle:
-        """Connector shape between lanes — the rounded quarter-arc elbow."""
-        return BranchLineStyle.ROUNDED
+        """Connector shape between lanes — the single flowing bezier curve."""
+        return BranchLineStyle.BEZIER
 
     @classmethod
     def _resolve_merge_commit_style(cls) -> MergeCommitStyle:

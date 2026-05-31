@@ -6,7 +6,7 @@
 <path d="M105.83690100000001,12.5 L105.83690100000001,237.5" stroke="#b8b8b8" stroke-width="0.7" stroke-dasharray="4,4" />
 <path d="M205.836901,12.5 L205.836901,237.5" stroke="#b8b8b8" stroke-width="0.7" stroke-dasharray="4,4" />
 <path d="M105.83690100000001,225.0 L105.83690100000001,125.0" stroke="#4a4f5a" stroke-width="2" stroke-linecap="round" />
-<path d="M105.83690100000001,125.0 L185.836901,125.0 A20,20,0,0,0,205.836901,105.0 L205.836901,75.0" stroke="#56b393" stroke-width="2" fill="none" stroke-linecap="round" />
+<path d="M105.83690100000001,125.0 C205.836901,112.5,205.836901,112.5,205.836901,75.0" stroke="#56b393" stroke-width="2" fill="none" stroke-linecap="round" />
 <path d="M205.836901,75.0 L205.836901,25.0" stroke="#56b393" stroke-width="2" stroke-linecap="round" />
 <circle cx="105.83690100000001" cy="225.0" r="5" fill="#4a4f5a" stroke="white" stroke-width="1.5" />
 <circle cx="105.83690100000001" cy="175.0" r="5" fill="#4a4f5a" stroke="white" stroke-width="1.5" />

@@ -47,7 +47,7 @@ def test_default_theme_values_pin_the_byte_identical_baseline() -> None:
     assert DEFAULT_THEME.colors["branch1"] == "#56b393"
     assert DEFAULT_THEME.default_branch_color_cycle == ["branch1", "branch2", "branch3", "branch4"]
     # Refreshed visual vocabulary.
-    assert DEFAULT_THEME.branch_line_style is BranchLineStyle.ROUNDED
+    assert DEFAULT_THEME.branch_line_style is BranchLineStyle.BEZIER
     assert DEFAULT_THEME.merge_commit_style is MergeCommitStyle.CHECKMARK
     # `"white"` (not `"#ffffff"`) preserves the byte-identical SVG output the
     # renderer emitted before this field became themeable.
