@@ -49,6 +49,7 @@ Heuristic notes:
 
 from gitsvg.layout._layout import (
     GridSlot,
+    LaneSegment,
     Layout,
     LayoutArc,
     LayoutBranch,
@@ -56,6 +57,7 @@ from gitsvg.layout._layout import (
     LayoutGrid,
     LayoutPullRequest,
 )
+from gitsvg.layout._layout_arc_kind import LayoutArcKind
 from gitsvg.layout._layout_settings import LayoutSettings
 from gitsvg.layout._occupancy import Occupancy
 from gitsvg.state import State
@@ -129,7 +131,7 @@ def compute_layout(state: State, layout_settings: LayoutSettings | None = None) 
         LayoutBranch(
             id=state.branches[name].id,
             name=name,
-            branch_pos=branch_pos_by_name[name],
+            segments=[LaneSegment(lane=branch_pos_by_name[name], start=branch_starts[name], end=branch_ends[name])],
             start=branch_starts[name],
             end=branch_ends[name],
         )
@@ -415,8 +417,9 @@ def _branch_off_arcs(
         branch_layout = branch_layouts_by_name[name]
         arcs.append(
             LayoutArc(
+                kind=LayoutArcKind.BRANCH_OFF,
                 trunk_point=GridSlot(parent_layout.branch_pos, parent_layout.commit_pos),
-                branch_point=GridSlot(branch_layout.branch_pos, branch_layout.start),
+                branch_point=GridSlot(branch_layout.lane_at(branch_layout.start), branch_layout.start),
             )
         )
     return arcs
@@ -438,6 +441,7 @@ def _merge_arcs(
                 continue
             arcs.append(
                 LayoutArc(
+                    kind=LayoutArcKind.MERGE,
                     trunk_point=GridSlot(commit_layout.branch_pos, commit_layout.commit_pos),
                     branch_point=GridSlot(parent_layout.branch_pos, parent_layout.commit_pos),
                 )
@@ -474,8 +478,8 @@ def _build_pull_requests(state: State, branches: list[LayoutBranch]) -> list[Lay
         pull_requests.append(
             LayoutPullRequest(
                 id=pr_id,
-                trunk_point=GridSlot(into_branch.branch_pos, projected_merge_pos),
-                branch_point=GridSlot(from_branch.branch_pos, from_branch.end),
+                trunk_point=GridSlot(into_branch.lane_at(projected_merge_pos), projected_merge_pos),
+                branch_point=GridSlot(from_branch.lane_at(from_branch.end), from_branch.end),
                 title=pr_state.title,
             )
         )
@@ -499,7 +503,7 @@ def _compute_grid(
     """
     user_grid = state.grid
 
-    max_branch_pos = max((b.branch_pos for b in branches), default=0)
+    max_branch_pos = max((seg.lane for b in branches for seg in b.segments), default=0)
     max_commit_pos_from_commits = max((c.commit_pos for c in commit_layouts.values()), default=-1)
     max_commit_pos_from_branches = max((b.end for b in branches), default=-1)
     max_commit_pos_from_prs = max((pr.trunk_point.commit_pos for pr in pull_requests), default=-1)

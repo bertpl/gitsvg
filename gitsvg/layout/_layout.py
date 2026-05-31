@@ -25,6 +25,8 @@ lane-reuse, future left-to-right orientations) all produce the same
 
 from dataclasses import dataclass, field
 
+from gitsvg.layout._layout_arc_kind import LayoutArcKind
+
 
 @dataclass(slots=True)
 class GridSlot:
@@ -60,6 +62,26 @@ class LayoutGrid:
 
 
 @dataclass(slots=True)
+class LaneSegment:
+    """One contiguous stretch of a branch's life spent on a single lane.
+
+    A branch with a static lane has exactly one segment spanning its
+    whole life; a branch that migrates lanes mid-life has one segment per
+    lane it occupies, ordered along the commit axis and jointly covering
+    `[branch.start, branch.end]`.
+
+    Attributes:
+        lane: Slot index along the branch axis for this stretch.
+        start: Commit-axis position where this stretch begins (inclusive).
+        end: Commit-axis position where this stretch ends (inclusive).
+    """
+
+    lane: int  # axis-bound: branch-axis (slot index)
+    start: int  # axis-bound: commit-axis (slot index)
+    end: int  # axis-bound: commit-axis (slot index)
+
+
+@dataclass(slots=True)
 class LayoutBranch:
     """One branch as the renderer should draw it.
 
@@ -68,7 +90,10 @@ class LayoutBranch:
             renderer uses this to look up per-branch presentational
             overrides (colour, label-side) on the resolved theme.
         name: Branch name (used to draw the name pill).
-        branch_pos: Slot index along the branch axis (the lane).
+        segments: The lanes this branch occupies over its life, ordered
+            along the commit axis and jointly covering `[start, end]`. A
+            static-lane branch has exactly one segment; a migrating
+            branch has one per lane stretch.
         start: Commit-axis position where the branch begins (the
             branch-off point — for non-root branches this is one slot
             above the parent commit's `commit_pos`).
@@ -78,9 +103,28 @@ class LayoutBranch:
 
     id: str
     name: str
-    branch_pos: int  # axis-bound: branch-axis (slot index)
+    segments: list["LaneSegment"]
     start: int  # axis-bound: commit-axis (slot index)
     end: int  # axis-bound: commit-axis (slot index)
+
+    def lane_at(self, row: int) -> int:
+        """Return the lane this branch occupies at commit-axis `row`.
+
+        Rows below the first segment clamp to the first segment's lane
+        and rows above the last segment clamp to the last segment's lane,
+        so callers can query projected positions just past the tip (e.g.
+        a pull request's projected merge row).
+
+        Args:
+            row: Commit-axis slot index to resolve.
+
+        Returns:
+            The lane (branch-axis slot index) occupied at `row`.
+        """
+        for segment in self.segments:
+            if row <= segment.end:
+                return segment.lane
+        return self.segments[-1].lane
 
 
 @dataclass(slots=True)
@@ -131,12 +175,16 @@ class LayoutArc:
     - **colour** is the branch passing through the branch point.
 
     Attributes:
+        kind: What the connector represents (branch-off, merge, or
+            lane-change). Carried explicitly because geometry alone
+            cannot tell a lane-change apart from a branch-off / merge.
         trunk_point: Where the connector tees laterally into the ongoing
             branch (the lateral leg).
         branch_point: Where the connector aligns with a branch's own
             line — that branch's start or tip (the tangent leg).
     """
 
+    kind: LayoutArcKind
     trunk_point: GridSlot
     branch_point: GridSlot
 

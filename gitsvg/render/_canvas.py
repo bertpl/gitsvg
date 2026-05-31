@@ -192,7 +192,7 @@ def _auto_fit_branch_axis_edge(layout: Layout, theme: RendererSettings, *, edge:
     """
     branches = layout.branches
     commit_layouts = layout.commits
-    max_branch_pos = max((b.branch_pos for b in branches), default=0)
+    max_branch_pos = max((seg.lane for b in branches for seg in b.segments), default=0)
     target_lane = 0 if edge == "lower" else max_branch_pos
     matching_label_side = LabelSide.BEFORE if edge == "lower" else LabelSide.AFTER
 
@@ -201,7 +201,7 @@ def _auto_fit_branch_axis_edge(layout: Layout, theme: RendererSettings, *, edge:
 
     needed: float = 0.0
     for branch in branches:
-        if branch.branch_pos == target_lane:
+        if branch.lane_at(branch.start) == target_lane:
             extent = (pill_width(branch.name, theme) / 2) if is_vertical else (pill_height / 2)
             needed = max(needed, extent + _AUTO_FIT_EDGE_PAD_PX)
     for commit in commit_layouts.values():

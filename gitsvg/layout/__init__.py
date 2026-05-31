@@ -17,6 +17,7 @@ on the resolved `Theme` the renderer reads.
 from gitsvg.layout._engine import compute_layout
 from gitsvg.layout._layout import (
     GridSlot,
+    LaneSegment,
     Layout,
     LayoutArc,
     LayoutBranch,
@@ -24,12 +25,15 @@ from gitsvg.layout._layout import (
     LayoutGrid,
     LayoutPullRequest,
 )
+from gitsvg.layout._layout_arc_kind import LayoutArcKind
 from gitsvg.layout._serialisation import layout_to_json
 
 __all__ = [
     "GridSlot",
+    "LaneSegment",
     "Layout",
     "LayoutArc",
+    "LayoutArcKind",
     "LayoutBranch",
     "LayoutCommit",
     "LayoutGrid",

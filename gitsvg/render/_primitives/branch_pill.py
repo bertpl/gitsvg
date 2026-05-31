@@ -33,7 +33,7 @@ def draw_branch_pill(
 ) -> None:
     """Append a branch-name pill (background rectangle + text) to the drawing."""
     x, y = offset_position(
-        anchor_branch_pos=branch.branch_pos,
+        anchor_branch_pos=branch.lane_at(branch.start),
         anchor_commit_pos=branch.start,
         branch_axis_offset_in_lanes=theme.branch_name_pill_offset_branch_axis_in_lanes,
         commit_axis_offset_in_rows=theme.branch_name_pill_offset_commit_axis_in_rows,
