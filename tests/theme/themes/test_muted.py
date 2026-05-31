@@ -1,7 +1,7 @@
 """Tests for `MutedTheme` — the pre-refresh default look, preserved as a named theme.
 
 Covers the two halves of the refresh: that the package `default` now
-resolves to the refreshed values (saturated palette, bezier connectors,
+resolves to the refreshed values (saturated palette, rounded connectors,
 checkmark merge dots), and that `muted` pins exactly those three fields
 back so it reproduces the pre-refresh default everywhere else.
 """
@@ -32,7 +32,7 @@ _REFRESHED_PALETTE = {
 #  Refreshed default carries the new vocabulary
 # ==================================================================================================
 def test_default_theme_uses_refreshed_palette_and_styles() -> None:
-    """The package default resolves to the saturated palette, bezier connectors, and checkmark merge dots."""
+    """The package default resolves to the saturated palette, rounded connectors, and checkmark merge dots."""
     # --- arrange / act ----------------
     theme = DEFAULT_THEME
 
