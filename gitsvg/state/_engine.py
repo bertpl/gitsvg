@@ -46,7 +46,7 @@ from gitsvg.state._apply import (
     apply_remove_op,
 )
 from gitsvg.state._state import State
-from gitsvg.theme import Theme, ThemeBuilder
+from gitsvg.theme import CommitLabelLayout, CommitRowMode, Orientation, Theme, ThemeBuilder
 
 # Leaf-path import: pulls in `State` for the shared handler signature,
 # so the package-level `gitsvg.theme.__init__` deliberately does not
@@ -80,6 +80,7 @@ def apply_ops(parsed_ops: list[ParsedOp], report: ValidationReport) -> tuple[Sta
         _apply_one(state, builder, parsed, report)
     theme = builder.build()
     _check_auto_lane_change_conflicts(state, builder, theme, report)
+    _check_table_mode_conflicts(builder, theme, report)
     return state, theme
 
 
@@ -175,6 +176,63 @@ def _check_merge_lane_clearance_conflict(builder: ThemeBuilder, theme: Theme, re
             field="merge_lane_clearance",
         )
     )
+
+
+def _check_table_mode_conflicts(builder: ThemeBuilder, theme: Theme, report: ValidationReport) -> None:
+    """Emit the table-mode mutual-exclusion errors (E223, E224).
+
+    `commit_label_layout: table` lays commit metadata out as a column
+    table beside the graph — a layout only the vertical orientations
+    support, and one that needs exactly one commit per row. So table mode
+    conflicts with a horizontal orientation (E223) and with an explicit
+    `commit_row_mode: shared` (E224). Both are checked on the resolved
+    theme at end-of-apply, mirroring the `auto_lane_change` conflicts: the
+    final resolved layout is what matters, and a later named-theme switch
+    that drops table mode clears the conflict on its own.
+
+    `split()` already forces `commit_row_mode → unique` under table mode,
+    so E224 fires only when the user *explicitly* set `shared` — the
+    contradiction is the mistake, not the (silently honoured) unset case.
+
+    Args:
+        builder: The theme builder, carrying `user_set` and the
+            originating op lines (`user_set_lines`).
+        theme: The resolved theme, carrying `commit_label_layout` and
+            `orientation`.
+        report: Receives the conflict errors.
+    """
+    if theme.commit_label_layout != CommitLabelLayout.TABLE:
+        return
+
+    if theme.orientation in (Orientation.LR, Orientation.RL):
+        file, line = builder.user_set_lines.get("commit_label_layout", (None, 0))
+        report.add(
+            ValidationError(
+                file=file,
+                line=line,
+                code="E223",
+                message=(
+                    "theme.commit_label_layout 'table' is supported only in vertical orientations "
+                    f"(got {theme.orientation.value!r}); use a vertical orientation or 'inline' labels"
+                ),
+                field="commit_label_layout",
+            )
+        )
+
+    if builder.user_set.get("commit_row_mode") == CommitRowMode.SHARED:
+        file, line = builder.user_set_lines.get("commit_row_mode", (None, 0))
+        report.add(
+            ValidationError(
+                file=file,
+                line=line,
+                code="E224",
+                message=(
+                    "theme.commit_row_mode 'shared' conflicts with commit_label_layout 'table' "
+                    "(table mode lays one commit per row); drop commit_row_mode or set it to 'unique'"
+                ),
+                field="commit_row_mode",
+            )
+        )
 
 
 def _apply_one(state: State, builder: ThemeBuilder, parsed: ParsedOp, report: ValidationReport) -> None:

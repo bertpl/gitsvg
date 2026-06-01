@@ -35,6 +35,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 from gitsvg.file_format import LabelSide
 from gitsvg.theme._box_anchor import BoxAnchor, validate_box_anchor
 from gitsvg.theme._branch_line_style import BranchLineStyle
+from gitsvg.theme._commit_label_layout import CommitLabelLayout
 from gitsvg.theme._commit_row_mode import CommitRowMode
 from gitsvg.theme._merge_commit_style import MergeCommitStyle
 from gitsvg.theme._orientation import Orientation
@@ -167,6 +168,18 @@ class Theme(BaseModel):
     commit axis (horizontal stripes in `bt`/`tb`, vertical in `lr`/`rl`)."""
 
     # --------------------------------------------------------------------------
+    #  Table layout
+    # --------------------------------------------------------------------------
+    commit_label_layout: CommitLabelLayout | None = None  # axis-bound: commit-axis (label placement)
+    """How commit labels are placed: `inline` (free-floating beside each dot,
+    the default) or `table` (fixed-width columns beside the graph, one row per
+    commit). `table` is vertical-orientations-only and forces
+    `commit_row_mode: unique`."""
+    table_hash_width: int | None = None  # px along the branch axis; 0 = field omitted, space reclaimed
+    table_branch_width: int | None = None  # px along the branch axis; 0 = field omitted, space reclaimed
+    table_msg_width: int | None = None  # px along the branch axis; 0 = field omitted, space reclaimed
+
+    # --------------------------------------------------------------------------
     #  Label-side defaults
     # --------------------------------------------------------------------------
     label_side_default: LabelSide = LabelSide.AFTER
@@ -210,6 +223,14 @@ class Theme(BaseModel):
     @classmethod
     def _merge_lane_clearance_non_negative(cls, v: int | None) -> int | None:
         """Reject negative clearance — a lane can't be reserved for fewer than zero rows."""
+        if v is not None and v < 0:
+            raise ValueError("must be >= 0")
+        return v
+
+    @field_validator("table_hash_width", "table_branch_width", "table_msg_width")
+    @classmethod
+    def _table_widths_non_negative(cls, v: int | None) -> int | None:
+        """Reject negative table column widths — `0` disables a column, below that is meaningless."""
         if v is not None and v < 0:
             raise ValueError("must be >= 0")
         return v
@@ -273,10 +294,11 @@ class Theme(BaseModel):
         narrow.
 
         `LayoutSettings` carries the layout-policy fields
-        (`commit_row_mode`, `auto_lane_change`, `merge_lane_clearance`);
-        `RendererSettings` structurally mirrors `Theme` and carries every
-        field — the layout-policy ones ride along unused on the renderer
-        slice.
+        (`commit_row_mode`, `auto_lane_change`, `merge_lane_clearance`),
+        with `commit_row_mode` resolved to `unique` when
+        `commit_label_layout` is `table`; `RendererSettings` structurally
+        mirrors `Theme` and carries every field — the layout-policy ones
+        ride along unused on the renderer slice.
 
         Returns:
             A `(layout_settings, renderer_settings)` pair carrying the
@@ -288,9 +310,18 @@ class Theme(BaseModel):
         from gitsvg.layout._layout_settings import LayoutSettings
         from gitsvg.render._renderer_settings import RendererSettings
 
+        # Table mode lays one commit per row, so it forces `unique` row packing
+        # regardless of the `commit_row_mode` field. This is the single place
+        # "table ⇒ unique" lives; the layout engine never learns about table
+        # mode. A user who *explicitly* set `shared` alongside table mode is
+        # flagged separately (E224) — the forcing here covers the unset case.
+        effective_row_mode = (
+            CommitRowMode.UNIQUE if self.commit_label_layout == CommitLabelLayout.TABLE else self.commit_row_mode
+        )
+
         return (
             LayoutSettings(
-                commit_row_mode=self.commit_row_mode,
+                commit_row_mode=effective_row_mode,
                 auto_lane_change=self.auto_lane_change,
                 merge_lane_clearance=self.merge_lane_clearance,
             ),

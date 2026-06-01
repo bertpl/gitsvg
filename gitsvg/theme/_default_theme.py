@@ -22,6 +22,7 @@ from typing import Any, Self
 
 from gitsvg.theme._box_anchor import BoxAnchor
 from gitsvg.theme._branch_line_style import BranchLineStyle
+from gitsvg.theme._commit_label_layout import CommitLabelLayout
 from gitsvg.theme._commit_row_mode import CommitRowMode
 from gitsvg.theme._merge_commit_style import MergeCommitStyle
 from gitsvg.theme._orientation import Orientation
@@ -472,6 +473,29 @@ class DefaultTheme(Theme):
         return None
 
     # --------------------------------------------------------------------------
+    #  Table layout
+    # --------------------------------------------------------------------------
+    @classmethod
+    def _resolve_commit_label_layout(cls) -> CommitLabelLayout:
+        """Label-placement default — `inline` (free-floating beside each dot)."""
+        return CommitLabelLayout.INLINE
+
+    @classmethod
+    def _resolve_table_hash_width(cls) -> int:
+        """Default hash-column width (px) in table mode."""
+        return 64
+
+    @classmethod
+    def _resolve_table_branch_width(cls) -> int:
+        """Default branch-name-column width (px) in table mode."""
+        return 120
+
+    @classmethod
+    def _resolve_table_msg_width(cls) -> int:
+        """Default message-column width (px) in table mode."""
+        return 480
+
+    # --------------------------------------------------------------------------
     #  Factory
     # --------------------------------------------------------------------------
     @classmethod
@@ -591,6 +615,10 @@ class DefaultTheme(Theme):
             branch_label_bg_opacity=pick("branch_label_bg_opacity", cls._resolve_branch_label_bg_opacity),
             background_color=pick("background_color", cls._resolve_background_color),
             commit_row_band_color=pick("commit_row_band_color", cls._resolve_commit_row_band_color),
+            commit_label_layout=pick("commit_label_layout", cls._resolve_commit_label_layout),
+            table_hash_width=pick("table_hash_width", cls._resolve_table_hash_width),
+            table_branch_width=pick("table_branch_width", cls._resolve_table_branch_width),
+            table_msg_width=pick("table_msg_width", cls._resolve_table_msg_width),
         )
 
 

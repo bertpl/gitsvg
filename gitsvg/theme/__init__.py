@@ -25,6 +25,7 @@ from gitsvg.theme._box_anchor import BoxAnchor, validate_box_anchor
 from gitsvg.theme._branch_line_style import BranchLineStyle
 from gitsvg.theme._builder import ThemeBuilder
 from gitsvg.theme._color import is_color_visible
+from gitsvg.theme._commit_label_layout import CommitLabelLayout
 from gitsvg.theme._commit_row_mode import CommitRowMode
 from gitsvg.theme._default_theme import DefaultTheme
 from gitsvg.theme._merge_commit_style import MergeCommitStyle
@@ -42,6 +43,7 @@ __all__ = [
     "DEFAULT_THEME",
     "BoxAnchor",
     "BranchLineStyle",
+    "CommitLabelLayout",
     "CommitRowMode",
     "DefaultTheme",
     "MergeCommitStyle",

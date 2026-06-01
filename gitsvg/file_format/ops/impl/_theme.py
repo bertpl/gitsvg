@@ -14,6 +14,7 @@ from gitsvg.file_format.ops.framework._types import (
 )
 from gitsvg.theme._box_anchor import BoxAnchor, validate_box_anchor
 from gitsvg.theme._branch_line_style import BranchLineStyle
+from gitsvg.theme._commit_label_layout import CommitLabelLayout
 from gitsvg.theme._commit_row_mode import CommitRowMode
 from gitsvg.theme._merge_commit_style import MergeCommitStyle
 from gitsvg.theme._orientation import Orientation, normalize_orientation
@@ -282,6 +283,22 @@ class ThemeOp(OpBase):
     commit_row_band_color: HexColor | None = Field(
         default=None,
         description="Optional zebra-stripe fill painted on alternate commit-axis rows, spanning the full canvas just above the background (any orientation; unset by default = no banding, so output is unchanged). Accepts 3/4/6/8-digit hex; an alpha channel (e.g. `#00000022`) composes the stripe over the background, while `#RGB`/`#RRGGBB` paint fully opaque.",
+    )
+    commit_label_layout: CommitLabelLayout | None = Field(
+        default=None,
+        description="How commit labels are placed: `inline` (default — `msg`/`hash` float beside each dot) or `table` (commit `hash`/branch/message laid out as fixed-width columns beside the graph, one row per commit). `table` is supported only in vertical orientations (`bt`/`tb`) and forces one commit per row (`commit_row_mode: unique`); combining it with a horizontal orientation or an explicit `commit_row_mode: shared` is rejected.",
+    )
+    table_hash_width: NonNegativeInt | None = Field(
+        default=None,
+        description="Width (px) of the hash column in `table` layout; `0` omits the column and reclaims its space. No effect outside table mode.",
+    )
+    table_branch_width: NonNegativeInt | None = Field(
+        default=None,
+        description="Width (px) of the branch-name column in `table` layout; `0` omits the column and reclaims its space. No effect outside table mode.",
+    )
+    table_msg_width: NonNegativeInt | None = Field(
+        default=None,
+        description="Width (px) of the message column in `table` layout; `0` omits the column and reclaims its space. No effect outside table mode.",
     )
     colors: dict[IdStr, HexColor] | None = Field(
         default=None,
