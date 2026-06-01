@@ -175,9 +175,8 @@ class Theme(BaseModel):
     the default) or `table` (fixed-width columns beside the graph, one row per
     commit). `table` is vertical-orientations-only and forces
     `commit_row_mode: unique`."""
-    table_hash_width: int | None = None  # px along the branch axis; 0 = field omitted, space reclaimed
-    table_branch_width: int | None = None  # px along the branch axis; 0 = field omitted, space reclaimed
     table_msg_width: int | None = None  # px along the branch axis; 0 = field omitted, space reclaimed
+    table_hash_width: int | None = None  # px along the branch axis; 0 = field omitted, space reclaimed
 
     # --------------------------------------------------------------------------
     #  Label-side defaults
@@ -227,7 +226,7 @@ class Theme(BaseModel):
             raise ValueError("must be >= 0")
         return v
 
-    @field_validator("table_hash_width", "table_branch_width", "table_msg_width")
+    @field_validator("table_msg_width", "table_hash_width")
     @classmethod
     def _table_widths_non_negative(cls, v: int | None) -> int | None:
         """Reject negative table column widths — `0` disables a column, below that is meaningless."""

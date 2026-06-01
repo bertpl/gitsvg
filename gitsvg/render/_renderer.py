@@ -28,12 +28,16 @@ Z-order (back to front):
    merge commits per `merge_commit_style`; enlarged when highlighted).
    Above the line band, below every text element.
 5. Branch-name pills (coloured rounded rectangles + branch name).
+   Skipped in `table` mode — the branch name moves to a tip pill in the
+   table's message column.
 6. Pull-request title pills (anchored half a row back from the
    projected merge row on the source branch line; only when the PR has
    a `title`).
 7. Commit labels (`msg` primary lines + optional `hash` secondary
    line, on the side indicated by `label_side`; bold msg when
-   highlighted).
+   highlighted). In `table` mode this layer is replaced by the table
+   region — message + hash columns beside the graph, with each branch's
+   name as a tip pill in its ref-target commit's message cell.
 """
 
 import copy
@@ -42,7 +46,7 @@ from collections import defaultdict
 import drawsvg as draw
 
 from gitsvg.layout import GridSlot, Layout, LayoutArc, LayoutBranch, LayoutPullRequest
-from gitsvg.render._canvas import compute_canvas
+from gitsvg.render._canvas import compute_canvas, is_table_active
 from gitsvg.render._colors import resolve_branch_color
 from gitsvg.render._primitives.arc import draw_arc
 from gitsvg.render._primitives.branch_guide import draw_branch_guide
@@ -51,8 +55,10 @@ from gitsvg.render._primitives.branch_pill import draw_branch_pill
 from gitsvg.render._primitives.commit_dot import draw_commit_dot
 from gitsvg.render._primitives.commit_label import draw_commit_label
 from gitsvg.render._primitives.commit_row_band import draw_commit_row_band
+from gitsvg.render._primitives.commit_table import draw_commit_table
 from gitsvg.render._primitives.pull_request_pill import draw_pull_request_pill
 from gitsvg.render._renderer_settings import RendererSettings
+from gitsvg.render._table import compute_table_columns
 from gitsvg.theme import DEFAULT_THEME, is_color_visible
 
 
@@ -187,15 +193,26 @@ def render(layout: Layout, theme: RendererSettings | None = None) -> draw.Drawin
         draw_commit_dot(d, commit, color_for(commit.branch_id), canvas, theme)
 
     # --- Branch-name pills ----------------------
-    for branch in layout.branches:
-        draw_branch_pill(d, branch, color_for(branch.id), canvas, theme)
+    # In table mode the branch name moves to a tip pill in the table's
+    # message column, so the branch-start pill is skipped.
+    table_active = is_table_active(theme)
+    if not table_active:
+        for branch in layout.branches:
+            draw_branch_pill(d, branch, color_for(branch.id), canvas, theme)
 
     # --- Pull-request title pills ---------------
     for pr in layout.pull_requests:
         draw_pull_request_pill(d, pr, color_for(_branch_through_point(layout, pr.branch_point).id), canvas, theme)
 
-    # --- Commit labels --------------------------
-    for commit in layout.commits.values():
-        draw_commit_label(d, commit, canvas, theme)
+    # --- Commit labels / table ------------------
+    # Inline mode draws free-floating labels beside each dot; table mode
+    # replaces them with the right-half table (message + hash columns + tip
+    # pills).
+    if table_active:
+        columns = compute_table_columns(theme.table_msg_width, theme.table_hash_width, gutter=theme.pill_padding_x)
+        draw_commit_table(d, layout, columns, canvas.table_x_origin, canvas, theme, color_for)
+    else:
+        for commit in layout.commits.values():
+            draw_commit_label(d, commit, canvas, theme)
 
     return d
