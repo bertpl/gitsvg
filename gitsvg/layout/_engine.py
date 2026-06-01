@@ -142,7 +142,12 @@ def compute_layout(state: State, layout_settings: LayoutSettings | None = None) 
     # Branches first, so each commit can resolve its lane from the
     # segment covering its row (`lane_at`) — the migrating-branch case.
     branches: list[LayoutBranch] = [
-        LayoutBranch(id=state.branches[name].id, name=name, segments=segments_by_name[name])
+        LayoutBranch(
+            id=state.branches[name].id,
+            name=name,
+            segments=segments_by_name[name],
+            tip_commit_id=_branch_tip_commit(state, name),
+        )
         for name in state.branch_order
     ]
     branch_by_name: dict[str, LayoutBranch] = {b.name: b for b in branches}
@@ -186,6 +191,26 @@ def compute_layout(state: State, layout_settings: LayoutSettings | None = None) 
 # ==================================================================================================
 #  Helpers — bookkeeping
 # ==================================================================================================
+def _branch_tip_commit(state: State, name: str) -> str | None:
+    """Return the commit a branch's ref points at — its tip, or branch-off commit when empty.
+
+    Mirrors git's ref semantics: a non-empty branch's ref points at its
+    last commit (`commit_ids[-1]`); an empty branch's ref points at the
+    commit it was branched from (`rooted_on_commit`); a never-committed
+    first branch has neither, so the ref target is None.
+
+    Args:
+        state: The fully-applied state.
+        name: Branch name to resolve.
+
+    Returns:
+        The ref-target commit id, or None when the branch has no commits
+        and no resolved branch-off commit.
+    """
+    branch = state.branches[name]
+    return branch.commit_ids[-1] if branch.commit_ids else branch.rooted_on_commit
+
+
 def _compute_chain_parents(state: State) -> dict[str, str | None]:
     """Build a map of `commit_id → chain parent id` from `branch.commit_ids` order."""
     chain_parent: dict[str, str | None] = {}

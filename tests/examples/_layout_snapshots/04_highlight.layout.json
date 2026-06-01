@@ -16,7 +16,8 @@
         }
       ],
       "start": 0,
-      "end": 4
+      "end": 4,
+      "tip_commit_id": "c4"
     }
   ],
   "commits": [
