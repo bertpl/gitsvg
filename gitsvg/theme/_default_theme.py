@@ -163,6 +163,11 @@ class DefaultTheme(Theme):
         return 7
 
     @classmethod
+    def _resolve_merge_commit_radius(cls) -> int:
+        """Merge-commit-dot radius (px) — defaults to `commit_radius`, so merge and ordinary dots match unless overridden."""
+        return cls._resolve_commit_radius()
+
+    @classmethod
     def _resolve_arc_corner_radius_in_grid_units(cls) -> float:
         """Corner radius for branch-off / merge arcs, as a multiple of `min(branch_spacing, commit_spacing)`."""
         return 0.4
@@ -542,6 +547,7 @@ class DefaultTheme(Theme):
             commit_radius=pick("commit_radius", cls._resolve_commit_radius),
             commit_stroke_width=pick("commit_stroke_width", cls._resolve_commit_stroke_width),
             highlight_radius=pick("highlight_radius", cls._resolve_highlight_radius),
+            merge_commit_radius=pick("merge_commit_radius", cls._resolve_merge_commit_radius),
             arc_corner_radius_in_grid_units=pick(
                 "arc_corner_radius_in_grid_units", cls._resolve_arc_corner_radius_in_grid_units
             ),

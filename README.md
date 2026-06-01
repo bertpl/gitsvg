@@ -235,11 +235,12 @@ By default a branch keeps its lane for its whole life, so once an inner branch m
 
 ## Named themes
 
-Beyond `default`, gitsvg ships three built-in themes:
+Beyond `default`, gitsvg ships four built-in themes:
 
 - **`muted`** — the pre-refresh default look: a softer, greyer branch palette with plain circle merge dots.
 - **`dark`** — One Dark-inspired palette on a `#282c34` canvas.
 - **`compact`** — ~30 % denser spacing with smaller fonts.
+- **`gui`** — a desktop-git-GUI look: table layout (graph left, message and hash columns right, branch names as tip pills), auto lane change, tight spacing, and a system-color branch palette.
 
 Selecting one is a single field on a `theme` op:
 
@@ -248,9 +249,13 @@ Selecting one is a single field on a `theme` op:
 {"op": "theme", "name": "dark"}
 ```
 
-The shipped preview below tiles the refreshed `default` next to all three built-in themes on the same input file:
+The shipped preview below tiles the refreshed `default` next to the `muted`, `dark`, and `compact` themes on a shared input file, with the table-layout `gui` theme shown beneath on its own richer diagram:
 
 ![Built-in named themes](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/10_named_themes.svg)
+
+The `gui` theme is best seen at full size. Its shipped example (`examples/13_gui_table.gitsvg.jsonl`) renders a multi-branch history the way a desktop git client would — the graph on the left, a per-commit table on the right, and each branch's name as a colored pill at the commit its ref points to:
+
+![Desktop-GUI table theme](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/13_gui_table.svg)
 
 Selecting a named theme also wipes any `theme:` field overrides and `branch.color` overrides accumulated earlier — useful for "use exactly this theme." To layer a chosen theme on top of those overrides instead (e.g. when importing a diagram that already carries its own theming), pass `keep_prior_overrides: true` on the same op.
 

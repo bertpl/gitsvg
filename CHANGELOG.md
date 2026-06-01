@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New `theme.commit_row_band_color` — paints a zebra stripe on alternate commit-axis rows (full canvas, any orientation) for easier row-tracking; unset by default. Accepts an alpha channel (`#RRGGBBAA`) so the stripe composes over the background.
 - New `theme.commit_label_layout: table` lays commit labels out as a table beside the graph — message and hash columns, with branch names as pills at their tip commits (vertical orientations only).
 - New `theme.table_cell_padding_x_in_font_sizes` (default `0.5`) sets the table's horizontal cell padding and the gaps between tip pills and the message.
+- New `theme.merge_commit_radius` (defaults to `commit_radius`) sizes merge-commit dots independently — e.g. to keep merges prominent while shrinking ordinary dots.
+- New built-in `gui` named theme mimicking a desktop git GUI — table layout, auto lane change, tight spacing, and a system-color branch palette.
+- New shipped example `examples/13_gui_table.svg` demonstrating the `gui` theme; also shown as a fifth tile on the named-themes preview.
 
 ### Changed
 

@@ -142,6 +142,40 @@ def test_highlighted_checkmark_merge_dot_composes_highlight_and_scale() -> None:
     assert 'r="7.7"' in svg  # highlight_radius (7) x checkmark radius_scale (1.1)
 
 
+# ==================================================================================================
+#  merge_commit_radius — independent merge-dot sizing
+# ==================================================================================================
+def test_merge_commit_radius_defaults_to_commit_radius() -> None:
+    """Unset, the merge radius equals `commit_radius`, so merge and ordinary dots match."""
+    # --- assert -----------------------
+    assert DEFAULT_THEME.merge_commit_radius == DEFAULT_THEME.commit_radius
+
+
+def test_unset_merge_commit_radius_matches_explicit_commit_radius_output() -> None:
+    """Leaving `merge_commit_radius` unset renders byte-identically to setting it to `commit_radius`."""
+    # --- arrange ----------------------
+    base = _MERGE_JSONL + '{"op": "theme", "merge_commit_style": "circle"}\n'
+    explicit = _MERGE_JSONL + '{"op": "theme", "merge_commit_style": "circle", "merge_commit_radius": 5}\n'
+
+    # --- act / assert -----------------
+    assert _render(base) == _render(explicit)
+
+
+def test_merge_commit_radius_sizes_only_merge_dots() -> None:
+    """A large `merge_commit_radius` over a small `commit_radius` enlarges only the merge dot."""
+    # --- arrange ----------------------
+    jsonl = (
+        _MERGE_JSONL + '{"op": "theme", "merge_commit_style": "circle", "commit_radius": 3, "merge_commit_radius": 8}\n'
+    )
+
+    # --- act --------------------------
+    svg = _render(jsonl)
+
+    # --- assert -----------------------
+    assert 'r="8"' in svg  # the merge dot takes merge_commit_radius
+    assert 'r="3"' in svg  # ordinary dots take commit_radius
+
+
 @pytest.mark.parametrize("orientation", ["bt", "tb", "lr", "rl"])
 @pytest.mark.parametrize("style", [s.value for s in MergeCommitStyle])
 def test_renders_in_every_orientation_and_style(orientation: str, style: str) -> None:

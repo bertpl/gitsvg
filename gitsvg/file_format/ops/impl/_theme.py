@@ -134,6 +134,10 @@ class ThemeOp(OpBase):
         default=None,
         description="Radius of a highlighted commit dot.",
     )
+    merge_commit_radius: NonNegativeFloat | None = Field(
+        default=None,
+        description="Radius of a merge-commit dot (commits with 2+ parents). Defaults to `commit_radius`, so merge and ordinary dots match unless set; raise it to keep merge dots prominent when shrinking `commit_radius`. Under `merge_commit_style: checkmark` the dot's ring scales from this radius.",
+    )
     arc_corner_radius_in_grid_units: NonNegativeFloat | None = Field(
         default=None,
         description="Corner radius for `rounded`-style connectors, expressed as a multiple of `min(branch_spacing, commit_spacing)`. Per-connector clamped at render time to fit the segment lengths, so values larger than 1.0 produce no further effect. Ignored by the `straight` and `double_rounded` styles.",

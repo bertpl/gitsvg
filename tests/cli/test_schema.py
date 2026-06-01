@@ -83,7 +83,7 @@ def test_schema_themes_lists_registered_names_alphabetically() -> None:
     # --- assert -----------------------
     assert result.exit_code == 0
     lines = [line for line in result.output.splitlines() if line]
-    assert lines == ["compact", "dark", "default", "muted"]
+    assert lines == ["compact", "dark", "default", "gui", "muted"]
 
 
 # ==================================================================================================
