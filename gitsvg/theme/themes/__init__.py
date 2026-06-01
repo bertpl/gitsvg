@@ -13,6 +13,7 @@ exposes, falling back to `DefaultTheme`'s for anything not overridden.
 
 from gitsvg.theme.themes._compact import CompactTheme
 from gitsvg.theme.themes._dark import DarkTheme
+from gitsvg.theme.themes._gui import GuiTheme
 from gitsvg.theme.themes._muted import MutedTheme
 
-__all__ = ["CompactTheme", "DarkTheme", "MutedTheme"]
+__all__ = ["CompactTheme", "DarkTheme", "GuiTheme", "MutedTheme"]

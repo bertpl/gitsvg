@@ -1,0 +1,31 @@
+{"op": "theme", "name": "gui"}
+{"op": "branch", "name": "main", "label_side": "before"}
+{"op": "commit", "branch": "main", "id": "c0", "msg": "init platform", "hash": "auto"}
+{"op": "branch", "name": "api", "from_branch": "main"}
+{"op": "commit", "branch": "api", "id": "a1", "msg": "graphql schema", "hash": "auto"}
+{"op": "branch", "name": "web", "from_branch": "main"}
+{"op": "commit", "branch": "web", "id": "w1", "msg": "app shell", "hash": "auto"}
+{"op": "commit", "branch": "api", "id": "a2", "msg": "resolvers", "hash": "auto"}
+{"op": "branch", "name": "auth", "from_branch": "main"}
+{"op": "commit", "branch": "auth", "id": "x1", "msg": "oauth flow", "hash": "auto"}
+{"op": "branch", "name": "infra", "from_branch": "main"}
+{"op": "commit", "branch": "infra", "id": "i1", "msg": "terraform base", "hash": "auto"}
+{"op": "commit", "branch": "infra", "id": "i2", "msg": "ci pipeline", "hash": "auto"}
+{"op": "commit", "branch": "web", "id": "w2", "msg": "client router", "hash": "auto"}
+{"op": "branch", "name": "data", "from_branch": "main"}
+{"op": "commit", "branch": "data", "id": "d1", "msg": "warehouse schema", "hash": "auto"}
+{"op": "commit", "branch": "infra", "id": "i3", "msg": "k8s manifests", "hash": "auto"}
+{"op": "commit", "branch": "auth", "id": "x2", "msg": "jwt refresh", "hash": "auto"}
+{"op": "merge", "from": "infra", "into": "main", "as": "mi", "msg": "merge infra", "hash": "auto"}
+{"op": "commit", "branch": "main", "id": "c1", "msg": "platform baseline", "hash": "auto"}
+{"op": "commit", "branch": "data", "id": "d2", "msg": "etl jobs", "hash": "auto"}
+{"op": "commit", "branch": "api", "id": "a3", "msg": "subscriptions", "hash": "auto"}
+{"op": "commit", "branch": "web", "id": "w3", "msg": "server-side render", "hash": "auto"}
+{"op": "merge", "from": "api", "into": "main", "as": "ma", "msg": "merge api", "hash": "auto"}
+{"op": "commit", "branch": "main", "id": "c2", "msg": "v1.0 launch", "hash": "auto", "highlight": true}
+{"op": "commit", "branch": "data", "id": "d3", "msg": "dashboards", "hash": "auto"}
+{"op": "merge", "from": "data", "into": "main", "as": "md", "msg": "merge analytics", "hash": "auto"}
+{"op": "commit", "branch": "auth", "id": "x3", "msg": "rbac roles", "hash": "auto"}
+{"op": "commit", "branch": "web", "id": "w4", "msg": "i18n", "hash": "auto"}
+{"op": "commit", "branch": "auth", "id": "x4", "msg": "audit trail", "hash": "auto"}
+{"op": "commit", "branch": "main", "id": "c3", "msg": "v1.1 release", "hash": "auto"}

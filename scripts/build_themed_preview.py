@@ -31,14 +31,20 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 INPUT_PATH = REPO_ROOT / "examples" / "10_named_themes.gitsvg.jsonl"
 OUTPUT_PATH = REPO_ROOT / "examples" / "10_named_themes.svg"
 
+# The `gui` theme is a table-layout theme, so it gets its own richer input
+# (many branches + merges) and renders into a full-width tile of its own below
+# the square grid, rather than sharing the compact `INPUT_PATH` diagram.
+GUI_INPUT_PATH = REPO_ROOT / "examples" / "13_gui_table.gitsvg.jsonl"
+GUI_THEME = "gui"
+
 
 # ==================================================================================================
 #  Themes to showcase
 # ==================================================================================================
-# Subset of `NAMED_THEMES` to include in the preview tile, in display order
-# (row-major across the 2×2 grid). `default` and `muted` lead so the refresh
-# and its escape hatch sit side by side. Extend this tuple when new themes
-# ship; `_build_preview` lays them out in a grid that grows with the count.
+# Square-grid themes, in display order (row-major across the 2×2 grid).
+# `default` and `muted` lead so the refresh and its escape hatch sit side by
+# side. `gui` is shown separately as a full-width tile below the grid (see
+# `GUI_THEME`), since its table layout wants the wider, richer diagram.
 PREVIEW_THEMES: tuple[str, ...] = ("default", "muted", "dark", "compact")
 
 
@@ -114,88 +120,147 @@ def _inner_svg_content(svg_text: str) -> str:
 # ==================================================================================================
 #  Compose tiles
 # ==================================================================================================
-def _build_preview(themes: list[tuple[str, draw.Drawing]]) -> draw.Drawing:
-    """Tile the per-theme drawings into one labelled preview SVG.
+def _tile(d: draw.Drawing, name: str, inner: draw.Drawing, *, tile_x, tile_y_box, tile_width, tile_height) -> None:
+    """Draw one labelled, bordered tile (label band + viewport + nested render) onto `d`.
 
-    Tiles sit in a squarish grid (`ceil(sqrt(n))` columns, row-major in
-    display order), each consisting of a centered label above a bordered
-    viewport containing the rendered diagram. Every tile is sized to the
-    widest / tallest per-theme render so the grid aligns; shorter renders
-    sit centered inside their tile. Four themes lay out as a 2×2 grid.
+    The nested render keeps its intrinsic aspect ratio: it is scaled down
+    only if wider or taller than the padded viewport, then centered, so
+    smaller renders sit centered at 1:1 and oversized ones fit without
+    distortion.
 
     Args:
-        themes: List of `(theme_name, drawing)` pairs in display order.
+        d: The composition drawing to append onto.
+        name: Theme name, shown centered in the label band above the tile.
+        inner: The rendered per-theme drawing to nest.
+        tile_x: Left edge of the bordered viewport.
+        tile_y_box: Top edge of the bordered viewport (below the label band).
+        tile_width: Bordered-viewport width.
+        tile_height: Bordered-viewport height.
+    """
+    # --- label band ---------------------------
+    d.append(
+        draw.Text(
+            name,
+            font_size=_LABEL_FONT_SIZE,
+            x=tile_x + tile_width / 2,
+            y=tile_y_box - _LABEL_HEIGHT / 2,
+            text_anchor="middle",
+            dominant_baseline="middle",
+            font_family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+            fill="#383838",
+        )
+    )
+
+    # --- bordered viewport --------------------
+    d.append(
+        draw.Rectangle(
+            tile_x,
+            tile_y_box,
+            tile_width,
+            tile_height,
+            stroke=_BORDER_COLOR,
+            stroke_width=_BORDER_WIDTH,
+            fill="none",
+        )
+    )
+
+    # --- nested render (fit + center) ---------
+    avail_w = tile_width - 2 * _TILE_PADDING
+    avail_h = tile_height - 2 * _TILE_PADDING
+    scale = min(1.0, avail_w / inner.width, avail_h / inner.height)
+    disp_w = inner.width * scale
+    disp_h = inner.height * scale
+    inner_x = tile_x + _TILE_PADDING + (avail_w - disp_w) / 2
+    inner_y = tile_y_box + _TILE_PADDING + (avail_h - disp_h) / 2
+    inner_svg = (
+        f'<svg x="{inner_x}" y="{inner_y}" '
+        f'width="{disp_w}" height="{disp_h}" '
+        f'viewBox="0 0 {inner.width} {inner.height}">'
+        f"{_inner_svg_content(inner.as_svg())}"
+        f"</svg>"
+    )
+    d.append(draw.Raw(inner_svg))
+
+
+def _build_preview(
+    grid_themes: list[tuple[str, draw.Drawing]],
+    wide_theme: tuple[str, draw.Drawing] | None = None,
+) -> draw.Drawing:
+    """Compose the grid themes into a square block, with an optional full-width tile below.
+
+    `grid_themes` lay out in a squarish grid (`ceil(sqrt(n))` columns,
+    row-major), every tile sized to the widest / tallest grid render so
+    the block aligns. `wide_theme`, when present, is placed as a single
+    tile spanning the full block width in a row beneath the grid — sized
+    independently of the grid tiles, so it can never alter the grid block
+    (the four square tiles stay pixel-for-pixel what they are without it).
+
+    Args:
+        grid_themes: `(theme_name, drawing)` pairs for the square grid.
+        wide_theme: Optional `(theme_name, drawing)` for the full-width tile.
 
     Returns:
         A composed `Drawing` carrying the full tiled preview.
     """
-    # --- per-tile dimensions ------------------
-    tile_inner_width = max(d.width for _, d in themes)
-    tile_inner_height = max(d.height for _, d in themes)
+    # --- grid-tile dimensions (grid renders only) ---
+    tile_inner_width = max(d.width for _, d in grid_themes)
+    tile_inner_height = max(d.height for _, d in grid_themes)
     tile_width = tile_inner_width + 2 * _TILE_PADDING
     tile_height = tile_inner_height + 2 * _TILE_PADDING
     cell_height = _LABEL_HEIGHT + tile_height  # label band + bordered viewport
 
     # --- grid shape ---------------------------
-    n = len(themes)
+    n = len(grid_themes)
     n_cols = math.ceil(math.sqrt(n))
     n_rows = math.ceil(n / n_cols)
 
+    content_width = n_cols * tile_width + (n_cols - 1) * _TILE_GAP
+    grid_height = n_rows * cell_height + (n_rows - 1) * _TILE_GAP
+
+    # --- wide-tile dimensions -----------------
+    wide_block_height = 0
+    if wide_theme is not None:
+        wide_inner = wide_theme[1]
+        wide_avail_w = content_width - 2 * _TILE_PADDING
+        wide_scale = min(1.0, wide_avail_w / wide_inner.width)
+        wide_tile_height = wide_inner.height * wide_scale + 2 * _TILE_PADDING
+        wide_block_height = _TILE_GAP + _LABEL_HEIGHT + wide_tile_height
+
     # --- canvas dimensions --------------------
-    canvas_width = 2 * _OUTER_MARGIN + n_cols * tile_width + (n_cols - 1) * _TILE_GAP
-    canvas_height = 2 * _OUTER_MARGIN + n_rows * cell_height + (n_rows - 1) * _TILE_GAP
+    canvas_width = 2 * _OUTER_MARGIN + content_width
+    canvas_height = 2 * _OUTER_MARGIN + grid_height + wide_block_height
 
     d = draw.Drawing(canvas_width, canvas_height, origin=(0, 0))
 
-    # --- per-tile placement -------------------
-    for i, (name, inner) in enumerate(themes):
+    # --- grid tiles ---------------------------
+    for i, (name, inner) in enumerate(grid_themes):
         col, row = i % n_cols, i // n_cols
         tile_x = _OUTER_MARGIN + col * (tile_width + _TILE_GAP)
         cell_y = _OUTER_MARGIN + row * (cell_height + _TILE_GAP)
-        tile_y_label = cell_y + _LABEL_HEIGHT / 2
-        tile_y_box = cell_y + _LABEL_HEIGHT
-
-        # Label (centered above the tile).
-        d.append(
-            draw.Text(
-                name,
-                font_size=_LABEL_FONT_SIZE,
-                x=tile_x + tile_width / 2,
-                y=tile_y_label,
-                text_anchor="middle",
-                dominant_baseline="middle",
-                font_family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                fill="#383838",
-            )
+        _tile(
+            d,
+            name,
+            inner,
+            tile_x=tile_x,
+            tile_y_box=cell_y + _LABEL_HEIGHT,
+            tile_width=tile_width,
+            tile_height=tile_height,
         )
 
-        # Border rect around the rendered viewport.
-        d.append(
-            draw.Rectangle(
-                tile_x,
-                tile_y_box,
-                tile_width,
-                tile_height,
-                stroke=_BORDER_COLOR,
-                stroke_width=_BORDER_WIDTH,
-                fill="none",
-            )
+    # --- full-width tile ----------------------
+    if wide_theme is not None:
+        name, inner = wide_theme
+        wide_tile_height = inner.height * wide_scale + 2 * _TILE_PADDING
+        cell_y = _OUTER_MARGIN + grid_height + _TILE_GAP
+        _tile(
+            d,
+            name,
+            inner,
+            tile_x=_OUTER_MARGIN,
+            tile_y_box=cell_y + _LABEL_HEIGHT,
+            tile_width=content_width,
+            tile_height=wide_tile_height,
         )
-
-        # Nested SVG containing the rendered content. Use the inner
-        # drawing's intrinsic dimensions as the viewBox so the diagram
-        # scales 1:1 inside the bordered viewport, centered within the
-        # padded area so smaller themes don't anchor to the top-left.
-        inner_x = tile_x + _TILE_PADDING + (tile_inner_width - inner.width) / 2
-        inner_y = tile_y_box + _TILE_PADDING + (tile_inner_height - inner.height) / 2
-        inner_svg = (
-            f'<svg x="{inner_x}" y="{inner_y}" '
-            f'width="{inner.width}" height="{inner.height}" '
-            f'viewBox="0 0 {inner.width} {inner.height}">'
-            f"{_inner_svg_content(inner.as_svg())}"
-            f"</svg>"
-        )
-        d.append(draw.Raw(inner_svg))
 
     return d
 
@@ -203,26 +268,44 @@ def _build_preview(themes: list[tuple[str, draw.Drawing]]) -> draw.Drawing:
 # ==================================================================================================
 #  Main
 # ==================================================================================================
-def main() -> None:
-    """Render every named theme over the shared input and write the tiled preview SVG."""
-    # --- parse + apply --------------------
-    parsed_ops, report = parse_jsonl_file(INPUT_PATH)
-    parsed_ops = resolve_imports(parsed_ops, file=INPUT_PATH, report=report)
+def _load_state(input_path: Path):
+    """Parse, import-resolve, and apply a `.gitsvg.jsonl` file into render-ready state.
+
+    Args:
+        input_path: Path to the `.gitsvg.jsonl` source.
+
+    Returns:
+        The `(state, source_theme)` pair from `apply_ops`.
+
+    Raises:
+        SystemExit: If the input does not validate cleanly.
+    """
+    parsed_ops, report = parse_jsonl_file(input_path)
+    parsed_ops = resolve_imports(parsed_ops, file=input_path, report=report)
     state, source_theme = apply_ops(parsed_ops, report)
     if not report.is_clean():
-        raise SystemExit(f"input did not validate cleanly:\n{report}")
+        raise SystemExit(f"{input_path.name} did not validate cleanly:\n{report}")
+    return state, source_theme
 
-    # --- render per theme in display order --
-    rendered: list[tuple[str, draw.Drawing]] = []
-    for name in PREVIEW_THEMES:
+
+def main() -> None:
+    """Render the grid themes (shared input) + the `gui` tile (its own input) and write the preview."""
+    for name in (*PREVIEW_THEMES, GUI_THEME):
         if name not in NAMED_THEMES:
-            raise SystemExit(f"PREVIEW_THEMES references unknown theme {name!r}; not in NAMED_THEMES")
-        rendered.append((name, _render_through_theme(state, source_theme, name)))
+            raise SystemExit(f"preview references unknown theme {name!r}; not in NAMED_THEMES")
+
+    # --- square-grid themes (shared input) --
+    grid_state, grid_source = _load_state(INPUT_PATH)
+    grid = [(name, _render_through_theme(grid_state, grid_source, name)) for name in PREVIEW_THEMES]
+
+    # --- gui tile (dedicated table input) ---
+    gui_state, gui_source = _load_state(GUI_INPUT_PATH)
+    gui_tile = (GUI_THEME, _render_through_theme(gui_state, gui_source, GUI_THEME))
 
     # --- compose + write --------------------
-    preview = _build_preview(rendered)
+    preview = _build_preview(grid, gui_tile)
     preview.save_svg(str(OUTPUT_PATH))
-    print(f"wrote {OUTPUT_PATH.relative_to(REPO_ROOT)} ({len(rendered)} themes)")
+    print(f"wrote {OUTPUT_PATH.relative_to(REPO_ROOT)} ({len(grid) + 1} themes)")
 
 
 if __name__ == "__main__":

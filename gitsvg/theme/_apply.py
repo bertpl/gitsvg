@@ -10,7 +10,7 @@ from gitsvg.state._state import State
 from gitsvg.theme._builder import ThemeBuilder
 from gitsvg.theme._default_theme import DefaultTheme
 from gitsvg.theme._theme import Theme
-from gitsvg.theme.themes import CompactTheme, DarkTheme, MutedTheme
+from gitsvg.theme.themes import CompactTheme, DarkTheme, GuiTheme, MutedTheme
 
 # ==================================================================================================
 #  Named-theme registry
@@ -26,6 +26,7 @@ NAMED_THEMES: dict[str, type[Theme]] = {
     "muted": MutedTheme,
     "dark": DarkTheme,
     "compact": CompactTheme,
+    "gui": GuiTheme,
 }
 
 

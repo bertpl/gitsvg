@@ -87,6 +87,7 @@ class Theme(BaseModel):
     commit_radius: int | None = None  # axis-symmetric
     commit_stroke_width: float | None = None  # axis-symmetric
     highlight_radius: int | None = None  # axis-symmetric
+    merge_commit_radius: int | None = None  # axis-symmetric (merge-dot radius; defaults to commit_radius)
     merge_commit_style: MergeCommitStyle | None = None  # axis-symmetric (merge-dot style)
     arc_corner_radius_in_grid_units: float | None = None  # axis-symmetric
     branch_line_style: BranchLineStyle | None = None  # axis-symmetric (connector shape)

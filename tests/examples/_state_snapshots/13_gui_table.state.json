@@ -1,0 +1,272 @@
+{
+  "branches": [
+    {
+      "name": "main",
+      "head_commit_id": "c3"
+    },
+    {
+      "name": "api",
+      "head_commit_id": "a3"
+    },
+    {
+      "name": "web",
+      "head_commit_id": "w4"
+    },
+    {
+      "name": "auth",
+      "head_commit_id": "x4"
+    },
+    {
+      "name": "infra",
+      "head_commit_id": "i3"
+    },
+    {
+      "name": "data",
+      "head_commit_id": "d3"
+    }
+  ],
+  "commits": [
+    {
+      "id": "c0",
+      "branch": "main",
+      "hash": "ed7e65e",
+      "msg": "init platform",
+      "highlight": false,
+      "parents": []
+    },
+    {
+      "id": "a1",
+      "branch": "api",
+      "hash": "1f61dd8",
+      "msg": "graphql schema",
+      "highlight": false,
+      "parents": [
+        "c0"
+      ]
+    },
+    {
+      "id": "w1",
+      "branch": "web",
+      "hash": "22bb566",
+      "msg": "app shell",
+      "highlight": false,
+      "parents": [
+        "c0"
+      ]
+    },
+    {
+      "id": "a2",
+      "branch": "api",
+      "hash": "c3ce0e7",
+      "msg": "resolvers",
+      "highlight": false,
+      "parents": [
+        "a1"
+      ]
+    },
+    {
+      "id": "x1",
+      "branch": "auth",
+      "hash": "7da18af",
+      "msg": "oauth flow",
+      "highlight": false,
+      "parents": [
+        "c0"
+      ]
+    },
+    {
+      "id": "i1",
+      "branch": "infra",
+      "hash": "97f4e38",
+      "msg": "terraform base",
+      "highlight": false,
+      "parents": [
+        "c0"
+      ]
+    },
+    {
+      "id": "i2",
+      "branch": "infra",
+      "hash": "b37bc74",
+      "msg": "ci pipeline",
+      "highlight": false,
+      "parents": [
+        "i1"
+      ]
+    },
+    {
+      "id": "w2",
+      "branch": "web",
+      "hash": "0d0daca",
+      "msg": "client router",
+      "highlight": false,
+      "parents": [
+        "w1"
+      ]
+    },
+    {
+      "id": "d1",
+      "branch": "data",
+      "hash": "421d11f",
+      "msg": "warehouse schema",
+      "highlight": false,
+      "parents": [
+        "c0"
+      ]
+    },
+    {
+      "id": "i3",
+      "branch": "infra",
+      "hash": "d6459c4",
+      "msg": "k8s manifests",
+      "highlight": false,
+      "parents": [
+        "i2"
+      ]
+    },
+    {
+      "id": "x2",
+      "branch": "auth",
+      "hash": "3dba956",
+      "msg": "jwt refresh",
+      "highlight": false,
+      "parents": [
+        "x1"
+      ]
+    },
+    {
+      "id": "mi",
+      "branch": "main",
+      "hash": "d2d7ddb",
+      "msg": "merge infra",
+      "highlight": false,
+      "parents": [
+        "c0",
+        "i3"
+      ]
+    },
+    {
+      "id": "c1",
+      "branch": "main",
+      "hash": "8c420cb",
+      "msg": "platform baseline",
+      "highlight": false,
+      "parents": [
+        "mi"
+      ]
+    },
+    {
+      "id": "d2",
+      "branch": "data",
+      "hash": "ce04c38",
+      "msg": "etl jobs",
+      "highlight": false,
+      "parents": [
+        "d1"
+      ]
+    },
+    {
+      "id": "a3",
+      "branch": "api",
+      "hash": "2700183",
+      "msg": "subscriptions",
+      "highlight": false,
+      "parents": [
+        "a2"
+      ]
+    },
+    {
+      "id": "w3",
+      "branch": "web",
+      "hash": "31c115d",
+      "msg": "server-side render",
+      "highlight": false,
+      "parents": [
+        "w2"
+      ]
+    },
+    {
+      "id": "ma",
+      "branch": "main",
+      "hash": "b88f726",
+      "msg": "merge api",
+      "highlight": false,
+      "parents": [
+        "c1",
+        "a3"
+      ]
+    },
+    {
+      "id": "c2",
+      "branch": "main",
+      "hash": "41b5195",
+      "msg": "v1.0 launch",
+      "highlight": true,
+      "parents": [
+        "ma"
+      ]
+    },
+    {
+      "id": "d3",
+      "branch": "data",
+      "hash": "9edfb94",
+      "msg": "dashboards",
+      "highlight": false,
+      "parents": [
+        "d2"
+      ]
+    },
+    {
+      "id": "md",
+      "branch": "main",
+      "hash": "5f6b709",
+      "msg": "merge analytics",
+      "highlight": false,
+      "parents": [
+        "c2",
+        "d3"
+      ]
+    },
+    {
+      "id": "x3",
+      "branch": "auth",
+      "hash": "fd47812",
+      "msg": "rbac roles",
+      "highlight": false,
+      "parents": [
+        "x2"
+      ]
+    },
+    {
+      "id": "w4",
+      "branch": "web",
+      "hash": "f7623b3",
+      "msg": "i18n",
+      "highlight": false,
+      "parents": [
+        "w3"
+      ]
+    },
+    {
+      "id": "x4",
+      "branch": "auth",
+      "hash": "a7980c3",
+      "msg": "audit trail",
+      "highlight": false,
+      "parents": [
+        "x3"
+      ]
+    },
+    {
+      "id": "c3",
+      "branch": "main",
+      "hash": "c716147",
+      "msg": "v1.1 release",
+      "highlight": false,
+      "parents": [
+        "md"
+      ]
+    }
+  ],
+  "pull_requests": []
+}

@@ -1,0 +1,459 @@
+{
+  "grid": {
+    "n_commits": 24,
+    "n_branches": 6
+  },
+  "branches": [
+    {
+      "id": "b0",
+      "name": "main",
+      "branch_pos": 0,
+      "segments": [
+        {
+          "lane": 0,
+          "start": 0,
+          "end": 23
+        }
+      ],
+      "start": 0,
+      "end": 23,
+      "tip_commit_id": "c3"
+    },
+    {
+      "id": "b1",
+      "name": "api",
+      "branch_pos": 1,
+      "segments": [
+        {
+          "lane": 1,
+          "start": 1,
+          "end": 15
+        }
+      ],
+      "start": 1,
+      "end": 15,
+      "tip_commit_id": "a3"
+    },
+    {
+      "id": "b2",
+      "name": "web",
+      "branch_pos": 2,
+      "segments": [
+        {
+          "lane": 2,
+          "start": 1,
+          "end": 16
+        },
+        {
+          "lane": 1,
+          "start": 17,
+          "end": 21
+        }
+      ],
+      "start": 1,
+      "end": 21,
+      "tip_commit_id": "w4"
+    },
+    {
+      "id": "b3",
+      "name": "auth",
+      "branch_pos": 3,
+      "segments": [
+        {
+          "lane": 3,
+          "start": 1,
+          "end": 16
+        },
+        {
+          "lane": 2,
+          "start": 17,
+          "end": 21
+        },
+        {
+          "lane": 1,
+          "start": 22,
+          "end": 22
+        }
+      ],
+      "start": 1,
+      "end": 22,
+      "tip_commit_id": "x4"
+    },
+    {
+      "id": "b4",
+      "name": "infra",
+      "branch_pos": 4,
+      "segments": [
+        {
+          "lane": 4,
+          "start": 1,
+          "end": 10
+        }
+      ],
+      "start": 1,
+      "end": 10,
+      "tip_commit_id": "i3"
+    },
+    {
+      "id": "b5",
+      "name": "data",
+      "branch_pos": 5,
+      "segments": [
+        {
+          "lane": 5,
+          "start": 1,
+          "end": 11
+        },
+        {
+          "lane": 4,
+          "start": 12,
+          "end": 16
+        },
+        {
+          "lane": 3,
+          "start": 17,
+          "end": 18
+        }
+      ],
+      "start": 1,
+      "end": 18,
+      "tip_commit_id": "d3"
+    }
+  ],
+  "commits": [
+    {
+      "id": "c0",
+      "branch_id": "b0",
+      "branch_pos": 0,
+      "commit_pos": 0,
+      "msg": "init platform",
+      "hash": "ed7e65e",
+      "highlight": false,
+      "is_merge": false
+    },
+    {
+      "id": "a1",
+      "branch_id": "b1",
+      "branch_pos": 1,
+      "commit_pos": 1,
+      "msg": "graphql schema",
+      "hash": "1f61dd8",
+      "highlight": false,
+      "is_merge": false
+    },
+    {
+      "id": "w1",
+      "branch_id": "b2",
+      "branch_pos": 2,
+      "commit_pos": 2,
+      "msg": "app shell",
+      "hash": "22bb566",
+      "highlight": false,
+      "is_merge": false
+    },
+    {
+      "id": "a2",
+      "branch_id": "b1",
+      "branch_pos": 1,
+      "commit_pos": 3,
+      "msg": "resolvers",
+      "hash": "c3ce0e7",
+      "highlight": false,
+      "is_merge": false
+    },
+    {
+      "id": "x1",
+      "branch_id": "b3",
+      "branch_pos": 3,
+      "commit_pos": 4,
+      "msg": "oauth flow",
+      "hash": "7da18af",
+      "highlight": false,
+      "is_merge": false
+    },
+    {
+      "id": "i1",
+      "branch_id": "b4",
+      "branch_pos": 4,
+      "commit_pos": 5,
+      "msg": "terraform base",
+      "hash": "97f4e38",
+      "highlight": false,
+      "is_merge": false
+    },
+    {
+      "id": "i2",
+      "branch_id": "b4",
+      "branch_pos": 4,
+      "commit_pos": 6,
+      "msg": "ci pipeline",
+      "hash": "b37bc74",
+      "highlight": false,
+      "is_merge": false
+    },
+    {
+      "id": "w2",
+      "branch_id": "b2",
+      "branch_pos": 2,
+      "commit_pos": 7,
+      "msg": "client router",
+      "hash": "0d0daca",
+      "highlight": false,
+      "is_merge": false
+    },
+    {
+      "id": "d1",
+      "branch_id": "b5",
+      "branch_pos": 5,
+      "commit_pos": 8,
+      "msg": "warehouse schema",
+      "hash": "421d11f",
+      "highlight": false,
+      "is_merge": false
+    },
+    {
+      "id": "i3",
+      "branch_id": "b4",
+      "branch_pos": 4,
+      "commit_pos": 9,
+      "msg": "k8s manifests",
+      "hash": "d6459c4",
+      "highlight": false,
+      "is_merge": false
+    },
+    {
+      "id": "x2",
+      "branch_id": "b3",
+      "branch_pos": 3,
+      "commit_pos": 10,
+      "msg": "jwt refresh",
+      "hash": "3dba956",
+      "highlight": false,
+      "is_merge": false
+    },
+    {
+      "id": "mi",
+      "branch_id": "b0",
+      "branch_pos": 0,
+      "commit_pos": 11,
+      "msg": "merge infra",
+      "hash": "d2d7ddb",
+      "highlight": false,
+      "is_merge": true
+    },
+    {
+      "id": "c1",
+      "branch_id": "b0",
+      "branch_pos": 0,
+      "commit_pos": 12,
+      "msg": "platform baseline",
+      "hash": "8c420cb",
+      "highlight": false,
+      "is_merge": false
+    },
+    {
+      "id": "d2",
+      "branch_id": "b5",
+      "branch_pos": 4,
+      "commit_pos": 13,
+      "msg": "etl jobs",
+      "hash": "ce04c38",
+      "highlight": false,
+      "is_merge": false
+    },
+    {
+      "id": "a3",
+      "branch_id": "b1",
+      "branch_pos": 1,
+      "commit_pos": 14,
+      "msg": "subscriptions",
+      "hash": "2700183",
+      "highlight": false,
+      "is_merge": false
+    },
+    {
+      "id": "w3",
+      "branch_id": "b2",
+      "branch_pos": 2,
+      "commit_pos": 15,
+      "msg": "server-side render",
+      "hash": "31c115d",
+      "highlight": false,
+      "is_merge": false
+    },
+    {
+      "id": "ma",
+      "branch_id": "b0",
+      "branch_pos": 0,
+      "commit_pos": 16,
+      "msg": "merge api",
+      "hash": "b88f726",
+      "highlight": false,
+      "is_merge": true
+    },
+    {
+      "id": "c2",
+      "branch_id": "b0",
+      "branch_pos": 0,
+      "commit_pos": 17,
+      "msg": "v1.0 launch",
+      "hash": "41b5195",
+      "highlight": true,
+      "is_merge": false
+    },
+    {
+      "id": "d3",
+      "branch_id": "b5",
+      "branch_pos": 3,
+      "commit_pos": 18,
+      "msg": "dashboards",
+      "hash": "9edfb94",
+      "highlight": false,
+      "is_merge": false
+    },
+    {
+      "id": "md",
+      "branch_id": "b0",
+      "branch_pos": 0,
+      "commit_pos": 19,
+      "msg": "merge analytics",
+      "hash": "5f6b709",
+      "highlight": false,
+      "is_merge": true
+    },
+    {
+      "id": "x3",
+      "branch_id": "b3",
+      "branch_pos": 2,
+      "commit_pos": 20,
+      "msg": "rbac roles",
+      "hash": "fd47812",
+      "highlight": false,
+      "is_merge": false
+    },
+    {
+      "id": "w4",
+      "branch_id": "b2",
+      "branch_pos": 1,
+      "commit_pos": 21,
+      "msg": "i18n",
+      "hash": "f7623b3",
+      "highlight": false,
+      "is_merge": false
+    },
+    {
+      "id": "x4",
+      "branch_id": "b3",
+      "branch_pos": 1,
+      "commit_pos": 22,
+      "msg": "audit trail",
+      "hash": "a7980c3",
+      "highlight": false,
+      "is_merge": false
+    },
+    {
+      "id": "c3",
+      "branch_id": "b0",
+      "branch_pos": 0,
+      "commit_pos": 23,
+      "msg": "v1.1 release",
+      "hash": "c716147",
+      "highlight": false,
+      "is_merge": false
+    }
+  ],
+  "arcs": [
+    {
+      "kind": "branch_off",
+      "from_branch_pos": 0,
+      "from_commit_pos": 0,
+      "to_branch_pos": 1,
+      "to_commit_pos": 1
+    },
+    {
+      "kind": "branch_off",
+      "from_branch_pos": 0,
+      "from_commit_pos": 0,
+      "to_branch_pos": 2,
+      "to_commit_pos": 1
+    },
+    {
+      "kind": "branch_off",
+      "from_branch_pos": 0,
+      "from_commit_pos": 0,
+      "to_branch_pos": 3,
+      "to_commit_pos": 1
+    },
+    {
+      "kind": "branch_off",
+      "from_branch_pos": 0,
+      "from_commit_pos": 0,
+      "to_branch_pos": 4,
+      "to_commit_pos": 1
+    },
+    {
+      "kind": "branch_off",
+      "from_branch_pos": 0,
+      "from_commit_pos": 0,
+      "to_branch_pos": 5,
+      "to_commit_pos": 1
+    },
+    {
+      "kind": "merge",
+      "from_branch_pos": 4,
+      "from_commit_pos": 10,
+      "to_branch_pos": 0,
+      "to_commit_pos": 11
+    },
+    {
+      "kind": "merge",
+      "from_branch_pos": 1,
+      "from_commit_pos": 15,
+      "to_branch_pos": 0,
+      "to_commit_pos": 16
+    },
+    {
+      "kind": "merge",
+      "from_branch_pos": 3,
+      "from_commit_pos": 18,
+      "to_branch_pos": 0,
+      "to_commit_pos": 19
+    },
+    {
+      "kind": "lane_change",
+      "from_branch_pos": 2,
+      "from_commit_pos": 16,
+      "to_branch_pos": 1,
+      "to_commit_pos": 17
+    },
+    {
+      "kind": "lane_change",
+      "from_branch_pos": 3,
+      "from_commit_pos": 16,
+      "to_branch_pos": 2,
+      "to_commit_pos": 17
+    },
+    {
+      "kind": "lane_change",
+      "from_branch_pos": 2,
+      "from_commit_pos": 21,
+      "to_branch_pos": 1,
+      "to_commit_pos": 22
+    },
+    {
+      "kind": "lane_change",
+      "from_branch_pos": 5,
+      "from_commit_pos": 11,
+      "to_branch_pos": 4,
+      "to_commit_pos": 12
+    },
+    {
+      "kind": "lane_change",
+      "from_branch_pos": 4,
+      "from_commit_pos": 16,
+      "to_branch_pos": 3,
+      "to_commit_pos": 17
+    }
+  ],
+  "pull_requests": []
+}
