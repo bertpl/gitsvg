@@ -1,0 +1,117 @@
+"""Tests for the table label rendering (`commit_label_layout: table`)."""
+
+import xml.etree.ElementTree as ET
+
+from gitsvg.layout import compute_layout
+from gitsvg.parse import parse_jsonl_text
+from gitsvg.render import render
+from gitsvg.render._canvas import compute_canvas, is_table_active
+from gitsvg.state import apply_ops
+from gitsvg.theme import CommitLabelLayout, DefaultTheme, Orientation
+
+
+def _table_render(text: str, **overrides):
+    """Build a table-mode `(layout, renderer_settings, canvas, svg)` for `text`."""
+    parsed, report = parse_jsonl_text(text, file="x.jsonl")
+    state, _theme = apply_ops(parsed, report)
+    theme = DefaultTheme.build({"commit_label_layout": CommitLabelLayout.TABLE, **overrides})
+    layout_settings, renderer = theme.split()
+    layout = compute_layout(state, layout_settings)
+    canvas = compute_canvas(layout, renderer)
+    return layout, renderer, canvas, render(layout, renderer).as_svg()
+
+
+def _texts(svg: str) -> list[ET.Element]:
+    return [el for el in ET.fromstring(svg).iter() if el.tag.split("}")[-1] == "text"]
+
+
+_LINEAR = (
+    '{"op": "branch", "name": "main"}\n'
+    '{"op": "commit", "branch": "main", "id": "c1", "msg": "init", "hash": "abc1234"}\n'
+    '{"op": "commit", "branch": "main", "id": "c2", "msg": "second", "hash": "def5678"}\n'
+)
+
+
+def test_table_mode_allocates_a_region_right_of_the_graph() -> None:
+    # --- arrange / act ----------------
+    _layout, renderer, canvas, _svg = _table_render(_LINEAR)
+
+    # --- assert -----------------------
+    assert is_table_active(renderer)
+    assert canvas.table_x_origin > 0
+
+
+def test_inline_mode_allocates_no_table_region() -> None:
+    """The default (`inline`) layout sets no table origin."""
+    # --- arrange ----------------------
+    parsed, report = parse_jsonl_text(_LINEAR, file="x.jsonl")
+    state, _theme = apply_ops(parsed, report)
+    _layout_settings, renderer = DefaultTheme.build({}).split()
+    layout = compute_layout(state)
+
+    # --- act --------------------------
+    canvas = compute_canvas(layout, renderer)
+
+    # --- assert -----------------------
+    assert not is_table_active(renderer)
+    assert canvas.table_x_origin == 0.0
+
+
+def test_horizontal_orientation_makes_table_inactive() -> None:
+    """`table` + a horizontal orientation (the E223 case) falls back to inline here."""
+    # --- arrange / act ----------------
+    _layout_settings, renderer = DefaultTheme.build(
+        {"commit_label_layout": CommitLabelLayout.TABLE, "orientation": Orientation.LR}
+    ).split()
+
+    # --- assert -----------------------
+    assert not is_table_active(renderer)
+
+
+def test_table_draws_message_and_hash_in_the_table_region() -> None:
+    # --- arrange / act ----------------
+    _layout, _renderer, canvas, svg = _table_render(_LINEAR)
+    texts = _texts(svg)
+
+    # --- assert -----------------------
+    contents = [t.text for t in texts]
+    assert "init" in contents and "second" in contents  # message column
+    assert "abc1234" in contents and "def5678" in contents  # hash column
+    # Every table cell sits at or past the table origin (right of the graph).
+    cell_xs = [float(t.attrib["x"]) for t in texts if t.text in {"init", "second", "abc1234", "def5678"}]
+    assert all(x >= canvas.table_x_origin for x in cell_xs)
+
+
+def test_table_mode_draws_no_free_floating_labels_left_of_the_table() -> None:
+    """The graph-side commit labels are gone — all text is the table (≥ table origin)."""
+    # --- arrange / act ----------------
+    _layout, _renderer, canvas, svg = _table_render(_LINEAR)
+
+    # --- assert -----------------------
+    # No text element sits in the graph region (left of the table origin).
+    assert all(float(t.attrib["x"]) >= canvas.table_x_origin for t in _texts(svg))
+
+
+def test_branch_tip_pill_renders_at_the_tip_commit() -> None:
+    # --- arrange / act ----------------
+    _layout, _renderer, _canvas, svg = _table_render(_LINEAR)
+
+    # --- assert -----------------------
+    # The branch name appears only as its tip pill in table mode.
+    assert "main" in [t.text for t in _texts(svg)]
+
+
+def test_shared_tip_row_carries_multiple_pills() -> None:
+    """An empty branch shares its parent's commit, so that row carries both names, same y."""
+    # --- arrange / act ----------------
+    _layout, _renderer, _canvas, svg = _table_render(
+        '{"op": "branch", "name": "main"}\n'
+        '{"op": "commit", "branch": "main", "id": "c1", "msg": "init"}\n'
+        '{"op": "branch", "name": "feature", "from_branch": "main"}\n'
+    )
+    texts = _texts(svg)
+
+    # --- assert -----------------------
+    main_pill = next(t for t in texts if t.text == "main")
+    feature_pill = next(t for t in texts if t.text == "feature")
+    assert main_pill.attrib["y"] == feature_pill.attrib["y"]  # same row (c1's tip)

@@ -13,12 +13,11 @@ def test_table_widths_have_sensible_defaults() -> None:
     theme = DefaultTheme.build({})
 
     # --- assert -----------------------
-    assert theme.table_hash_width == 64
-    assert theme.table_branch_width == 120
     assert theme.table_msg_width == 480
+    assert theme.table_hash_width == 64
 
 
-@pytest.mark.parametrize("field", ["table_hash_width", "table_branch_width", "table_msg_width"])
+@pytest.mark.parametrize("field", ["table_msg_width", "table_hash_width"])
 def test_table_width_override_and_zero_disable(field: str) -> None:
     # --- arrange / act ----------------
     overridden = DefaultTheme.build({field: 200})
@@ -29,7 +28,7 @@ def test_table_width_override_and_zero_disable(field: str) -> None:
     assert getattr(disabled, field) == 0  # 0 is legal — disables the column
 
 
-@pytest.mark.parametrize("field", ["table_hash_width", "table_branch_width", "table_msg_width"])
+@pytest.mark.parametrize("field", ["table_msg_width", "table_hash_width"])
 def test_negative_table_width_rejected_at_theme_level(field: str) -> None:
     """The `Theme` field validator rejects negatives (defence in depth)."""
     # --- arrange / act / assert -------
@@ -50,11 +49,11 @@ def test_negative_table_width_rejected_on_theme_op() -> None:
 def test_table_widths_resolve_through_apply() -> None:
     # --- arrange / act ----------------
     parsed, report = parse_jsonl_text(
-        '{"op": "theme", "table_hash_width": 50, "table_branch_width": 0, "table_msg_width": 300}\n',
+        '{"op": "theme", "table_hash_width": 50, "table_msg_width": 300}\n',
         file="x.jsonl",
     )
     _, theme = apply_ops(parsed, report)
 
     # --- assert -----------------------
     assert report.is_clean()
-    assert (theme.table_hash_width, theme.table_branch_width, theme.table_msg_width) == (50, 0, 300)
+    assert (theme.table_msg_width, theme.table_hash_width) == (300, 50)

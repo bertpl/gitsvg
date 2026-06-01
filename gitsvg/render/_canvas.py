@@ -21,7 +21,8 @@ from gitsvg.file_format import LabelSide
 from gitsvg.layout import Layout
 from gitsvg.render._label_widths import commit_label_width, pill_width
 from gitsvg.render._renderer_settings import RendererSettings
-from gitsvg.theme import Orientation
+from gitsvg.render._table import compute_table_columns
+from gitsvg.theme import CommitLabelLayout, Orientation
 
 # Auto-fit safety margin between content (pill / outward label) and the canvas
 # edge — keeps the rendered geometry from butting right up against the SVG
@@ -72,6 +73,9 @@ class RenderCanvas:
         margin_top: Effective pixel margin at the visually-top canvas edge.
         orientation: Active orientation (`bt`, `tb`, `lr`, `rl`). Drives
             the geometry module's grid → pixel mapping.
+        table_x_origin: Pixel x of the table region's left edge when table
+            mode is active (right of the graph, past a fixed gap); `0` when
+            no table region is present.
     """
 
     width: float  # axis-symmetric (visual)
@@ -85,6 +89,28 @@ class RenderCanvas:
     margin_bottom: float  # axis-symmetric (visual-side, px)
     margin_top: float  # axis-symmetric (visual-side, px)
     orientation: Orientation  # axis-symmetric (selector)
+    table_x_origin: float = 0.0  # axis-symmetric (visual, px); 0 when no table region
+
+
+def is_table_active(theme: RendererSettings) -> bool:
+    """Return whether the table label layout is active and supported.
+
+    Table mode draws only in vertical orientations (`bt` / `tb`); a
+    horizontal orientation with `commit_label_layout: table` is a rejected
+    combination (E223) and falls back to the inline layout here, so the
+    renderer and canvas treat it as inactive.
+
+    Args:
+        theme: The resolved theme.
+
+    Returns:
+        True when `commit_label_layout` is `table` and the orientation is
+        vertical.
+    """
+    return theme.commit_label_layout == CommitLabelLayout.TABLE and theme.orientation in (
+        Orientation.BT,
+        Orientation.TB,
+    )
 
 
 def compute_canvas(layout: Layout, theme: RendererSettings) -> RenderCanvas:
@@ -138,9 +164,23 @@ def compute_canvas(layout: Layout, theme: RendererSettings) -> RenderCanvas:
         margins[visual_side] = max(margins[visual_side], axis_needs[axis_edge])
 
     is_vertical = orientation in (Orientation.BT, Orientation.TB)
+    table_x_origin = 0.0
     if is_vertical:
-        width = margins["left"] + (n_branches - 1) * branch_spacing + margins["right"]
+        graph_extent = (n_branches - 1) * branch_spacing
+        width = margins["left"] + graph_extent + margins["right"]
         height = margins["top"] + (n_commits - 1) * commit_spacing + margins["bottom"]
+        # Table mode appends a self-bounded region to the right of the graph,
+        # past a gap of half a branch-lane; the branch-axis margins stay at
+        # their defaults (the relocated labels/pills are suppressed in the
+        # auto-fit pass).
+        if is_table_active(theme):
+            table_width = compute_table_columns(
+                theme.table_msg_width, theme.table_hash_width, gutter=theme.pill_padding_x
+            ).width
+            if table_width > 0:
+                graph_table_gap = branch_spacing / 2
+                table_x_origin = margins["left"] + graph_extent + graph_table_gap
+                width = table_x_origin + table_width + margins["right"]
     else:
         width = margins["left"] + (n_commits - 1) * commit_spacing + margins["right"]
         height = margins["top"] + (n_branches - 1) * branch_spacing + margins["bottom"]
@@ -156,6 +196,7 @@ def compute_canvas(layout: Layout, theme: RendererSettings) -> RenderCanvas:
         margin_bottom=margins["bottom"],
         margin_top=margins["top"],
         orientation=orientation,
+        table_x_origin=table_x_origin,
     )
 
 
@@ -190,6 +231,13 @@ def _auto_fit_branch_axis_edge(layout: Layout, theme: RendererSettings, *, edge:
         Pixel allowance needed past the edge; returns 0 if nothing
         on the edge protrudes.
     """
+    # Table mode relocates the commit labels and branch pills into the table
+    # region, so neither protrudes past a branch-axis edge — the margins stay
+    # at their theme defaults and the table region (added by `compute_canvas`)
+    # is the only right-side allowance.
+    if is_table_active(theme):
+        return 0.0
+
     branches = layout.branches
     commit_layouts = layout.commits
     max_branch_pos = max((seg.lane for b in branches for seg in b.segments), default=0)
@@ -254,9 +302,11 @@ def _auto_fit_commit_axis_edge(layout: Layout, theme: RendererSettings, *, edge:
 
     needed: float = 0.0
 
-    # Branch-name pills.
+    # Branch-name pills. Skipped in table mode — branch names move to the
+    # table's tip pills, so the branch-start pill no longer protrudes here.
+    # PR-title pills (below) still render in table mode, so they stay.
     branch_offset_rows = theme.branch_name_pill_offset_commit_axis_in_rows
-    if branch_offset_rows != 0:
+    if not is_table_active(theme) and branch_offset_rows != 0:
         protrudes_at = "lower" if branch_offset_rows < 0 else "upper"
         if edge == protrudes_at:
             target_start = 0 if edge == "lower" else max_commit_pos

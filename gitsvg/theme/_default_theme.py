@@ -481,19 +481,14 @@ class DefaultTheme(Theme):
         return CommitLabelLayout.INLINE
 
     @classmethod
-    def _resolve_table_hash_width(cls) -> int:
-        """Default hash-column width (px) in table mode."""
-        return 64
-
-    @classmethod
-    def _resolve_table_branch_width(cls) -> int:
-        """Default branch-name-column width (px) in table mode."""
-        return 120
-
-    @classmethod
     def _resolve_table_msg_width(cls) -> int:
         """Default message-column width (px) in table mode."""
         return 480
+
+    @classmethod
+    def _resolve_table_hash_width(cls) -> int:
+        """Default hash-column width (px) in table mode."""
+        return 64
 
     # --------------------------------------------------------------------------
     #  Factory
@@ -616,9 +611,8 @@ class DefaultTheme(Theme):
             background_color=pick("background_color", cls._resolve_background_color),
             commit_row_band_color=pick("commit_row_band_color", cls._resolve_commit_row_band_color),
             commit_label_layout=pick("commit_label_layout", cls._resolve_commit_label_layout),
-            table_hash_width=pick("table_hash_width", cls._resolve_table_hash_width),
-            table_branch_width=pick("table_branch_width", cls._resolve_table_branch_width),
             table_msg_width=pick("table_msg_width", cls._resolve_table_msg_width),
+            table_hash_width=pick("table_hash_width", cls._resolve_table_hash_width),
         )
 
 

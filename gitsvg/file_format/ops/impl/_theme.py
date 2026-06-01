@@ -288,17 +288,13 @@ class ThemeOp(OpBase):
         default=None,
         description="How commit labels are placed: `inline` (default — `msg`/`hash` float beside each dot) or `table` (commit `hash`/branch/message laid out as fixed-width columns beside the graph, one row per commit). `table` is supported only in vertical orientations (`bt`/`tb`) and forces one commit per row (`commit_row_mode: unique`); combining it with a horizontal orientation or an explicit `commit_row_mode: shared` is rejected.",
     )
-    table_hash_width: NonNegativeInt | None = Field(
-        default=None,
-        description="Width (px) of the hash column in `table` layout; `0` omits the column and reclaims its space. No effect outside table mode.",
-    )
-    table_branch_width: NonNegativeInt | None = Field(
-        default=None,
-        description="Width (px) of the branch-name column in `table` layout; `0` omits the column and reclaims its space. No effect outside table mode.",
-    )
     table_msg_width: NonNegativeInt | None = Field(
         default=None,
         description="Width (px) of the message column in `table` layout; `0` omits the column and reclaims its space. No effect outside table mode.",
+    )
+    table_hash_width: NonNegativeInt | None = Field(
+        default=None,
+        description="Width (px) of the hash column in `table` layout; `0` omits the column and reclaims its space. No effect outside table mode.",
     )
     colors: dict[IdStr, HexColor] | None = Field(
         default=None,

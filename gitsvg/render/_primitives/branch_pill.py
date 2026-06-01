@@ -25,6 +25,7 @@ from gitsvg.render._anchor_resolution import rotated_target
 from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._geometry import offset_position
 from gitsvg.render._label_widths import pill_width
+from gitsvg.render._primitives._pill import draw_pill_box
 from gitsvg.render._renderer_settings import RendererSettings
 
 
@@ -42,37 +43,19 @@ def draw_branch_pill(
 
     width = pill_width(branch.name, theme)
     height = theme.branch_label_font_size + theme.pill_padding_y
-    corner = theme.pill_corner_radius
 
     box_u, box_v = theme.branch_pill_anchor
     rect_left = x - box_u * width
     rect_top = y - box_v * height
-    text_x = rect_left + width / 2
-    text_y = rect_top + height / 2
 
     target = rotated_target(d, theme.branch_label_angle, x, y)
-    target.append(
-        draw.Rectangle(
-            rect_left,
-            rect_top,
-            width,
-            height,
-            rx=corner,
-            ry=corner,
-            fill=color,
-            opacity=theme.branch_label_bg_opacity,
-        )
-    )
-    target.append(
-        draw.Text(
-            branch.name,
-            theme.branch_label_font_size,
-            text_x,
-            text_y,
-            text_anchor="middle",
-            dominant_baseline="middle",
-            fill="white",
-            font_family=theme.label_font_family,
-            font_weight="500",
-        )
+    draw_pill_box(
+        target,
+        left=rect_left,
+        top=rect_top,
+        width=width,
+        height=height,
+        text=branch.name,
+        color=color,
+        theme=theme,
     )

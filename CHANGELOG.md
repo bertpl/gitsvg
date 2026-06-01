@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - New `theme.commit_row_band_color` — paints a zebra stripe on alternate commit-axis rows (full canvas, any orientation) for easier row-tracking; unset by default. Accepts an alpha channel (`#RRGGBBAA`) so the stripe composes over the background.
-- New `theme.commit_label_layout` (`inline` default, or `table`) with table column widths `table_hash_width` / `table_branch_width` / `table_msg_width` (0 disables a column); `table` forces unique commit rows and is rejected in horizontal orientations or alongside an explicit `commit_row_mode: shared`.
+- New `theme.commit_label_layout: table` lays commit labels out as a table beside the graph — message and hash columns, with branch names as pills at their tip commits (vertical orientations only).
 
 ### Changed
 
