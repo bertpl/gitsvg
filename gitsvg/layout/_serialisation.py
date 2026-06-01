@@ -50,7 +50,7 @@ def _branch_to_json(branch: LayoutBranch) -> dict[str, Any]:
 
     Returns:
         A dict with `id`, `name`, `branch_pos`, `segments`, `start`,
-        `end`.
+        `end`, `tip_commit_id`.
     """
     return {
         "id": branch.id,
@@ -59,6 +59,7 @@ def _branch_to_json(branch: LayoutBranch) -> dict[str, Any]:
         "segments": [{"lane": s.lane, "start": s.start, "end": s.end} for s in branch.segments],
         "start": branch.start,
         "end": branch.end,
+        "tip_commit_id": branch.tip_commit_id,
     }
 
 

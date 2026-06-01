@@ -647,6 +647,7 @@ def test_lane_at_clamps_below_and_above_segments() -> None:
         id="b",
         name="b",
         segments=[LaneSegment(lane=2, start=1, end=3), LaneSegment(lane=1, start=4, end=6)],
+        tip_commit_id=None,
     )
 
     # --- act / assert -----------------

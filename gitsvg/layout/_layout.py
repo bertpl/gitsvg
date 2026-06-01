@@ -98,11 +98,18 @@ class LayoutBranch:
             along the commit axis and jointly covering its span. A
             static-lane branch has exactly one segment; a migrating
             branch has one per lane stretch.
+        tip_commit_id: The commit this branch's ref points at — its tip
+            (`commit_ids[-1]`) when it has commits, else its branch-off
+            commit (`rooted_on_commit`), else None for a never-committed
+            first branch. Lets the renderer place a branch's name pill at
+            its ref target; a commit may be the ref target of several
+            branches.
     """
 
     id: str
     name: str
     segments: list[LaneSegment]
+    tip_commit_id: str | None
 
     @property
     def start(self) -> int:

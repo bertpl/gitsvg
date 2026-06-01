@@ -16,7 +16,8 @@
         }
       ],
       "start": 0,
-      "end": 6
+      "end": 6,
+      "tip_commit_id": "m3"
     },
     {
       "id": "b1",
@@ -30,7 +31,8 @@
         }
       ],
       "start": 1,
-      "end": 1
+      "end": 1,
+      "tip_commit_id": "a1"
     },
     {
       "id": "b2",
@@ -44,7 +46,8 @@
         }
       ],
       "start": 1,
-      "end": 2
+      "end": 2,
+      "tip_commit_id": "x1"
     },
     {
       "id": "b3",
@@ -58,7 +61,8 @@
         }
       ],
       "start": 5,
-      "end": 5
+      "end": 5,
+      "tip_commit_id": "b1"
     }
   ],
   "commits": [
