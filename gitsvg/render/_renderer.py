@@ -8,10 +8,14 @@ canvas the coordinate transform reads from.
 
 Z-order (back to front):
 
-0. Canvas background (a filled rect when `theme.background_color` is
-   not None; nothing otherwise — the SVG stays transparent).
-1. Branch guides (faint dashed verticals at every occupied lane).
-2. Per-branch line band — looping branches in declaration order, each
+0. Canvas background (a filled rect when `theme.background_color` is a
+   visible, non-transparent colour; nothing otherwise — the SVG stays
+   transparent).
+1. Commit-row bands (zebra stripes on alternate commit-axis rows when
+   `theme.commit_row_band_color` is visible; nothing otherwise). Span
+   the full canvas, just above the background and below the guides.
+2. Branch guides (faint dashed verticals at every occupied lane).
+3. Per-branch line band — looping branches in declaration order, each
    branch's connectors and line are drawn as one colour-coherent group
    before the next branch's: its branch-off / merge arcs, then its
    branch line, then its pull-request arcs (dashed). Every element in
@@ -20,14 +24,14 @@ Z-order (back to front):
    branch's coloured strokes contiguous along the z-axis. Crossings
    between branches resolve by declaration order — a later-declared
    branch paints over an earlier one.
-3. Commit dots (ordinary commits in branch colour with white outline;
+4. Commit dots (ordinary commits in branch colour with white outline;
    merge commits per `merge_commit_style`; enlarged when highlighted).
    Above the line band, below every text element.
-4. Branch-name pills (coloured rounded rectangles + branch name).
-5. Pull-request title pills (anchored half a row back from the
+5. Branch-name pills (coloured rounded rectangles + branch name).
+6. Pull-request title pills (anchored half a row back from the
    projected merge row on the source branch line; only when the PR has
    a `title`).
-6. Commit labels (`msg` primary lines + optional `hash` secondary
+7. Commit labels (`msg` primary lines + optional `hash` secondary
    line, on the side indicated by `label_side`; bold msg when
    highlighted).
 """
@@ -46,9 +50,10 @@ from gitsvg.render._primitives.branch_line import draw_branch_line
 from gitsvg.render._primitives.branch_pill import draw_branch_pill
 from gitsvg.render._primitives.commit_dot import draw_commit_dot
 from gitsvg.render._primitives.commit_label import draw_commit_label
+from gitsvg.render._primitives.commit_row_band import draw_commit_row_band
 from gitsvg.render._primitives.pull_request_pill import draw_pull_request_pill
 from gitsvg.render._renderer_settings import RendererSettings
-from gitsvg.theme import DEFAULT_THEME
+from gitsvg.theme import DEFAULT_THEME, is_color_visible
 
 
 def _branch_through_point(layout: Layout, point: GridSlot) -> LayoutBranch:
@@ -116,7 +121,7 @@ def render(layout: Layout, theme: RendererSettings | None = None) -> draw.Drawin
         return resolve_branch_color(branch_id, declaration_index_by_id.get(branch_id, 0), theme)
 
     # --- Canvas background ----------------------
-    if theme.background_color is not None:
+    if is_color_visible(theme.background_color):
         d.append(
             draw.Rectangle(
                 0,
@@ -126,6 +131,16 @@ def render(layout: Layout, theme: RendererSettings | None = None) -> draw.Drawin
                 fill=theme.background_color,
             )
         )
+
+    # --- Commit-row bands -----------------------
+    # Zebra stripes on alternate commit-axis rows (odd index → row 0 bare),
+    # spanning the full canvas just above the background. Skipped entirely
+    # when the band colour is unset / fully transparent, so default output
+    # stays byte-identical.
+    band_color = theme.commit_row_band_color
+    if is_color_visible(band_color):
+        for commit_pos in range(1, canvas.n_commits, 2):
+            draw_commit_row_band(d, commit_pos, band_color, canvas)
 
     # --- Branch guides --------------------------
     for lane in _get_occupied_lanes(layout):

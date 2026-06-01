@@ -157,6 +157,16 @@ class Theme(BaseModel):
     """Optional fill for a full-canvas background rect; `None` keeps the SVG transparent."""
 
     # --------------------------------------------------------------------------
+    #  Row banding
+    # --------------------------------------------------------------------------
+    commit_row_band_color: str | None = None  # axis-bound: commit-axis (zebra stripe)
+    """Optional zebra-stripe fill painted on alternate commit-axis rows,
+    spanning the full canvas just above the background; `None` (the default)
+    paints no bands. A hex value with an alpha channel composes the stripe
+    over whatever sits behind it. Orientation-neutral — bands follow the
+    commit axis (horizontal stripes in `bt`/`tb`, vertical in `lr`/`rl`)."""
+
+    # --------------------------------------------------------------------------
     #  Label-side defaults
     # --------------------------------------------------------------------------
     label_side_default: LabelSide = LabelSide.AFTER

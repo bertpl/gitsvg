@@ -464,6 +464,14 @@ class DefaultTheme(Theme):
         return None
 
     # --------------------------------------------------------------------------
+    #  Row banding
+    # --------------------------------------------------------------------------
+    @classmethod
+    def _resolve_commit_row_band_color(cls) -> str | None:
+        """Commit-row zebra-stripe fill default — `None` paints no bands."""
+        return None
+
+    # --------------------------------------------------------------------------
     #  Factory
     # --------------------------------------------------------------------------
     @classmethod
@@ -582,6 +590,7 @@ class DefaultTheme(Theme):
             commit_stroke_color=pick("commit_stroke_color", cls._resolve_commit_stroke_color),
             branch_label_bg_opacity=pick("branch_label_bg_opacity", cls._resolve_branch_label_bg_opacity),
             background_color=pick("background_color", cls._resolve_background_color),
+            commit_row_band_color=pick("commit_row_band_color", cls._resolve_commit_row_band_color),
         )
 
 

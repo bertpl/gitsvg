@@ -307,9 +307,10 @@ def test_string_constraints_reject_empty_or_whitespace(raw: dict) -> None:
 
 @pytest.mark.parametrize(
     "color",
-    ["#abc", "#ABC", "#7b8fb2", "#7B8FB2"],
+    ["#abc", "#ABC", "#7b8fb2", "#7B8FB2", "#abcd", "#7b8fb2cc"],
 )
 def test_branch_color_accepts_valid_hex_forms(color: str) -> None:
+    """3-, 4-, 6-, and 8-digit hex all validate (4-/8-digit carry an alpha channel)."""
     # --- arrange ----------------------
     raw = {"op": "branch", "name": "main", "color": color}
 
@@ -322,7 +323,7 @@ def test_branch_color_accepts_valid_hex_forms(color: str) -> None:
 
 @pytest.mark.parametrize(
     "color",
-    ["7b8fb2", "#xyz", "#1234", "#1234567", "blue", ""],
+    ["7b8fb2", "#xyz", "#12345", "#1234567", "blue", ""],
 )
 def test_branch_color_rejects_invalid_hex_forms(color: str) -> None:
     # --- arrange ----------------------

@@ -28,6 +28,24 @@ def test_default_theme_emits_no_background_rect() -> None:
     assert '<rect x="0" y="0"' not in svg
 
 
+def test_background_color_accepts_alpha_hex() -> None:
+    """Color fields take an optional alpha channel — a translucent background validates and resolves."""
+    # --- arrange ----------------------
+    parsed, report = parse_jsonl_text(
+        '{"op": "theme", "background_color": "#11223344"}\n'
+        '{"op": "branch", "name": "main"}\n'
+        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n',
+        file="x.jsonl",
+    )
+
+    # --- act --------------------------
+    _state, theme = apply_ops(parsed, report)
+
+    # --- assert -----------------------
+    assert report.is_clean()
+    assert theme.background_color == "#11223344"
+
+
 def test_theme_with_background_emits_full_canvas_rect_first() -> None:
     """A non-None `theme.background_color` emits a full-canvas `<rect>` as
     the first painted element (Z-order layer 0, behind all other content)."""
