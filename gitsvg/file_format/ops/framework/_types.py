@@ -29,8 +29,13 @@ commit messages, pull-request titles, file paths.
 """
 
 
-HexColor = Annotated[str, Field(pattern=r"^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$")]
-"""Hex color, 3- or 6-digit form, with leading `#`. Case-insensitive."""
+HexColor = Annotated[str, Field(pattern=r"^#([0-9A-Fa-f]{3,4}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$")]
+"""Hex color with an optional alpha channel — 3-, 4-, 6-, or 8-digit form,
+with leading `#`. Case-insensitive. The 4- and 8-digit forms carry a
+trailing alpha nibble / byte (`#RGBA`, `#RRGGBBAA`); the 3- and 6-digit
+forms are fully opaque. The alpha channel lets a fill compose over
+whatever sits behind it — e.g. a zebra band over the background, or a
+translucent `background_color`."""
 
 
 # ==================================================================================================

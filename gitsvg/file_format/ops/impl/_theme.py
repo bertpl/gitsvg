@@ -279,6 +279,10 @@ class ThemeOp(OpBase):
         default=None,
         description="Optional full-canvas background colour; unset by default (transparent SVG).",
     )
+    commit_row_band_color: HexColor | None = Field(
+        default=None,
+        description="Optional zebra-stripe fill painted on alternate commit-axis rows, spanning the full canvas just above the background (any orientation; unset by default = no banding, so output is unchanged). Accepts 3/4/6/8-digit hex; an alpha channel (e.g. `#00000022`) composes the stripe over the background, while `#RGB`/`#RRGGBB` paint fully opaque.",
+    )
     colors: dict[IdStr, HexColor] | None = Field(
         default=None,
         description="Replacement branch-palette dict; replaces the current palette wholesale when set.",

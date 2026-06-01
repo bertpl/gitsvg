@@ -24,6 +24,7 @@ a package-load cycle. Same pattern as `file_format/ops/framework/`.
 from gitsvg.theme._box_anchor import BoxAnchor, validate_box_anchor
 from gitsvg.theme._branch_line_style import BranchLineStyle
 from gitsvg.theme._builder import ThemeBuilder
+from gitsvg.theme._color import is_color_visible
 from gitsvg.theme._commit_row_mode import CommitRowMode
 from gitsvg.theme._default_theme import DefaultTheme
 from gitsvg.theme._merge_commit_style import MergeCommitStyle
@@ -48,6 +49,7 @@ __all__ = [
     "Theme",
     "ThemeBuilder",
     "_resolve_int_or_float",
+    "is_color_visible",
     "normalize_orientation",
     "validate_box_anchor",
 ]

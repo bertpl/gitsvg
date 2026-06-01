@@ -173,6 +173,32 @@ def branch_guide_endpoints(
     return ((x_left, y), (x_right, y))
 
 
+def commit_row_band_rect(commit_pos: int, canvas: RenderCanvas) -> tuple[float, float, float, float]:
+    """Return the `(x, y, width, height)` of a full-span band for one commit-axis row.
+
+    The band spans the entire canvas perpendicular to the commit axis
+    and is `commit_spacing` thick along it, centered on the row's screen
+    position. In vertical orientations (`bt` / `tb`) it is a full-width
+    horizontal stripe; in horizontal orientations (`lr` / `rl`) a
+    full-height vertical stripe.
+
+    Args:
+        commit_pos: Commit-axis slot index of the row to band.
+        canvas: Effective canvas spec — supplies span, spacing, and
+            orientation.
+
+    Returns:
+        `(x, y, width, height)` for a `draw.Rectangle`.
+    """
+    thickness = canvas.commit_spacing
+    center_x, center_y = grid_to_pixel(0, commit_pos, canvas)
+    # The full-span origin coordinate is a literal int 0 (not 0.0) so the SVG
+    # attribute reads `x="0"` / `y="0"`, matching the background rect's output.
+    if canvas.orientation in (Orientation.BT, Orientation.TB):
+        return (0, center_y - thickness / 2, canvas.width, thickness)
+    return (center_x - thickness / 2, 0, thickness, canvas.height)
+
+
 # ==================================================================================================
 #  Internals
 # ==================================================================================================
