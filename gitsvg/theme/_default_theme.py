@@ -490,6 +490,11 @@ class DefaultTheme(Theme):
         """Default hash-column width (px) in table mode."""
         return 64
 
+    @classmethod
+    def _resolve_table_cell_padding_x_in_font_sizes(cls) -> float:
+        """Default table horizontal spacing unit — half a label font size."""
+        return 0.5
+
     # --------------------------------------------------------------------------
     #  Factory
     # --------------------------------------------------------------------------
@@ -613,6 +618,9 @@ class DefaultTheme(Theme):
             commit_label_layout=pick("commit_label_layout", cls._resolve_commit_label_layout),
             table_msg_width=pick("table_msg_width", cls._resolve_table_msg_width),
             table_hash_width=pick("table_hash_width", cls._resolve_table_hash_width),
+            table_cell_padding_x_in_font_sizes=pick(
+                "table_cell_padding_x_in_font_sizes", cls._resolve_table_cell_padding_x_in_font_sizes
+            ),
         )
 
 

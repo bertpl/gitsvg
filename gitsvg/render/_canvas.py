@@ -174,9 +174,7 @@ def compute_canvas(layout: Layout, theme: RendererSettings) -> RenderCanvas:
         # their defaults (the relocated labels/pills are suppressed in the
         # auto-fit pass).
         if is_table_active(theme):
-            table_width = compute_table_columns(
-                theme.table_msg_width, theme.table_hash_width, gutter=theme.pill_padding_x
-            ).width
+            table_width = compute_table_columns(theme.table_msg_width, theme.table_hash_width, gutter=0).width
             if table_width > 0:
                 graph_table_gap = branch_spacing / 2
                 table_x_origin = margins["left"] + graph_extent + graph_table_gap

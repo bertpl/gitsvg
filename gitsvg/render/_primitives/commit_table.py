@@ -53,16 +53,19 @@ def draw_commit_table(
 
     # Half of the pill's internal horizontal padding reads as a tighter gap
     # between adjacent pills and before the message than the full padding.
-    gap = theme.pill_padding_x / 2
+    # One horizontal unit: cell content is inset by it on each side, and it's
+    # the gap between adjacent pills and before the message.
+    pad = theme.table_cell_padding_x
     pill_height = theme.branch_label_font_size + theme.pill_padding_y
 
     for commit in layout.commits.values():
         row_y = grid_to_pixel(0, commit.commit_pos, canvas)[1]
         for column in columns.columns:
-            col_left = table_x_origin + column.x_offset
+            content_left = table_x_origin + column.x_offset + pad
+            content_width = column.width - 2 * pad
             if column.field == TableField.MESSAGE:
                 # Tip pills first, then the message in the width that remains.
-                x = col_left
+                x = content_left
                 for branch in pills_by_commit.get(commit.id, []):
                     width = pill_width(branch.name, theme)
                     draw_pill_box(
@@ -75,14 +78,14 @@ def draw_commit_table(
                         color=color_of(branch.id),
                         theme=theme,
                     )
-                    x += width + gap
-                pill_run = x - col_left
+                    x += width + pad
+                pill_run = x - content_left
                 _draw_cell_text(
                     d,
                     text=flatten_message(commit.msg) if commit.msg else "",
-                    x=col_left + pill_run,
+                    x=content_left + pill_run,
                     y=row_y,
-                    max_width=column.width - pill_run,
+                    max_width=content_width - pill_run,
                     font_size=theme.label_font_size,
                     color=theme.label_color,
                     bold=commit.highlight,
@@ -92,9 +95,9 @@ def draw_commit_table(
                 _draw_cell_text(
                     d,
                     text=commit.hash or "",
-                    x=col_left,
+                    x=content_left,
                     y=row_y,
-                    max_width=column.width,
+                    max_width=content_width,
                     font_size=theme.hash_font_size,
                     color=theme.hash_color,
                     bold=False,

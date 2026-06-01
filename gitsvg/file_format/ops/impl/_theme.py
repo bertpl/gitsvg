@@ -296,6 +296,10 @@ class ThemeOp(OpBase):
         default=None,
         description="Width (px) of the hash column in `table` layout; `0` omits the column and reclaims its space. No effect outside table mode.",
     )
+    table_cell_padding_x_in_font_sizes: NonNegativeFloat | None = Field(
+        default=None,
+        description="The table's horizontal spacing unit in `table` layout, as a multiple of `label_font_size` (default `0.5`): the inner padding inset on each side of a cell, and the gap between adjacent tip pills and before the message. Columns abut, so content-to-content separation between columns is twice this value.",
+    )
     colors: dict[IdStr, HexColor] | None = Field(
         default=None,
         description="Replacement branch-palette dict; replaces the current palette wholesale when set.",
