@@ -82,6 +82,21 @@ def test_table_draws_message_and_hash_in_the_table_region() -> None:
     assert all(x >= canvas.table_x_origin for x in cell_xs)
 
 
+def test_cell_text_is_inset_from_the_column_edge_by_the_padding() -> None:
+    """Cell text starts a cell-padding inset past the table origin, not flush against it."""
+    # --- arrange / act ----------------
+    _layout, renderer, canvas, svg = _table_render(_LINEAR)
+    msg_xs = [float(t.attrib["x"]) for t in _texts(svg) if t.text in {"init", "second"}]
+    inset = canvas.table_x_origin + renderer.table_cell_padding_x
+
+    # --- assert -----------------------
+    # The bare row ("init") sits exactly at the inset; the tip row ("second",
+    # carrying the "main" pill) is pushed further right by the pill run.
+    assert msg_xs
+    assert min(msg_xs) == inset
+    assert all(x >= inset for x in msg_xs)
+
+
 def test_table_mode_draws_no_free_floating_labels_left_of_the_table() -> None:
     """The graph-side commit labels are gone — all text is the table (≥ table origin)."""
     # --- arrange / act ----------------

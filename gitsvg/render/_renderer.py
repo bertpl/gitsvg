@@ -117,6 +117,12 @@ def render(layout: Layout, theme: RendererSettings | None = None) -> draw.Drawin
     canvas = compute_canvas(layout, theme)
     d = draw.Drawing(canvas.width, canvas.height)
 
+    # Table layout (when active) is computed once for the table draw.
+    table_active = is_table_active(theme)
+    table_columns = (
+        compute_table_columns(theme.table_msg_width, theme.table_hash_width, gutter=0) if table_active else None
+    )
+
     # --- Branch id → declaration index map ------
     # Used by the colour resolver. Layout.branches is in declaration
     # order, matching state.branch_order.
@@ -195,7 +201,6 @@ def render(layout: Layout, theme: RendererSettings | None = None) -> draw.Drawin
     # --- Branch-name pills ----------------------
     # In table mode the branch name moves to a tip pill in the table's
     # message column, so the branch-start pill is skipped.
-    table_active = is_table_active(theme)
     if not table_active:
         for branch in layout.branches:
             draw_branch_pill(d, branch, color_for(branch.id), canvas, theme)
@@ -208,9 +213,8 @@ def render(layout: Layout, theme: RendererSettings | None = None) -> draw.Drawin
     # Inline mode draws free-floating labels beside each dot; table mode
     # replaces them with the right-half table (message + hash columns + tip
     # pills).
-    if table_active:
-        columns = compute_table_columns(theme.table_msg_width, theme.table_hash_width, gutter=theme.pill_padding_x)
-        draw_commit_table(d, layout, columns, canvas.table_x_origin, canvas, theme, color_for)
+    if table_active and table_columns is not None:
+        draw_commit_table(d, layout, table_columns, canvas.table_x_origin, canvas, theme, color_for)
     else:
         for commit in layout.commits.values():
             draw_commit_label(d, commit, canvas, theme)

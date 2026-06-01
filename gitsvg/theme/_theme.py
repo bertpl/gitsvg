@@ -177,6 +177,11 @@ class Theme(BaseModel):
     `commit_row_mode: unique`."""
     table_msg_width: int | None = None  # px along the branch axis; 0 = field omitted, space reclaimed
     table_hash_width: int | None = None  # px along the branch axis; 0 = field omitted, space reclaimed
+    table_cell_padding_x_in_font_sizes: float | None = None  # axis-symmetric (table horizontal spacing unit)
+    """The table's horizontal spacing unit, as a multiple of `label_font_size`:
+    the inner padding inset on each side of a cell, and the gap between adjacent
+    tip pills and before the message. Columns abut (no separate gutter), so
+    content-to-content separation between columns is twice this value."""
 
     # --------------------------------------------------------------------------
     #  Label-side defaults
@@ -370,6 +375,11 @@ class Theme(BaseModel):
     def label_line_padding(self) -> int | float:
         """Resolved extra height per line (px) in a multi-line label stack."""
         return _resolve_int_or_float(self.label_line_padding_in_font_sizes * self.label_font_size)
+
+    @property
+    def table_cell_padding_x(self) -> int | float:
+        """Resolved table horizontal spacing unit (px) — cell inset and intra-cell gaps."""
+        return _resolve_int_or_float(self.table_cell_padding_x_in_font_sizes * self.label_font_size)
 
     # --------------------------------------------------------------------------
     #  Per-branch resolved-value lookups
