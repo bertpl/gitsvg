@@ -9,11 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- New `gitsvg theme` command for inspecting the built-in named themes: `gitsvg theme` lists them with one-line descriptions, `gitsvg theme <name>` prints a theme's resolved field values, and `gitsvg theme --list-names` prints bare names.
+- New `gitsvg theme` command to inspect the built-in named themes — index, per-theme resolved values, and a bare-name list.
 
 ### Changed
 
-- **Breaking:** theme inspection moved off `gitsvg schema` onto the new `gitsvg theme` command. Migration: `gitsvg schema theme <name>` → `gitsvg theme <name>`; `gitsvg schema themes` → `gitsvg theme --list-names`. `gitsvg schema theme` with no name is unchanged — it still prints the `theme` op's JSON Schema.
+- **Breaking:** named-theme inspection moved from `gitsvg schema` to the new `gitsvg theme` command: `schema theme <name>` → `theme <name>`, `schema themes` → `theme --list-names`.
 - US English spelling normalized across user-facing text — CLI `gitsvg schema` field descriptions and error-catalog entries — and the documentation. No behavioral change.
 
 ### Deprecated
