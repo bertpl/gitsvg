@@ -12,7 +12,7 @@ import-order dependency on which feature modules are touched first. This
 also means an emit site cannot use a code that has no catalog entry:
 `ValidationError.__post_init__` rejects it.
 
-Entries are organised by validation phase:
+Entries are organized by validation phase:
 
 - E0xx — parse / JSONL syntax
 - E1xx — per-op schema (pydantic-level)

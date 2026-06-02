@@ -7,7 +7,7 @@ errors to the report. The `theme` parameter is present for signature
 uniformity with the wider apply-handler family (which includes the
 theme-mutating handler under `gitsvg.theme._apply`); state-only
 handlers leave it untouched, the `branch:` handler writes
-per-branch colour overrides to it.
+per-branch color overrides to it.
 """
 
 from gitsvg.state._apply._impl.branch import apply_branch_op

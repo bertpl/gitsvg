@@ -62,7 +62,7 @@ def apply_ops(parsed_ops: list[ParsedOp], report: ValidationReport) -> tuple[Sta
     branch, and remove handlers mutate it; other handlers ignore it.
     At end-of-apply the builder produces the fully-resolved `Theme`
     via its chosen subclass's `build(user_set)` classmethod, with
-    state-derived per-branch colour overrides written onto the result.
+    state-derived per-branch color overrides written onto the result.
 
     Args:
         parsed_ops: Schema-validated ops in source order.
@@ -150,7 +150,7 @@ def _check_merge_lane_clearance_conflict(builder: ThemeBuilder, theme: Theme, re
     the user set the field, which is the mistake, even at its default `1`.
     Checking at end-of-apply (not per-op) means a named-theme switch that
     wipes prior overrides — the default `keep_prior_overrides=False`
-    behaviour — clears the field from `user_set` first, so switching
+    behavior — clears the field from `user_set` first, so switching
     themes is the documented escape hatch.
 
     Args:
@@ -192,7 +192,7 @@ def _check_table_mode_conflicts(builder: ThemeBuilder, theme: Theme, report: Val
 
     `split()` already forces `commit_row_mode → unique` under table mode,
     so E224 fires only when the user *explicitly* set `shared` — the
-    contradiction is the mistake, not the (silently honoured) unset case.
+    contradiction is the mistake, not the (silently honored) unset case.
 
     Args:
         builder: The theme builder, carrying `user_set` and the

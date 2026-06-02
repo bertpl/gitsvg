@@ -3,12 +3,12 @@
 `theme.merge_commit_style` selects how a merge commit's dot is drawn
 (ordinary commits always use the plain `circle` dot):
 
-- `circle` (default) — the plain dot: branch-colour fill,
+- `circle` (default) — the plain dot: branch-color fill,
   `commit_stroke_color` outline. Identical to an ordinary commit, so merge
   dots stay byte-identical to prior versions.
 - `checkmark` — a hollow dot: fill and stroke swap (fill =
-  `commit_stroke_color`, stroke = the branch colour at branch-line weight)
-  with a branch-colour checkmark overlaid, marking the commit as a merge.
+  `commit_stroke_color`, stroke = the branch color at branch-line weight)
+  with a branch-color checkmark overlaid, marking the commit as a merge.
 
 Each style is a `_draw_<style>(d, x, y, radius, color, theme)` builder that
 owns the dot's full rendering at the given base radius; `_MERGE_DOT_BUILDERS`
@@ -37,9 +37,9 @@ _CHECKMARK_DOT_RADIUS_SCALE = 1.1
 _CHECKMARK_TICK_WIDTH_IN_RADII = 0.32  # axis-symmetric (perceptual)
 
 # `checkmark` tick vertices as (x, y) fractions of the base dot radius, relative
-# to the dot centre (SVG y-down): a short arm down to the vertex, a long arm up
+# to the dot center (SVG y-down): a short arm down to the vertex, a long arm up
 # to the right — the canonical check shape, sized to sit inside the dot and
-# nudged slightly below centre so it reads optically centred.
+# nudged slightly below center so it reads optically centered.
 _CHECKMARK_TICK_POINTS = (
     (-0.50, 0.08),
     (-0.16, 0.42),
@@ -51,7 +51,7 @@ _CHECKMARK_TICK_POINTS = (
 #  Style builders — each owns its full dot rendering at the given base radius
 # ==================================================================================================
 def _draw_circle(d: draw.Drawing, x: float, y: float, radius: float, color: str, theme: RendererSettings) -> None:
-    """The plain dot: branch-colour fill, `commit_stroke_color` outline.
+    """The plain dot: branch-color fill, `commit_stroke_color` outline.
 
     Ordinary commits and `circle`-style merge commits share this body, so
     default output stays byte-identical to prior versions.
@@ -69,10 +69,10 @@ def _draw_circle(d: draw.Drawing, x: float, y: float, radius: float, color: str,
 
 
 def _draw_checkmark(d: draw.Drawing, x: float, y: float, radius: float, color: str, theme: RendererSettings) -> None:
-    """A hollow merge dot: swapped fill / stroke plus a branch-colour checkmark.
+    """A hollow merge dot: swapped fill / stroke plus a branch-color checkmark.
 
     The ring is `_CHECKMARK_DOT_RADIUS_SCALE`x the base radius, in the branch
-    colour at branch-line weight, with `commit_stroke_color` fill; the tick
+    color at branch-line weight, with `commit_stroke_color` fill; the tick
     stays sized to the base radius — so the dot reads larger but the tick
     doesn't.
     """

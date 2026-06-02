@@ -38,7 +38,7 @@ def populated_registry(
 def empty_registry(monkeypatch: pytest.MonkeyPatch) -> Iterator[dict[str, _codes.ErrorCode]]:
     """Replace the global registry with an empty dict.
 
-    Use when a test explicitly needs to verify behaviour under an empty
+    Use when a test explicitly needs to verify behavior under an empty
     catalog (e.g. CLI placeholder text).
     """
     fresh: dict[str, _codes.ErrorCode] = {}

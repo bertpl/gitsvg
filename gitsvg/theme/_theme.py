@@ -16,7 +16,7 @@ non-default field carries a concrete value.
 Per-field validators capture always-hold invariants (positive
 spacings / font sizes, opacities in `[0, 1]`). The apply pass emits
 catalog-coded errors with line numbers when the same constraints
-fail on user input; the validators are defence in depth at build
+fail on user input; the validators are defense in depth at build
 time and document the invariants alongside the field.
 
 Position/size fields with a natural anchor stay stored as ratios
@@ -142,7 +142,7 @@ class Theme(BaseModel):
     commit_label_anchor_after: BoxAnchor | None = None  # axis-symmetric (renderer geometry; label_side="after")
 
     # --------------------------------------------------------------------------
-    #  Colours
+    #  Colors
     # --------------------------------------------------------------------------
     colors: dict[str, str] | None = None
     default_branch_color_cycle: list[str] | None = None
@@ -196,7 +196,7 @@ class Theme(BaseModel):
     #  State-derived per-branch overrides
     # --------------------------------------------------------------------------
     branch_color_overrides: dict[str, str] = Field(default_factory=dict)
-    """Hex colour overrides, keyed by `BranchState.id` (not name). Filled by
+    """Hex color overrides, keyed by `BranchState.id` (not name). Filled by
     the apply pass from `branch:` ops carrying a `color` field, then attached
     to the built `Theme`; not user-input on the `theme:` op."""
 

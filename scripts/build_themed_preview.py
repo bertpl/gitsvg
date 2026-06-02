@@ -2,7 +2,7 @@
 
 Reads `examples/10_named_themes.gitsvg.jsonl`, renders it once per
 registered named theme, and tiles the per-theme SVGs into a single
-labelled preview SVG. Rerun whenever themes change or when the
+labeled preview SVG. Rerun whenever themes change or when the
 underlying input file changes.
 
 Usage::
@@ -68,7 +68,7 @@ def _render_through_theme(state, source_theme: Theme, theme_name: str) -> draw.D
 
     Per-branch overrides authored on the source diagram (`branch.color`,
     `branch.label_side`) are forwarded onto the named theme so each
-    showcase tile honours the user's authoring choices — only the
+    showcase tile honors the user's authoring choices — only the
     palette / typography / spacings differ between tiles.
 
     Args:
@@ -121,7 +121,7 @@ def _inner_svg_content(svg_text: str) -> str:
 #  Compose tiles
 # ==================================================================================================
 def _tile(d: draw.Drawing, name: str, inner: draw.Drawing, *, tile_x, tile_y_box, tile_width, tile_height) -> None:
-    """Draw one labelled, bordered tile (label band + viewport + nested render) onto `d`.
+    """Draw one labeled, bordered tile (label band + viewport + nested render) onto `d`.
 
     The nested render keeps its intrinsic aspect ratio: it is scaled down
     only if wider or taller than the padded viewport, then centered, so

@@ -3,7 +3,7 @@
 For every `examples/<name>.gitsvg.jsonl`, generates the state JSON
 and asserts it byte-equal to the committed snapshot at
 `tests/examples/_state_snapshots/<name>.state.json`. Guards against
-silent drift in the state→JSON serialisation surface.
+silent drift in the state→JSON serialization surface.
 
 To regenerate after an intentional change:
 

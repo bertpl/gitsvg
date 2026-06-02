@@ -20,7 +20,7 @@ from gitsvg.render._primitives._merge_dot_styles import (
 from gitsvg.state import apply_ops
 from gitsvg.theme import DEFAULT_THEME, MergeCommitStyle
 
-# Renderer settings for builder-level tests (supplies stroke colour / width).
+# Renderer settings for builder-level tests (supplies stroke color / width).
 _, _RT = DEFAULT_THEME.split()
 
 # A diagram with a single merge commit (`mg`) on `main`.
@@ -72,7 +72,7 @@ def test_draw_checkmark_emits_circle_plus_tick_with_swapped_fill() -> None:
     assert svg.count("<circle") == 1  # the hollow dot
     assert svg.count("<path") == 1  # the tick
     assert 'fill="white"' in svg  # fill swapped to commit_stroke_color
-    assert "#123456" in svg  # branch colour now the ring + tick
+    assert "#123456" in svg  # branch color now the ring + tick
 
 
 # ==================================================================================================

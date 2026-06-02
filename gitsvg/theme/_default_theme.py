@@ -256,7 +256,7 @@ class DefaultTheme(Theme):
     def _resolve_branch_name_pill_offset_branch_axis_in_lanes(cls, orientation: Orientation) -> float:
         """Per-orientation branch-pill branch-axis offset (signed).
 
-        `0.0` in every orientation — centred on the branch lane.
+        `0.0` in every orientation — centered on the branch lane.
         """
         del orientation  # not orientation-dependent today; the signature accepts it for future overrides
         return 0.0
@@ -306,7 +306,7 @@ class DefaultTheme(Theme):
     def _resolve_pull_request_pill_offset_branch_axis_in_lanes(cls, orientation: Orientation) -> float:
         """Per-orientation PR-pill branch-axis offset (signed).
 
-        Vertical: `0.0` — centred on the source branch's lane.
+        Vertical: `0.0` — centered on the source branch's lane.
         Horizontal: `-0.5` — pill sits half a lane above the source
         branch line at the merge column.
         """
@@ -345,7 +345,7 @@ class DefaultTheme(Theme):
     def _resolve_branch_pill_anchor(cls, orientation: Orientation) -> BoxAnchor:
         """Per-orientation branch-pill `(u, v)`.
 
-        Vertical orientations (`bt`, `tb`): pill centred on the world
+        Vertical orientations (`bt`, `tb`): pill centered on the world
         point — `(0.5, 0.5)`. Horizontal orientations: pill anchored on
         its edge nearest the start commit, so the resolved offset
         becomes a minimum gap and a long branch name extends further
@@ -365,7 +365,7 @@ class DefaultTheme(Theme):
 
         Always `(0.5, 0.5)` — the PR pill's offset point lives away
         from the start-side margin concern the branch pill addresses,
-        so it centres on the offset point in every orientation.
+        so it centers on the offset point in every orientation.
         """
         del orientation
         return (0.5, 0.5)
@@ -375,10 +375,10 @@ class DefaultTheme(Theme):
         """Per-orientation commit-label `(u, v)` for the `before` (lower-index) side.
 
         Vertical orientations (`bt`, `tb`): stack extends to the left
-        of the commit dot, vertically centred — `(1.0, 0.5)` puts the
+        of the commit dot, vertically centered — `(1.0, 0.5)` puts the
         stack's right-middle at the world point. Horizontal
         orientations (`lr`, `rl`): stack extends below the dot,
-        horizontally centred — `(0.5, 1.0)` puts the stack's bottom-
+        horizontally centered — `(0.5, 1.0)` puts the stack's bottom-
         middle at the world point.
         """
         if orientation in _VERTICAL_ORIENTATIONS:
@@ -390,8 +390,8 @@ class DefaultTheme(Theme):
         """Per-orientation commit-label `(u, v)` for the `after` (higher-index) side.
 
         Mirror of `_resolve_commit_label_anchor_before`. Vertical:
-        stack extends to the right, vertically centred — `(0.0, 0.5)`.
-        Horizontal: stack extends above the dot, horizontally centred
+        stack extends to the right, vertically centered — `(0.0, 0.5)`.
+        Horizontal: stack extends above the dot, horizontally centered
         — `(0.5, 0.0)`.
         """
         if orientation in _VERTICAL_ORIENTATIONS:
@@ -399,13 +399,13 @@ class DefaultTheme(Theme):
         return (0.5, 0.0)
 
     # --------------------------------------------------------------------------
-    #  Colours
+    #  Colors
     # --------------------------------------------------------------------------
     @classmethod
     def _resolve_colors(cls) -> dict[str, str]:
-        """Default branch-colour palette.
+        """Default branch-color palette.
 
-        Soft but not grey: `main` is a darkened blue-grey spine, and the
+        Soft but not gray: `main` is a darkened blue-gray spine, and the
         four `branch*` slots are gently saturated green / blue / mauve /
         purple that stay legible without shouting. Hue is held across the
         whole palette relative to the `muted` named theme (the
@@ -422,35 +422,35 @@ class DefaultTheme(Theme):
 
     @classmethod
     def _resolve_default_branch_color_cycle(cls) -> list[str]:
-        """Default cycle of palette keys used to colour non-main branches in declaration order."""
+        """Default cycle of palette keys used to color non-main branches in declaration order."""
         return ["branch1", "branch2", "branch3", "branch4"]
 
     @classmethod
     def _resolve_label_color(cls) -> str:
-        """Fill colour for commit-message labels."""
+        """Fill color for commit-message labels."""
         return "#383838"
 
     @classmethod
     def _resolve_hash_color(cls) -> str:
-        """Fill colour for the secondary hash line on commit labels."""
+        """Fill color for the secondary hash line on commit labels."""
         return "#707070"
 
     @classmethod
     def _resolve_branch_guide_color(cls) -> str:
-        """Stroke colour for the faint per-lane vertical guides."""
+        """Stroke color for the faint per-lane vertical guides."""
         return "#b8b8b8"
 
     @classmethod
     def _resolve_commit_stroke_color(cls) -> str:
-        """Stroke colour for the outline around commit dots.
+        """Stroke color for the outline around commit dots.
 
         Visually separates the dot from any branch line passing
         through it. `"white"` works for the default theme's
         transparent (or white-rendered) background; dark themes
-        should override to their background colour so the outline
+        should override to their background color so the outline
         reads as a "carved out" gap rather than a bright halo.
 
-        Under `merge_commit_style: checkmark` this colour is also
+        Under `merge_commit_style: checkmark` this color is also
         reused as the merge dot's fill (fill and stroke swap), so a
         dark theme's override flows through to the hollow merge dot.
         """
@@ -466,7 +466,7 @@ class DefaultTheme(Theme):
     # --------------------------------------------------------------------------
     @classmethod
     def _resolve_background_color(cls) -> str | None:
-        """Full-canvas background colour default — `None` keeps the SVG transparent."""
+        """Full-canvas background color default — `None` keeps the SVG transparent."""
         return None
 
     # --------------------------------------------------------------------------
@@ -507,7 +507,7 @@ class DefaultTheme(Theme):
     def build(cls, user_set: dict[str, Any]) -> Self:
         """Resolve a fully-populated `DefaultTheme` from explicitly-set fields.
 
-        Resolution order honours field dependencies: orientation
+        Resolution order honors field dependencies: orientation
         first, spacings next (depend on orientation), margins (depend
         on orientation + resolved spacings), then every other field.
 

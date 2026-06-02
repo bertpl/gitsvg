@@ -1,7 +1,7 @@
 """Compact theme — denser layout for dashboards / inline use.
 
 `CompactTheme` shrinks spacings and fonts to produce a visibly tighter
-diagram while keeping the same visual vocabulary. Colours, anchors,
+diagram while keeping the same visual vocabulary. Colors, anchors,
 label angles, and pull-request visuals inherit unchanged — only the
 metrics that govern density change.
 

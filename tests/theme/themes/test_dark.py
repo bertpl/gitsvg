@@ -12,7 +12,7 @@ from gitsvg.theme.themes import DarkTheme
 #  Resolved field values
 # ==================================================================================================
 def test_dark_theme_build_resolves_overridden_palette_fields() -> None:
-    """`DarkTheme.build({})` resolves every overridden colour field to its dark-theme value."""
+    """`DarkTheme.build({})` resolves every overridden color field to its dark-theme value."""
     # --- arrange / act ----------------
     theme = DarkTheme.build({})
 
@@ -31,8 +31,8 @@ def test_dark_theme_build_resolves_overridden_palette_fields() -> None:
     assert theme.commit_stroke_color == "#282c34"
 
 
-def test_dark_theme_inherits_non_colour_defaults() -> None:
-    """`DarkTheme` only overrides colour-bearing resolvers — geometry,
+def test_dark_theme_inherits_non_color_defaults() -> None:
+    """`DarkTheme` only overrides color-bearing resolvers — geometry,
     spacing, and typography inherit unchanged from `DefaultTheme`."""
     # --- arrange / act ----------------
     theme = DarkTheme.build({})
@@ -108,9 +108,9 @@ def test_keep_prior_overrides_true_preserves_user_fields_into_dark() -> None:
 # ==================================================================================================
 #  Render smoke — output SVG carries the dark palette
 # ==================================================================================================
-def test_dark_theme_renders_with_expected_palette_colours() -> None:
+def test_dark_theme_renders_with_expected_palette_colors() -> None:
     """A small diagram rendered through `DarkTheme` produces an SVG
-    that contains every palette colour the dark theme defines."""
+    that contains every palette color the dark theme defines."""
     # --- arrange ----------------------
     source = (
         '{"op": "branch", "name": "main"}\n'
@@ -131,7 +131,7 @@ def test_dark_theme_renders_with_expected_palette_colours() -> None:
     assert report.is_clean()
     # Dark canvas background.
     assert "#282c34" in svg
-    # Main branch palette colour appears.
+    # Main branch palette color appears.
     assert "#abb2bf" in svg
-    # Feature branch picks the first cycle colour.
+    # Feature branch picks the first cycle color.
     assert "#98c379" in svg

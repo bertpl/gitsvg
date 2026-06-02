@@ -1,4 +1,4 @@
-"""Tests for the renderer-side branch-colour resolver."""
+"""Tests for the renderer-side branch-color resolver."""
 
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.render._colors import resolve_branch_color
@@ -14,7 +14,7 @@ def _state_theme_from(text: str):
 # ==================================================================================================
 #  Default cycle — first branch = `main`, then cycle palette
 # ==================================================================================================
-def test_first_branch_resolves_to_main_palette_colour() -> None:
+def test_first_branch_resolves_to_main_palette_color() -> None:
     # --- arrange / act / assert -------
     assert resolve_branch_color("b0", declaration_index=0, theme=DEFAULT_THEME) == DEFAULT_THEME.colors["main"]
 
@@ -60,7 +60,7 @@ def test_override_uses_branch_id_not_name() -> None:
     resolved = resolve_branch_color(live_feat.id, declaration_index=1, theme=theme)
 
     # --- assert -----------------------
-    # The redeclared `feat` has no colour override, so it falls back to the
+    # The redeclared `feat` has no color override, so it falls back to the
     # cycle — *not* the removed branch's "#111111".
     assert resolved != "#111111"
     assert resolved == theme.colors[theme.default_branch_color_cycle[0]]

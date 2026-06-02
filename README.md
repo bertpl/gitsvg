@@ -35,7 +35,7 @@ gitsvg validate diagram.gitsvg.jsonl
 
 ## Diagrams
 
-The [`examples/`](examples/) folder ships ten self-contained input files demonstrating the format. The first seven examples cover the diagram operations; the [Theming](#theming) section below covers visual customisation. Each subsection shows the rendered output and the source it came from.
+The [`examples/`](examples/) folder ships ten self-contained input files demonstrating the format. The first seven examples cover the diagram operations; the [Theming](#theming) section below covers visual customization. Each subsection shows the rendered output and the source it came from.
 
 ### Example 1: Linear history
 
@@ -153,13 +153,13 @@ The `pull_request` op declares a pending merge between two branches. Both endpoi
 
 ## Theming
 
-The `theme` op customises the diagram's presentational surface — spacings, sizes, fonts, the branch-colour palette, the SVG background, the orientation, and more. Each op only overrides the fields it lists; a `name` (`default`, `muted`, `dark`, `compact`) selects a built-in theme to base resolution on.
+The `theme` op customizes the diagram's presentational surface — spacings, sizes, fonts, the branch-color palette, the SVG background, the orientation, and more. Each op only overrides the fields it lists; a `name` (`default`, `muted`, `dark`, `compact`) selects a built-in theme to base resolution on.
 
-### Example 8: Recoloured palette
+### Example 8: Recolored palette
 
 Here we import Example 3 unchanged and apply a saturated palette with thicker strokes, larger labels, and a warm background.
 
-![Recoloured palette](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/08_themed.svg)
+![Recolored palette](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/08_themed.svg)
 
 ```jsonl
 {"op": "import", "path": "03_multi_branch.gitsvg.jsonl"}
@@ -237,7 +237,7 @@ By default a branch keeps its lane for its whole life, so once an inner branch m
 
 Beyond `default`, gitsvg ships four built-in themes:
 
-- **`muted`** — the pre-refresh default look: a softer, greyer branch palette with plain circle merge dots.
+- **`muted`** — the pre-refresh default look: a softer, grayer branch palette with plain circle merge dots.
 - **`dark`** — One Dark-inspired palette on a `#282c34` canvas.
 - **`compact`** — ~30 % denser spacing with smaller fonts.
 - **`gui`** — a desktop-git-GUI look: table layout (graph left, message and hash columns right, branch names as tip pills), auto lane change, tight spacing, and a system-color branch palette.

@@ -83,11 +83,11 @@ def test_empty_branch_emits_no_branch_line() -> None:
 
 
 def test_connectors_are_grouped_per_branch_in_declaration_order() -> None:
-    """Each branch's connectors and line draw as one contiguous colour group.
+    """Each branch's connectors and line draw as one contiguous color group.
 
     The renderer loops branches in declaration order and draws all of a
     branch's arcs + line + PR arcs before moving to the next, so the
-    branch-coloured `<path>` strokes appear grouped — every `main` stroke
+    branch-colored `<path>` strokes appear grouped — every `main` stroke
     before every `feature` stroke — rather than interleaved by element
     type."""
     # --- arrange ----------------------
@@ -104,7 +104,7 @@ def test_connectors_are_grouped_per_branch_in_declaration_order() -> None:
     # --- act --------------------------
     # Collect path strokes in the line band only — everything before the
     # first commit dot (<circle>), so the default checkmark merge tick
-    # (a branch-coloured path drawn later, in the dots layer) doesn't
+    # (a branch-colored path drawn later, in the dots layer) doesn't
     # leak into the band-grouping assertion.
     svg = _render_from(text).as_svg()
     band_strokes: list[str | None] = []
@@ -122,8 +122,8 @@ def test_connectors_are_grouped_per_branch_in_declaration_order() -> None:
     assert branch_strokes == ["#111111", "#222222", "#222222", "#222222"]
 
 
-def test_render_preserves_branch_colour_in_dot_fill() -> None:
-    """Each commit's dot is filled with its branch's resolved colour."""
+def test_render_preserves_branch_color_in_dot_fill() -> None:
+    """Each commit's dot is filled with its branch's resolved color."""
     # --- arrange ----------------------
     text = (
         '{"op": "branch", "name": "main", "color": "#aabbcc"}\n'
@@ -134,5 +134,5 @@ def test_render_preserves_branch_colour_in_dot_fill() -> None:
     svg_text = _render_from(text).as_svg()
 
     # --- assert -----------------------
-    # The override colour appears on the branch line and the commit dot.
+    # The override color appears on the branch line and the commit dot.
     assert "#aabbcc" in svg_text

@@ -24,7 +24,7 @@ class BranchOp(OpBase):
     )
     color: HexColor | None = Field(
         default=None,
-        description="Override hex colour for this branch; cycles through defaults when unset.",
+        description="Override hex color for this branch; cycles through defaults when unset.",
     )
     label_side: LabelSide | None = Field(
         default=None,

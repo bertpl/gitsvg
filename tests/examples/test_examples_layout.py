@@ -3,7 +3,7 @@
 For every `examples/<name>.gitsvg.jsonl`, generates the layout JSON
 and asserts it byte-equal to the committed snapshot at
 `tests/examples/_layout_snapshots/<name>.layout.json`. Guards against
-silent drift in the layout→JSON serialisation surface.
+silent drift in the layout→JSON serialization surface.
 
 To regenerate after an intentional change:
 

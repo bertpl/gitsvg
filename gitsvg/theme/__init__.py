@@ -8,7 +8,7 @@ overrides the apply pass accumulated.
 
 `ThemeBuilder` is the transient accumulator threaded through the apply
 pass: it tracks the chosen `theme_cls`, the `user_set` dict, and
-state-derived per-branch colour overrides. The state engine calls
+state-derived per-branch color overrides. The state engine calls
 `builder.build()` once at end-of-apply to produce the resolved `Theme`.
 A `theme:` op carrying `name` reassigns `theme_cls` (via
 `set_theme_cls`) and, unless the op also carries

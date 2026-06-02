@@ -12,11 +12,11 @@ from enum import StrEnum
 class MergeCommitStyle(StrEnum):
     """Merge-commit dot style.
 
-    - `CIRCLE`: the plain commit dot — branch-colour fill,
+    - `CIRCLE`: the plain commit dot — branch-color fill,
       `commit_stroke_color` outline (the default; identical to an ordinary
       commit).
     - `CHECKMARK`: a hollow dot — fill and stroke swap (fill =
-      `commit_stroke_color`, stroke = the branch colour) with a branch-colour
+      `commit_stroke_color`, stroke = the branch color) with a branch-color
       checkmark, marking the commit as a merge at a glance.
     """
 

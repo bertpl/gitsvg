@@ -35,5 +35,5 @@ class PullRequestOp(OpBase):
     )
     title: NonEmptyStr | None = Field(
         default=None,
-        description="Short headline label rendered next to the PR arc; omit for an unlabelled PR.",
+        description="Short headline label rendered next to the PR arc; omit for an unlabeled PR.",
     )

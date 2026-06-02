@@ -1,4 +1,4 @@
-"""JSON serialisation of resolved state.
+"""JSON serialization of resolved state.
 
 `state_to_json` produces a dict matching `gitsvg state`'s public
 output schema:
@@ -34,7 +34,7 @@ from gitsvg.state._state import CommitState, State
 
 
 def state_to_json(state: State) -> dict[str, Any]:
-    """Convert a resolved `State` to a JSON-serialisable dict.
+    """Convert a resolved `State` to a JSON-serializable dict.
 
     Args:
         state: The state produced by `apply_ops` (and validated end-to-end

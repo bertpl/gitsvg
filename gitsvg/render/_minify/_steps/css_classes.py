@@ -11,7 +11,7 @@ Two passes:
    with at least two elements, compute the trunk = intersection of
    every member's presentation cluster. When non-empty, emit it as a
    class shared by every member of the tag-kind. Catches the common
-   "shared structural baseline plus varying colour" pattern (e.g. all
+   "shared structural baseline plus varying color" pattern (e.g. all
    branch lines share `stroke-width` / `fill` but vary in `stroke`).
 
 2. **Leaf pass.** After trunk removal, run exact-match clustering on
@@ -75,9 +75,9 @@ def extract_css_classes(svg: str) -> str:
 
     Args:
         svg: The full SVG markup as a string. Numeric and hex values
-            should already be normalised (rounding and hex shortening
+            should already be normalized (rounding and hex shortening
             run before extraction so the style block carries the same
-            normalised forms as any leftover inline attributes).
+            normalized forms as any leftover inline attributes).
 
     Returns:
         The SVG with eligible attribute clusters hoisted into a

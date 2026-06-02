@@ -83,7 +83,7 @@ class GuiTheme(DefaultTheme):
 
     @classmethod
     def _resolve_commit_row_band_color(cls) -> str | None:
-        """Faint mid-grey zebra stripe on alternate commit rows — `#808080` at `0.05` alpha (`0x0D`), barely-there row tracking."""
+        """Faint mid-gray zebra stripe on alternate commit rows — `#808080` at `0.05` alpha (`0x0D`), barely-there row tracking."""
         return "#8080800D"
 
     # --------------------------------------------------------------------------
@@ -114,7 +114,7 @@ class GuiTheme(DefaultTheme):
     # --------------------------------------------------------------------------
     @classmethod
     def _resolve_branch_guide_color(cls) -> str:
-        """The default guide grey at half opacity (`#b8b8b880`) — the dense lanes read better with fainter guides."""
+        """The default guide gray at half opacity (`#b8b8b880`) — the dense lanes read better with fainter guides."""
         return "#b8b8b880"
 
     # --------------------------------------------------------------------------

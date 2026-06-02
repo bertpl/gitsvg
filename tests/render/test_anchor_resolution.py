@@ -2,7 +2,7 @@
 
 The per-orientation anchor defaults now live as `_resolve_*_anchor`
 classmethods on `DefaultTheme` (post v0.1.9 anchor graduation); the
-expected values reproduce v0.1.8's table — vertical pills centred,
+expected values reproduce v0.1.8's table — vertical pills centered,
 horizontal branch pills edge-anchored toward the start commit,
 commit labels anchored on the side opposite their extension direction.
 
@@ -38,10 +38,10 @@ def test_default_theme_resolves_branch_pill_anchor(orientation: Orientation, exp
 
 
 # ==================================================================================================
-#  PR pill anchor (always centred)
+#  PR pill anchor (always centered)
 # ==================================================================================================
 @pytest.mark.parametrize("orientation", [Orientation.BT, Orientation.TB, Orientation.LR, Orientation.RL])
-def test_default_theme_resolves_pr_pill_anchor_always_centred(orientation: Orientation) -> None:
+def test_default_theme_resolves_pr_pill_anchor_always_centered(orientation: Orientation) -> None:
     # --- arrange / act ----------------
     result = DefaultTheme._resolve_pull_request_pill_anchor(orientation)
 

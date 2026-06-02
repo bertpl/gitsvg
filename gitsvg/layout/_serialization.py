@@ -1,4 +1,4 @@
-"""JSON serialisation of resolved layout.
+"""JSON serialization of resolved layout.
 
 `layout_to_json` produces `gitsvg layout`'s **public output schema** — a
 deliberate, stable contract for consumers (agents, tooling) debugging a
@@ -19,7 +19,7 @@ churn it:
 - `pull_requests` — geometry for each open pull request: `from_*` (source
   tip) and `to_*` (projected merge point on the target lane).
 
-`grid` / `commits` serialise straight from their dataclasses via
+`grid` / `commits` serialize straight from their dataclasses via
 `dataclasses.asdict` (the commits dict flattens to a list, each entry
 carrying its own `id`, so all collections share a uniform shape).
 `branches` are translated explicitly (`_branch_to_json`) so the public
@@ -46,7 +46,7 @@ def _branch_to_json(branch: LayoutBranch) -> dict[str, Any]:
     branch migrated lanes under `auto_lane_change`.
 
     Args:
-        branch: The branch to serialise.
+        branch: The branch to serialize.
 
     Returns:
         A dict with `id`, `name`, `branch_pos`, `segments`, `start`,
@@ -74,14 +74,14 @@ def _arc_to_json(arc: LayoutArc) -> dict[str, Any]:
     the new-lane head (the branch point).
 
     Args:
-        arc: The connector to serialise.
+        arc: The connector to serialize.
 
     Returns:
         A dict with `kind`, `from_branch_pos`, `from_commit_pos`,
         `to_branch_pos`, `to_commit_pos`.
 
     Raises:
-        ValueError: If `arc.kind` is a kind this serialiser does not map
+        ValueError: If `arc.kind` is a kind this serializer does not map
             to a `from` / `to` orientation.
     """
     if arc.kind is LayoutArcKind.MERGE:
@@ -108,7 +108,7 @@ def _pull_request_to_json(pr: LayoutPullRequest) -> dict[str, Any]:
     no `kind`.
 
     Args:
-        pr: The pull request to serialise.
+        pr: The pull request to serialize.
 
     Returns:
         A dict with `id`, `from_branch_pos`, `from_commit_pos`,
@@ -125,7 +125,7 @@ def _pull_request_to_json(pr: LayoutPullRequest) -> dict[str, Any]:
 
 
 def layout_to_json(layout: Layout) -> dict[str, Any]:
-    """Convert a resolved `Layout` to a JSON-serialisable dict.
+    """Convert a resolved `Layout` to a JSON-serializable dict.
 
     Args:
         layout: The layout produced by `compute_layout`.

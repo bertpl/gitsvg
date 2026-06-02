@@ -29,7 +29,7 @@ class MutedTheme(DefaultTheme):
 
     @classmethod
     def _resolve_colors(cls) -> dict[str, str]:
-        """The pre-refresh branch palette — same hues, a touch greyer/softer than today's default."""
+        """The pre-refresh branch palette — same hues, a touch grayer/softer than today's default."""
         return {
             "main": "#5c6370",
             "branch1": "#6a9f8d",

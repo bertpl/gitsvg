@@ -1,4 +1,4 @@
-"""Apply a `branch` op — root resolution, uniqueness check, optional theme colour."""
+"""Apply a `branch` op — root resolution, uniqueness check, optional theme color."""
 
 from typing import cast
 

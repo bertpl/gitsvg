@@ -1,8 +1,8 @@
-"""Branch colour resolution at render time.
+"""Branch color resolution at render time.
 
 The single helper `resolve_branch_color(branch_id, declaration_index, theme)`
 implements the cycle: explicit per-branch override wins, otherwise the
-first branch (index 0) takes the theme's `"main"` palette colour and
+first branch (index 0) takes the theme's `"main"` palette color and
 subsequent branches cycle through `default_branch_color_cycle`. Primitives
 call this as they emit each branch / commit / arc / PR.
 """
@@ -11,7 +11,7 @@ from gitsvg.render._renderer_settings import RendererSettings
 
 
 def resolve_branch_color(branch_id: str, declaration_index: int, theme: RendererSettings) -> str:
-    """Return the hex colour for a branch.
+    """Return the hex color for a branch.
 
     Args:
         branch_id: Stable `BranchState.id` for the branch in question.
@@ -23,7 +23,7 @@ def resolve_branch_color(branch_id: str, declaration_index: int, theme: Renderer
         theme: The resolved theme; supplies the palette and overrides.
 
     Returns:
-        A hex colour string the renderer can use directly.
+        A hex color string the renderer can use directly.
     """
     explicit = theme.branch_color_overrides.get(branch_id)
     if explicit is not None:

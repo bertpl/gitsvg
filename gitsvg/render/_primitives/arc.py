@@ -69,7 +69,7 @@ def draw_arc(
         canvas: Effective canvas spec, used for the geometry transform.
         theme: Resolved theme; supplies the connector style, corner
             radius, and stroke width.
-        color: Stroke colour for the connector (resolved upstream).
+        color: Stroke color for the connector (resolved upstream).
         stroke_dasharray: Optional SVG `stroke-dasharray` value (e.g.
             `"6,4"`). When set, the whole connector is rendered with that
             dash pattern; pull-request connectors pass one to stand apart

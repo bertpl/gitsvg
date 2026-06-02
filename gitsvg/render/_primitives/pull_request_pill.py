@@ -12,10 +12,10 @@ orientation defaults live in `gitsvg/theme/_resolve.py`.
 
 Where the pill rect sits relative to that world point comes from the
 box anchor resolved by `gitsvg/render/_anchor_resolution.py`. The
-PR pill is always centred on the world point (`(0.5, 0.5)`) — its
+PR pill is always centered on the world point (`(0.5, 0.5)`) — its
 offset lands away from the start-side margin concern the branch
 pill addresses, so the edge-anchoring story doesn't apply. Text is
-always centred inside the pill rect.
+always centered inside the pill rect.
 
 Width is approximated from the text length using a per-character pixel
 estimate; no real glyph measurement.

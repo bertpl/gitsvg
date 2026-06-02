@@ -19,7 +19,7 @@ from gitsvg.theme.themes import CompactTheme, DarkTheme, GuiTheme, MutedTheme
 # Setting a name swaps the `ThemeBuilder.theme_cls` to the named subclass; the
 # subsequent wipe of accumulated overrides is conditional on the op's
 # `keep_prior_overrides` flag (default `False` = wipe, matching v0.1.4's
-# documented `{name: "default"}` behaviour). New entries land here; no other
+# documented `{name: "default"}` behavior). New entries land here; no other
 # change needed.
 NAMED_THEMES: dict[str, type[Theme]] = {
     "default": DefaultTheme,
@@ -43,7 +43,7 @@ _NON_THEME_FIELDS = frozenset({"op", "name", "keep_prior_overrides"})
 # message_suffix) triple. The predicate returns True when the value is
 # *acceptable*; failure emits the error code with a message of the form
 # `{field} {message_suffix} (got {value})`. The same invariants also live on
-# `Theme` as per-field validators (defence in depth at `build()` time); the
+# `Theme` as per-field validators (defense in depth at `build()` time); the
 # explicit checks here surface line numbers via the validation report.
 _FIELD_CONSTRAINTS: dict[str, tuple] = {
     # Spacings — zero collapses lanes / rows onto themselves.

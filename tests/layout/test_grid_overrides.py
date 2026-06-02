@@ -72,7 +72,7 @@ def test_pinned_grid_and_theme_spacing_govern_canvas_size() -> None:
 
 
 # ==================================================================================================
-#  Auto-fit margins for long labels (renderer behaviour, no `grid:` op needed)
+#  Auto-fit margins for long labels (renderer behavior, no `grid:` op needed)
 # ==================================================================================================
 def test_long_branch_name_auto_fits_lower_margin_when_default_too_small() -> None:
     """A pill on the leftmost lane with a long name auto-extends the lower

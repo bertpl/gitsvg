@@ -166,7 +166,7 @@ def test_named_theme_replaces_prior_explicit_overrides() -> None:
 
 def test_named_theme_wipes_prior_branch_color_overrides_by_default() -> None:
     """A named-theme op with the default `keep_prior_overrides=False`
-    also wipes state-derived per-branch colour overrides — a "clean
+    also wipes state-derived per-branch color overrides — a "clean
     slate" reset is clean across both override categories, not just
     `theme:` field overrides."""
     # --- arrange / act ----------------
@@ -178,14 +178,14 @@ def test_named_theme_wipes_prior_branch_color_overrides_by_default() -> None:
     assert report.is_clean()
     main_id = state.branches["main"].id
     # The named-theme reset wiped the per-branch override; the resolved
-    # palette colour for main applies instead.
+    # palette color for main applies instead.
     assert main_id not in theme.branch_color_overrides
 
 
 def test_named_theme_wipes_prior_branch_label_side_overrides_by_default() -> None:
     """A named-theme op with the default `keep_prior_overrides=False`
     also wipes state-derived per-branch label-side overrides — same
-    reset semantics as the colour-override category."""
+    reset semantics as the color-override category."""
     # --- arrange / act ----------------
     state, theme, report = _apply(
         '{"op": "branch", "name": "main", "label_side": "before"}\n{"op": "theme", "name": "default"}\n'
@@ -251,7 +251,7 @@ def test_flag_true_preserves_prior_explicit_overrides() -> None:
 
 def test_flag_true_preserves_prior_branch_color_overrides() -> None:
     """`keep_prior_overrides: true` also preserves state-derived
-    per-branch colour overrides — both categories survive the switch."""
+    per-branch color overrides — both categories survive the switch."""
     # --- arrange / act ----------------
     state, theme, report = _apply(
         '{"op": "branch", "name": "main", "color": "#aabbcc"}\n'
@@ -267,7 +267,7 @@ def test_flag_true_preserves_prior_branch_color_overrides() -> None:
 def test_flag_true_preserves_prior_branch_label_side_overrides() -> None:
     """`keep_prior_overrides: true` also preserves state-derived
     per-branch label-side overrides — same survival semantics as the
-    colour-override category."""
+    color-override category."""
     # --- arrange / act ----------------
     state, theme, report = _apply(
         '{"op": "branch", "name": "main", "label_side": "before"}\n'
@@ -282,7 +282,7 @@ def test_flag_true_preserves_prior_branch_label_side_overrides() -> None:
 
 def test_flag_false_explicit_matches_default_wipe() -> None:
     """An explicit `keep_prior_overrides: false` reproduces the default
-    behaviour — wipes both override categories, same as omitting the flag."""
+    behavior — wipes both override categories, same as omitting the flag."""
     # --- arrange / act ----------------
     state, theme, report = _apply(
         '{"op": "theme", "background_color": "#deadbe"}\n'
@@ -488,7 +488,7 @@ def test_font_size_must_be_positive_emits_e219(field: str) -> None:
 
 
 # ==================================================================================================
-#  Branch-colour overrides — written by `apply_branch_op` to `theme.branch_color_overrides`
+#  Branch-color overrides — written by `apply_branch_op` to `theme.branch_color_overrides`
 # ==================================================================================================
 def test_branch_op_with_color_writes_override_keyed_by_id() -> None:
     """When a `branch` op carries an explicit `color:` field, the override

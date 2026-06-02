@@ -1,18 +1,18 @@
 """DOM-equivalence helper for testing visually-lossless minification steps.
 
-Compares two SVGs by parsing both, normalising into a canonical form,
-and asserting the canonical strings match. Normalisations cover every
+Compares two SVGs by parsing both, normalizing into a canonical form,
+and asserting the canonical strings match. Normalizations cover every
 L0 ↔ L1 ↔ L2 transform in the pipeline:
 
 - XML declaration stripped.
 - Empty `<defs>` elements removed.
-- `xmlns:*` namespace declarations ignored (serialiser skips them).
+- `xmlns:*` namespace declarations ignored (serializer skips them).
 - CSS class definitions in `<style>` blocks resolved: for every
   element with `class="cN"`, the declarations from `cN` are written
   inline; the `class` attribute and the `<style>` block are then
   removed, so the L2 classed form matches the L0/L1 inline form.
 - Default attribute values dropped (e.g. `font-weight="400"`).
-- Hex colours expanded to long form (`#abc` → `#aabbcc`).
+- Hex colors expanded to long form (`#abc` → `#aabbcc`).
 - Numeric attribute values rounded to 1dp; sub-pixel differences are
   well below the visually-lossless contract under typical screen
   viewing conditions.
@@ -84,10 +84,10 @@ def canonicalise(svg: str) -> str:
     _resolve_css_classes(root)
     _drop_empty_defs(root)
     _drop_default_attrs(root)
-    _normalise_attr_values(root)
+    _normalize_attr_values(root)
     _push_inheriting_attrs_down(root)
     _filter_irrelevant_inherited_attrs(root)
-    return _serialise(root)
+    return _serialize(root)
 
 
 def assert_dom_equivalent(svg_a: str, svg_b: str, label_a: str = "A", label_b: str = "B") -> None:
@@ -204,8 +204,8 @@ def _drop_default_attrs(root: ET.Element) -> None:
                 del elem.attrib[attr]
 
 
-def _normalise_attr_values(root: ET.Element) -> None:
-    """Expand short hex colours and round decimal numbers to 1dp (in-place)."""
+def _normalize_attr_values(root: ET.Element) -> None:
+    """Expand short hex colors and round decimal numbers to 1dp (in-place)."""
     for elem in root.iter():
         for attr, value in list(elem.attrib.items()):
             value = _HEX_SHORT_RE.sub(lambda m: f"#{m[1]}{m[1]}{m[2]}{m[2]}{m[3]}{m[3]}", value)
@@ -259,14 +259,14 @@ def _filter_irrelevant_inherited_attrs(root: ET.Element) -> None:
                 del elem.attrib[attr]
 
 
-def _serialise(elem: ET.Element) -> str:
-    """Serialise an element tree canonically: sorted attrs, no whitespace, no xmlns:* decls."""
+def _serialize(elem: ET.Element) -> str:
+    """Serialize an element tree canonically: sorted attrs, no whitespace, no xmlns:* decls."""
     parts: list[str] = []
-    _serialise_into(elem, parts)
+    _serialize_into(elem, parts)
     return "".join(parts)
 
 
-def _serialise_into(elem: ET.Element, parts: list[str]) -> None:
+def _serialize_into(elem: ET.Element, parts: list[str]) -> None:
     tag = _local(elem.tag)
     parts.append(f"<{tag}")
     bare_attrs = {_local(k): v for k, v in elem.attrib.items() if not k.startswith("xmlns")}
@@ -280,7 +280,7 @@ def _serialise_into(elem: ET.Element, parts: list[str]) -> None:
     if text:
         parts.append(re.sub(r"\s+", " ", text))
     for child in elem:
-        _serialise_into(child, parts)
+        _serialize_into(child, parts)
     parts.append(f"</{tag}>")
 
 

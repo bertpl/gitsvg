@@ -37,7 +37,7 @@ under the SIL Open Font License 1.1.
 already installed locally (e.g. TeX Live installs them under
 `/usr/local/texlive/<year>/texmf-dist/fonts/truetype/public/dejavu/`
 on macOS). DejaVu is distributed under the Bitstream Vera / DejaVu
-licence, which permits derivative works such as numeric width
+license, which permits derivative works such as numeric width
 tables.
 
 ## Regenerating the LUTs

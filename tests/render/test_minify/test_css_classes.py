@@ -27,8 +27,8 @@ def test_three_elements_sharing_exact_cluster_emit_one_trunk_class() -> None:
         assert forbidden not in result, f"{forbidden} should have been extracted into the class"
 
 
-def test_shared_trunk_with_colour_variants_emits_trunk_plus_leaf_classes() -> None:
-    """The gitsvg pattern: shared structural baseline + per-colour leaves."""
+def test_shared_trunk_with_color_variants_emits_trunk_plus_leaf_classes() -> None:
+    """The gitsvg pattern: shared structural baseline + per-color leaves."""
     # --- arrange ----------------------
     svg = (
         '<svg xmlns="http://www.w3.org/2000/svg">'

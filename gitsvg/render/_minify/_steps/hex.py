@@ -1,4 +1,4 @@
-"""Shorten 6-digit hex colour values to 3-digit form when pair-wise digits match."""
+"""Shorten 6-digit hex color values to 3-digit form when pair-wise digits match."""
 
 import re
 
@@ -9,7 +9,7 @@ _HEX_RE = re.compile(r"#([0-9A-Fa-f])([0-9A-Fa-f])([0-9A-Fa-f])([0-9A-Fa-f])([0-
 
 
 def shorten_hex_colors(svg: str) -> str:
-    """Rewrite `#RRGGBB` hex colour values to `#RGB` when pair-wise digits match.
+    """Rewrite `#RRGGBB` hex color values to `#RGB` when pair-wise digits match.
 
     `#aabbcc` becomes `#abc` (3 bytes saved per match); `#aabbcd` stays
     unchanged. Case-preserving: `#AABBCC` → `#ABC`. The trailing
@@ -20,7 +20,7 @@ def shorten_hex_colors(svg: str) -> str:
         svg: The full SVG markup as a string.
 
     Returns:
-        The SVG with eligible hex colours shortened.
+        The SVG with eligible hex colors shortened.
     """
 
     def _replace(match: re.Match[str]) -> str:

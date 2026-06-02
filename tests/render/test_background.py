@@ -57,7 +57,7 @@ def test_theme_with_background_emits_full_canvas_rect_first() -> None:
     svg = render(layout, theme).as_svg()
 
     # --- assert -----------------------
-    # The background rect carries the chosen colour and starts at the origin.
+    # The background rect carries the chosen color and starts at the origin.
     assert 'x="0" y="0"' in svg
     assert 'fill="#ff00ff"' in svg
     # It precedes the branch-guide path that's normally the back-most layer.
