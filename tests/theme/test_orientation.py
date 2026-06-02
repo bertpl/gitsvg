@@ -298,3 +298,28 @@ def test_explicit_null_orientation_resets_to_default() -> None:
 def test_orientation_is_vertical(orientation: Orientation, expected: bool) -> None:
     # --- act / assert -----------------
     assert orientation.is_vertical is expected
+
+
+# ==================================================================================================
+#  Build-boundary orientation coercion (regression guard)
+# ==================================================================================================
+def test_build_coerces_raw_string_orientation_to_enum_before_resolution() -> None:
+    """A raw-string `orientation` override is coerced to the `Orientation` enum
+    at the `build()` boundary, before any resolver runs.
+
+    `theme:` ops deliver `orientation` as a raw canonical string, so without the
+    coercion it would reach orientation-dependent resolvers untyped — and a
+    type-specific call like `orientation.is_vertical` (used by the spacing
+    resolvers) would raise `AttributeError` on a `str`. Pinning both the resolved
+    enum type and a resolver output that depends on `.is_vertical` keeps that
+    regression caught.
+    """
+    # --- act --------------------------
+    theme = DefaultTheme.build({"orientation": "lr"})
+
+    # --- assert -----------------------
+    # Coerced to the enum, not left as the raw "lr" string.
+    assert theme.orientation is Orientation.LR
+    # And the coercion happened before resolution: `_resolve_branch_spacing`
+    # consumed `orientation.is_vertical` and picked the horizontal default.
+    assert theme.branch_spacing == 75
