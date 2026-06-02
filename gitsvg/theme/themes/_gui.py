@@ -22,8 +22,6 @@ from gitsvg.theme._commit_label_layout import CommitLabelLayout
 from gitsvg.theme._default_theme import DefaultTheme
 from gitsvg.theme._orientation import Orientation
 
-_VERTICAL_ORIENTATIONS = frozenset({Orientation.BT, Orientation.TB})
-
 
 class GuiTheme(DefaultTheme):
     """Desktop-git-GUI look (Fork) — table layout with the Fork palette.
@@ -66,12 +64,12 @@ class GuiTheme(DefaultTheme):
         horizontal via E223); the horizontal value is inherited and
         never resolved for this theme.
         """
-        return 15 if orientation in _VERTICAL_ORIENTATIONS else super()._resolve_branch_spacing(orientation)
+        return 15 if orientation.is_vertical else super()._resolve_branch_spacing(orientation)
 
     @classmethod
     def _resolve_commit_spacing(cls, orientation: Orientation) -> int:
         """Per-orientation `commit_spacing` (px) — `25`, a row pitch the metadata table and its bands read well at."""
-        return 25 if orientation in _VERTICAL_ORIENTATIONS else super()._resolve_commit_spacing(orientation)
+        return 25 if orientation.is_vertical else super()._resolve_commit_spacing(orientation)
 
     # --------------------------------------------------------------------------
     #  Table region — message column + row bands

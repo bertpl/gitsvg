@@ -1,6 +1,7 @@
 """Tests for the `State` container helpers."""
 
 from gitsvg.state import BranchState, State
+from tests.state._helpers import build_state_from_jsonl
 
 
 def test_new_state_is_empty() -> None:
@@ -48,3 +49,30 @@ def test_branch_tip_returns_none_for_unknown_branch() -> None:
 
     # --- act / assert -----------------
     assert state.branch_tip("ghost") is None
+
+
+def test_remove_commit_drops_from_commits_and_branch() -> None:
+    # --- arrange ----------------------
+    state, _report = build_state_from_jsonl(
+        '{"op": "branch", "name": "main"}\n'
+        '{"op": "commit", "branch": "main", "id": "c1", "msg": "a"}\n'
+        '{"op": "commit", "branch": "main", "id": "c2", "msg": "b"}\n'
+    )
+
+    # --- act --------------------------
+    state.remove_commit("c1")
+
+    # --- assert -----------------------
+    assert "c1" not in state.commits
+    assert state.branches["main"].commit_ids == ["c2"]
+
+
+def test_remove_commit_is_noop_for_absent_id() -> None:
+    # --- arrange ----------------------
+    state, _report = build_state_from_jsonl('{"op": "branch", "name": "main"}\n')
+
+    # --- act --------------------------
+    state.remove_commit("does-not-exist")
+
+    # --- assert -----------------------
+    assert state.commits == {}

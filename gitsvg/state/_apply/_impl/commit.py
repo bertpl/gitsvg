@@ -88,7 +88,7 @@ def apply_commit_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, repor
 
     # --- Apply replaces removals ----------------
     for rid in op.replaces or []:
-        _remove_commit(state, rid)
+        state.remove_commit(rid)
 
     # --- Add the commit -------------------------
     state.commits[commit_id] = CommitState(
@@ -150,20 +150,3 @@ def _generate_auto_commit_id(state: State) -> str:
     while f"_c{n}" in state.commits:
         n += 1
     return f"_c{n}"
-
-
-def _remove_commit(state: State, commit_id: str) -> None:
-    """Remove `commit_id` from state.
-
-    Drops the commit from the global commits dict and from its branch's
-    commit-ids list. Cross-references (parents, replaces, captured
-    `from_branch` snapshots, etc.) are left untouched — `remove` is
-    permissive about dangling references; `check_end_of_file` (in
-    `gitsvg.state._eof`) catches any that aren't restored.
-    """
-    commit = state.commits.pop(commit_id, None)
-    if commit is None:
-        return
-    branch = state.branches.get(commit.branch)
-    if branch is not None and commit_id in branch.commit_ids:
-        branch.commit_ids.remove(commit_id)

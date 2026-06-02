@@ -36,14 +36,10 @@ _ROUNDING_DECIMALS_BY_LEVEL: dict[MinifyLevel, int] = {0: 0, 1: 6, 2: 4, 3: 2}
 def compute_minify_config(level: MinifyLevel) -> MinifyConfig:
     """Resolve a `MinifyLevel` to a populated `MinifyConfig`.
 
-    Level mapping:
-
-    - L0: every toggle off; the runner short-circuits and returns
-      input unchanged (the CLI bypasses the pipeline entirely at L0).
-    - L1: lossless basics — structural drops, whitespace strip,
-      font-family hoist, 6dp rounding.
-    - L2: L1 + hex shortening + 4dp rounding.
-    - L3: L2 + font-fallback trim + 2dp rounding.
+    See the `gitsvg.render._minify` package docstring for the level
+    ladder. At L0 every toggle is off; the runner short-circuits and
+    returns the input unchanged (the CLI bypasses the pipeline
+    entirely at L0).
 
     Args:
         level: The minification level (0-3).

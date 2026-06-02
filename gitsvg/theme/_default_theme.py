@@ -26,12 +26,7 @@ from gitsvg.theme._commit_label_layout import CommitLabelLayout
 from gitsvg.theme._commit_row_mode import CommitRowMode
 from gitsvg.theme._merge_commit_style import MergeCommitStyle
 from gitsvg.theme._orientation import Orientation
-from gitsvg.theme._theme import Theme
-
-# ==================================================================================================
-#  Vertical-orientation set — used inside several `_resolve_*` methods.
-# ==================================================================================================
-_VERTICAL_ORIENTATIONS = frozenset({Orientation.BT, Orientation.TB})
+from gitsvg.theme._theme import Theme, _resolve_int_or_float
 
 
 class DefaultTheme(Theme):
@@ -76,7 +71,7 @@ class DefaultTheme(Theme):
         symmetric with `commit_spacing`, since commit labels sit
         above/below the branch line.
         """
-        return 100 if orientation in _VERTICAL_ORIENTATIONS else 75
+        return 100 if orientation.is_vertical else 75
 
     @classmethod
     def _resolve_commit_spacing(cls, orientation: Orientation) -> int:
@@ -86,7 +81,7 @@ class DefaultTheme(Theme):
         `75` (symmetric with `branch_spacing` — see
         `_resolve_branch_spacing`).
         """
-        return 50 if orientation in _VERTICAL_ORIENTATIONS else 75
+        return 50 if orientation.is_vertical else 75
 
     # --------------------------------------------------------------------------
     #  Margins (depend on orientation + resolved spacings)
@@ -100,7 +95,7 @@ class DefaultTheme(Theme):
         uses `×1.5` (timeline starts on the left; widened to fit the
         branch pill), `rl` uses `×1.0`.
         """
-        if orientation in _VERTICAL_ORIENTATIONS:
+        if orientation.is_vertical:
             return _resolve_int_or_float(1.0 * branch_spacing)
         if orientation == Orientation.LR:
             return _resolve_int_or_float(1.5 * commit_spacing)
@@ -115,7 +110,7 @@ class DefaultTheme(Theme):
         `lr` uses `×1.0`, `rl` uses `×1.5` (timeline starts on the
         right; widened to fit the branch pill).
         """
-        if orientation in _VERTICAL_ORIENTATIONS:
+        if orientation.is_vertical:
             return _resolve_int_or_float(1.0 * branch_spacing)
         if orientation == Orientation.RL:
             return _resolve_int_or_float(1.5 * commit_spacing)
@@ -128,14 +123,14 @@ class DefaultTheme(Theme):
         Vertical anchors to `commit_spacing × 0.5`; horizontal anchors
         to `branch_spacing × 1.0`.
         """
-        if orientation in _VERTICAL_ORIENTATIONS:
+        if orientation.is_vertical:
             return _resolve_int_or_float(0.5 * commit_spacing)
         return _resolve_int_or_float(1.0 * branch_spacing)
 
     @classmethod
     def _resolve_margin_bottom(cls, orientation: Orientation, branch_spacing: int, commit_spacing: int) -> int | float:
         """Per-orientation `margin_bottom` default (px). Mirror of `_resolve_margin_top`."""
-        if orientation in _VERTICAL_ORIENTATIONS:
+        if orientation.is_vertical:
             return _resolve_int_or_float(0.5 * commit_spacing)
         return _resolve_int_or_float(1.0 * branch_spacing)
 
@@ -191,7 +186,7 @@ class DefaultTheme(Theme):
         horizontal `branch_spacing`, so the resolved pixel offset stays
         close to the vertical default.
         """
-        return 0.12 if orientation in _VERTICAL_ORIENTATIONS else 0.24
+        return 0.12 if orientation.is_vertical else 0.24
 
     @classmethod
     def _resolve_branch_guide_width(cls) -> float:
@@ -211,7 +206,7 @@ class DefaultTheme(Theme):
         `0.5` — the larger reach covers the branch-pill area in the
         asymmetrically-wider start-side margin.
         """
-        return 0.25 if orientation in _VERTICAL_ORIENTATIONS else 0.5
+        return 0.25 if orientation.is_vertical else 0.5
 
     # --------------------------------------------------------------------------
     #  Typography
@@ -251,7 +246,7 @@ class DefaultTheme(Theme):
         near side, so this is the minimum gap; the pill extends
         further into the start-side margin).
         """
-        return -0.5 if orientation in _VERTICAL_ORIENTATIONS else -0.25
+        return -0.5 if orientation.is_vertical else -0.25
 
     @classmethod
     def _resolve_branch_name_pill_offset_branch_axis_in_lanes(cls, orientation: Orientation) -> float:
@@ -301,7 +296,7 @@ class DefaultTheme(Theme):
         row, offset along the branch axis instead (see
         `_resolve_pull_request_pill_offset_branch_axis_in_lanes`).
         """
-        return -0.5 if orientation in _VERTICAL_ORIENTATIONS else 0.0
+        return -0.5 if orientation.is_vertical else 0.0
 
     @classmethod
     def _resolve_pull_request_pill_offset_branch_axis_in_lanes(cls, orientation: Orientation) -> float:
@@ -311,7 +306,7 @@ class DefaultTheme(Theme):
         Horizontal: `-0.5` — pill sits half a lane above the source
         branch line at the merge column.
         """
-        return 0.0 if orientation in _VERTICAL_ORIENTATIONS else -0.5
+        return 0.0 if orientation.is_vertical else -0.5
 
     # --------------------------------------------------------------------------
     #  Label angles
@@ -382,7 +377,7 @@ class DefaultTheme(Theme):
         horizontally centered — `(0.5, 1.0)` puts the stack's bottom-
         middle at the world point.
         """
-        if orientation in _VERTICAL_ORIENTATIONS:
+        if orientation.is_vertical:
             return (1.0, 0.5)
         return (0.5, 1.0)
 
@@ -395,7 +390,7 @@ class DefaultTheme(Theme):
         Horizontal: stack extends above the dot, horizontally centered
         — `(0.5, 0.0)`.
         """
-        if orientation in _VERTICAL_ORIENTATIONS:
+        if orientation.is_vertical:
             return (0.0, 0.5)
         return (0.5, 0.0)
 
@@ -529,8 +524,10 @@ class DefaultTheme(Theme):
             """Return the user-set value for `name` if present, else `default_fn(*args)`."""
             return user_set[name] if name in user_set else default_fn(*args)
 
-        # Dependency-ordered resolution.
-        orientation = pick("orientation", cls._resolve_orientation)
+        # Dependency-ordered resolution. Coerce orientation to the enum up
+        # front so every resolver receives an `Orientation` (a user override
+        # may arrive as the raw canonical string).
+        orientation = Orientation(pick("orientation", cls._resolve_orientation))
         branch_spacing = pick("branch_spacing", cls._resolve_branch_spacing, orientation)
         commit_spacing = pick("commit_spacing", cls._resolve_commit_spacing, orientation)
         commit_radius = pick("commit_radius", cls._resolve_commit_radius)
@@ -633,13 +630,3 @@ class DefaultTheme(Theme):
                 "table_cell_padding_x_in_font_sizes", cls._resolve_table_cell_padding_x_in_font_sizes
             ),
         )
-
-
-def _resolve_int_or_float(value: float) -> int | float:
-    """Cast a whole-number float to int; return float otherwise.
-
-    Used by the margin resolvers so the SVG attribute formatting stays
-    stable across whole-number cases (drawsvg writes integer values
-    without a decimal point and float values with one).
-    """
-    return int(value) if value == int(value) else value

@@ -15,8 +15,6 @@ overrides. Margins anchor to spacings and shrink the same way.
 from gitsvg.theme._default_theme import DefaultTheme
 from gitsvg.theme._orientation import Orientation
 
-_VERTICAL_ORIENTATIONS = frozenset({Orientation.BT, Orientation.TB})
-
 
 class CompactTheme(DefaultTheme):
     """Denser variant of `DefaultTheme`.
@@ -51,7 +49,7 @@ class CompactTheme(DefaultTheme):
         — kept equal to `commit_spacing` so the horizontal layout stays
         symmetric, matching the `DefaultTheme` invariant.
         """
-        return 75 if orientation in _VERTICAL_ORIENTATIONS else 55
+        return 75 if orientation.is_vertical else 55
 
     @classmethod
     def _resolve_commit_spacing(cls, orientation: Orientation) -> int:
@@ -60,7 +58,7 @@ class CompactTheme(DefaultTheme):
         Vertical: `35` (was `50`). Horizontal: `55` (was `75`,
         symmetric with `branch_spacing`).
         """
-        return 35 if orientation in _VERTICAL_ORIENTATIONS else 55
+        return 35 if orientation.is_vertical else 55
 
     @classmethod
     def _resolve_label_font_size(cls) -> float:
@@ -86,7 +84,7 @@ class CompactTheme(DefaultTheme):
         against the tighter rows. Horizontal: inherited `-0.25`
         (edge-anchored, no adjustment needed).
         """
-        if orientation in _VERTICAL_ORIENTATIONS:
+        if orientation.is_vertical:
             return -0.65
         return -0.25
 
@@ -98,6 +96,6 @@ class CompactTheme(DefaultTheme):
         opposite direction so the title breathes away from the
         merge endpoint. Horizontal: inherited `0.0`.
         """
-        if orientation in _VERTICAL_ORIENTATIONS:
+        if orientation.is_vertical:
             return -0.35
         return 0.0

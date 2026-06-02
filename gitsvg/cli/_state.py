@@ -31,7 +31,7 @@ from pathlib import Path
 
 import click
 
-from gitsvg.cli._bulk import process_input
+from gitsvg.cli._bulk import print_report_errors, process_input
 from gitsvg.cli._pipeline import run_validate_pipeline
 from gitsvg.errors import ValidationReport
 from gitsvg.state import state_to_json
@@ -103,8 +103,7 @@ def _state_to_stdout(input_path: Path) -> int:
     """
     state, report, _theme = run_validate_pipeline(input_path)
     if not report.is_clean():
-        for err in report.errors:
-            click.echo(err.format(), err=True)
+        print_report_errors(report)
         return 1
     click.echo(json.dumps(state_to_json(state), indent=2))
     return 0

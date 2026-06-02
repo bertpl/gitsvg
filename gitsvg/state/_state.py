@@ -166,6 +166,20 @@ class State:
         """Return True when `pr_id` is the id of an open pull-request."""
         return pr_id in self.pull_requests
 
+    def remove_commit(self, commit_id: str) -> None:
+        """Drop a commit from `commits` and from its branch's `commit_ids`.
+
+        No-op when `commit_id` is absent. Cross-references (parents,
+        replaces, captured snapshots) are left untouched — callers rely
+        on end-of-file validation to flag any dangling references.
+        """
+        commit = self.commits.pop(commit_id, None)
+        if commit is None:
+            return
+        branch = self.branches.get(commit.branch)
+        if branch is not None and commit_id in branch.commit_ids:
+            branch.commit_ids.remove(commit_id)
+
     def branch_tip(self, name: str) -> str | None:
         """Return the id of the latest commit on `name`, or None when empty.
 

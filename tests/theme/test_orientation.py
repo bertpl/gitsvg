@@ -14,7 +14,7 @@ import pytest
 from pydantic import ValidationError
 
 from gitsvg.file_format.ops.impl._theme import ThemeOp
-from gitsvg.theme import DefaultTheme
+from gitsvg.theme import DefaultTheme, Orientation
 
 
 # ==================================================================================================
@@ -281,3 +281,20 @@ def test_explicit_null_orientation_resets_to_default() -> None:
     # apply-step behavior is covered elsewhere.
     assert op.orientation is None
     assert "orientation" in op.model_fields_set
+
+
+# ==================================================================================================
+#  Orientation.is_vertical
+# ==================================================================================================
+@pytest.mark.parametrize(
+    ("orientation", "expected"),
+    [
+        (Orientation.BT, True),
+        (Orientation.TB, True),
+        (Orientation.LR, False),
+        (Orientation.RL, False),
+    ],
+)
+def test_orientation_is_vertical(orientation: Orientation, expected: bool) -> None:
+    # --- act / assert -----------------
+    assert orientation.is_vertical is expected

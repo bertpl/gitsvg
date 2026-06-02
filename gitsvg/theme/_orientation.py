@@ -25,6 +25,11 @@ class Orientation(StrEnum):
     LR = "lr"
     RL = "rl"
 
+    @property
+    def is_vertical(self) -> bool:
+        """Return True for the vertical orientations (`bt`, `tb`)."""
+        return self in (Orientation.BT, Orientation.TB)
+
 
 # Two-step normalization: input is first lowercased and `-` replaced by
 # `_`, then looked up in this table. Every accepted alias (Mermaid `TD`,

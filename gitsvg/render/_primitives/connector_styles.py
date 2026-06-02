@@ -36,7 +36,6 @@ from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._geometry import grid_to_pixel
 from gitsvg.render._renderer_settings import RendererSettings
 from gitsvg.theme._branch_line_style import BranchLineStyle
-from gitsvg.theme._orientation import Orientation
 
 # Sub-pixel tolerance below which a connector segment degenerates (collapses
 # to a straight line). Pure numerical-precision guard; never scales.
@@ -123,7 +122,7 @@ def _connector_geometry(
     x1, y1 = grid_to_pixel(from_branch_pos, from_commit_pos, canvas)
     x2, y2 = grid_to_pixel(to_branch_pos, to_commit_pos, canvas)
 
-    commit_axis_vertical = canvas.orientation in (Orientation.BT, Orientation.TB)
+    commit_axis_vertical = canvas.orientation.is_vertical
     screen_y_first = vertical_first if commit_axis_vertical else not vertical_first
 
     dx = 1 if x2 > x1 else -1
