@@ -2,6 +2,7 @@
 
 import json
 
+import pytest
 from click.testing import CliRunner
 
 from gitsvg.cli._cli import cli
@@ -89,80 +90,62 @@ def test_schema_themes_lists_registered_names_alphabetically() -> None:
 # ==================================================================================================
 #  schema theme <name> (inspect)
 # ==================================================================================================
-def test_schema_theme_default_emits_resolved_json() -> None:
+@pytest.mark.parametrize(
+    ("name", "expected_fields"),
+    [
+        (
+            "default",
+            {
+                ("orientation",): "bt",
+                ("branch_spacing",): 100,
+                ("background_color",): None,
+                ("colors", "main"): "#4a4f5a",
+                ("colors", "branch1"): "#56b393",
+                ("branch_line_style",): "bezier",
+                ("merge_commit_style",): "checkmark",
+            },
+        ),
+        (
+            "dark",
+            {
+                ("background_color",): "#282c34",
+                ("colors", "main"): "#abb2bf",
+                ("commit_stroke_color",): "#282c34",
+            },
+        ),
+        (
+            "muted",
+            {
+                ("colors", "main"): "#5c6370",
+                ("branch_line_style",): "rounded",
+                ("merge_commit_style",): "circle",
+            },
+        ),
+        (
+            "compact",
+            {
+                ("branch_spacing",): 75,
+                ("commit_spacing",): 35,
+                ("label_font_size",): 9.5,
+            },
+        ),
+    ],
+)
+def test_schema_theme_inspect_emits_resolved_fields(name: str, expected_fields: dict) -> None:
     # --- arrange ----------------------
     runner = CliRunner()
 
     # --- act --------------------------
-    result = runner.invoke(cli, ["schema", "theme", "default"])
+    result = runner.invoke(cli, ["schema", "theme", name])
 
     # --- assert -----------------------
     assert result.exit_code == 0
     payload = json.loads(result.output)
-    assert payload["orientation"] == "bt"
-    assert payload["branch_spacing"] == 100
-    assert payload["background_color"] is None
-
-
-def test_schema_theme_dark_emits_dark_palette() -> None:
-    # --- arrange ----------------------
-    runner = CliRunner()
-
-    # --- act --------------------------
-    result = runner.invoke(cli, ["schema", "theme", "dark"])
-
-    # --- assert -----------------------
-    assert result.exit_code == 0
-    payload = json.loads(result.output)
-    assert payload["background_color"] == "#282c34"
-    assert payload["colors"]["main"] == "#abb2bf"
-    assert payload["commit_stroke_color"] == "#282c34"
-
-
-def test_schema_theme_muted_emits_pre_refresh_palette_and_styles() -> None:
-    # --- arrange ----------------------
-    runner = CliRunner()
-
-    # --- act --------------------------
-    result = runner.invoke(cli, ["schema", "theme", "muted"])
-
-    # --- assert -----------------------
-    assert result.exit_code == 0
-    payload = json.loads(result.output)
-    assert payload["colors"]["main"] == "#5c6370"
-    assert payload["branch_line_style"] == "rounded"
-    assert payload["merge_commit_style"] == "circle"
-
-
-def test_schema_theme_default_emits_refreshed_palette_and_styles() -> None:
-    # --- arrange ----------------------
-    runner = CliRunner()
-
-    # --- act --------------------------
-    result = runner.invoke(cli, ["schema", "theme", "default"])
-
-    # --- assert -----------------------
-    assert result.exit_code == 0
-    payload = json.loads(result.output)
-    assert payload["colors"]["main"] == "#4a4f5a"
-    assert payload["colors"]["branch1"] == "#56b393"
-    assert payload["branch_line_style"] == "bezier"
-    assert payload["merge_commit_style"] == "checkmark"
-
-
-def test_schema_theme_compact_emits_tighter_metrics() -> None:
-    # --- arrange ----------------------
-    runner = CliRunner()
-
-    # --- act --------------------------
-    result = runner.invoke(cli, ["schema", "theme", "compact"])
-
-    # --- assert -----------------------
-    assert result.exit_code == 0
-    payload = json.loads(result.output)
-    assert payload["branch_spacing"] == 75
-    assert payload["commit_spacing"] == 35
-    assert payload["label_font_size"] == 9.5
+    for path, value in expected_fields.items():
+        resolved = payload
+        for key in path:
+            resolved = resolved[key]
+        assert resolved == value
 
 
 def test_schema_theme_unknown_exits_non_zero_with_known_list() -> None:
