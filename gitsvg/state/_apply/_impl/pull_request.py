@@ -5,6 +5,7 @@ from typing import cast
 from gitsvg.errors import ValidationError, ValidationReport
 from gitsvg.file_format.ops import PullRequestOp
 from gitsvg.parse import ParsedOp
+from gitsvg.state._apply._errors import add_branch_not_declared
 from gitsvg.state._state import PullRequestState, State
 from gitsvg.theme import ThemeBuilder
 
@@ -44,27 +45,11 @@ def apply_pull_request_op(state: State, builder: ThemeBuilder, parsed: ParsedOp,
         return
 
     if not state.has_branch(op.from_):
-        report.add(
-            ValidationError(
-                file=file,
-                line=line,
-                code="E200",
-                message=f"branch {op.from_!r} is not declared",
-                field="from",
-            )
-        )
+        add_branch_not_declared(report, file=file, line=line, branch=op.from_, field="from")
         return
 
     if not state.has_branch(op.into):
-        report.add(
-            ValidationError(
-                file=file,
-                line=line,
-                code="E200",
-                message=f"branch {op.into!r} is not declared",
-                field="into",
-            )
-        )
+        add_branch_not_declared(report, file=file, line=line, branch=op.into, field="into")
         return
 
     pr_id = op.id if op.id is not None else _generate_auto_pr_id(state)

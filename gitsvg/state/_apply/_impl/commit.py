@@ -6,6 +6,7 @@ from gitsvg.errors import ValidationError, ValidationReport
 from gitsvg.file_format.ops import CommitOp
 from gitsvg.parse import ParsedOp
 from gitsvg.state._apply._checks import check_replaces_rules
+from gitsvg.state._apply._errors import add_branch_not_declared, add_commit_id_already_used
 from gitsvg.state._auto_hash import compute_auto_hash, effective_parent_ids
 from gitsvg.state._state import CommitState, State
 from gitsvg.theme import ThemeBuilder
@@ -34,15 +35,7 @@ def apply_commit_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, repor
 
     # --- Branch reference -----------------------
     if not state.has_branch(op.branch):
-        report.add(
-            ValidationError(
-                file=file,
-                line=line,
-                code="E200",
-                message=f"branch {op.branch!r} is not declared",
-                field="branch",
-            )
-        )
+        add_branch_not_declared(report, file=file, line=line, branch=op.branch, field="branch")
         return
 
     # --- Replaces rules -------------------------
@@ -72,15 +65,7 @@ def apply_commit_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, repor
     explicit_id = op.id
     commit_id = explicit_id if explicit_id is not None else _generate_auto_commit_id(state)
     if explicit_id is not None and explicit_id in state.commits and explicit_id not in replaced_set:
-        report.add(
-            ValidationError(
-                file=file,
-                line=line,
-                code="E203",
-                message=f"commit id {explicit_id!r} is already used",
-                field="id",
-            )
-        )
+        add_commit_id_already_used(report, file=file, line=line, commit_id=explicit_id, field="id")
         return
 
     # --- Resolve `gap` (replaces inheritance) ---

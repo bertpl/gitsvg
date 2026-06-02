@@ -22,35 +22,21 @@ emitted for a failing input. Output format may change before
 gitsvg 1.0 — pin a version when caching the schema.
 """
 
-import json
-import sys
 from pathlib import Path
 
-import click
-
-from gitsvg.cli._bulk import print_report_errors, process_input
-from gitsvg.cli._pipeline import run_validate_pipeline
-from gitsvg.errors import ValidationReport
+from gitsvg.cli._introspect import introspection_command, run_introspection_command
 from gitsvg.layout import compute_layout, layout_to_json
+from gitsvg.state import State
+from gitsvg.theme import Theme
 
 
-@click.command(name="layout")
-@click.argument(
-    "input_path",
-    type=click.Path(exists=True, dir_okay=True, file_okay=True, path_type=Path),
-)
-@click.option(
-    "-o",
-    "--output",
-    "output_path",
-    required=False,
-    default=None,
-    type=click.Path(dir_okay=True, file_okay=True, path_type=Path),
-    help=(
-        "Path to write the JSON to (or output directory when INPUT is a directory). "
-        "Omit to print to stdout in single-file mode; required for bulk mode."
-    ),
-)
+def _layout_payload(state: State, theme: Theme) -> object:
+    """Build the `gitsvg layout` JSON payload — the resolved layout geometry."""
+    layout_settings, _ = theme.split()
+    return layout_to_json(compute_layout(state, layout_settings))
+
+
+@introspection_command("layout")
 def layout_command(input_path: Path, output_path: Path | None) -> None:
     """Emit a JSON view of the resolved layout (grid, lanes, arcs, guides, pull-request geometry).
 
@@ -68,61 +54,4 @@ def layout_command(input_path: Path, output_path: Path | None) -> None:
     Output format may change before gitsvg 1.0; pin a gitsvg
     version when caching the schema.
     """
-    if input_path.is_dir() and output_path is None:
-        click.echo(
-            "INPUT is a directory; -o OUTPUT_DIR is required for bulk mode.",
-            err=True,
-        )
-        sys.exit(2)
-
-    if output_path is None:
-        sys.exit(_layout_to_stdout(input_path))
-
-    sys.exit(
-        process_input(
-            input_path,
-            output_path,
-            output_ext=".layout.json",
-            process_one=_layout_to_file,
-        )
-    )
-
-
-def _layout_to_stdout(input_path: Path) -> int:
-    """Run the pipeline, print the JSON to stdout, and return an exit code.
-
-    Args:
-        input_path: A `.gitsvg.jsonl` input file.
-
-    Returns:
-        0 on clean validation (after emitting the JSON), 1 when
-        validation failed (after writing errors to stderr).
-    """
-    state, report, theme = run_validate_pipeline(input_path)
-    if not report.is_clean():
-        print_report_errors(report)
-        return 1
-    layout_settings, _ = theme.split()
-    layout = compute_layout(state, layout_settings)
-    click.echo(json.dumps(layout_to_json(layout), indent=2))
-    return 0
-
-
-def _layout_to_file(input_path: Path, output_path: Path) -> ValidationReport:
-    """Run the pipeline and write the JSON to `output_path` when clean.
-
-    Args:
-        input_path: A `.gitsvg.jsonl` input file.
-        output_path: Where to write the JSON.
-
-    Returns:
-        The validation report. On clean reports the file has been
-        written; on dirty reports no file is created.
-    """
-    state, report, theme = run_validate_pipeline(input_path)
-    if not report.is_clean():
-        return report
-    layout_settings, _ = theme.split()
-    layout = compute_layout(state, layout_settings)
-    output_path.write_text(json.dumps(layout_to_json(layout), indent=2) + "\n")
-    return report
+    run_introspection_command(input_path, output_path, output_ext=".layout.json", payload_fn=_layout_payload)

@@ -25,35 +25,19 @@ emitted for a failing input. Output format may change before
 gitsvg 1.0 — pin a version when caching the schema.
 """
 
-import json
-import sys
 from pathlib import Path
 
-import click
-
-from gitsvg.cli._bulk import print_report_errors, process_input
-from gitsvg.cli._pipeline import run_validate_pipeline
-from gitsvg.errors import ValidationReport
-from gitsvg.state import state_to_json
+from gitsvg.cli._introspect import introspection_command, run_introspection_command
+from gitsvg.state import State, state_to_json
+from gitsvg.theme import Theme
 
 
-@click.command(name="state")
-@click.argument(
-    "input_path",
-    type=click.Path(exists=True, dir_okay=True, file_okay=True, path_type=Path),
-)
-@click.option(
-    "-o",
-    "--output",
-    "output_path",
-    required=False,
-    default=None,
-    type=click.Path(dir_okay=True, file_okay=True, path_type=Path),
-    help=(
-        "Path to write the JSON to (or output directory when INPUT is a directory). "
-        "Omit to print to stdout in single-file mode; required for bulk mode."
-    ),
-)
+def _state_payload(state: State, _theme: Theme) -> object:
+    """Build the `gitsvg state` JSON payload — the resolved diagram snapshot."""
+    return state_to_json(state)
+
+
+@introspection_command("state")
 def state_command(input_path: Path, output_path: Path | None) -> None:
     """Emit a JSON snapshot of the diagram (branches, commits, open pull requests, ids, parents).
 
@@ -71,57 +55,4 @@ def state_command(input_path: Path, output_path: Path | None) -> None:
     Output format may change before gitsvg 1.0; pin a gitsvg
     version when caching the schema.
     """
-    if input_path.is_dir() and output_path is None:
-        click.echo(
-            "INPUT is a directory; -o OUTPUT_DIR is required for bulk mode.",
-            err=True,
-        )
-        sys.exit(2)
-
-    if output_path is None:
-        sys.exit(_state_to_stdout(input_path))
-
-    sys.exit(
-        process_input(
-            input_path,
-            output_path,
-            output_ext=".state.json",
-            process_one=_state_to_file,
-        )
-    )
-
-
-def _state_to_stdout(input_path: Path) -> int:
-    """Run the pipeline, print the JSON to stdout, and return an exit code.
-
-    Args:
-        input_path: A `.gitsvg.jsonl` input file.
-
-    Returns:
-        0 on clean validation (after emitting the JSON), 1 when
-        validation failed (after writing errors to stderr).
-    """
-    state, report, _theme = run_validate_pipeline(input_path)
-    if not report.is_clean():
-        print_report_errors(report)
-        return 1
-    click.echo(json.dumps(state_to_json(state), indent=2))
-    return 0
-
-
-def _state_to_file(input_path: Path, output_path: Path) -> ValidationReport:
-    """Run the pipeline and write the JSON to `output_path` when clean.
-
-    Args:
-        input_path: A `.gitsvg.jsonl` input file.
-        output_path: Where to write the JSON.
-
-    Returns:
-        The validation report. On clean reports the file has been
-        written; on dirty reports no file is created.
-    """
-    state, report, _theme = run_validate_pipeline(input_path)
-    if not report.is_clean():
-        return report
-    output_path.write_text(json.dumps(state_to_json(state), indent=2) + "\n")
-    return report
+    run_introspection_command(input_path, output_path, output_ext=".state.json", payload_fn=_state_payload)
