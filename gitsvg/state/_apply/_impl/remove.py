@@ -44,7 +44,7 @@ def apply_remove_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, repor
                     )
                 )
                 continue
-            _remove_commit(state, commit_id)
+            state.remove_commit(commit_id)
         return
 
     if op.branches:
@@ -100,16 +100,6 @@ def apply_remove_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, repor
 # ==================================================================================================
 #  Helpers
 # ==================================================================================================
-def _remove_commit(state: State, commit_id: str) -> None:
-    """Drop a commit from state and from its branch's commit-ids list."""
-    commit = state.commits.pop(commit_id, None)
-    if commit is None:
-        return
-    branch = state.branches.get(commit.branch)
-    if branch is not None and commit_id in branch.commit_ids:
-        branch.commit_ids.remove(commit_id)
-
-
 def _remove_branch_with_cascade(state: State, builder: ThemeBuilder, branch_name: str) -> None:
     """Drop a branch (and every commit on it) from state, plus its theme overrides.
 
@@ -126,6 +116,6 @@ def _remove_branch_with_cascade(state: State, builder: ThemeBuilder, branch_name
     if branch_name in state.branch_order:
         state.branch_order.remove(branch_name)
     for commit_id in list(branch.commit_ids):
-        state.commits.pop(commit_id, None)
+        state.remove_commit(commit_id)
     builder.branch_color_overrides.pop(branch.id, None)
     builder.branch_label_side_overrides.pop(branch.id, None)

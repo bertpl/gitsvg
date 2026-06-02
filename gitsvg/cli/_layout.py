@@ -28,7 +28,7 @@ from pathlib import Path
 
 import click
 
-from gitsvg.cli._bulk import process_input
+from gitsvg.cli._bulk import print_report_errors, process_input
 from gitsvg.cli._pipeline import run_validate_pipeline
 from gitsvg.errors import ValidationReport
 from gitsvg.layout import compute_layout, layout_to_json
@@ -100,8 +100,7 @@ def _layout_to_stdout(input_path: Path) -> int:
     """
     state, report, theme = run_validate_pipeline(input_path)
     if not report.is_clean():
-        for err in report.errors:
-            click.echo(err.format(), err=True)
+        print_report_errors(report)
         return 1
     layout_settings, _ = theme.split()
     layout = compute_layout(state, layout_settings)

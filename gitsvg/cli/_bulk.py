@@ -34,6 +34,17 @@ ProcessOne = Callable[[Path, Path], ValidationReport]
 """Per-file callback: validate + act on one input, return its report."""
 
 
+def print_report_errors(report: ValidationReport, *, err: bool = True) -> None:
+    """Echo each error in `report` via `click.echo`, one formatted error per line.
+
+    Args:
+        report: The report whose errors to print.
+        err: Route to stderr (default) or stdout (`err=False`).
+    """
+    for error in report.errors:
+        click.echo(error.format(), err=err)
+
+
 # ==================================================================================================
 #  Top-level dispatch
 # ==================================================================================================
@@ -91,8 +102,7 @@ def process_input(
 
     report = process_one(input_path, output_path)
     if not report.is_clean():
-        for err in report.errors:
-            click.echo(err.format(), err=True)
+        print_report_errors(report)
         return 1
     return 0
 

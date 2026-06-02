@@ -7,6 +7,7 @@ import pytest
 
 from gitsvg.cli._bulk import (
     mirror_output_path,
+    print_report_errors,
     process_input,
     run_bulk,
     walk_inputs,
@@ -275,3 +276,34 @@ def test_process_input_single_file_failure_prints_errors_and_returns_one(
     assert code == 1
     assert not output_file.exists()
     assert "[E101]" in capsys.readouterr().err
+
+
+# ==================================================================================================
+#  print_report_errors
+# ==================================================================================================
+def test_print_report_errors_writes_each_error_to_stderr(capsys: pytest.CaptureFixture[str]) -> None:
+    # --- arrange ----------------------
+    report = ValidationReport()
+    report.add(ValidationError(file="x.jsonl", line=1, code="E101", message="bad thing"))
+
+    # --- act --------------------------
+    print_report_errors(report)
+
+    # --- assert -----------------------
+    captured = capsys.readouterr()
+    assert "x.jsonl:1: [E101] bad thing" in captured.err
+    assert captured.out == ""
+
+
+def test_print_report_errors_err_false_writes_to_stdout(capsys: pytest.CaptureFixture[str]) -> None:
+    # --- arrange ----------------------
+    report = ValidationReport()
+    report.add(ValidationError(file="x.jsonl", line=2, code="E101", message="oops"))
+
+    # --- act --------------------------
+    print_report_errors(report, err=False)
+
+    # --- assert -----------------------
+    captured = capsys.readouterr()
+    assert "x.jsonl:2: [E101] oops" in captured.out
+    assert captured.err == ""

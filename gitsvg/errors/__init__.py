@@ -24,6 +24,6 @@ __all__ = [
     "ValidationReport",
     "all_codes",
     "default_catalog_dir",
-    "load_catalog_entry",
     "find_error_code",
+    "load_catalog_entry",
 ]

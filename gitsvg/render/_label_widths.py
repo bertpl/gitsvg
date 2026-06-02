@@ -24,6 +24,24 @@ def pill_width(text: str, theme: RendererSettings) -> float:
     return text_width(text, theme.label_font_family, theme.branch_label_font_size) + theme.pill_padding_x
 
 
+def pill_height(theme: RendererSettings) -> int | float:
+    """Return the pixel height of a pill rectangle.
+
+    Padding convention: `pill_width` adds a single leading-edge
+    `pill_padding_x`, whereas pill height is the full
+    `branch_label_font_size + pill_padding_y` (the padding is not
+    halved).
+
+    Args:
+        theme: Supplies the font size and vertical pill padding.
+
+    Returns:
+        Pixel height covering the label font size plus the vertical
+        pill padding.
+    """
+    return theme.branch_label_font_size + theme.pill_padding_y
+
+
 def commit_label_width(commit: LayoutCommit, theme: RendererSettings) -> float:
     """Return the widest line's pixel width across a commit's label stack.
 

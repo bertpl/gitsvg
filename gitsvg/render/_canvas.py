@@ -19,7 +19,7 @@ from typing import Literal
 
 from gitsvg.file_format import LabelSide
 from gitsvg.layout import Layout
-from gitsvg.render._label_widths import commit_label_width, pill_width
+from gitsvg.render._label_widths import commit_label_width, pill_height, pill_width
 from gitsvg.render._renderer_settings import RendererSettings
 from gitsvg.render._table import compute_table_columns
 from gitsvg.theme import CommitLabelLayout, Orientation
@@ -107,10 +107,7 @@ def is_table_active(theme: RendererSettings) -> bool:
         True when `commit_label_layout` is `table` and the orientation is
         vertical.
     """
-    return theme.commit_label_layout == CommitLabelLayout.TABLE and theme.orientation in (
-        Orientation.BT,
-        Orientation.TB,
-    )
+    return theme.commit_label_layout == CommitLabelLayout.TABLE and theme.orientation.is_vertical
 
 
 def compute_canvas(layout: Layout, theme: RendererSettings) -> RenderCanvas:
@@ -163,7 +160,7 @@ def compute_canvas(layout: Layout, theme: RendererSettings) -> RenderCanvas:
     for axis_edge, visual_side in _AXIS_TO_VISUAL[orientation].items():
         margins[visual_side] = max(margins[visual_side], axis_needs[axis_edge])
 
-    is_vertical = orientation in (Orientation.BT, Orientation.TB)
+    is_vertical = orientation.is_vertical
     table_x_origin = 0.0
     if is_vertical:
         graph_extent = (n_branches - 1) * branch_spacing
@@ -242,13 +239,13 @@ def _auto_fit_branch_axis_edge(layout: Layout, theme: RendererSettings, *, edge:
     target_lane = 0 if edge == "lower" else max_branch_pos
     matching_label_side = LabelSide.BEFORE if edge == "lower" else LabelSide.AFTER
 
-    is_vertical = theme.orientation in (Orientation.BT, Orientation.TB)
-    pill_height = theme.branch_label_font_size + theme.pill_padding_y
+    is_vertical = theme.orientation.is_vertical
+    pill_h = pill_height(theme)
 
     needed: float = 0.0
     for branch in branches:
         if branch.start_lane == target_lane:
-            extent = (pill_width(branch.name, theme) / 2) if is_vertical else (pill_height / 2)
+            extent = (pill_width(branch.name, theme) / 2) if is_vertical else (pill_h / 2)
             needed = max(needed, extent + _AUTO_FIT_EDGE_PAD_PX)
     for commit in commit_layouts.values():
         if commit.branch_pos == target_lane and theme.branch_label_side(commit.branch_id) == matching_label_side:
@@ -294,8 +291,8 @@ def _auto_fit_commit_axis_edge(layout: Layout, theme: RendererSettings, *, edge:
         Pixel allowance needed past the edge; returns 0 if nothing
         on the edge protrudes.
     """
-    is_vertical = theme.orientation in (Orientation.BT, Orientation.TB)
-    pill_height = theme.branch_label_font_size + theme.pill_padding_y
+    is_vertical = theme.orientation.is_vertical
+    pill_h = pill_height(theme)
     max_commit_pos = layout.grid.n_commits - 1
 
     needed: float = 0.0
@@ -311,7 +308,7 @@ def _auto_fit_commit_axis_edge(layout: Layout, theme: RendererSettings, *, edge:
             offset_px = abs(branch_offset_rows) * theme.commit_spacing
             for branch in layout.branches:
                 if branch.start == target_start:
-                    extent = offset_px + (pill_height / 2 if is_vertical else pill_width(branch.name, theme))
+                    extent = offset_px + (pill_h / 2 if is_vertical else pill_width(branch.name, theme))
                     needed = max(needed, extent + _AUTO_FIT_EDGE_PAD_PX)
 
     # PR-title pills (only branches with a non-None title render a pill).
@@ -324,7 +321,7 @@ def _auto_fit_commit_axis_edge(layout: Layout, theme: RendererSettings, *, edge:
             for pr in layout.pull_requests:
                 if pr.title is None or pr.trunk_point.commit_pos != target_pos:
                     continue
-                extent = offset_px + (pill_height / 2 if is_vertical else pill_width(pr.title, theme))
+                extent = offset_px + (pill_h / 2 if is_vertical else pill_width(pr.title, theme))
                 needed = max(needed, extent + _AUTO_FIT_EDGE_PAD_PX)
 
     return needed

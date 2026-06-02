@@ -161,7 +161,7 @@ def branch_guide_endpoints(
         guide line.
     """
     overshoot = theme.guide_overshoot
-    if canvas.orientation in (Orientation.BT, Orientation.TB):
+    if canvas.orientation.is_vertical:
         x = grid_to_pixel(branch_pos, 0, canvas)[0]
         y_top = canvas.margin_top - overshoot
         y_bottom = canvas.height - canvas.margin_bottom + overshoot
@@ -194,7 +194,7 @@ def commit_row_band_rect(commit_pos: int, canvas: RenderCanvas) -> tuple[float, 
     center_x, center_y = grid_to_pixel(0, commit_pos, canvas)
     # The full-span origin coordinate is a literal int 0 (not 0.0) so the SVG
     # attribute reads `x="0"` / `y="0"`, matching the background rect's output.
-    if canvas.orientation in (Orientation.BT, Orientation.TB):
+    if canvas.orientation.is_vertical:
         return (0, center_y - thickness / 2, canvas.width, thickness)
     return (center_x - thickness / 2, 0, thickness, canvas.height)
 

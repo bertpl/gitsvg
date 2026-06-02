@@ -18,6 +18,7 @@ from pathlib import Path
 
 import click
 
+from gitsvg.cli._bulk import print_report_errors
 from gitsvg.cli._pipeline import run_validate_pipeline
 from gitsvg.errors import ValidationReport
 
@@ -48,9 +49,8 @@ def validate_command(path: Path, json_output: bool) -> None:
 #  Output rendering
 # ==================================================================================================
 def _print_plain(report: ValidationReport) -> None:
-    """Print the report as plain text, one error per line."""
-    for err in report.errors:
-        click.echo(err.format())
+    """Print the report as plain text to stdout, one error per line."""
+    print_report_errors(report, err=False)
 
 
 def _render_json(report: ValidationReport) -> str:
