@@ -46,7 +46,7 @@ from gitsvg.state._apply import (
     apply_remove_op,
 )
 from gitsvg.state._state import State
-from gitsvg.theme import CommitLabelLayout, CommitRowMode, Orientation, Theme, ThemeBuilder
+from gitsvg.theme import CommitLabelLayout, CommitRowMode, Theme, ThemeBuilder
 
 # Leaf-path import: pulls in `State` for the shared handler signature,
 # so the package-level `gitsvg.theme.__init__` deliberately does not
@@ -204,7 +204,7 @@ def _check_table_mode_conflicts(builder: ThemeBuilder, theme: Theme, report: Val
     if theme.commit_label_layout != CommitLabelLayout.TABLE:
         return
 
-    if theme.orientation in (Orientation.LR, Orientation.RL):
+    if not theme.orientation.is_vertical:
         file, line = builder.user_set_lines.get("commit_label_layout", (None, 0))
         report.add(
             ValidationError(

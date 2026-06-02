@@ -261,12 +261,14 @@ renderer modules.
 **Rule.** `Theme` lives only at the orchestration layer between the
 apply pass and the layout / renderer stages. The pipeline stages
 consume disjoint slices: `LayoutSettings` (the home for layout-
-affecting fields — empty today, since `compute_layout(state)` is a
-pure grid transformation) and `RendererSettings` (every current theme
-field). Both slices are produced by `Theme.split()`; neither stage
-imports `Theme` directly. `RendererSettings` is a `Theme` subclass so
-the field declarations, validators, and resolved-pixel property
-accessors stay DRY; the class identity is what marks the boundary.
+affecting fields — currently `commit_row_mode`, `auto_lane_change`,
+and `merge_lane_clearance`, which `compute_layout(state,
+layout_settings)` consults) and `RendererSettings` (every current
+theme field). Both slices are produced by `Theme.split()`; neither
+stage imports `Theme` directly. `RendererSettings` is a `Theme`
+subclass so the field declarations, validators, and resolved-pixel
+property accessors stay DRY; the class identity is what marks the
+boundary.
 
 **Rationale.** Pinning each stage to a narrow type lets layout and
 renderer vary independently. `RendererSettings` can grow new visual
