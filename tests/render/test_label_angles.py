@@ -81,7 +81,7 @@ def test_commit_label_angle_wraps_commit_label() -> None:
 
     # --- assert -----------------------
     matches = _ROTATE_RE.findall(svg)
-    # Two commits → two commit-label rotation groups (one per labelled commit).
+    # Two commits → two commit-label rotation groups (one per labeled commit).
     # Branch pill is not rotated.
     assert len(matches) == 2
     for angle, _, _ in matches:
@@ -139,7 +139,7 @@ def test_rotation_pivot_matches_branch_pill_world_point(orientation: str) -> Non
     world anchor point — `(wx, wy) = pill_rect_top_left + (u*width, v*height)` — so
     the box anchor stays pinned regardless of orientation. We back this out
     by checking the rotate(angle, px, py) pivot lands on the rect edge /
-    centre that the `BoxAnchor` resolves to."""
+    center that the `BoxAnchor` resolves to."""
     # --- arrange ----------------------
     text = (
         f'{{"op": "theme", "orientation": "{orientation}", "branch_label_angle": 45}}\n'
@@ -166,7 +166,7 @@ def test_rotation_pivot_matches_branch_pill_world_point(orientation: str) -> Non
     rect_w = float(rect_match.group(3))
     rect_h = float(rect_match.group(4))
 
-    # `BoxAnchor` per orientation: BT/TB centred (0.5, 0.5); LR right-edge
+    # `BoxAnchor` per orientation: BT/TB centered (0.5, 0.5); LR right-edge
     # anchored (1.0, 0.5); RL left-edge anchored (0.0, 0.5).
     if orientation == "lr":
         expected_u = 1.0

@@ -86,7 +86,7 @@ def draw_commit_label(d: draw.Drawing, commit: LayoutCommit, canvas: RenderCanva
     max_font_size = max(font_size for _, font_size, _, _ in lines)
 
     # Stack-vertical anchor derived from the resolved `v`: 0 → stack
-    # top edge at `cy`, 1 → bottom edge at `cy`, 0.5 → centred. The
+    # top edge at `cy`, 1 → bottom edge at `cy`, 0.5 → centered. The
     # two-term form keeps the line-span offset and the visible-edge
     # adjustment separate, so for v ∈ {0, 0.5, 1} the resulting float
     # arithmetic matches the legacy three-branch formula bit-for-bit

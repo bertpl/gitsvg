@@ -1,6 +1,6 @@
 """LayoutArcKind enum — what kind of connector a `LayoutArc` represents.
 
-Carried explicitly on `LayoutArc` so the renderer and the serialiser can
+Carried explicitly on `LayoutArc` so the renderer and the serializer can
 dispatch on the connector's role rather than re-deriving it from
 geometry. Geometry alone cannot distinguish every kind: a lane-change
 connector has both endpoints on the same branch one row apart, so the

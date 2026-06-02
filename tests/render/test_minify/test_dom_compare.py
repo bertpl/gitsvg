@@ -38,7 +38,7 @@ def test_inter_element_whitespace_collapses() -> None:
     assert canonicalise(with_ws) == canonicalise(without_ws)
 
 
-def test_empty_defs_block_normalises_to_absent() -> None:
+def test_empty_defs_block_normalizes_to_absent() -> None:
     # --- arrange ----------------------
     with_defs = "<svg><defs></defs><path/></svg>"
     without_defs = "<svg><path/></svg>"
@@ -74,7 +74,7 @@ def test_short_and_long_hex_compare_equal() -> None:
     assert canonicalise(short) == canonicalise(long)
 
 
-def test_sub_pixel_numeric_diffs_normalise_equal() -> None:
+def test_sub_pixel_numeric_diffs_normalize_equal() -> None:
     # --- arrange ----------------------
     hi_precision = '<svg><circle cx="100.123456" cy="200.0001"/></svg>'
     lo_precision = '<svg><circle cx="100.12" cy="200"/></svg>'

@@ -1,6 +1,6 @@
 """Bulk walker + type-matrix dispatch for `.gitsvg.jsonl` inputs.
 
-Two flavours of CLI subcommand consume `.gitsvg.jsonl` input files:
+Two flavors of CLI subcommand consume `.gitsvg.jsonl` input files:
 
 - *Single-file mode* — `INPUT` is one file, `-o` is one output path.
 - *Bulk mode* — `INPUT` is a directory, `-o` is a directory; the
@@ -13,7 +13,7 @@ etc.). The single entry point is `process_input`; the helpers
 `walk_inputs`, `mirror_output_path`, and `run_bulk` are exposed for
 tests and for direct reuse when a subcommand needs finer control.
 
-Bulk-mode behaviour: continue on per-file failures (a failing file
+Bulk-mode behavior: continue on per-file failures (a failing file
 does not stop the walk), aggregate validation errors, print a
 summary line at the end, and exit non-zero when at least one file
 failed. Matches the shape of the local-only render / validate

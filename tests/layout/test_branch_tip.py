@@ -68,7 +68,7 @@ def test_merge_leaves_source_tip_at_its_own_commit_and_target_at_the_merge() -> 
     assert branches["main"].tip_commit_id == "m1"  # the merge commit is the target's tip
 
 
-def test_tip_commit_id_is_serialised_in_layout_json() -> None:
+def test_tip_commit_id_is_serialized_in_layout_json() -> None:
     # --- arrange ----------------------
     parsed, report = parse_jsonl_text(
         '{"op": "branch", "name": "main"}\n{"op": "commit", "branch": "main", "id": "c1", "msg": "a"}\n',

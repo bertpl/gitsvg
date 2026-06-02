@@ -1,20 +1,20 @@
 """Draw a branch-name pill at the branch's start point.
 
-The pill is a filled rounded rectangle in the branch's colour with the
+The pill is a filled rounded rectangle in the branch's color with the
 branch name in white text. Its world anchor point comes from the
 signed two-axis offset declared on the theme
 (`branch_name_pill_offset_commit_axis_in_rows` and
 `branch_name_pill_offset_branch_axis_in_lanes`); the per-orientation
 defaults live in `gitsvg/theme/_resolve.py`.
 
-Where the pill rect sits relative to that world point — centred,
+Where the pill rect sits relative to that world point — centered,
 right-edge anchored, left-edge anchored — comes from the box anchor
 resolved by `gitsvg/render/_anchor_resolution.py`. Vertical
-orientations (`bt`, `tb`) centre the pill (`(0.5, 0.5)`); horizontal
+orientations (`bt`, `tb`) center the pill (`(0.5, 0.5)`); horizontal
 orientations anchor the pill's edge nearest the start commit so the
 theme offset becomes a minimum gap and a long branch name extends
 further into the start-side margin without crowding the dot. The text
-itself is always centred inside the pill rect — pill-internal text
+itself is always centered inside the pill rect — pill-internal text
 placement is invariant.
 """
 

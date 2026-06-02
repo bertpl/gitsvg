@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- US English spelling normalized across user-facing text — CLI `gitsvg schema` field descriptions and error-catalog entries — and the documentation. No behavioral change.
+
 ### Deprecated
 
 ### Removed
@@ -118,7 +120,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Pill and commit-label widths now use measured glyph metrics from `theme.label_font_family`'s fallback chain instead of a uniform per-character factor; existing diagrams may show small pixel shifts.
 - Canvas auto-fit now covers long branch names in `lr` / `rl` (start-side margin grows to fit instead of overflowing) and correctly routes the `tb` branch-pill allowance to `margin_top` instead of `margin_bottom`.
-- Default first non-main branch colour swapped from blue-grey to green for a clearer contrast against the `main` palette entry.
+- Default first non-main branch color swapped from blue-gray to green for a clearer contrast against the `main` palette entry.
 - Horizontal-orientation default spacings (`lr` / `rl`) changed from `(50, 100)` to `(75, 75)` — symmetric reads better when commit labels sit above/below the branch line.
 ## 0.1.6 (2026-05-15)
 
@@ -136,7 +138,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Five new `theme:` op fields expose previously-internal visual constants for user customisation: `guide_overshoot_in_rows`, `pill_padding_x_in_font_sizes`, `pill_padding_y_in_font_sizes`, `pill_corner_radius_in_font_sizes`, `label_line_padding_in_font_sizes`. Defaults reproduce today's pixel values; see the format spec for anchors.
+- Five new `theme:` op fields expose previously-internal visual constants for user customization: `guide_overshoot_in_rows`, `pill_padding_x_in_font_sizes`, `pill_padding_y_in_font_sizes`, `pill_corner_radius_in_font_sizes`, `label_line_padding_in_font_sizes`. Defaults reproduce today's pixel values; see the format spec for anchors.
 - Two new validation error codes on the `theme:` op surface: `E218` (`branch_spacing` / `commit_spacing` must be `> 0`), `E219` (font sizes must be `> 0`).
 
 ### Changed
@@ -149,9 +151,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- New `theme` op for applying presentational overrides (spacings, margins, font sizes, stroke widths, colour palette, background) from JSONL. Each op patches the live theme; `"name": "default"` resets every field to the package defaults.
-- `theme.colors` accepts a replacement branch-colour palette dict.
-- Optional full-canvas background colour via `theme.background_color` (default unset = transparent).
+- New `theme` op for applying presentational overrides (spacings, margins, font sizes, stroke widths, color palette, background) from JSONL. Each op patches the live theme; `"name": "default"` resets every field to the package defaults.
+- `theme.colors` accepts a replacement branch-color palette dict.
+- Optional full-canvas background color via `theme.background_color` (default unset = transparent).
 - New shipped example (`examples/08_themed.gitsvg.jsonl`) demonstrating the theme op via a saturated palette over an imported diagram.
 ## 0.1.3 (2026-05-11)
 
@@ -226,15 +228,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Render output now includes branch-off arcs and merge arcs connecting parent commits to child-branch starts and merge commits.
 - Render output now includes branch guides — faint dashed vertical lines at every occupied lane.
 - Render output now includes commit labels (`msg` primary, optional `hash` as a smaller secondary line); multi-line `msg` strings stack vertically.
-- Render output now includes branch-name pills — coloured rounded rectangles positioned below each branch's start point.
+- Render output now includes branch-name pills — colored rounded rectangles positioned below each branch's start point.
 - Highlight visual: a commit with `highlight: true` now renders with an enlarged dot and a bold `msg` label.
-- `canvas:` op honours all eight optional fields end-to-end; auto-fit kicks in for fields left unset.
+- `canvas:` op honors all eight optional fields end-to-end; auto-fit kicks in for fields left unset.
 - Auto-fit margins reserve room for the longest visible labels per side; pin via `canvas:` to opt out.
 - Pinned-canvas overflow: when content exceeds pinned `n_commits`/`n_branches`, the excess is clipped by SVG default `overflow:hidden`.
 
 ### Changed
 
-- Internal: rendering pipeline restructured into state → layout → renderer stages. No user-visible behaviour change.
+- Internal: rendering pipeline restructured into state → layout → renderer stages. No user-visible behavior change.
 
 ### Removed
 

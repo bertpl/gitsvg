@@ -42,7 +42,7 @@ def test_compact_theme_build_resolves_overridden_metrics_horizontal() -> None:
 
 
 def test_compact_theme_inherits_default_palette() -> None:
-    """`CompactTheme` inherits the refreshed default palette unchanged — it varies metrics, not colour."""
+    """`CompactTheme` inherits the refreshed default palette unchanged — it varies metrics, not color."""
     # --- arrange / act ----------------
     theme = CompactTheme.build({})
 

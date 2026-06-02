@@ -58,7 +58,7 @@ representation; the renderer reads `RendererSettings` (the renderer's
 slice of the resolved theme, produced by `Theme.split()` — see
 invariant #8) and converts grid positions to pixel coordinates. No
 field crosses the boundary in the other direction. Layout output
-carries no pixel coordinates, colours, fonts, strokes, or opacities;
+carries no pixel coordinates, colors, fonts, strokes, or opacities;
 presentational state never flows back into layout.
 
 **Rationale.** Layout strategies (declaration-order assignment,
@@ -67,7 +67,7 @@ custom palettes, future orientation) vary independently. Keeping
 each side oblivious to the other lets either evolve without
 coupling.
 
-**Enforcement.** Code-review discipline. Pixel/colour/font fields
+**Enforcement.** Code-review discipline. Pixel/color/font fields
 appearing on a `Layout*` type are the trigger for review pushback.
 
 **Locked in:** v0.1.4.
@@ -88,7 +88,7 @@ naming its axis classification. Three classes:
   fields: they survive the bottom-to-top default but break under
   any rotation.
 
-Non-position/size fields (colours, fonts, IDs, names, booleans)
+Non-position/size fields (colors, fonts, IDs, names, booleans)
 carry no comment.
 
 **Rationale.** Surfaces orientation-leaky fields at the field
@@ -172,8 +172,8 @@ indices and axis-relative offsets.
 **Enforcement.** Code-review discipline. Pixel arithmetic on
 `canvas.*` or theme spacing/margin fields appearing inside a
 `_primitives/*.py` module is the trigger for review pushback.
-Local primitive geometry (pill width/height + centring on the
-anchor; label-stack vertical centring; arc segment + sweep math)
+Local primitive geometry (pill width/height + centering on the
+anchor; label-stack vertical centering; arc segment + sweep math)
 stays in the primitives — those are not coordinate transforms.
 
 **Locked in:** v0.1.5.
@@ -183,7 +183,7 @@ stays in the primitives — those are not coordinate transforms.
 **Rule.** Layout-engine inputs and renderer inputs live on distinct
 ops. The `grid:` op carries the layout extent (`n_commits`,
 `n_branches`); the `theme:` op carries every pixel-side concern
-(spacings, margins, fonts, colours, strokes, opacities). No field
+(spacings, margins, fonts, colors, strokes, opacities). No field
 appears on both ops, and no field on `state.grid` flows into the
 resolved theme.
 

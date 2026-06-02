@@ -10,7 +10,7 @@ Step ordering is fixed (not data-driven). The pinned order:
    root, before any trim or extraction sees it.
 4. `trim_font_family_fallback` — operates on the consolidated root
    attribute; L3 only.
-5. `shorten_hex_colors` — colour-attribute substitution.
+5. `shorten_hex_colors` — color-attribute substitution.
 6. `round_numbers` — coordinates are stable by now; runs before CSS
    class extraction so values packed into the `<style>` block are
    already at the level's target precision (the rounding regex
@@ -24,7 +24,7 @@ Step ordering is fixed (not data-driven). The pinned order:
 Most adjacencies are order-independent but pinned for determinism.
 The few real dependencies: defaults-drop before CSS extraction (so
 defaults aren't hoisted); hex/rounding before CSS extraction (so
-extracted values are already normalised); empty-defs drop before
+extracted values are already normalized); empty-defs drop before
 symbol/use (so a populated `<defs>` from dedup isn't accidentally
 dropped); font-family hoist before font-fallback trim.
 """

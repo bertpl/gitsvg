@@ -1,4 +1,4 @@
-"""Tests for the resolved-state JSON serialiser."""
+"""Tests for the resolved-state JSON serializer."""
 
 from gitsvg.state import state_to_json
 from tests.state._helpers import build_state_from_jsonl

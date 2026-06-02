@@ -213,7 +213,7 @@ def _auto_fit_branch_axis_edge(layout: Layout, theme: RendererSettings, *, edge:
       direction the edge faces.
     - Edge-lane branch-name pills. The pill rect's extent along the
       branch axis depends on orientation: in vertical orientations
-      the rect is centred horizontally over the lane line so the
+      the rect is centered horizontally over the lane line so the
       half-pill-width protrudes; in horizontal orientations the rect
       is anchored along the commit axis (rect width runs along the
       commit axis, height along the branch axis), so the half-pill-
@@ -278,7 +278,7 @@ def _auto_fit_commit_axis_edge(layout: Layout, theme: RendererSettings, *, edge:
       case to the upper edge.
 
     The pill's extent past its anchor depends on orientation: in
-    vertical orientations the rect is centred on the anchor so the
+    vertical orientations the rect is centered on the anchor so the
     half-pill-height extends along the commit axis; in horizontal
     orientations the rect's near-edge is anchored at the offset
     point so the full pill_width extends in the offset direction

@@ -14,7 +14,7 @@ draw time when picking commit-label positioning.
 
 Members carry the canonical short-code string values (`"before"`,
 `"after"`) so the enum interoperates transparently with JSON / Pydantic
-serialisation and with code that still compares against raw strings.
+serialization and with code that still compares against raw strings.
 """
 
 from enum import StrEnum

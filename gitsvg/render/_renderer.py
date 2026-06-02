@@ -2,32 +2,32 @@
 
 The renderer is purely "Layout + Theme → SVG primitives." It never
 imports `State`. Layout supplies integer-grid positions and semantic
-identifiers; theme supplies every pixel, colour, font, stroke, and
+identifiers; theme supplies every pixel, color, font, stroke, and
 dash decision. `compute_canvas(layout, theme)` resolves the pixel-space
 canvas the coordinate transform reads from.
 
 Z-order (back to front):
 
 0. Canvas background (a filled rect when `theme.background_color` is a
-   visible, non-transparent colour; nothing otherwise — the SVG stays
+   visible, non-transparent color; nothing otherwise — the SVG stays
    transparent).
 1. Commit-row bands (zebra stripes on alternate commit-axis rows when
    `theme.commit_row_band_color` is visible; nothing otherwise). Span
    the full canvas, just above the background and below the guides.
 2. Branch guides (faint dashed verticals at every occupied lane).
 3. Per-branch line band — looping branches in declaration order, each
-   branch's connectors and line are drawn as one colour-coherent group
+   branch's connectors and line are drawn as one color-coherent group
    before the next branch's: its branch-off / merge arcs, then its
    branch line, then its pull-request arcs (dashed). Every element in
-   the band is coloured by exactly one branch (the arc colour resolver
+   the band is colored by exactly one branch (the arc color resolver
    attributes each connector to its branch point), so grouping keeps a
-   branch's coloured strokes contiguous along the z-axis. Crossings
+   branch's colored strokes contiguous along the z-axis. Crossings
    between branches resolve by declaration order — a later-declared
    branch paints over an earlier one.
-4. Commit dots (ordinary commits in branch colour with white outline;
+4. Commit dots (ordinary commits in branch color with white outline;
    merge commits per `merge_commit_style`; enlarged when highlighted).
    Above the line band, below every text element.
-5. Branch-name pills (coloured rounded rectangles + branch name).
+5. Branch-name pills (colored rounded rectangles + branch name).
    Skipped in `table` mode — the branch name moves to a tip pill in the
    table's message column.
 6. Pull-request title pills (anchored half a row back from the
@@ -65,7 +65,7 @@ from gitsvg.theme import DEFAULT_THEME, is_color_visible
 def _branch_through_point(layout: Layout, point: GridSlot) -> LayoutBranch:
     """Return the branch whose line passes through `point`.
 
-    A connector takes its colour from the branch at its branch point —
+    A connector takes its color from the branch at its branch point —
     the new branch for a branch-off (the point is that branch's start),
     or the merged-in / source branch for a merge or pull request (the
     point is a row within that branch's life). Matched against each
@@ -77,7 +77,7 @@ def _branch_through_point(layout: Layout, point: GridSlot) -> LayoutBranch:
         point: The grid slot to resolve — a connector's branch point.
 
     Returns:
-        The `LayoutBranch` whose colour the renderer should use.
+        The `LayoutBranch` whose color the renderer should use.
 
     Raises:
         LookupError: If no branch matches — should never happen for a
@@ -124,12 +124,12 @@ def render(layout: Layout, theme: RendererSettings | None = None) -> draw.Drawin
     )
 
     # --- Branch id → declaration index map ------
-    # Used by the colour resolver. Layout.branches is in declaration
+    # Used by the color resolver. Layout.branches is in declaration
     # order, matching state.branch_order.
     declaration_index_by_id: dict[str, int] = {b.id: i for i, b in enumerate(layout.branches)}
 
     def color_for(branch_id: str) -> str:
-        """Resolve `branch_id` to its rendered colour using the closed-over index map and theme."""
+        """Resolve `branch_id` to its rendered color using the closed-over index map and theme."""
         return resolve_branch_color(branch_id, declaration_index_by_id.get(branch_id, 0), theme)
 
     # --- Canvas background ----------------------
@@ -147,7 +147,7 @@ def render(layout: Layout, theme: RendererSettings | None = None) -> draw.Drawin
     # --- Commit-row bands -----------------------
     # Zebra stripes on alternate commit-axis rows (odd index → row 0 bare),
     # spanning the full canvas just above the background. Skipped entirely
-    # when the band colour is unset / fully transparent, so default output
+    # when the band color is unset / fully transparent, so default output
     # stays byte-identical.
     band_color = theme.commit_row_band_color
     if is_color_visible(band_color):
@@ -159,9 +159,9 @@ def render(layout: Layout, theme: RendererSettings | None = None) -> draw.Drawin
         draw_branch_guide(d, lane, canvas, theme)
 
     # --- Per-branch line band -------------------
-    # Bucket every connector under the branch whose colour it carries
+    # Bucket every connector under the branch whose color it carries
     # (its branch point), so each branch's arcs + line + PR arcs draw as
-    # one contiguous colour-coherent group, in declaration order.
+    # one contiguous color-coherent group, in declaration order.
     arcs_by_branch: dict[str, list[LayoutArc]] = defaultdict(list)
     for arc in layout.arcs:
         arcs_by_branch[_branch_through_point(layout, arc.branch_point).id].append(arc)

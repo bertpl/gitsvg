@@ -214,7 +214,7 @@ def test_highlight_targets_a_commit_id() -> None:
 
 
 # ==================================================================================================
-#  Cross-cutting: extra="forbid" and discriminator behaviour
+#  Cross-cutting: extra="forbid" and discriminator behavior
 # ==================================================================================================
 @pytest.mark.parametrize("op_name", OP_NAMES)
 def test_unknown_field_is_rejected_for_every_op(op_name: str) -> None:

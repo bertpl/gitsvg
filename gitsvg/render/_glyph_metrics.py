@@ -7,7 +7,7 @@ across every resolved LUT. SVG geometry sized from this width is
 safe whichever font in the chain a viewer actually picks.
 
 When no entry in the chain resolves to a known LUT (e.g. only
-cursive / fantasy fonts plus an unrecognised specific name), the
+cursive / fantasy fonts plus an unrecognized specific name), the
 implementation falls back to a coarse per-character factor so the
 function never raises and downstream geometry stays well-defined.
 """
@@ -88,7 +88,7 @@ _REGISTRY_BOLD: Final[dict[str, GlyphWidths]] = {
 #  Chain parsing + resolution
 # ==================================================================================================
 def parse_chain(font_family: str) -> list[str]:
-    """Parse a CSS-style font-family string into normalised entries.
+    """Parse a CSS-style font-family string into normalized entries.
 
     Splits on commas, strips whitespace and surrounding single or
     double quotes from each entry, and lowercases. Empty entries
@@ -99,7 +99,7 @@ def parse_chain(font_family: str) -> list[str]:
             ``"'Inter', 'Helvetica Neue', sans-serif"``.
 
     Returns:
-        Normalised entries in their original order, e.g.
+        Normalized entries in their original order, e.g.
         ``["inter", "helvetica neue", "sans-serif"]``.
     """
     entries: list[str] = []
@@ -111,7 +111,7 @@ def parse_chain(font_family: str) -> list[str]:
 
 
 def resolve_chain(chain: list[str], *, bold: bool) -> list[GlyphWidths]:
-    """Resolve normalised chain entries to bundled `GlyphWidths`.
+    """Resolve normalized chain entries to bundled `GlyphWidths`.
 
     Args:
         chain: Output of `parse_chain`.
@@ -120,7 +120,7 @@ def resolve_chain(chain: list[str], *, bold: bool) -> list[GlyphWidths]:
     Returns:
         The resolved `GlyphWidths` instances in chain order. Entries
         without a matching bundled LUT (unknown specific font names,
-        unrecognised generic keywords like ``cursive`` / ``fantasy``)
+        unrecognized generic keywords like ``cursive`` / ``fantasy``)
         are skipped.
     """
     registry = _REGISTRY_BOLD if bold else _REGISTRY_REGULAR

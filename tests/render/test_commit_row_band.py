@@ -97,7 +97,7 @@ def test_default_theme_emits_no_band_rects() -> None:
 
 
 def test_visible_band_color_stripes_odd_rows() -> None:
-    """A visible band colour paints one full-width band per odd commit row (row 0 bare)."""
+    """A visible band color paints one full-width band per odd commit row (row 0 bare)."""
     # --- arrange ----------------------
     layout = _layout(_FOUR_ROWS)
     theme = DefaultTheme.build({"commit_row_band_color": _BAND})
@@ -131,7 +131,7 @@ def test_bands_sit_below_commit_dots() -> None:
 
 
 def test_fully_transparent_band_color_emits_nothing() -> None:
-    """An explicit but fully-transparent band colour paints no bands (treated as off)."""
+    """An explicit but fully-transparent band color paints no bands (treated as off)."""
     # --- arrange ----------------------
     layout = _layout(_FOUR_ROWS)
     theme = DefaultTheme.build({"commit_row_band_color": "#00000000"})

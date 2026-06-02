@@ -160,7 +160,7 @@ def _map_pydantic_error(err: dict, *, file: str, line: int) -> ValidationError:
     """
     err_type = err["type"]
     code = _resolve_code(err_type)
-    field = _normalise_field_path(err["loc"])
+    field = _normalize_field_path(err["loc"])
     return ValidationError(file=file, line=line, code=code, message=err["msg"], field=field)
 
 
@@ -186,7 +186,7 @@ def _resolve_code(err_type: str) -> str:
     return "E102"
 
 
-def _normalise_field_path(loc: tuple) -> str | None:
+def _normalize_field_path(loc: tuple) -> str | None:
     """Convert a pydantic `loc` tuple to a dotted field path.
 
     The first element of `loc` is typically the discriminator value

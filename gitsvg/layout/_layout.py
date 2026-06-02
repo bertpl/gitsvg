@@ -9,12 +9,12 @@ layout is *exclusively* about integer-grid positioning:
 - Resolved hash strings (auto-resolved 7-char hex from state).
 - Pre-computed connectors as a `trunk_point` / `branch_point` slot pair
   each (branch-off and merge); the renderer derives elbow orientation,
-  draw direction, and colour attribution from the two points.
+  draw direction, and color attribution from the two points.
 - Grid extent (`n_commits`, `n_branches`).
 
-Layout output carries **no** colour, pixel, font, stroke, opacity,
+Layout output carries **no** color, pixel, font, stroke, opacity,
 render-strategy, or presentational-override data. Every presentational
-decision happens in the renderer from the resolved `Theme` — colour
+decision happens in the renderer from the resolved `Theme` — color
 attribution and segment-draw-order for arcs, per-branch label-side
 resolution, and so on.
 
@@ -92,7 +92,7 @@ class LayoutBranch:
     Attributes:
         id: Stable opaque branch id matching `BranchState.id`. The
             renderer uses this to look up per-branch presentational
-            overrides (colour, label-side) on the resolved theme.
+            overrides (color, label-side) on the resolved theme.
         name: Branch name (used to draw the name pill).
         segments: The lanes this branch occupies over its life, ordered
             along the commit axis and jointly covering its span. A
@@ -154,7 +154,7 @@ class LayoutCommit:
         id: The commit's id (matching `CommitState.id` in state).
         branch_id: Id of the branch the commit lives on; the renderer
             uses this to resolve per-branch presentational overrides
-            (colour, label-side) on the resolved theme.
+            (color, label-side) on the resolved theme.
         branch_pos: Slot index along the branch axis.
         commit_pos: Slot index along the commit axis (0 = oldest).
         msg: Optional commit message — drawn as the primary label line.
@@ -193,7 +193,7 @@ class LayoutArc:
       − trunk_point.commit_pos)` — branch point above the trunk reads as
       a branch-off, below as a merge (they are mirror images across the
       commit axis);
-    - **colour** is the branch passing through the branch point.
+    - **color** is the branch passing through the branch point.
 
     Attributes:
         kind: What the connector represents (branch-off, merge, or

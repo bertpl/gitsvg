@@ -1,17 +1,17 @@
 """Dark theme — One Dark-inspired palette for dark backgrounds.
 
-`DarkTheme` overrides every colour-bearing `_resolve_*` on
+`DarkTheme` overrides every color-bearing `_resolve_*` on
 `DefaultTheme` to swap the muted light-background palette for the
-well-known One Dark colour set. Geometry, spacings, typography, and
-label angles inherit unchanged — only colour-adjacent fields change.
+well-known One Dark color set. Geometry, spacings, typography, and
+label angles inherit unchanged — only color-adjacent fields change.
 
-The commit-dot stroke colour matches the canvas background so the
+The commit-dot stroke color matches the canvas background so the
 outline reads as a "carved out" gap separating the dot from any
 branch line passing through it, rather than the white halo
 `DefaultTheme` uses against light backgrounds.
 
 Pill text is hard-coded white in the pill primitives, so pill
-backgrounds inherit the branch's palette colour and read legibly on
+backgrounds inherit the branch's palette color and read legibly on
 the dark canvas without an extra resolver.
 """
 
@@ -29,14 +29,14 @@ class DarkTheme(DefaultTheme):
 
     @classmethod
     def _resolve_background_color(cls) -> str:
-        """Cool dark blue-grey canvas (One Dark `bg`) — softer than pure black, family-coherent with the palette below."""
+        """Cool dark blue-gray canvas (One Dark `bg`) — softer than pure black, family-coherent with the palette below."""
         return "#282c34"
 
     @classmethod
     def _resolve_colors(cls) -> dict[str, str]:
         """One Dark branch palette.
 
-        `main` is the editor's default text colour — a soft cool grey
+        `main` is the editor's default text color — a soft cool gray
         that sits in the same family as the background and reads as a
         deliberate neutral rather than a desaturated branch. The four
         `branch*` slots cycle through green, blue, coral, and purple
@@ -53,17 +53,17 @@ class DarkTheme(DefaultTheme):
 
     @classmethod
     def _resolve_label_color(cls) -> str:
-        """One Dark default text — same soft grey as `main`, keeps the typography coherent with the palette family."""
+        """One Dark default text — same soft gray as `main`, keeps the typography coherent with the palette family."""
         return "#abb2bf"
 
     @classmethod
     def _resolve_hash_color(cls) -> str:
-        """Mid-grey that sits clearly between `label_color` (`#abb2bf`) and `background_color` (`#282c34`) — preserves the secondary-line hierarchy while staying legible at the small hash font size."""
+        """Mid-gray that sits clearly between `label_color` (`#abb2bf`) and `background_color` (`#282c34`) — preserves the secondary-line hierarchy while staying legible at the small hash font size."""
         return "#7f848e"
 
     @classmethod
     def _resolve_branch_guide_color(cls) -> str:
-        """One Dark cursor-line grey — present but recedes against the background."""
+        """One Dark cursor-line gray — present but recedes against the background."""
         return "#3e4451"
 
     @classmethod

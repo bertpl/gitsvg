@@ -155,7 +155,7 @@ def test_commit_label_anchor_per_side_dispatch() -> None:
     """
     # --- arrange ----------------------
     # main with label_side=before; feature with label_side=after. Override
-    # only the `_before` side to a centred (0.5, 0.5) anchor; the `_after`
+    # only the `_before` side to a centered (0.5, 0.5) anchor; the `_after`
     # side should keep its BT default (0.0, 0.5).
     text = (
         '{"op": "theme", "commit_label_anchor_before": [0.5, 0.5]}\n'

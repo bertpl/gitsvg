@@ -1,7 +1,7 @@
 """Tests for `hash: "auto"` deterministic generation.
 
 Covers the pure `compute_auto_hash` and `effective_parent_ids` helpers
-plus end-to-end behaviour through the state-apply pipeline (commits,
+plus end-to-end behavior through the state-apply pipeline (commits,
 merges, replaces, fork branches, and the rebase-style chain
 propagation pattern).
 """

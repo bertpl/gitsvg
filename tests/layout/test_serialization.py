@@ -1,4 +1,4 @@
-"""Tests for the resolved-layout JSON serialiser."""
+"""Tests for the resolved-layout JSON serializer."""
 
 from gitsvg.layout import compute_layout, layout_to_json
 from gitsvg.parse import parse_jsonl_text
@@ -6,7 +6,7 @@ from gitsvg.state import apply_ops
 
 
 def _layout_json(text: str) -> dict:
-    """Parse JSONL → state → layout → serialised JSON dict."""
+    """Parse JSONL → state → layout → serialized JSON dict."""
     parsed, report = parse_jsonl_text(text, file="x.jsonl")
     state, _theme = apply_ops(parsed, report)
     return layout_to_json(compute_layout(state))
@@ -102,8 +102,8 @@ def test_pull_request_emits_pull_request_geometry() -> None:
     assert pr["to_branch_pos"] == 0
 
 
-def test_commits_serialised_as_list_not_dict() -> None:
-    """The Layout dataclass keys commits by id; JSON serialisation flattens to a list."""
+def test_commits_serialized_as_list_not_dict() -> None:
+    """The Layout dataclass keys commits by id; JSON serialization flattens to a list."""
     # --- arrange ----------------------
     jsonl = '{"op": "branch", "name": "main"}\n{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
 
@@ -115,7 +115,7 @@ def test_commits_serialised_as_list_not_dict() -> None:
     assert payload["commits"][0]["id"] == "c1"
 
 
-def test_grid_serialised_as_dict_with_slot_counts() -> None:
+def test_grid_serialized_as_dict_with_slot_counts() -> None:
     # --- arrange ----------------------
     jsonl = (
         '{"op": "branch", "name": "main"}\n'

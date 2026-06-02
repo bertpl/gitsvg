@@ -9,7 +9,7 @@ Public surface:
   `LayoutPullRequest`, `LayoutGrid`, `GridSlot` — the dataclasses the
   renderer consumes.
 
-Layout output is exclusively about integer-grid positioning. Colours,
+Layout output is exclusively about integer-grid positioning. Colors,
 fonts, pixel dimensions, and every other presentational decision live
 on the resolved `Theme` the renderer reads.
 """
@@ -26,7 +26,7 @@ from gitsvg.layout._layout import (
     LayoutPullRequest,
 )
 from gitsvg.layout._layout_arc_kind import LayoutArcKind
-from gitsvg.layout._serialisation import layout_to_json
+from gitsvg.layout._serialization import layout_to_json
 
 __all__ = [
     "GridSlot",

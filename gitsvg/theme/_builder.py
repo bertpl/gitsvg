@@ -11,7 +11,7 @@ pass collects op by op:
   fields on a `theme:` op that also sets `name`. The dict only holds
   fields the user actually touched; absent keys fall through to the
   subclass's `_resolve_<field>` classmethod at build time.
-- `branch_color_overrides`: state-derived per-branch hex colours,
+- `branch_color_overrides`: state-derived per-branch hex colors,
   accumulated from `branch:` ops carrying `color`, removed when a
   `remove:` op drops the branch.
 - `branch_label_side_overrides`: state-derived per-branch label
@@ -61,7 +61,7 @@ class ThemeBuilder:
             semantic check at end-of-apply can attribute an error to the
             originating op's line — e.g. E222 for a `merge_lane_clearance`
             that has no effect with `auto_lane_change` off.
-        branch_color_overrides: Hex-colour overrides keyed by
+        branch_color_overrides: Hex-color overrides keyed by
             `BranchState.id`, populated as `branch:` ops with `color`
             apply and pruned when their branch is removed.
         branch_label_side_overrides: `label_side` overrides keyed by
@@ -80,7 +80,7 @@ class ThemeBuilder:
 
         The companion `clear_overrides` runs separately (or not, per
         the op's `keep_prior_overrides` flag), so callers wanting the
-        v0.1.4-documented "reset every field" behaviour invoke both.
+        v0.1.4-documented "reset every field" behavior invoke both.
 
         Args:
             theme_cls: The concrete `Theme` subclass to dispatch

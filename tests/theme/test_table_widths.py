@@ -30,7 +30,7 @@ def test_table_width_override_and_zero_disable(field: str) -> None:
 
 @pytest.mark.parametrize("field", ["table_msg_width", "table_hash_width"])
 def test_negative_table_width_rejected_at_theme_level(field: str) -> None:
-    """The `Theme` field validator rejects negatives (defence in depth)."""
+    """The `Theme` field validator rejects negatives (defense in depth)."""
     # --- arrange / act / assert -------
     with pytest.raises(ValidationError):
         DefaultTheme.build({field: -1})

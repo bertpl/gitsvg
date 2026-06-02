@@ -23,7 +23,7 @@ Opacity = Annotated[float, Field(ge=0, le=1)]
 """Float in `[0, 1]` — for opacity fields where SVG semantics are bounded."""
 
 OrientationInput = Annotated[Orientation, BeforeValidator(normalize_orientation)]
-"""Annotated orientation type that normalises permissive input forms (case-insensitive, `-`/`_` interchangeable, Mermaid `TD`, CSS `ltr`/`rtl`, vernacular `top_down`/`bottom_up`) to the canonical short code before the `Literal` validator runs."""
+"""Annotated orientation type that normalizes permissive input forms (case-insensitive, `-`/`_` interchangeable, Mermaid `TD`, CSS `ltr`/`rtl`, vernacular `top_down`/`bottom_up`) to the canonical short code before the `Literal` validator runs."""
 
 
 class ThemeOp(OpBase):
@@ -38,7 +38,7 @@ class ThemeOp(OpBase):
     - **`keep_prior_overrides`** modifies the effect of `name` in the
       same op. By default (`false`) a `name` change wipes every
       previously-accumulated override (both `theme:` field overrides
-      and state-derived per-branch `branch:` colour overrides) before
+      and state-derived per-branch `branch:` color overrides) before
       this op's own explicit fields apply. Setting it to `true`
       preserves prior overrides so a chosen theme can be layered onto
       existing tweaks. The flag is only meaningful when `name` is also
@@ -62,7 +62,7 @@ class ThemeOp(OpBase):
     )
     keep_prior_overrides: bool = Field(
         default=False,
-        description="When set on an op that also sets `name`, controls whether previously-accumulated overrides survive the theme switch: `false` (default) wipes both prior `theme:` field overrides and state-derived per-branch `branch:` colour overrides; `true` preserves them so this theme layers on top. Only meaningful alongside `name` — explicit values on an op without `name` are rejected (E220).",
+        description="When set on an op that also sets `name`, controls whether previously-accumulated overrides survive the theme switch: `false` (default) wipes both prior `theme:` field overrides and state-derived per-branch `branch:` color overrides; `true` preserves them so this theme layers on top. Only meaningful alongside `name` — explicit values on an op without `name` are rejected (E220).",
     )
 
     # --- Orientation ------------------------------------
@@ -148,7 +148,7 @@ class ThemeOp(OpBase):
     )
     merge_commit_style: MergeCommitStyle | None = Field(
         default=None,
-        description="Style for merge-commit dots (commits with 2+ parents); ordinary commits are unaffected: `circle` (default; the plain branch-colour dot, identical to an ordinary commit) or `checkmark` (a hollow dot — fill and stroke swap so the dot is `commit_stroke_color`-filled with a branch-colour ring — overlaid with a branch-colour checkmark).",
+        description="Style for merge-commit dots (commits with 2+ parents); ordinary commits are unaffected: `circle` (default; the plain branch-color dot, identical to an ordinary commit) or `checkmark` (a hollow dot — fill and stroke swap so the dot is `commit_stroke_color`-filled with a branch-color ring — overlaid with a branch-color checkmark).",
     )
     label_offset_branch_axis_in_lanes: NonNegativeFloat | None = Field(
         default=None,
@@ -194,7 +194,7 @@ class ThemeOp(OpBase):
     )
     branch_name_pill_offset_branch_axis_in_lanes: float | None = Field(
         default=None,
-        description="Branch-name pill offset along the branch axis, expressed as a signed multiple of `branch_spacing`. Positive = toward higher branch-axis index. Default is `0` (pill is centred on the branch lane in bottom-to-top orientation).",
+        description="Branch-name pill offset along the branch axis, expressed as a signed multiple of `branch_spacing`. Positive = toward higher branch-axis index. Default is `0` (pill is centered on the branch lane in bottom-to-top orientation).",
     )
     pill_padding_x_in_font_sizes: NonNegativeFloat | None = Field(
         default=None,
@@ -224,7 +224,7 @@ class ThemeOp(OpBase):
     )
     pull_request_pill_offset_branch_axis_in_lanes: float | None = Field(
         default=None,
-        description="PR title-pill offset along the branch axis, expressed as a signed multiple of `branch_spacing`. Positive = toward higher branch-axis index. Default is `0` (pill is centred on the source branch's lane in bottom-to-top orientation).",
+        description="PR title-pill offset along the branch axis, expressed as a signed multiple of `branch_spacing`. Positive = toward higher branch-axis index. Default is `0` (pill is centered on the source branch's lane in bottom-to-top orientation).",
     )
 
     # --- Label angles -----------------------------------
@@ -244,11 +244,11 @@ class ThemeOp(OpBase):
     # --- Box anchors ------------------------------------
     branch_pill_anchor: BoxAnchor | None = Field(
         default=None,
-        description="Branch-name pill `(u, v)` in `[0, 1]²` — where inside the un-rotated pill rect the world anchor point sits (and equivalently where rotation pivots around). Two-element JSON array. Per-orientation defaults: `bt`/`tb` centre `[0.5, 0.5]`; `lr` right-edge `[1.0, 0.5]`; `rl` left-edge `[0.0, 0.5]`.",
+        description="Branch-name pill `(u, v)` in `[0, 1]²` — where inside the un-rotated pill rect the world anchor point sits (and equivalently where rotation pivots around). Two-element JSON array. Per-orientation defaults: `bt`/`tb` center `[0.5, 0.5]`; `lr` right-edge `[1.0, 0.5]`; `rl` left-edge `[0.0, 0.5]`.",
     )
     pull_request_pill_anchor: BoxAnchor | None = Field(
         default=None,
-        description="PR-title pill `(u, v)` in `[0, 1]²`. Two-element JSON array. Defaults to centre `[0.5, 0.5]` in every orientation.",
+        description="PR-title pill `(u, v)` in `[0, 1]²`. Two-element JSON array. Defaults to center `[0.5, 0.5]` in every orientation.",
     )
     commit_label_anchor_before: BoxAnchor | None = Field(
         default=None,
@@ -259,22 +259,22 @@ class ThemeOp(OpBase):
         description="Commit-label `(u, v)` for the `after` (higher-index) side. Two-element JSON array. Per-orientation defaults: `bt`/`tb` `[0.0, 0.5]`; `lr`/`rl` `[0.5, 0.0]`.",
     )
 
-    # --- Colours ----------------------------------------
+    # --- Colors ----------------------------------------
     label_color: HexColor | None = Field(
         default=None,
-        description="Fill colour for commit-message labels.",
+        description="Fill color for commit-message labels.",
     )
     hash_color: HexColor | None = Field(
         default=None,
-        description="Fill colour for the secondary hash line on commit labels.",
+        description="Fill color for the secondary hash line on commit labels.",
     )
     branch_guide_color: HexColor | None = Field(
         default=None,
-        description="Stroke colour for the faint per-lane vertical guides.",
+        description="Stroke color for the faint per-lane vertical guides.",
     )
     commit_stroke_color: HexColor | None = Field(
         default=None,
-        description="Stroke colour for the outline around commit dots. Visually separates the dot from any branch line passing through it. Default is `white` (reads as a halo on light backgrounds); dark themes typically override this to their background colour so the outline reads as a 'carved out' gap. Under `merge_commit_style: checkmark`, merge dots reuse this colour as their fill.",
+        description="Stroke color for the outline around commit dots. Visually separates the dot from any branch line passing through it. Default is `white` (reads as a halo on light backgrounds); dark themes typically override this to their background color so the outline reads as a 'carved out' gap. Under `merge_commit_style: checkmark`, merge dots reuse this color as their fill.",
     )
     branch_label_bg_opacity: Opacity | None = Field(
         default=None,
@@ -282,7 +282,7 @@ class ThemeOp(OpBase):
     )
     background_color: HexColor | None = Field(
         default=None,
-        description="Optional full-canvas background colour; unset by default (transparent SVG).",
+        description="Optional full-canvas background color; unset by default (transparent SVG).",
     )
     commit_row_band_color: HexColor | None = Field(
         default=None,

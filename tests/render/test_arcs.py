@@ -36,7 +36,7 @@ def test_branch_off_emits_one_extra_path_per_non_root_branch() -> None:
 
 
 def test_branch_off_arc_color_matches_target_branch() -> None:
-    """The branch-off arc takes the *new* (target) branch's colour, matching
+    """The branch-off arc takes the *new* (target) branch's color, matching
     the seed convention."""
     # --- arrange ----------------------
     text = (
@@ -50,7 +50,7 @@ def test_branch_off_arc_color_matches_target_branch() -> None:
     svg_text = _render_from(text).as_svg()
 
     # --- assert -----------------------
-    # The feat branch's colour appears at least 3× (line, dot, branch-off arc).
+    # The feat branch's color appears at least 3× (line, dot, branch-off arc).
     assert svg_text.count("#112233") >= 3
 
 
@@ -102,7 +102,7 @@ def test_merge_emits_an_extra_path_for_the_merge_arc() -> None:
 
 
 def test_merge_arc_color_matches_source_branch() -> None:
-    """The merge arc takes the *source* (from) branch's colour, matching the
+    """The merge arc takes the *source* (from) branch's color, matching the
     seed convention — opposite of branch-off (which uses target)."""
     # --- arrange ----------------------
     text = (
@@ -117,7 +117,7 @@ def test_merge_arc_color_matches_source_branch() -> None:
     svg_text = _render_from(text).as_svg()
 
     # --- assert -----------------------
-    # The feat branch's colour appears on its line, dot, branch-off arc, AND
+    # The feat branch's color appears on its line, dot, branch-off arc, AND
     # the merge arc — 4 occurrences minimum.
     assert svg_text.count("#112233") >= 4
 

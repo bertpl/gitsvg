@@ -51,7 +51,7 @@ Heuristic notes:
   - **Merge arcs**: one per merged-in parent on a commit with
     `len(parents) >= 2` — the merge commit (trunk) → the source branch's
     line at `merge_row - 1` (branch point).
-- **Grid extent**: `n_commits` / `n_branches` honour pinned values on
+- **Grid extent**: `n_commits` / `n_branches` honor pinned values on
   `state.grid` when set; otherwise auto-fit from the visible content
   (including any open pull-request's projected merge row).
 """
@@ -698,7 +698,7 @@ def _lane_change_arcs(branches: list[LayoutBranch]) -> list[LayoutArc]:
     own line: the `trunk_point` is the old-lane tail (`prev.lane,
     prev.end`) and the `branch_point` is the new-lane head (`next.lane,
     next.start`, one row later). The renderer attributes the connector's
-    colour from its `branch_point`, so using the new-lane end keeps the
+    color from its `branch_point`, so using the new-lane end keeps the
     arc on the migrating branch.
     """
     arcs: list[LayoutArc] = []
@@ -765,7 +765,7 @@ def _compute_grid(
 ) -> LayoutGrid:
     """Compute the integer-grid extent.
 
-    Honours pinned `n_commits` / `n_branches` on `state.grid` when
+    Honors pinned `n_commits` / `n_branches` on `state.grid` when
     set; otherwise auto-fits to the visible content (commits, branch
     spans, and any open pull-request's projected merge row).
     """

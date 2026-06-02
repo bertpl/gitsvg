@@ -1,7 +1,7 @@
 """Tests for the render-side lookups derived from `Layout.branches`.
 
 `_branch_through_point` resolves a connector's branch point back to the
-branch whose colour the renderer should use — the colour attribution
+branch whose color the renderer should use — the color attribution
 that moved render-side when the layout DTOs dropped their
 `color_branch_id` fields. A branch-off's branch point is the new
 branch's start; a merge's or pull request's branch point is a row within
@@ -25,7 +25,7 @@ def _layout_from(text: str):
 
 
 # ==================================================================================================
-#  _branch_through_point — colour attribution via a connector's branch point
+#  _branch_through_point — color attribution via a connector's branch point
 # ==================================================================================================
 def test_branch_through_point_resolves_new_branch_for_branch_off() -> None:
     # --- arrange ----------------------

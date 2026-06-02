@@ -3,7 +3,7 @@
 State holds the structural model — commits, branches, pull-requests,
 branch declaration order, and the optional pinned grid extent — plus
 the one per-entity layout hint that is still structural (the branch
-lane override). Presentational data — colours, label sides, and
+lane override). Presentational data — colors, label sides, and
 every other render-side decision — lives in a separate `Theme`,
 produced alongside `State` by the apply stage. Each op mutates
 state when it applies cleanly; the state engine is the producer,
@@ -130,7 +130,7 @@ class State:
     """
 
     def __init__(self) -> None:
-        """Initialise an empty state — no branches, no commits, no pull-requests, no grid pin."""
+        """Initialize an empty state — no branches, no commits, no pull-requests, no grid pin."""
         self.branches: dict[str, BranchState] = {}
         self.commits: dict[str, CommitState] = {}
         self.pull_requests: dict[str, PullRequestState] = {}

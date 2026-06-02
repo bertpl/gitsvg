@@ -1,7 +1,7 @@
-"""Orientation enum + the input-alias normalisation table.
+"""Orientation enum + the input-alias normalization table.
 
 Defines the canonical four-valued `Orientation` `StrEnum` used by
-`Theme.orientation`, and the alias-normalisation function used by the
+`Theme.orientation`, and the alias-normalization function used by the
 `theme:` op's `orientation` field to accept a generous set of input
 forms (case-insensitive short codes including Mermaid's `TD` and CSS
 `ltr` / `rtl`, long forms with `-` or `_` separator, vernacular
@@ -17,7 +17,7 @@ class Orientation(StrEnum):
     Members carry the canonical short-code string values (`"bt"`,
     `"tb"`, `"lr"`, `"rl"`) so the enum interoperates transparently
     with code that still compares against raw strings and with
-    Pydantic / JSON serialisation (which reads off the string value).
+    Pydantic / JSON serialization (which reads off the string value).
     """
 
     BT = "bt"
@@ -26,7 +26,7 @@ class Orientation(StrEnum):
     RL = "rl"
 
 
-# Two-step normalisation: input is first lowercased and `-` replaced by
+# Two-step normalization: input is first lowercased and `-` replaced by
 # `_`, then looked up in this table. Every accepted alias (Mermaid `TD`,
 # CSS `ltr` / `rtl`, the four explicit `<dir>_to_<dir>` long forms, and
 # the two vernacular `top_down` / `bottom_up`) maps to its canonical
@@ -53,18 +53,18 @@ _ALIAS_TABLE: dict[str, Orientation] = {
 
 
 def normalize_orientation(value: object) -> object:
-    """Normalise an input orientation string to its canonical `Orientation` member.
+    """Normalize an input orientation string to its canonical `Orientation` member.
 
-    Two-step normalisation:
+    Two-step normalization:
 
-    1. Pre-normalise: lowercase + replace `-` with `_`.
+    1. Pre-normalize: lowercase + replace `-` with `_`.
     2. Exact lookup in the alias table; raises if not found.
 
     Non-string inputs pass through unchanged (Pydantic raises later
     when the value doesn't match the declared `Orientation` type).
 
     Args:
-        value: User-supplied orientation. Strings get normalised;
+        value: User-supplied orientation. Strings get normalized;
             anything else passes through.
 
     Returns:
@@ -72,15 +72,15 @@ def normalize_orientation(value: object) -> object:
         string; the original value otherwise.
 
     Raises:
-        ValueError: When a string input does not normalise to any
+        ValueError: When a string input does not normalize to any
             canonical value. The message lists every accepted form.
     """
     if not isinstance(value, str):
         return value
-    normalised = value.lower().replace("-", "_")
-    if normalised not in _ALIAS_TABLE:
+    normalized = value.lower().replace("-", "_")
+    if normalized not in _ALIAS_TABLE:
         accepted = ", ".join(sorted(_ALIAS_TABLE))
         raise ValueError(
             f"unknown orientation {value!r}; accepted (case-insensitive, `-` and `_` interchangeable): {accepted}"
         )
-    return _ALIAS_TABLE[normalised]
+    return _ALIAS_TABLE[normalized]

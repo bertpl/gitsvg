@@ -277,7 +277,7 @@ def test_explicit_null_orientation_resets_to_default() -> None:
 
     # --- assert -----------------------
     # The op carries None for orientation; the apply step special-cases this
-    # to map back to "bt". This test covers the op-level behaviour; the
-    # apply-step behaviour is covered elsewhere.
+    # to map back to "bt". This test covers the op-level behavior; the
+    # apply-step behavior is covered elsewhere.
     assert op.orientation is None
     assert "orientation" in op.model_fields_set

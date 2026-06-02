@@ -23,18 +23,18 @@ def test_gui_theme_build_resolves_table_layout_and_tight_spacing() -> None:
 
 
 def test_gui_theme_tunes_table_region() -> None:
-    """The message column is halved and a faint mid-grey row band is enabled."""
+    """The message column is halved and a faint mid-gray row band is enabled."""
     # --- arrange / act ----------------
     theme = GuiTheme.build({})
 
     # --- assert -----------------------
     assert theme.table_msg_width == 240  # half the default 480
-    assert theme.commit_row_band_color == "#8080800D"  # mid-grey at 0.05 alpha
+    assert theme.commit_row_band_color == "#8080800D"  # mid-gray at 0.05 alpha
     assert theme.commit_stroke_width == 0  # flat dots, no white ring
     assert theme.commit_radius == 3  # small ordinary dots
     assert theme.merge_commit_radius == 5  # merges stay prominent
     assert theme.highlight_radius == 4  # modest bump over the ordinary dot
-    assert theme.branch_guide_color == "#b8b8b880"  # default grey at half opacity
+    assert theme.branch_guide_color == "#b8b8b880"  # default gray at half opacity
 
 
 def test_gui_theme_matches_hash_typography_to_message() -> None:

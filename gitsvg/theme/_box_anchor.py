@@ -1,4 +1,4 @@
-"""`BoxAnchor` — normalised `(u, v)` location inside an un-rotated bounding box.
+"""`BoxAnchor` — normalized `(u, v)` location inside an un-rotated bounding box.
 
 A `BoxAnchor` is a `(u, v)` pair in `[0, 1]²` that says where inside a
 text-bearing primitive's un-rotated bounding box the world anchor
@@ -6,7 +6,7 @@ point sits:
 
 - `(0, 0)` = top-left corner of the un-rotated bounding box.
 - `(1, 1)` = bottom-right.
-- `(0.5, 0.5)` = centre.
+- `(0.5, 0.5)` = center.
 
 Under rotation, the same `(u, v)` is also the rotation pivot — so the
 world point stays pinned regardless of the resolved label angle.
