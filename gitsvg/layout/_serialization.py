@@ -11,8 +11,8 @@ churn it:
   id, the user-facing name, and the lane / start / end slot positions.
 - `commits` — one entry per surviving commit, with lane / row positions,
   the branch id the commit lives on, and an `is_merge` flag (2+ parents).
-- `arcs` — pre-computed connectors (branch-off and merge), in z-order.
-  Each carries a `kind` (`"branch_off"` / `"merge"`) and `from_*` / `to_*`
+- `arcs` — pre-computed connectors (branch-off, merge, and lane-change), in z-order.
+  Each carries a `kind` (`"branch_off"` / `"merge"` / `"lane_change"`) and `from_*` / `to_*`
   endpoint slots — the orientation a reader debugging a layout reads most
   naturally. Internally a connector is a trunk point and a branch point;
   `_arc_to_json` maps the pair back to the public schema.

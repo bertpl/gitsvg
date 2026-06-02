@@ -5,7 +5,7 @@ branch name in white text. Its world anchor point comes from the
 signed two-axis offset declared on the theme
 (`branch_name_pill_offset_commit_axis_in_rows` and
 `branch_name_pill_offset_branch_axis_in_lanes`); the per-orientation
-defaults live in `gitsvg/theme/_resolve.py`.
+defaults resolve at theme-build time.
 
 Where the pill rect sits relative to that world point — centered,
 right-edge anchored, left-edge anchored — comes from the box anchor

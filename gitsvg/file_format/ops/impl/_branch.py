@@ -14,6 +14,9 @@ class BranchOp(OpBase):
 
     op: Literal["branch"]
     name: IdStr = Field(description="Unique branch name.")
+    # Two distinct root sources can't share one `from` key, so `branch` uses
+    # bare `from_branch` / `from_commit` rather than the `from`/`into` alias
+    # pattern that `MergeOp` / `PullRequestOp` follow. The split is intentional.
     from_branch: IdStr | None = Field(
         default=None,
         description="Source branch this branch is rooted on (mutually exclusive with `from_commit`).",

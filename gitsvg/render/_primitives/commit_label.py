@@ -41,7 +41,7 @@ from gitsvg.render._renderer_settings import RendererSettings
 # accordingly when drawn at the anchor x. The three canonical values
 # (`0.0`, `0.5`, `1.0`) cover every position the commit-label resolver
 # returns today; non-canonical `u` would need explicit pixel-x maths
-# instead of the discrete SVG attribute and is out of scope for v0.1.8.
+# instead of the discrete SVG attribute and isn't supported today.
 _SVG_TEXT_ANCHOR: dict[float, str] = {
     0.0: "start",
     0.5: "middle",

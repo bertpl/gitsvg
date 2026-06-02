@@ -1,4 +1,4 @@
-"""Bulk walker + type-matrix dispatch for `.gitsvg.jsonl` inputs.
+"""Bulk walker + input/output kind dispatch for `.gitsvg.jsonl` inputs.
 
 Two flavors of CLI subcommand consume `.gitsvg.jsonl` input files:
 
@@ -64,14 +64,14 @@ def process_input(
             `.gitsvg.jsonl` suffix on the input filename.
         process_one: Per-file callback. Receives the input path
             and the output path. Returns a `ValidationReport`;
-            clean = success. Must not print to stderr — error
-            reporting is centralised here so bulk mode can
-            aggregate.
+            clean = success. Must not print to stderr — for inputs
+            routed through this function, validation errors are written
+            to stderr here so bulk mode can aggregate.
 
     Returns:
         Exit code suitable for `sys.exit()`: 0 on full success, 1
-        when any file failed validation, 2 on a type-matrix
-        mismatch.
+        when any file failed validation, 2 on an input/output kind
+        mismatch (file vs directory).
     """
     if input_path.is_dir():
         if output_path.exists() and not output_path.is_dir():

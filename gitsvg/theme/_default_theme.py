@@ -186,10 +186,11 @@ class DefaultTheme(Theme):
     def _resolve_label_offset_branch_axis_in_lanes(cls, orientation: Orientation) -> float:
         """Per-orientation label offset along the branch axis (as a multiple of `branch_spacing`).
 
-        Vertical orientations use `0.12` (12 px at default
-        `branch_spacing=100`). Horizontal orientations use `0.24` —
-        twice the lane ratio compensates for the halved `branch_spacing=50` (no, 75) — the resolved pixel offset stays close to the BT default.
-        """  # noqa: E501
+        Vertical orientations use `0.12`; horizontal orientations use
+        `0.24` — twice the lane ratio compensates for the smaller
+        horizontal `branch_spacing`, so the resolved pixel offset stays
+        close to the vertical default.
+        """
         return 0.12 if orientation in _VERTICAL_ORIENTATIONS else 0.24
 
     @classmethod
@@ -509,7 +510,10 @@ class DefaultTheme(Theme):
 
         Resolution order honors field dependencies: orientation
         first, spacings next (depend on orientation), margins (depend
-        on orientation + resolved spacings), then every other field.
+        on orientation + resolved spacings), then every other field —
+        with any field other resolvers depend on hoisted ahead of its
+        dependents (e.g. `commit_radius` is resolved early because
+        `merge_commit_radius` defaults to it).
 
         Args:
             user_set: Mapping from field name to the value the user

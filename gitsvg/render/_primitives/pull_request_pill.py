@@ -8,7 +8,7 @@ source branch toward the target branch's lane. Tracks the merge
 target row, so when the target branch progresses past the source tip
 the pill follows. The signed two-axis theme offsets
 (`pull_request_pill_offset_*`) further nudge the anchor; the per-
-orientation defaults live in `gitsvg/theme/_resolve.py`.
+orientation defaults resolve at theme-build time.
 
 Where the pill rect sits relative to that world point comes from the
 box anchor resolved by `gitsvg/render/_anchor_resolution.py`. The

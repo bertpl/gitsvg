@@ -36,10 +36,6 @@ from collections import defaultdict
 _SVG_NS = "http://www.w3.org/2000/svg"
 ET.register_namespace("", _SVG_NS)
 
-# Presentation attributes that are valid CSS properties and thus
-# eligible for class extraction. Geometry attributes (x, y, cx, cy, r,
-# width, height, d, transform) and structural attributes (id, href,
-# class) are not eligible.
 # Attributes whose values are interpreted as CSS `<length>` and therefore
 # require a unit suffix when expressed in CSS (i.e. inside a `<style>`
 # block). SVG presentation-attribute form accepts bare numerics, but the
@@ -47,6 +43,10 @@ ET.register_namespace("", _SVG_NS)
 # rendered at the browser default size, for example.
 _CSS_LENGTH_ATTRS: frozenset[str] = frozenset({"font-size"})
 
+# Presentation attributes that are valid CSS properties and thus
+# eligible for class extraction. Geometry attributes (x, y, cx, cy, r,
+# width, height, d, transform) and structural attributes (id, href,
+# class) are not eligible.
 _PRESENTATION_ATTRS: frozenset[str] = frozenset(
     {
         "fill",
