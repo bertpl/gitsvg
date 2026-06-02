@@ -5,6 +5,7 @@ from typing import cast
 from gitsvg.errors import ValidationError, ValidationReport
 from gitsvg.file_format.ops import MergeOp
 from gitsvg.parse import ParsedOp
+from gitsvg.state._apply._errors import add_branch_not_declared, add_commit_id_already_used
 from gitsvg.state._apply._impl.commit import _generate_auto_commit_id
 from gitsvg.state._auto_hash import compute_auto_hash, effective_parent_ids
 from gitsvg.state._state import CommitState, State
@@ -33,27 +34,11 @@ def apply_merge_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, report
     line = parsed.line
 
     if not state.has_branch(op.from_):
-        report.add(
-            ValidationError(
-                file=file,
-                line=line,
-                code="E200",
-                message=f"branch {op.from_!r} is not declared",
-                field="from",
-            )
-        )
+        add_branch_not_declared(report, file=file, line=line, branch=op.from_, field="from")
         return
 
     if not state.has_branch(op.into):
-        report.add(
-            ValidationError(
-                file=file,
-                line=line,
-                code="E200",
-                message=f"branch {op.into!r} is not declared",
-                field="into",
-            )
-        )
+        add_branch_not_declared(report, file=file, line=line, branch=op.into, field="into")
         return
 
     for pr in state.pull_requests.values():
@@ -74,15 +59,7 @@ def apply_merge_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, report
     explicit_id = op.as_
     merge_id = explicit_id if explicit_id is not None else _generate_auto_commit_id(state)
     if explicit_id is not None and explicit_id in state.commits:
-        report.add(
-            ValidationError(
-                file=file,
-                line=line,
-                code="E203",
-                message=f"commit id {explicit_id!r} is already used",
-                field="as",
-            )
-        )
+        add_commit_id_already_used(report, file=file, line=line, commit_id=explicit_id, field="as")
         return
 
     parents = [tip for tip in (state.branch_tip(op.into), state.branch_tip(op.from_)) if tip is not None]

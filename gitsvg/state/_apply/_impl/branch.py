@@ -5,6 +5,7 @@ from typing import cast
 from gitsvg.errors import ValidationError, ValidationReport
 from gitsvg.file_format.ops import BranchOp
 from gitsvg.parse import ParsedOp
+from gitsvg.state._apply._errors import add_branch_not_declared
 from gitsvg.state._state import BranchState, State
 from gitsvg.theme import ThemeBuilder
 
@@ -72,15 +73,7 @@ def apply_branch_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, repor
                 if state.has_commit(op.from_branch)
                 else ""
             )
-            report.add(
-                ValidationError(
-                    file=file,
-                    line=line,
-                    code="E200",
-                    message=f"branch {op.from_branch!r} is not declared{hint}",
-                    field="from_branch",
-                )
-            )
+            add_branch_not_declared(report, file=file, line=line, branch=op.from_branch, field="from_branch", hint=hint)
             return
         rooted_on = state.branch_tip(op.from_branch)
 

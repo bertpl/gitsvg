@@ -5,6 +5,7 @@ from typing import cast
 from gitsvg.errors import ValidationError, ValidationReport
 from gitsvg.file_format.ops import RemoveOp
 from gitsvg.parse import ParsedOp
+from gitsvg.state._apply._errors import add_branch_not_declared
 from gitsvg.state._state import State
 from gitsvg.theme import ThemeBuilder
 
@@ -50,15 +51,7 @@ def apply_remove_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, repor
     if op.branches:
         for index, branch_name in enumerate(op.branches):
             if not state.has_branch(branch_name):
-                report.add(
-                    ValidationError(
-                        file=file,
-                        line=line,
-                        code="E200",
-                        message=f"branch {branch_name!r} is not declared",
-                        field=f"branches.{index}",
-                    )
-                )
+                add_branch_not_declared(report, file=file, line=line, branch=branch_name, field=f"branches.{index}")
                 continue
             blocking_prs = [
                 pr for pr in state.pull_requests.values() if branch_name in (pr.from_branch, pr.into_branch)
