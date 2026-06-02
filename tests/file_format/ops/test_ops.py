@@ -150,7 +150,7 @@ def test_commit_hash_auto_sentinel_accepted() -> None:
     assert op.hash == "auto"
 
 
-def test_commit_with_replaces_and_parents() -> None:
+def test_commit_with_replaces() -> None:
     # --- arrange ----------------------
     raw = {
         "op": "commit",
@@ -158,7 +158,6 @@ def test_commit_with_replaces_and_parents() -> None:
         "id": "c5",
         "msg": "squash A B C",
         "replaces": ["c2", "c3", "c4"],
-        "parents": ["c1"],
     }
 
     # --- act --------------------------
@@ -166,7 +165,6 @@ def test_commit_with_replaces_and_parents() -> None:
 
     # --- assert -----------------------
     assert op.replaces == ["c2", "c3", "c4"]
-    assert op.parents == ["c1"]
 
 
 def test_merge_uses_from_and_as_aliases() -> None:
@@ -374,7 +372,6 @@ def test_numeric_fields_accept_zero(raw: dict) -> None:
 @pytest.mark.parametrize(
     "raw",
     [
-        {"op": "commit", "branch": "main", "msg": "x", "parents": []},
         {"op": "commit", "branch": "main", "msg": "x", "replaces": []},
         {"op": "remove", "commits": []},
         {"op": "remove", "branches": []},
@@ -389,7 +386,7 @@ def test_list_fields_reject_empty_lists(raw: dict) -> None:
 @pytest.mark.parametrize(
     "raw",
     [
-        {"op": "commit", "branch": "main", "msg": "x", "parents": ["has space"]},
+        {"op": "commit", "branch": "main", "msg": "x", "replaces": ["has space"]},
         {"op": "commit", "branch": "main", "msg": "x", "replaces": [""]},
         {"op": "remove", "commits": ["", "ok"]},
     ],

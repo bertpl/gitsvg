@@ -1,16 +1,15 @@
 """Tests for `hash: "auto"` deterministic generation.
 
-Covers the pure `compute_auto_hash` and `effective_parent_ids` helpers
-plus end-to-end behavior through the state-apply pipeline (commits,
-merges, replaces, fork branches, and the rebase-style chain
-propagation pattern).
+Covers the pure `compute_auto_hash` helper plus end-to-end behavior
+through the state-apply pipeline (commits, merges, replaces, fork
+branches, and the rebase-style chain propagation pattern).
 """
 
 import re
 
 import pytest
 
-from gitsvg.state._auto_hash import compute_auto_hash, effective_parent_ids
+from gitsvg.state._auto_hash import compute_auto_hash
 from tests.state._helpers import build_state_from_jsonl
 
 
@@ -150,28 +149,6 @@ def test_first_commit_on_fork_branch_uses_rooted_on_commit() -> None:
     assert state.commits["f1"].hash == expected
 
 
-def test_explicit_parents_override_implicit_chain_parent() -> None:
-    """When a commit op sets `parents:`, those are the immediate parents
-    for hash purposes — the chain parent on the branch is not added."""
-    # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "c2", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "feat", "id": "f1", "hash": "auto", "parents": ["c1"]}\n'
-    )
-
-    # --- act --------------------------
-    state, _ = build_state_from_jsonl(text)
-
-    # --- assert -----------------------
-    # Chain parent would be c2 (main's tip when feat was forked), but the explicit
-    # parents=["c1"] takes over.
-    expected = compute_auto_hash("f1", ["c1"])
-    assert state.commits["f1"].hash == expected
-
-
 # ==================================================================================================
 #  End-to-end: hash="auto" resolution on merge ops
 # ==================================================================================================
@@ -253,55 +230,6 @@ def test_renaming_an_upstream_id_changes_downstream_auto_hashes() -> None:
     assert state_a.commits["c1"].hash == state_b.commits["c1"].hash
     # c3 has the same id in both but a different chain parent → different hash.
     assert state_a.commits["c3"].hash != state_b.commits["c3"].hash
-
-
-# ==================================================================================================
-#  effective_parent_ids helper
-# ==================================================================================================
-def test_effective_parent_ids_for_root_commit_is_empty() -> None:
-    # --- arrange ----------------------
-    text = '{"op": "branch", "name": "main"}\n{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-    state, _ = build_state_from_jsonl(text)
-
-    # --- act --------------------------
-    parents = effective_parent_ids(state, "c1", "main")
-
-    # --- assert -----------------------
-    assert parents == []
-
-
-def test_effective_parent_ids_for_chain_commit() -> None:
-    # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "c2", "msg": "x"}\n'
-    )
-    state, _ = build_state_from_jsonl(text)
-
-    # --- act --------------------------
-    parents = effective_parent_ids(state, "c2", "main")
-
-    # --- assert -----------------------
-    assert parents == ["c1"]
-
-
-def test_effective_parent_ids_prefers_explicit_parents() -> None:
-    # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "c2", "msg": "x", "parents": ["c1"]}\n'
-    )
-    state, _ = build_state_from_jsonl(text)
-
-    # --- act --------------------------
-    parents = effective_parent_ids(state, "c2", "main")
-
-    # --- assert -----------------------
-    # Explicit parents wins (here it happens to coincide with chain parent,
-    # but the helper is still returning the explicit list, not deriving from chain).
-    assert parents == ["c1"]
 
 
 # ==================================================================================================

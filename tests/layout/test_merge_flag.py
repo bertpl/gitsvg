@@ -44,37 +44,3 @@ def test_merge_commit_is_flagged() -> None:
     # --- assert -----------------------
     assert layout.commits["mg"].is_merge is True
     assert layout.commits["m1"].is_merge is False
-
-
-def test_inline_same_lane_merge_is_flagged() -> None:
-    """A two-parent commit whose parents share the lane draws no merge arc,
-    but the commit is still a merge — caught via parent count, the case an
-    arc-geometry derivation would miss."""
-    # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "a", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "b", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "c", "msg": "merge", "parents": ["a", "b"]}\n'
-    )
-
-    # --- act --------------------------
-    layout = _layout_from(text)
-
-    # --- assert -----------------------
-    assert layout.commits["c"].is_merge is True
-
-
-def test_commit_with_single_explicit_parent_is_not_a_merge() -> None:
-    # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "a", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "b", "msg": "x", "parents": ["a"]}\n'
-    )
-
-    # --- act --------------------------
-    layout = _layout_from(text)
-
-    # --- assert -----------------------
-    assert layout.commits["b"].is_merge is False

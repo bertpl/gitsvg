@@ -24,6 +24,29 @@ def test_merge_creates_two_parent_commit_on_into_branch() -> None:
     assert state.branches["main"].commit_ids[-1] == "merge1"
 
 
+def test_merge_into_empty_branch_uses_rooted_on_as_chain_parent() -> None:
+    """Merging into a never-committed branch: the into-side parent is the
+    branch's rooted-on commit (its chain parent), placed first — canonical
+    chain-first, not dropped as a missing tip."""
+    # --- arrange ----------------------
+    text = (
+        '{"op": "branch", "name": "main"}\n'
+        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
+        '{"op": "branch", "name": "target", "from_commit": "c1"}\n'
+        '{"op": "branch", "name": "feat", "from_commit": "c1"}\n'
+        '{"op": "commit", "branch": "feat", "id": "f1", "msg": "x"}\n'
+        '{"op": "merge", "from": "feat", "into": "target", "as": "mg"}\n'
+    )
+
+    # --- act --------------------------
+    state, report = build_state_from_jsonl(text)
+
+    # --- assert -----------------------
+    assert report.is_clean()
+    # target had no commits, so its chain parent is its rooted-on commit c1.
+    assert state.commits["mg"].parents == ["c1", "f1"]
+
+
 def test_merge_with_unknown_from_branch_emits_e200() -> None:
     # --- arrange ----------------------
     text = '{"op": "branch", "name": "main"}\n{"op": "merge", "from": "ghost", "into": "main"}\n'

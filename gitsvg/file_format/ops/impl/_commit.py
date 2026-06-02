@@ -32,14 +32,6 @@ class CommitOp(OpBase):
             "derived from the commit's id and parent ids."
         ),
     )
-    parents: list[IdStr] | None = Field(
-        default=None,
-        min_length=1,
-        description=(
-            "Explicit parent commit ids; only needed for merges or squashes that link off-chain "
-            "(the previous commit on the same branch is always an implicit parent)."
-        ),
-    )
     replaces: list[IdStr] | None = Field(
         default=None,
         min_length=1,

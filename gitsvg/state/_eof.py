@@ -58,9 +58,15 @@ def _check_branch_roots(state: State, report: ValidationReport) -> None:
 
 
 def _check_commit_parents(state: State, report: ValidationReport) -> None:
-    """Emit E401 for each `parents:` reference that points at a removed commit."""
+    """Emit E401 for each canonical parent that points at a removed commit.
+
+    A commit's parents are resolved structurally (chain parent, plus the
+    merged-in tip for a merge), so a dangling reference here means a
+    `remove` op deleted a commit that some surviving commit still descends
+    from — either its chain predecessor or a merged-in tip.
+    """
     for commit in state.commits.values():
-        for index, parent_id in enumerate(commit.parents):
+        for parent_id in commit.parents:
             if state.has_commit(parent_id):
                 continue
             report.add(
@@ -69,6 +75,6 @@ def _check_commit_parents(state: State, report: ValidationReport) -> None:
                     line=commit.declaration_line,
                     code="E401",
                     message=(f"commit {commit.id!r} has a parent {parent_id!r} that has since been removed"),
-                    field=f"parents.{index}",
+                    field="parents",
                 )
             )

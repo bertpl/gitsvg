@@ -95,7 +95,6 @@ def compute_layout(state: State, layout_settings: LayoutSettings | None = None) 
     if layout_settings is None:
         layout_settings = LayoutSettings()
     # --- Phase 1: commit positions --------------
-    chain_parent: dict[str, str | None] = _compute_chain_parents(state)
     commit_pos_by_id: dict[str, int] = {}
     branch_starts: dict[str, int] = {}
     branch_ends: dict[str, int] = {}
@@ -109,7 +108,7 @@ def compute_layout(state: State, layout_settings: LayoutSettings | None = None) 
 
     for cid, cstate in state.commits.items():
         _ensure_branch_start(cstate.branch, state, commit_pos_by_id, branch_starts, branch_ends)
-        commit_pos = _compute_commit_pos(cid, cstate, chain_parent, commit_pos_by_id, branch_starts)
+        commit_pos = _compute_commit_pos(cstate, commit_pos_by_id, branch_starts)
         if unique_rows:
             commit_pos = max(commit_pos, next_row + cstate.gap)
             next_row = commit_pos + 1
@@ -211,17 +210,6 @@ def _branch_tip_commit(state: State, name: str) -> str | None:
     return branch.commit_ids[-1] if branch.commit_ids else branch.rooted_on_commit
 
 
-def _compute_chain_parents(state: State) -> dict[str, str | None]:
-    """Build a map of `commit_id → chain parent id` from `branch.commit_ids` order."""
-    chain_parent: dict[str, str | None] = {}
-    for branch_state in state.branches.values():
-        previous: str | None = None
-        for cid in branch_state.commit_ids:
-            chain_parent[cid] = previous
-            previous = cid
-    return chain_parent
-
-
 def _ensure_branch_start(
     branch_name: str,
     state: State,
@@ -251,27 +239,22 @@ def _ensure_branch_start(
 
 
 def _compute_commit_pos(
-    commit_id: str,
     commit_state: CommitState,
-    chain_parent: dict[str, str | None],
     commit_pos_by_id: dict[str, int],
     branch_starts: dict[str, int],
 ) -> int:
-    """Apply the uniform position rule: `max(effective_parents) + 1 + gap`.
+    """Apply the uniform position rule: `max(parent positions) + 1 + gap`.
 
-    Effective parents = chain parent ∪ declared `parents:` list. When
-    the set is empty (first commit on a root branch with no declared
-    parents), the rule reduces to `branch.start + gap`.
+    Reads the commit's canonical parent list (chain parent first, plus
+    the merged-in tip for a merge). When no parent has a position yet —
+    the first commit on the root branch — the rule reduces to
+    `branch.start + gap`.
     """
-    effective_parent_positions: list[int] = []
-    parent_id = chain_parent.get(commit_id)
-    if parent_id is not None and parent_id in commit_pos_by_id:
-        effective_parent_positions.append(commit_pos_by_id[parent_id])
-    for declared in commit_state.parents:
-        if declared in commit_pos_by_id:
-            effective_parent_positions.append(commit_pos_by_id[declared])
-    if effective_parent_positions:
-        base = max(effective_parent_positions)
+    parent_positions = [
+        commit_pos_by_id[parent_id] for parent_id in commit_state.parents if parent_id in commit_pos_by_id
+    ]
+    if parent_positions:
+        base = max(parent_positions)
     else:
         base = branch_starts[commit_state.branch] - 1
     return base + 1 + commit_state.gap

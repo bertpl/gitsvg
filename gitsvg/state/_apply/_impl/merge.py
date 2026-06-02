@@ -7,7 +7,7 @@ from gitsvg.file_format.ops import MergeOp
 from gitsvg.parse import ParsedOp
 from gitsvg.state._apply._errors import add_branch_not_declared, add_commit_id_already_used
 from gitsvg.state._apply._impl.commit import _generate_auto_commit_id
-from gitsvg.state._auto_hash import compute_auto_hash, effective_parent_ids
+from gitsvg.state._auto_hash import compute_auto_hash
 from gitsvg.state._state import CommitState, State
 from gitsvg.theme import ThemeBuilder
 
@@ -15,10 +15,12 @@ from gitsvg.theme import ThemeBuilder
 def apply_merge_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, report: ValidationReport) -> None:
     """Apply a `merge` op.
 
-    A merge produces a commit on `into` whose parents are the prior tip
-    of `into` and the current tip of `from`. When the optional `as`
-    field is set, the new commit takes that id; otherwise it is
-    auto-generated.
+    A merge produces a commit on `into` whose parents are the into
+    branch's chain parent (its prior tip, or its rooted-on commit when
+    empty) first and the current tip of `from` second — the single
+    canonical, chain-first parent list every downstream consumer reads.
+    When the optional `as` field is set, the new commit takes that id;
+    otherwise it is auto-generated.
 
     Validation:
 
@@ -62,7 +64,10 @@ def apply_merge_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, report
         add_commit_id_already_used(report, file=file, line=line, commit_id=explicit_id, field="as")
         return
 
-    parents = [tip for tip in (state.branch_tip(op.into), state.branch_tip(op.from_)) if tip is not None]
+    parents: list[str] = []
+    for parent_id in (state.chain_parent(op.into), state.branch_tip(op.from_)):
+        if parent_id is not None and parent_id not in parents:
+            parents.append(parent_id)
 
     state.commits[merge_id] = CommitState(
         id=merge_id,
@@ -80,4 +85,4 @@ def apply_merge_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, report
 
     # --- Resolve `hash: "auto"` -----------------
     if op.hash == "auto":
-        state.commits[merge_id].hash = compute_auto_hash(merge_id, effective_parent_ids(state, merge_id, op.into))
+        state.commits[merge_id].hash = compute_auto_hash(merge_id, parents)
