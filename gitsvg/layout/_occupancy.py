@@ -27,15 +27,10 @@ What does **not** contribute:
   *does* show up in the canvas auto-fit calculation (so the diagram
   has room to draw it) but it does not occupy a lane cell.
 
-Encapsulation contract: `Occupancy`'s storage is private. Callers only
-ever see `bool`, `frozenset[int]`, `list[int]`, or `tuple[int, int]`
-values through the public API. Storage can swap to an owner-aware
-shape (e.g. `dict[int, dict[int, Owner]]` with `add(lane, row,
-owner=...)` and `what_owns(lane, row)`) without changing any existing
-call site.
+Encapsulation contract: `Occupancy`'s storage is private — callers
+interact only through `add` and the `is_blocked_at_or_after` query,
+never touching the underlying per-lane sets.
 """
-
-from collections.abc import Iterator
 
 
 # ==================================================================================================
@@ -44,10 +39,9 @@ from collections.abc import Iterator
 class Occupancy:
     """Lane-keyed set of occupied (branch_pos, commit_pos) points.
 
-    Storage today is one set of rows per lane. The public API is shaped
-    so an owner-aware extension (`add(lane, row, owner=...)`,
-    `what_owns(lane, row)`) can be added later without changing any
-    existing call site.
+    Backed by one set of rows per lane. Callers register points with
+    `add` and ask whether a lane is blocked at or beyond a row with
+    `is_blocked_at_or_after`.
     """
 
     # --------------------------------------------------------------------------
@@ -74,11 +68,6 @@ class Occupancy:
     # --------------------------------------------------------------------------
     #  Queries
     # --------------------------------------------------------------------------
-    def is_occupied(self, branch_pos: int, commit_pos: int) -> bool:
-        """Return True iff `(branch_pos, commit_pos)` has been registered."""
-        rows = self._rows_by_lane.get(branch_pos)
-        return rows is not None and commit_pos in rows
-
     def is_blocked_at_or_after(self, branch_pos: int, threshold: int) -> bool:
         """Return True iff any occupied row on `branch_pos` is at or above `threshold`.
 
@@ -97,25 +86,3 @@ class Occupancy:
         if rows is None:
             return False
         return any(row >= threshold for row in rows)
-
-    def occupied_rows_on(self, branch_pos: int) -> frozenset[int]:
-        """Return all occupied rows on `branch_pos` as a frozen set."""
-        rows = self._rows_by_lane.get(branch_pos)
-        return frozenset(rows) if rows is not None else frozenset()
-
-    def occupied_lanes(self) -> list[int]:
-        """Return every lane with at least one occupied row, sorted ascending."""
-        return sorted(self._rows_by_lane.keys())
-
-    # --------------------------------------------------------------------------
-    #  Iteration
-    # --------------------------------------------------------------------------
-    def __iter__(self) -> Iterator[tuple[int, int]]:
-        """Yield every occupied `(branch_pos, commit_pos)` point.
-
-        Iteration order is sorted by lane, then by row — deterministic
-        regardless of insertion order.
-        """
-        for lane in sorted(self._rows_by_lane.keys()):
-            for row in sorted(self._rows_by_lane[lane]):
-                yield (lane, row)

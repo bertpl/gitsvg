@@ -53,9 +53,9 @@ def apply_commit_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, repor
 
     # --- Parents existence ----------------------
     for index, parent_id in enumerate(op.parents or []):
-        if parent_id in replaced_set:
-            # Rule 7 in `_replaces.py` already caught this; defensive guard.
-            return
+        # Rule 7 (`_replaces.py`) guarantees a new commit's parents are disjoint
+        # from its replaced set, so a parent can never also be replaced here.
+        assert parent_id not in replaced_set
         if not state.has_commit(parent_id):
             report.add(
                 ValidationError(
