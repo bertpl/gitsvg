@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - `theme.merge_commit_radius` now defaults to the effective `commit_radius` (including a `theme:`-overridden value) instead of the package default, so merge dots track a customized `commit_radius` as documented (regressed in 0.2.6).
+- Fractional values for the numeric `theme:` size fields (spacings, radii, line width) no longer crash with a traceback; sub-pixel values are now honored, and whole numbers render exactly as before.
 
 ### Security
 

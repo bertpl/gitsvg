@@ -90,7 +90,9 @@ class DefaultTheme(Theme):
     #  Margins (depend on orientation + resolved spacings)
     # --------------------------------------------------------------------------
     @classmethod
-    def _resolve_margin_left(cls, orientation: Orientation, branch_spacing: int, commit_spacing: int) -> int | float:
+    def _resolve_margin_left(
+        cls, orientation: Orientation, branch_spacing: float, commit_spacing: float
+    ) -> int | float:
         """Per-orientation `margin_left` default (px).
 
         Vertical orientations anchor to `branch_spacing × 1.0`.
@@ -105,7 +107,9 @@ class DefaultTheme(Theme):
         return _resolve_int_or_float(1.0 * commit_spacing)
 
     @classmethod
-    def _resolve_margin_right(cls, orientation: Orientation, branch_spacing: int, commit_spacing: int) -> int | float:
+    def _resolve_margin_right(
+        cls, orientation: Orientation, branch_spacing: float, commit_spacing: float
+    ) -> int | float:
         """Per-orientation `margin_right` default (px).
 
         Mirror of `_resolve_margin_left`: vertical anchors to
@@ -120,7 +124,7 @@ class DefaultTheme(Theme):
         return _resolve_int_or_float(1.0 * commit_spacing)
 
     @classmethod
-    def _resolve_margin_top(cls, orientation: Orientation, branch_spacing: int, commit_spacing: int) -> int | float:
+    def _resolve_margin_top(cls, orientation: Orientation, branch_spacing: float, commit_spacing: float) -> int | float:
         """Per-orientation `margin_top` default (px).
 
         Vertical anchors to `commit_spacing × 0.5`; horizontal anchors
@@ -131,7 +135,9 @@ class DefaultTheme(Theme):
         return _resolve_int_or_float(1.0 * branch_spacing)
 
     @classmethod
-    def _resolve_margin_bottom(cls, orientation: Orientation, branch_spacing: int, commit_spacing: int) -> int | float:
+    def _resolve_margin_bottom(
+        cls, orientation: Orientation, branch_spacing: float, commit_spacing: float
+    ) -> int | float:
         """Per-orientation `margin_bottom` default (px). Mirror of `_resolve_margin_top`."""
         if orientation.is_vertical:
             return _resolve_int_or_float(0.5 * commit_spacing)
@@ -161,7 +167,7 @@ class DefaultTheme(Theme):
         return 7
 
     @classmethod
-    def _resolve_merge_commit_radius(cls, commit_radius: int) -> int:
+    def _resolve_merge_commit_radius(cls, commit_radius: float) -> float:
         """Merge-commit-dot radius (px) — defaults to the resolved `commit_radius` (including a theme-overridden value), so merge and ordinary dots match unless `merge_commit_radius` is set explicitly."""
         return commit_radius
 
