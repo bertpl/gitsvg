@@ -81,43 +81,9 @@ def _expand(
     chain of resolved absolute paths from the top-level file down to
     (but not including) any file we recurse into.
     """
-    import_indices = [i for i, p in enumerate(parsed_ops) if isinstance(p.op, ImportOp)]
-
-    # No imports — nothing to expand.
-    if not import_indices:
-        return list(parsed_ops)
-
-    # Multiple imports — flag every one after the first; keep going with the first.
-    if len(import_indices) > 1:
-        for extra_index in import_indices[1:]:
-            extra = parsed_ops[extra_index]
-            report.add(
-                ValidationError(
-                    file=extra.file,
-                    line=extra.line,
-                    code="E303",
-                    message="multiple `import` ops in one file (only one is allowed)",
-                )
-            )
-        # Drop the extra import ops and continue with the first one only.
-        keep = {i for i in range(len(parsed_ops)) if i not in import_indices[1:]}
-        parsed_ops = [p for i, p in enumerate(parsed_ops) if i in keep]
-        import_indices = [import_indices[0]]
-
-    first_import_index = import_indices[0]
-
-    # Import not at position 0 — flag it and drop the import op.
-    if first_import_index != 0:
-        misplaced = parsed_ops[first_import_index]
-        report.add(
-            ValidationError(
-                file=misplaced.file,
-                line=misplaced.line,
-                code="E304",
-                message="`import` must be the first op in the file",
-            )
-        )
-        return [p for i, p in enumerate(parsed_ops) if i != first_import_index]
+    parsed_ops, proceed = _gate_leading_import(parsed_ops, report)
+    if not proceed:
+        return parsed_ops
 
     # First op is import — resolve it.
     import_parsed = parsed_ops[0]
@@ -184,3 +150,61 @@ def _expand(
     )
 
     return expanded + rest
+
+
+def _gate_leading_import(parsed_ops: list[ParsedOp], report: ValidationReport) -> tuple[list[ParsedOp], bool]:
+    """Normalize `parsed_ops` to a single leading `import`, flagging violations.
+
+    Enforces the "at most one `import`, and it must be first" rule before the
+    resolver touches the filesystem. Returns `(ops, proceed)`:
+
+    - `(ops, False)` — terminal: nothing to expand. Either no `import` is
+      present, or the sole `import` was misplaced (E304) and dropped. The caller
+      returns `ops` unchanged.
+    - `(ops, True)` — `ops` has exactly one `import` at position 0. Any extra
+      `import` ops were flagged (E303) and dropped; the caller resolves the
+      survivor.
+
+    Args:
+        parsed_ops: The file's ops.
+        report: Receives any E303 / E304 errors.
+    """
+    import_indices = [i for i, p in enumerate(parsed_ops) if isinstance(p.op, ImportOp)]
+
+    # No imports — nothing to expand.
+    if not import_indices:
+        return list(parsed_ops), False
+
+    # Multiple imports — flag every one after the first; keep going with the first.
+    if len(import_indices) > 1:
+        for extra_index in import_indices[1:]:
+            extra = parsed_ops[extra_index]
+            report.add(
+                ValidationError(
+                    file=extra.file,
+                    line=extra.line,
+                    code="E303",
+                    message="multiple `import` ops in one file (only one is allowed)",
+                )
+            )
+        # Drop the extra import ops and continue with the first one only.
+        extras = set(import_indices[1:])
+        parsed_ops = [p for i, p in enumerate(parsed_ops) if i not in extras]
+        import_indices = [import_indices[0]]
+
+    first_import_index = import_indices[0]
+
+    # Import not at position 0 — flag it and drop the import op.
+    if first_import_index != 0:
+        misplaced = parsed_ops[first_import_index]
+        report.add(
+            ValidationError(
+                file=misplaced.file,
+                line=misplaced.line,
+                code="E304",
+                message="`import` must be the first op in the file",
+            )
+        )
+        return [p for i, p in enumerate(parsed_ops) if i != first_import_index], False
+
+    return parsed_ops, True

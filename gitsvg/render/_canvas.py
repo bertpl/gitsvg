@@ -130,14 +130,38 @@ def compute_canvas(layout: Layout, theme: RendererSettings) -> RenderCanvas:
         effective spacing / margin values the coordinate transform reads.
     """
     grid = layout.grid
-    orientation = theme.orientation
-
-    branch_spacing = theme.branch_spacing
-    commit_spacing = theme.commit_spacing
-
     n_commits = grid.n_commits
     n_branches = grid.n_branches
 
+    margins = _resolve_margins(layout, theme)
+    width, height, table_x_origin = _compute_dimensions(theme, margins, n_commits, n_branches)
+
+    return RenderCanvas(
+        width=width,
+        height=height,
+        n_commits=n_commits,
+        n_branches=n_branches,
+        branch_spacing=theme.branch_spacing,
+        commit_spacing=theme.commit_spacing,
+        margin_left=margins["left"],
+        margin_right=margins["right"],
+        margin_bottom=margins["bottom"],
+        margin_top=margins["top"],
+        orientation=theme.orientation,
+        table_x_origin=table_x_origin,
+    )
+
+
+def _resolve_margins(layout: Layout, theme: RendererSettings) -> dict[str, float]:
+    """Resolve the four visual-side margins: theme defaults widened by auto-fit needs.
+
+    Computes the axis-relative auto-fit allowances (label / pill overhang) on
+    each of the four grid edges, maps them to visual sides per orientation, and
+    keeps the wider of the theme default and the computed need on each side.
+
+    Returns:
+        A `{"left"/"right"/"top"/"bottom": float}` margin map.
+    """
     # Axis-relative auto-fit needs (pure: no notion of visual sides).
     axis_needs: dict[str, float] = {
         "branch_lower": _auto_fit_branch_axis_edge(layout, theme, edge="lower"),
@@ -157,42 +181,58 @@ def compute_canvas(layout: Layout, theme: RendererSettings) -> RenderCanvas:
         "top": float(theme.margin_top),
         "bottom": float(theme.margin_bottom),
     }
-    for axis_edge, visual_side in _AXIS_TO_VISUAL[orientation].items():
+    for axis_edge, visual_side in _AXIS_TO_VISUAL[theme.orientation].items():
         margins[visual_side] = max(margins[visual_side], axis_needs[axis_edge])
+    return margins
 
-    is_vertical = orientation.is_vertical
-    table_x_origin = 0.0
-    if is_vertical:
+
+def _compute_dimensions(
+    theme: RendererSettings,
+    margins: dict[str, float],
+    n_commits: int,
+    n_branches: int,
+) -> tuple[float, float, float]:
+    """Compute `(width, height, table_x_origin)` from the margins and grid extent.
+
+    Vertical orientations run commits down the height and branches across the
+    width — plus an optional table region to the right (see `_table_region`).
+    Horizontal orientations swap the two axes and have no table region, so
+    `table_x_origin` is `0.0`.
+    """
+    branch_spacing = theme.branch_spacing
+    commit_spacing = theme.commit_spacing
+    if theme.orientation.is_vertical:
         graph_extent = (n_branches - 1) * branch_spacing
-        width = margins["left"] + graph_extent + margins["right"]
         height = margins["top"] + (n_commits - 1) * commit_spacing + margins["bottom"]
-        # Table mode appends a self-bounded region to the right of the graph,
-        # past a gap of half a branch-lane; the branch-axis margins stay at
-        # their defaults (the relocated labels/pills are suppressed in the
-        # auto-fit pass).
-        if is_table_active(theme):
-            table_width = compute_table_columns(theme.table_msg_width, theme.table_hash_width, gutter=0).width
-            if table_width > 0:
-                graph_table_gap = branch_spacing / 2
-                table_x_origin = margins["left"] + graph_extent + graph_table_gap
-                width = table_x_origin + table_width + margins["right"]
-    else:
-        width = margins["left"] + (n_commits - 1) * commit_spacing + margins["right"]
-        height = margins["top"] + (n_branches - 1) * branch_spacing + margins["bottom"]
-    return RenderCanvas(
-        width=width,
-        height=height,
-        n_commits=n_commits,
-        n_branches=n_branches,
-        branch_spacing=branch_spacing,
-        commit_spacing=commit_spacing,
-        margin_left=margins["left"],
-        margin_right=margins["right"],
-        margin_bottom=margins["bottom"],
-        margin_top=margins["top"],
-        orientation=orientation,
-        table_x_origin=table_x_origin,
-    )
+        table_x_origin, table_width = _table_region(theme, margins, graph_extent)
+        if table_width > 0:
+            width = table_x_origin + table_width + margins["right"]
+        else:
+            width = margins["left"] + graph_extent + margins["right"]
+        return width, height, table_x_origin
+    width = margins["left"] + (n_commits - 1) * commit_spacing + margins["right"]
+    height = margins["top"] + (n_branches - 1) * branch_spacing + margins["bottom"]
+    return width, height, 0.0
+
+
+def _table_region(theme: RendererSettings, margins: dict[str, float], graph_extent: float) -> tuple[float, float]:
+    """Table-mode region geometry for a vertical canvas: `(x_origin, width)`.
+
+    Table mode appends a self-bounded column region to the right of the graph,
+    past a gap of half a branch-lane; the branch-axis margins stay at their
+    defaults (the relocated labels / pills are suppressed in the auto-fit pass).
+
+    Returns:
+        `(table_x_origin, table_width)`, or `(0.0, 0.0)` when table mode is
+        inactive or the table has no width — i.e. nothing to append.
+    """
+    if not is_table_active(theme):
+        return 0.0, 0.0
+    table_width = compute_table_columns(theme.table_msg_width, theme.table_hash_width, gutter=0).width
+    if table_width <= 0:
+        return 0.0, 0.0
+    graph_table_gap = theme.branch_spacing / 2
+    return margins["left"] + graph_extent + graph_table_gap, table_width
 
 
 # ==================================================================================================
