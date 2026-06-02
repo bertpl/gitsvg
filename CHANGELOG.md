@@ -9,8 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- New `gitsvg theme` command to inspect the built-in named themes — index, per-theme resolved values, and a bare-name list.
+
 ### Changed
 
+- **Breaking:** named-theme inspection moved from `gitsvg schema` to the new `gitsvg theme` command: `schema theme <name>` → `theme <name>`, `schema themes` → `theme --list-names`.
 - US English spelling normalized across user-facing text — CLI `gitsvg schema` field descriptions and error-catalog entries — and the documentation. No behavioral change.
 
 ### Deprecated

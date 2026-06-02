@@ -1,10 +1,10 @@
-"""Gui theme — mimics a desktop git GUI (Fork) in table layout.
+"""Gui theme — mimics a popular desktop git GUI in table layout.
 
 `GuiTheme` reproduces the look of a desktop git client: the graph sits
 on the left, a table of per-commit metadata (message + hash columns)
 runs beside it, and each branch's name rides as a colored pill at its
-tip commit. The branch palette is Fork's own graph-lane colors (Apple
-system colors), extracted from the app's asset catalog.
+tip commit. The branch palette uses a desktop client's graph-lane
+colors (Apple system colors), extracted from its asset catalog.
 
 Two of the GUI-defining traits are already `DefaultTheme` values and
 inherit unchanged — the checkmark merge dots (`merge_commit_style`) and
@@ -24,7 +24,7 @@ from gitsvg.theme._orientation import Orientation
 
 
 class GuiTheme(DefaultTheme):
-    """Desktop-git-GUI look (Fork) — table layout with the Fork palette.
+    """Desktop-git-GUI look — table layout; inspired by one or more popular desktop clients.
 
     Overrides the layout policy (`_resolve_commit_label_layout` →
     `table`, `_resolve_auto_lane_change` → on), the spacings
@@ -32,7 +32,7 @@ class GuiTheme(DefaultTheme):
     every other theme), the hash typography (`_resolve_hash_font_size` /
     `_resolve_hash_color`, matched to the commit-message line), and the
     palette (`_resolve_colors` / `_resolve_default_branch_color_cycle`,
-    Fork's graph-lane colors). Checkmark merge dots and the bezier
+    a desktop client's graph-lane colors). Checkmark merge dots and the bezier
     connector inherit from `DefaultTheme`. Stays vertical — table mode
     forbids horizontal orientations (E223).
     """
@@ -129,16 +129,16 @@ class GuiTheme(DefaultTheme):
         return cls._resolve_label_color()
 
     # --------------------------------------------------------------------------
-    #  Palette — Fork's graph-lane colors
+    #  Palette — a desktop client's graph-lane colors
     # --------------------------------------------------------------------------
     @classmethod
     def _resolve_colors(cls) -> dict[str, str]:
-        """Fork's graph-lane palette (Apple system colors).
+        """A desktop client's graph-lane palette (Apple system colors).
 
-        Lifted from the Fork app's asset catalog — the saturated
+        Lifted from a desktop client's asset catalog — the saturated
         graph-lane colors it draws ref labels and lanes in. `main` takes
         the first lane color; the twelve `branch*` slots carry the rest
-        in Fork's index order, cycled by
+        in the source's index order, cycled by
         `_resolve_default_branch_color_cycle` in branch-declaration
         order.
         """
@@ -160,5 +160,5 @@ class GuiTheme(DefaultTheme):
 
     @classmethod
     def _resolve_default_branch_color_cycle(cls) -> list[str]:
-        """Cycle the twelve non-`main` Fork colors in index order across non-main branches."""
+        """Cycle the twelve non-`main` lane colors in index order across non-main branches."""
         return [f"branch{i}" for i in range(1, 13)]

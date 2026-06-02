@@ -30,7 +30,10 @@ from gitsvg.theme._theme import Theme, _resolve_int_or_float
 
 
 class DefaultTheme(Theme):
-    """The canonical default theme. Concrete `_resolve_*` methods + eager `build()`."""
+    """The canonical default theme that every other named theme builds on.
+
+    Supplies the concrete `_resolve_*` methods and the eager `build()`.
+    """
 
     # --------------------------------------------------------------------------
     #  Orientation
@@ -404,9 +407,8 @@ class DefaultTheme(Theme):
         Soft but not gray: `main` is a darkened blue-gray spine, and the
         four `branch*` slots are gently saturated green / blue / mauve /
         purple that stay legible without shouting. Hue is held across the
-        whole palette relative to the `muted` named theme (the
-        pre-refresh look); only `main`'s lightness and the four branches'
-        saturation differ.
+        whole palette relative to the `muted` named theme; only `main`'s
+        lightness and the four branches' saturation differ.
         """
         return {
             "main": "#4a4f5a",

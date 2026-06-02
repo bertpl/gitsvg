@@ -24,8 +24,8 @@ from enum import StrEnum
 class TableField(StrEnum):
     """One metadata field of a commit, rendered as a table column.
 
-    Fixed render order is `MESSAGE`, then `HASH` (Fork-like: the subject
-    column first, the short id after).
+    Fixed render order is `MESSAGE`, then `HASH` (desktop-client style:
+    the subject column first, the short id after).
     """
 
     MESSAGE = "message"
