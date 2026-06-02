@@ -69,7 +69,9 @@ def _extract_summary(body: str, code: str) -> str:
 
     Args:
         body: Markdown body of the catalog entry.
-        code: The code expected to appear in the heading.
+        code: The code matched against the first H1 heading; any first
+            H1 is tolerated, and a non-H1 first line yields an empty
+            string.
 
     Returns:
         The extracted summary, or an empty string when the convention is not

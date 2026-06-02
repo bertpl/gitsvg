@@ -93,6 +93,8 @@ def apply_merge_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, report
         msg=op.msg,
         hash=op.hash,
         parents=parents,
+        # Merge deliberately skips `_resolve_gap` (used by `commit:`): it never
+        # squashes, so there is no `replaces` gap to inherit.
         gap=op.gap or 0,
         declaration_file=file,
         declaration_line=line,

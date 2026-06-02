@@ -11,7 +11,7 @@ connectors alike.
 `_ConnectorGeometry` once (resolving the two role-labeled points to pixel
 endpoints and the orientation-mapped leg order), creates the SVG path, and
 dispatches to the builder registered for `theme.branch_line_style` in
-`_connector_styles` — the builder draws the whole connector (opening `M`
+`connector_styles` — the builder draws the whole connector (opening `M`
 included). The per-style geometry (rounded / straight / bezier /
 double_rounded / double_bezier) lives there.
 
@@ -48,7 +48,7 @@ def draw_arc(
 
     Branch-off / merge / pull-request connectors take their shape from
     `theme.branch_line_style` (`rounded` / `straight` / `bezier` /
-    `double_rounded` / `double_bezier`), dispatched through the `_connector_styles`
+    `double_rounded` / `double_bezier`), dispatched through the `connector_styles`
     registry. `rounded` is the default and renders byte-identically to
     prior versions.
 

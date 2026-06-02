@@ -12,7 +12,7 @@
 
 Each style is a `_draw_<style>(d, x, y, radius, color, theme)` builder that
 owns the dot's full rendering at the given base radius; `_MERGE_DOT_BUILDERS`
-maps each `MergeCommitStyle` to its builder, mirroring `_connector_styles`.
+maps each `MergeCommitStyle` to its builder, mirroring `connector_styles`.
 The `checkmark` dot ring is drawn `_CHECKMARK_DOT_RADIUS_SCALE`x the base
 radius (a touch larger), while its tick stays sized to the base radius — so
 the dot reads larger but the tick doesn't. Adding a style is a localized

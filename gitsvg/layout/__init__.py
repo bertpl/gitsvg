@@ -4,7 +4,7 @@ Public surface:
 
 - `compute_layout(state)` — pure transformation; takes the state engine's
   output and returns a complete `Layout` (integer-grid slot positions,
-  resolved label sides, pre-computed arcs, grid extent).
+  pre-computed arcs, grid extent).
 - `Layout`, `LayoutBranch`, `LayoutCommit`, `LayoutArc`,
   `LayoutPullRequest`, `LayoutGrid`, `GridSlot` — the dataclasses the
   renderer consumes.

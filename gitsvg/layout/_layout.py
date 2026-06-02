@@ -247,7 +247,7 @@ class Layout:
             order.
         commits: One `LayoutCommit` per surviving commit, keyed by id
             for renderer convenience.
-        arcs: All connectors (branch-off + merge) in z-order
+        arcs: All connectors (each carrying a `LayoutArcKind`) in z-order
             (back-to-front).
         pull_requests: One `LayoutPullRequest` per open PR, in the
             order they were declared.

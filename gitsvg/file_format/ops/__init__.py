@@ -1,4 +1,4 @@
-"""Pydantic models for the eight gitsvg operations.
+"""Pydantic models for the gitsvg operations.
 
 Subpackage layout:
 

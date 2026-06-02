@@ -5,9 +5,9 @@ default carried before the saturation / merge-dot refresh. It pins
 three `_resolve_*` methods to their pre-refresh values — the branch
 palette, the connector style, and the merge-commit style; every other
 field inherits from `DefaultTheme`, so the two themes stay in lockstep
-on geometry, spacings, typography, and label angles. (The connector
-pin currently coincides with the default's `rounded`; pinning it keeps
-`muted` stable if the default's connector style changes later.)
+on geometry, spacings, typography, and label angles. (`muted` pins
+`rounded` to keep the pre-refresh elbow connector even if the default's
+connector style changes.)
 
 Selecting it is one field on a `theme` op: `{"op": "theme", "name":
 "muted"}`.

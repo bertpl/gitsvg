@@ -43,7 +43,7 @@ Heuristic notes:
   cases of this rule with no extra logic.
 - **Branch line span**: from `start` to the branch's `line_end` — its
   last commit, extended to one row below any merge / pull request it
-  feeds (see `_line_ends`). Empty branches span just `start`.
+  feeds (see `_branch_extents`). Empty branches span just `start`.
 - **Connectors are single-row hops.** Every connector spans one commit
   row; the branch *line* carries all the long-distance vertical travel.
   - **Branch-off arcs**: one per non-root branch — parent commit (trunk)
@@ -71,7 +71,7 @@ from gitsvg.layout._layout import (
 from gitsvg.layout._layout_arc_kind import LayoutArcKind
 from gitsvg.layout._layout_settings import LayoutSettings
 from gitsvg.layout._occupancy import Occupancy
-from gitsvg.state import State
+from gitsvg.state import BranchState, CommitState, GridState, State
 from gitsvg.theme._commit_row_mode import CommitRowMode
 
 
@@ -252,7 +252,7 @@ def _ensure_branch_start(
 
 def _compute_commit_pos(
     commit_id: str,
-    commit_state,
+    commit_state: CommitState,
     chain_parent: dict[str, str | None],
     commit_pos_by_id: dict[str, int],
     branch_starts: dict[str, int],
@@ -573,7 +573,7 @@ def _register_branch_points(
 
 def _resolve_parent_anchor(
     state: State,
-    branch,
+    branch: BranchState,
     positions: dict[str, int],
     commit_pos_by_id: dict[str, int],
     branch_starts: dict[str, int],
@@ -662,7 +662,7 @@ def _merge_arcs(
     """One merge arc per merged-in parent — a single-row hop into the merge commit.
 
     The merged-in branch's line has been extended to one row below the
-    merge commit (`_line_ends`), so the arc hops from there — on that
+    merge commit (`_branch_extents`), so the arc hops from there — on that
     branch's lane at `merge_row - 1` — to the merge commit. The chain
     parent (same branch as the merge commit) is the branch's own
     continuation, not a merge edge, so it is skipped.
@@ -785,7 +785,7 @@ def _compute_grid(
     return LayoutGrid(n_commits=n_commits, n_branches=n_branches)
 
 
-def _override(user_grid, attr: str, default):
+def _override(user_grid: GridState | None, attr: str, default: int) -> int:
     """Return the user's pinned value for `attr` if set, else the default."""
     if user_grid is None:
         return default

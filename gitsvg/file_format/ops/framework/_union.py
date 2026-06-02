@@ -1,4 +1,4 @@
-"""Discriminated union and registries for the seven operations.
+"""Discriminated union and registries for the gitsvg operations.
 
 The `op:` field on each model is a `Literal[<name>]` and serves as the
 discriminator. Downstream code should prefer `OP_ADAPTER` (a pydantic
