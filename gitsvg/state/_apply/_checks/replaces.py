@@ -1,4 +1,4 @@
-"""The `replaces:` 7-rule semantic check, factored out of the commit-op handler.
+"""The `replaces:` semantic-rule check, factored out of the commit-op handler.
 
 `check_replaces_rules` is invoked by `_apply/_commit.py` before any state
 mutation. It validates the replaces field against current state and returns
@@ -6,7 +6,10 @@ True only when all applicable rules pass. Errors are appended to the report
 as they're discovered.
 
 Rule numbering follows the locked-in format spec; rule 6 (tags/annotate)
-is reserved and currently dormant.
+is reserved and currently dormant, and rule 7 (the squash commit's own
+parents disjoint from the replaced set) retired with the removal of
+author-declared commit parents — a commit can no longer name a parent, so
+the rule became vacuous.
 """
 
 from typing import cast
@@ -46,8 +49,6 @@ def check_replaces_rules(state: State, parsed: ParsedOp, report: ValidationRepor
     if not _check_rule_4_no_other_branch_rooted(state, replaced_set, target_branch, file, line, report):
         return False
     if not _check_rule_5_no_external_parents(state, replaced_set, file, line, report):
-        return False
-    if not _check_rule_7_new_parents_disjoint(op.parents or [], replaced_set, file, line, report):
         return False
     return True
 
@@ -199,30 +200,4 @@ def _check_rule_5_no_external_parents(
                     )
                 )
                 return False
-    return True
-
-
-# ==================================================================================================
-#  Rule 7 — the new commit's parents may not reference a replaced commit
-# ==================================================================================================
-def _check_rule_7_new_parents_disjoint(
-    new_parents: list[str],
-    replaced_set: set[str],
-    file: str,
-    line: int,
-    report: ValidationReport,
-) -> bool:
-    """Rule 7: the new commit's parents may not reference any replaced commit."""
-    for parent_id in new_parents:
-        if parent_id in replaced_set:
-            report.add(
-                ValidationError(
-                    file=file,
-                    line=line,
-                    code="E209",
-                    message=(f"parents references {parent_id!r} which is being removed by `replaces`"),
-                    field="parents",
-                )
-            )
-            return False
     return True

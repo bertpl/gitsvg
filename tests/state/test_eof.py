@@ -81,13 +81,13 @@ def test_branch_with_no_resolved_root_does_not_dangle() -> None:
 # ==================================================================================================
 #  E401 — dangling commit parent
 # ==================================================================================================
-def test_dangling_explicit_parent_emits_e401() -> None:
+def test_dangling_chain_parent_emits_e401() -> None:
+    """Removing a mid-chain commit dangles its successor's stored chain parent."""
     # --- arrange ----------------------
     text = (
         '{"op": "branch", "name": "main"}\n'
         '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "feat", "id": "f1", "msg": "x", "parents": ["c1"]}\n'
+        '{"op": "commit", "branch": "main", "id": "c2", "msg": "x"}\n'
         '{"op": "remove", "commits": ["c1"]}\n'
     )
 
@@ -98,8 +98,8 @@ def test_dangling_explicit_parent_emits_e401() -> None:
     # --- assert -----------------------
     e401_errors = [e for e in report.errors if e.code == "E401"]
     assert len(e401_errors) == 1
-    assert e401_errors[0].line == 4
-    assert e401_errors[0].field == "parents.0"
+    assert e401_errors[0].line == 3  # c2's declaration line
+    assert e401_errors[0].field == "parents"
 
 
 def test_dangling_merge_parent_emits_e401() -> None:
@@ -170,14 +170,18 @@ def test_rebuild_pattern_for_branch_remove_then_redeclare() -> None:
 # ==================================================================================================
 def test_multiple_missing_parents_emit_one_error_per_dangling_parent() -> None:
     # --- arrange ----------------------
+    # A merge commit carries two canonical parents (the into-side chain parent
+    # `c1` and the merged-in tip `f1`). `feat` is rooted on `c0`, so removing
+    # both `c1` and `f1` dangles exactly the two parents of `mg`.
     text = (
         '{"op": "branch", "name": "main"}\n'
+        '{"op": "commit", "branch": "main", "id": "c0", "msg": "x"}\n'
+        '{"op": "branch", "name": "feat", "from_commit": "c0"}\n'
+        '{"op": "commit", "branch": "feat", "id": "f1", "msg": "x"}\n'
         '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "c2", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "feat", "id": "f1", "msg": "x", "parents": ["c1", "c2"]}\n'
+        '{"op": "merge", "from": "feat", "into": "main", "as": "mg"}\n'
         '{"op": "remove", "commits": ["c1"]}\n'
-        '{"op": "remove", "commits": ["c2"]}\n'
+        '{"op": "remove", "commits": ["f1"]}\n'
     )
 
     # --- act --------------------------
@@ -187,4 +191,6 @@ def test_multiple_missing_parents_emit_one_error_per_dangling_parent() -> None:
     # --- assert -----------------------
     e401_errors = [e for e in report.errors if e.code == "E401"]
     assert len(e401_errors) == 2
-    assert sorted(e.field for e in e401_errors) == ["parents.0", "parents.1"]
+    assert {e.field for e in e401_errors} == {"parents"}
+    joined = " ".join(e.message for e in e401_errors)
+    assert "c1" in joined and "f1" in joined

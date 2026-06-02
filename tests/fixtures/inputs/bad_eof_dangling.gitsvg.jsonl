@@ -1,5 +1,5 @@
 {"op": "branch", "name": "main"}
 {"op": "commit", "branch": "main", "id": "c1", "msg": "x"}
 {"op": "branch", "name": "feat", "from_commit": "c1"}
-{"op": "commit", "branch": "feat", "id": "f1", "msg": "x", "parents": ["c1"]}
+{"op": "commit", "branch": "feat", "id": "f1", "msg": "x"}
 {"op": "remove", "commits": ["c1"]}

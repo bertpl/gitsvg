@@ -76,7 +76,12 @@ class CommitState:
         branch: Name of the branch the commit lives on.
         msg: Optional commit message.
         hash: Optional hash string (literal `"auto"` allowed; auto-resolution is deterministic).
-        parents: Explicit parents (empty list = the commit is a normal append).
+        parents: Canonical parent commit ids — the chain parent (the
+            branch's tip, or its rooted-on commit for the branch's first
+            commit) first, plus the merged-in tip for a merge commit.
+            Resolved once when the commit is applied; the single parent
+            set every downstream consumer reads. Empty only for the
+            first commit on the root branch.
         replaces: Commit ids this commit conceptually squashes (empty list = no squash).
         highlight: True when the commit is marked for visual highlight.
         gap: Number of empty commit-axis slots to leave between the branch's
@@ -188,3 +193,17 @@ class State:
         """
         branch = self.branches.get(name)
         return branch.commit_ids[-1] if branch and branch.commit_ids else None
+
+    def chain_parent(self, name: str) -> str | None:
+        """Return the commit a new commit on `name` descends from — its chain parent.
+
+        The branch's current tip when it has commits, otherwise the
+        commit it was rooted on (the source-branch tip or `from_commit`
+        captured at declaration). None only for the never-committed
+        first branch. This is the structural first parent every commit
+        on the branch inherits from branch membership.
+        """
+        branch = self.branches.get(name)
+        if branch is None:
+            return None
+        return branch.commit_ids[-1] if branch.commit_ids else branch.rooted_on_commit

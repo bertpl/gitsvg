@@ -67,17 +67,6 @@ def test_commit_on_undeclared_branch_emits_e200() -> None:
     assert [e.code for e in report.errors] == ["E200"]
 
 
-def test_commit_with_unknown_parent_emits_e201() -> None:
-    # --- arrange ----------------------
-    text = '{"op": "branch", "name": "main"}\n{"op": "commit", "branch": "main", "msg": "x", "parents": ["ghost"]}\n'
-
-    # --- act --------------------------
-    _, report = build_state_from_jsonl(text)
-
-    # --- assert -----------------------
-    assert [e.code for e in report.errors] == ["E201"]
-
-
 def test_duplicate_commit_id_emits_e203() -> None:
     # --- arrange ----------------------
     text = (
@@ -162,13 +151,21 @@ def test_replaces_rule_4_other_branch_rooted_emits_e207() -> None:
 
 
 def test_replaces_rule_5_external_parents_emits_e208() -> None:
-    """Rule 5: external commit's parents may not reference a replaced commit."""
+    """Rule 5: an external commit's canonical parents may not reference a replaced commit.
+
+    A merge into `feat` records `main`'s tip (`c1`) as a parent of `mg`;
+    squashing `c1` on `main` then leaves `mg` pointing at a replaced commit.
+    `feat` is rooted on `c0`, not `c1`, so rule 4 (E207) does not pre-empt
+    rule 5 — this isolates the E208 path.
+    """
     # --- arrange ----------------------
     text = (
         '{"op": "branch", "name": "main"}\n'
+        '{"op": "commit", "branch": "main", "id": "c0", "msg": "x"}\n'
+        '{"op": "branch", "name": "feat", "from_commit": "c0"}\n'
+        '{"op": "commit", "branch": "feat", "id": "f0", "msg": "x"}\n'
         '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "feat", "id": "f1", "msg": "x", "parents": ["c1"]}\n'
+        '{"op": "merge", "from": "main", "into": "feat", "as": "mg"}\n'
         '{"op": "commit", "branch": "main", "id": "c2", "msg": "squash", "replaces": ["c1"]}\n'
     )
 
@@ -176,26 +173,7 @@ def test_replaces_rule_5_external_parents_emits_e208() -> None:
     _, report = build_state_from_jsonl(text)
 
     # --- assert -----------------------
-    # E207 also fires (feat is rooted on c1) — but the parents-rule violation is what we're testing.
-    codes = sorted(e.code for e in report.errors)
-    assert "E208" in codes or "E207" in codes
-
-
-def test_replaces_rule_7_self_parents_emits_e209() -> None:
-    """Rule 7: the new commit's parents may not reference replaced commits."""
-    # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "c2", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "c3", "msg": "squash", "replaces": ["c1", "c2"], "parents": ["c1"]}\n'
-    )
-
-    # --- act --------------------------
-    _, report = build_state_from_jsonl(text)
-
-    # --- assert -----------------------
-    assert [e.code for e in report.errors] == ["E209"]
+    assert [e.code for e in report.errors] == ["E208"]
 
 
 def test_replaces_happy_path_atomically_squashes_tail() -> None:

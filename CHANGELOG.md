@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+- **Breaking:** removed the `commit` op's `parents` field; a commit's parents are now structural (its branch's prior commit), and `merge` is the only op that adds a second parent. Migration: replace `commit … "parents": [...]` with a `merge` op.
+
 ### Fixed
 
 - `theme.merge_commit_radius` now defaults to the effective `commit_radius` (including a `theme:`-overridden value) instead of the package default, so merge dots track a customized `commit_radius` as documented (regressed in 0.2.6).

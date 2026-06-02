@@ -24,7 +24,7 @@ def validate_one(path: Path) -> ValidationReport:
     """Run the full validate pipeline on `path` and return the report."""
     parsed_ops, report = parse_jsonl_file(path)
     expanded = resolve_imports(parsed_ops, file=path, report=report)
-    state = apply_ops(expanded, report)
+    state, _theme = apply_ops(expanded, report)
     check_end_of_file(state, report)
     return report
 

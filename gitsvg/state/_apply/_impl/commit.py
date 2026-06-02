@@ -7,7 +7,7 @@ from gitsvg.file_format.ops import CommitOp
 from gitsvg.parse import ParsedOp
 from gitsvg.state._apply._checks import check_replaces_rules
 from gitsvg.state._apply._errors import add_branch_not_declared, add_commit_id_already_used
-from gitsvg.state._auto_hash import compute_auto_hash, effective_parent_ids
+from gitsvg.state._auto_hash import compute_auto_hash
 from gitsvg.state._state import CommitState, State
 from gitsvg.theme import ThemeBuilder
 
@@ -18,16 +18,18 @@ def apply_commit_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, repor
     Validation order (no state mutation until everything passes):
 
     1. The branch reference must exist (E200).
-    2. If `replaces:` is set, the 7-rule check must pass.
-    3. Each parent in `parents:` must exist in current state (E201).
-       Rule 7 already excludes replaced ids from `parents`, so this
-       check naturally covers post-removal state.
-    4. The commit id (explicit or auto-generated) must be unique in
+    2. If `replaces:` is set, the rule check must pass.
+    3. The commit id (explicit or auto-generated) must be unique in
        current state, except when an explicit id is being vacated by
        `replaces:` (E203).
 
     On success, replaced commits are removed and the new commit is
-    appended to the branch's commit list.
+    appended to the branch's commit list. Its parents are resolved
+    structurally: a commit op contributes exactly its chain parent
+    (the branch's tip after any `replaces:` removal, or the branch's
+    rooted-on commit when it is the branch's first commit), so the
+    stored list is the single canonical parent set every downstream
+    consumer reads. Multi-parent commits come only from the `merge` op.
     """
     op = cast(CommitOp, parsed.op)
     file = parsed.file
@@ -44,23 +46,6 @@ def apply_commit_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, repor
 
     replaced_set: set[str] = set(op.replaces or [])
 
-    # --- Parents existence ----------------------
-    for index, parent_id in enumerate(op.parents or []):
-        # Rule 7 (`_replaces.py`) guarantees a new commit's parents are disjoint
-        # from its replaced set, so a parent can never also be replaced here.
-        assert parent_id not in replaced_set
-        if not state.has_commit(parent_id):
-            report.add(
-                ValidationError(
-                    file=file,
-                    line=line,
-                    code="E201",
-                    message=f"parent commit {parent_id!r} is not declared",
-                    field=f"parents.{index}",
-                )
-            )
-            return
-
     # --- Resolve commit id ----------------------
     explicit_id = op.id
     commit_id = explicit_id if explicit_id is not None else _generate_auto_commit_id(state)
@@ -75,13 +60,19 @@ def apply_commit_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, repor
     for rid in op.replaces or []:
         state.remove_commit(rid)
 
+    # --- Resolve canonical parents --------------
+    # Read after removal and before the append below, so the chain parent is
+    # the post-removal tip and never points at the new commit itself.
+    chain_parent = state.chain_parent(op.branch)
+    parents = [chain_parent] if chain_parent is not None else []
+
     # --- Add the commit -------------------------
     state.commits[commit_id] = CommitState(
         id=commit_id,
         branch=op.branch,
         msg=op.msg,
         hash=op.hash,
-        parents=list(op.parents or []),
+        parents=parents,
         replaces=list(op.replaces or []),
         highlight=bool(op.highlight),
         gap=resolved_gap,
@@ -92,7 +83,7 @@ def apply_commit_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, repor
 
     # --- Resolve `hash: "auto"` -----------------
     if op.hash == "auto":
-        state.commits[commit_id].hash = compute_auto_hash(commit_id, effective_parent_ids(state, commit_id, op.branch))
+        state.commits[commit_id].hash = compute_auto_hash(commit_id, parents)
 
 
 # ==================================================================================================
