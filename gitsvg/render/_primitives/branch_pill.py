@@ -25,7 +25,7 @@ from gitsvg.render._anchor_resolution import rotated_target
 from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._geometry import offset_position
 from gitsvg.render._label_widths import pill_width
-from gitsvg.render._primitives._pill import draw_pill_box
+from gitsvg.render._primitives.pill import draw_pill_box
 from gitsvg.render._renderer_settings import RendererSettings
 
 

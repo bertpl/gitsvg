@@ -1,4 +1,4 @@
-"""Tests for table column geometry (`gitsvg.render._table._columns`)."""
+"""Tests for table column geometry (`gitsvg.render._table.columns`)."""
 
 from gitsvg.render._table import TableField, compute_table_columns
 

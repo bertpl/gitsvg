@@ -1,4 +1,4 @@
-"""Tests for table cell-text preparation (`gitsvg.render._table._text`)."""
+"""Tests for table cell-text preparation (`gitsvg.render._table.text`)."""
 
 import pytest
 

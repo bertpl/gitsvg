@@ -5,7 +5,7 @@ future enum value added without a builder fails the suite here rather
 than `KeyError`-ing at render time.
 """
 
-from gitsvg.render._primitives._connector_styles import _CONNECTOR_BUILDERS
+from gitsvg.render._primitives.connector_styles import _CONNECTOR_BUILDERS
 from gitsvg.theme import BranchLineStyle
 
 

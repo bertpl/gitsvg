@@ -5,7 +5,7 @@ future enum value added without a spec fails the suite here rather than
 `KeyError`-ing at render time.
 """
 
-from gitsvg.render._primitives._merge_dot_styles import _MERGE_DOT_BUILDERS
+from gitsvg.render._primitives.merge_dot_styles import _MERGE_DOT_BUILDERS
 from gitsvg.theme import MergeCommitStyle
 
 

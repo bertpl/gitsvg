@@ -13,7 +13,7 @@ import pytest
 from gitsvg.layout import compute_layout
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.render import render
-from gitsvg.render._primitives._connector_styles import (
+from gitsvg.render._primitives.connector_styles import (
     _LANE_CHANGE_BUILDERS,
     _build_bezier,
     _build_double_bezier,

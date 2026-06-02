@@ -47,6 +47,7 @@ def fit_text(text: str, max_width: float, font_family: str, font_size: float, *,
     """
 
     def width(s: str) -> float:
+        """Pixel width of `s` in the cell's font."""
         return text_width(s, font_family, font_size, bold=bold)
 
     if width(text) <= max_width:
