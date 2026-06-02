@@ -69,8 +69,8 @@ class Theme(BaseModel):
     # --------------------------------------------------------------------------
     #  Spacing (px)
     # --------------------------------------------------------------------------
-    branch_spacing: int | None = None  # axis-bound: branch-axis
-    commit_spacing: int | None = None  # axis-bound: commit-axis
+    branch_spacing: float | None = None  # axis-bound: branch-axis
+    commit_spacing: float | None = None  # axis-bound: commit-axis
 
     # --------------------------------------------------------------------------
     #  Margins (visual-side, px)
@@ -83,11 +83,11 @@ class Theme(BaseModel):
     # --------------------------------------------------------------------------
     #  Strokes & geometry (px, except where noted)
     # --------------------------------------------------------------------------
-    branch_line_width: int | None = None  # axis-symmetric
-    commit_radius: int | None = None  # axis-symmetric
+    branch_line_width: float | None = None  # axis-symmetric
+    commit_radius: float | None = None  # axis-symmetric
     commit_stroke_width: float | None = None  # axis-symmetric
-    highlight_radius: int | None = None  # axis-symmetric
-    merge_commit_radius: int | None = None  # axis-symmetric (merge-dot radius; defaults to commit_radius)
+    highlight_radius: float | None = None  # axis-symmetric
+    merge_commit_radius: float | None = None  # axis-symmetric (merge-dot radius; defaults to commit_radius)
     merge_commit_style: MergeCommitStyle | None = None  # axis-symmetric (merge-dot style)
     arc_corner_radius_in_grid_units: float | None = None  # axis-symmetric
     branch_line_style: BranchLineStyle | None = None  # axis-symmetric (connector shape)
@@ -208,9 +208,27 @@ class Theme(BaseModel):
     # --------------------------------------------------------------------------
     #  Always-hold invariants
     # --------------------------------------------------------------------------
+    @field_validator(
+        "branch_spacing",
+        "commit_spacing",
+        "branch_line_width",
+        "commit_radius",
+        "highlight_radius",
+        "merge_commit_radius",
+    )
+    @classmethod
+    def _whole_values_render_as_int(cls, v: float | None) -> float | None:
+        """Store a whole-number size as `int` so the SVG renders it without a
+        decimal point (`5`, not `5.0`); fractional values pass through as
+        `float` for sub-pixel output. This is the same treatment the
+        ratio-stored fields already get via their resolved-pixel accessors,
+        so output is unchanged for the whole-number values diagrams have
+        always used."""
+        return _resolve_int_or_float(v) if v is not None else None
+
     @field_validator("branch_spacing", "commit_spacing")
     @classmethod
-    def _spacings_must_be_positive(cls, v: int | None) -> int | None:
+    def _spacings_must_be_positive(cls, v: float | None) -> float | None:
         """Reject `<= 0` spacings — zero collapses lanes / rows onto themselves."""
         if v is not None and v <= 0:
             raise ValueError("must be > 0")
