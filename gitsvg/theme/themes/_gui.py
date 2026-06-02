@@ -100,8 +100,8 @@ class GuiTheme(DefaultTheme):
         return 3
 
     @classmethod
-    def _resolve_merge_commit_radius(cls) -> int:
-        """Merge dots stay at the default `5` so merges read as the structural anchors against the smaller ordinary dots."""
+    def _resolve_merge_commit_radius(cls, commit_radius: int) -> int:
+        """Merge dots stay at `5` (independent of the smaller ordinary-dot `commit_radius`) so merges read as the structural anchors."""
         return 5
 
     @classmethod

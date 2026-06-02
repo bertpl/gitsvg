@@ -163,9 +163,9 @@ class DefaultTheme(Theme):
         return 7
 
     @classmethod
-    def _resolve_merge_commit_radius(cls) -> int:
-        """Merge-commit-dot radius (px) — defaults to `commit_radius`, so merge and ordinary dots match unless overridden."""
-        return cls._resolve_commit_radius()
+    def _resolve_merge_commit_radius(cls, commit_radius: int) -> int:
+        """Merge-commit-dot radius (px) — defaults to the resolved `commit_radius` (including a theme-overridden value), so merge and ordinary dots match unless `merge_commit_radius` is set explicitly."""
+        return commit_radius
 
     @classmethod
     def _resolve_arc_corner_radius_in_grid_units(cls) -> float:
@@ -529,6 +529,7 @@ class DefaultTheme(Theme):
         orientation = pick("orientation", cls._resolve_orientation)
         branch_spacing = pick("branch_spacing", cls._resolve_branch_spacing, orientation)
         commit_spacing = pick("commit_spacing", cls._resolve_commit_spacing, orientation)
+        commit_radius = pick("commit_radius", cls._resolve_commit_radius)
 
         return cls(
             orientation=orientation,
@@ -544,10 +545,10 @@ class DefaultTheme(Theme):
                 "margin_bottom", cls._resolve_margin_bottom, orientation, branch_spacing, commit_spacing
             ),
             branch_line_width=pick("branch_line_width", cls._resolve_branch_line_width),
-            commit_radius=pick("commit_radius", cls._resolve_commit_radius),
+            commit_radius=commit_radius,
             commit_stroke_width=pick("commit_stroke_width", cls._resolve_commit_stroke_width),
             highlight_radius=pick("highlight_radius", cls._resolve_highlight_radius),
-            merge_commit_radius=pick("merge_commit_radius", cls._resolve_merge_commit_radius),
+            merge_commit_radius=pick("merge_commit_radius", cls._resolve_merge_commit_radius, commit_radius),
             arc_corner_radius_in_grid_units=pick(
                 "arc_corner_radius_in_grid_units", cls._resolve_arc_corner_radius_in_grid_units
             ),

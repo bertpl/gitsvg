@@ -126,3 +126,38 @@ def test_default_theme_build_with_overrides() -> None:
     assert theme.background_color == "#222222"  # explicit override
     assert theme.commit_spacing == 50  # default (resolved under `bt`)
     assert theme.orientation == Orientation.BT  # default
+
+
+# ==================================================================================================
+#  merge_commit_radius default tracks the resolved commit_radius
+# ==================================================================================================
+def test_merge_commit_radius_defaults_to_resolved_commit_radius() -> None:
+    """A theme-overridden `commit_radius` carries into `merge_commit_radius`'s default.
+
+    Regression guard (0.2.6): the default must track the *resolved*
+    `commit_radius`, not the package constant, so a theme that resizes commit
+    dots keeps merge dots matched unless `merge_commit_radius` is set too.
+    """
+    # --- arrange / act ----------------
+    theme = DefaultTheme.build({"commit_radius": 7})
+
+    # --- assert -----------------------
+    assert theme.commit_radius == 7
+    assert theme.merge_commit_radius == 7  # tracks the override, not the default 5
+
+
+def test_merge_commit_radius_default_matches_default_commit_radius() -> None:
+    # --- arrange / act ----------------
+    theme = DefaultTheme.build({})
+
+    # --- assert -----------------------
+    assert theme.merge_commit_radius == theme.commit_radius == 5
+
+
+def test_explicit_merge_commit_radius_wins_over_commit_radius() -> None:
+    # --- arrange / act ----------------
+    theme = DefaultTheme.build({"commit_radius": 7, "merge_commit_radius": 3})
+
+    # --- assert -----------------------
+    assert theme.commit_radius == 7
+    assert theme.merge_commit_radius == 3  # explicit value, not the tracked 7
