@@ -30,7 +30,10 @@ from gitsvg.theme._theme import Theme, _resolve_int_or_float
 
 
 class DefaultTheme(Theme):
-    """The canonical default theme. Concrete `_resolve_*` methods + eager `build()`."""
+    """The canonical default theme that every other named theme builds on.
+
+    Supplies the concrete `_resolve_*` methods and the eager `build()`.
+    """
 
     # --------------------------------------------------------------------------
     #  Orientation

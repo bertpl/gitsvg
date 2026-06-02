@@ -2,7 +2,6 @@
 
 import json
 
-import pytest
 from click.testing import CliRunner
 
 from gitsvg.cli._cli import cli
@@ -72,101 +71,11 @@ def test_schema_unknown_op_exits_non_zero() -> None:
 
 
 # ==================================================================================================
-#  schema themes (list)
+#  schema theme (the `theme` op's schema — named-theme inspection lives on `gitsvg theme`)
 # ==================================================================================================
-def test_schema_themes_lists_registered_names_alphabetically() -> None:
-    # --- arrange ----------------------
-    runner = CliRunner()
-
-    # --- act --------------------------
-    result = runner.invoke(cli, ["schema", "themes"])
-
-    # --- assert -----------------------
-    assert result.exit_code == 0
-    lines = [line for line in result.output.splitlines() if line]
-    assert lines == ["compact", "dark", "default", "gui", "muted"]
-
-
-# ==================================================================================================
-#  schema theme <name> (inspect)
-# ==================================================================================================
-@pytest.mark.parametrize(
-    ("name", "expected_fields"),
-    [
-        (
-            "default",
-            {
-                ("orientation",): "bt",
-                ("branch_spacing",): 100,
-                ("background_color",): None,
-                ("colors", "main"): "#4a4f5a",
-                ("colors", "branch1"): "#56b393",
-                ("branch_line_style",): "bezier",
-                ("merge_commit_style",): "checkmark",
-            },
-        ),
-        (
-            "dark",
-            {
-                ("background_color",): "#282c34",
-                ("colors", "main"): "#abb2bf",
-                ("commit_stroke_color",): "#282c34",
-            },
-        ),
-        (
-            "muted",
-            {
-                ("colors", "main"): "#5c6370",
-                ("branch_line_style",): "rounded",
-                ("merge_commit_style",): "circle",
-            },
-        ),
-        (
-            "compact",
-            {
-                ("branch_spacing",): 75,
-                ("commit_spacing",): 35,
-                ("label_font_size",): 9.5,
-            },
-        ),
-    ],
-)
-def test_schema_theme_inspect_emits_resolved_fields(name: str, expected_fields: dict) -> None:
-    # --- arrange ----------------------
-    runner = CliRunner()
-
-    # --- act --------------------------
-    result = runner.invoke(cli, ["schema", "theme", name])
-
-    # --- assert -----------------------
-    assert result.exit_code == 0
-    payload = json.loads(result.output)
-    for path, value in expected_fields.items():
-        resolved = payload
-        for key in path:
-            resolved = resolved[key]
-        assert resolved == value
-
-
-def test_schema_theme_unknown_exits_non_zero_with_known_list() -> None:
-    # --- arrange ----------------------
-    runner = CliRunner()
-
-    # --- act --------------------------
-    result = runner.invoke(cli, ["schema", "theme", "midnight"])
-
-    # --- assert -----------------------
-    assert result.exit_code != 0
-    assert "Unknown theme" in result.output
-    # Lists the registered names so the user can pick one.
-    for name in ("compact", "dark", "default", "muted"):
-        assert name in result.output
-
-
-def test_schema_theme_without_name_still_emits_op_schema() -> None:
-    """`schema theme` (no second arg) keeps its existing meaning — the
-    JSON schema for the `theme` op — so the new commands don't break
-    the original surface."""
+def test_schema_theme_emits_op_schema() -> None:
+    """`schema theme` prints the `theme` *op*'s JSON schema (it is one of the
+    ops); inspecting named themes lives on the separate `gitsvg theme` command."""
     # --- arrange ----------------------
     runner = CliRunner()
 

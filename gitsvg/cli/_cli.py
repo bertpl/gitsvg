@@ -8,6 +8,7 @@ from gitsvg.cli._layout import layout_command
 from gitsvg.cli._render import render_command
 from gitsvg.cli._schema import schema_command
 from gitsvg.cli._state import state_command
+from gitsvg.cli._theme import theme_command
 from gitsvg.cli._validate import validate_command
 
 
@@ -18,6 +19,7 @@ def cli() -> None:
 
 
 cli.add_command(schema_command)
+cli.add_command(theme_command)
 cli.add_command(errors_command)
 cli.add_command(validate_command)
 cli.add_command(render_command)
