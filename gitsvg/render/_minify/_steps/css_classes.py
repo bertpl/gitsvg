@@ -29,9 +29,11 @@ Class names are `c1`, `c2`, … assigned in deterministic extraction
 order (trunks by tag-kind alphabetical, then leaves by first-seen).
 """
 
+import itertools
 import re
 import xml.etree.ElementTree as ET
 from collections import defaultdict
+from collections.abc import Iterator
 
 _SVG_NS = "http://www.w3.org/2000/svg"
 ET.register_namespace("", _SVG_NS)
@@ -94,62 +96,12 @@ def extract_css_classes(svg: str) -> str:
     except ET.ParseError:
         return svg
 
-    class_defs: list[tuple[str, dict[str, str]]] = []
     elem_classes: defaultdict[int, list[str]] = defaultdict(list)
-    next_id = [1]
-
-    def _new_class() -> str:
-        """Return the next sequential class name (`c1`, `c2`, ...) and bump the counter."""
-        name = f"c{next_id[0]}"
-        next_id[0] += 1
-        return name
-
-    # --- trunk pass ---------------------
-    elements_by_tag: defaultdict[str, list[ET.Element]] = defaultdict(list)
-    for elem in root.iter():
-        if _cluster(elem):
-            elements_by_tag[_local(elem.tag)].append(elem)
-
-    for tag in sorted(elements_by_tag):
-        elems = elements_by_tag[tag]
-        if len(elems) < 2:
-            continue
-        clusters = [_cluster(e) for e in elems]
-        trunk = _intersect_clusters(clusters)
-        if not trunk:
-            continue
-        class_name = _new_class()
-        class_defs.append((class_name, dict(trunk)))
-        for elem in elems:
-            for attr in trunk:
-                del elem.attrib[attr]
-            elem_classes[id(elem)].append(class_name)
-
-    # --- leaf pass ----------------------
-    leaf_groups: dict[tuple[tuple[str, str], ...], list[ET.Element]] = {}
-    leaf_order: list[tuple[tuple[str, str], ...]] = []
-    for elem in root.iter():
-        residual = _cluster(elem)
-        if not residual:
-            continue
-        key = tuple(sorted(residual.items()))
-        if key not in leaf_groups:
-            leaf_groups[key] = []
-            leaf_order.append(key)
-        leaf_groups[key].append(elem)
-
-    for key in leaf_order:
-        elems = leaf_groups[key]
-        if len(elems) < 2:
-            continue
-        class_name = _new_class()
-        cluster_dict = dict(key)
-        class_defs.append((class_name, cluster_dict))
-        for elem in elems:
-            for attr in cluster_dict:
-                if attr in elem.attrib:
-                    del elem.attrib[attr]
-            elem_classes[id(elem)].append(class_name)
+    counter = itertools.count(1)
+    # Trunk before leaf: the leaf pass clusters the *residual* attributes that
+    # the trunk pass leaves behind, so it must read an already-stripped tree.
+    class_defs = _trunk_pass(root, counter, elem_classes)
+    class_defs += _leaf_pass(root, counter, elem_classes)
 
     if not class_defs:
         return svg
@@ -166,6 +118,124 @@ def extract_css_classes(svg: str) -> str:
     root.insert(0, style_elem)
 
     return xml_decl + ET.tostring(root, encoding="unicode")
+
+
+def _trunk_pass(
+    root: ET.Element,
+    counter: Iterator[int],
+    elem_classes: defaultdict[int, list[str]],
+) -> list[tuple[str, dict[str, str]]]:
+    """Per tag-kind, extract the attribute intersection shared by all members.
+
+    Groups elements (with a non-empty cluster) by tag, and for each group of
+    two or more emits the non-empty intersection of their clusters as one
+    shared class. Strips the trunk attributes inline and records the class on
+    each member via `elem_classes`.
+
+    Returns:
+        The `(class_name, cluster)` definitions emitted, in tag-alphabetical
+        order.
+    """
+    groups = _group_by_tag(root)
+    defs: list[tuple[str, dict[str, str]]] = []
+    for tag in sorted(groups):
+        elems = groups[tag]
+        trunk = _intersect_clusters([_cluster(e) for e in elems])
+        emitted = _emit_class(elems, trunk, counter, elem_classes)
+        if emitted is not None:
+            defs.append(emitted)
+    return defs
+
+
+def _leaf_pass(
+    root: ET.Element,
+    counter: Iterator[int],
+    elem_classes: defaultdict[int, list[str]],
+) -> list[tuple[str, dict[str, str]]]:
+    """Exact-match clustering of the residual attributes left after trunk removal.
+
+    Groups elements by their (now-residual) cluster, and for each group of two
+    or more emits that cluster as one shared class. Strips it inline and records
+    the class on each member via `elem_classes`.
+
+    Returns:
+        The `(class_name, cluster)` definitions emitted, in first-seen order.
+    """
+    groups, order = _group_by_residual(root)
+    defs: list[tuple[str, dict[str, str]]] = []
+    for key in order:
+        emitted = _emit_class(groups[key], dict(key), counter, elem_classes)
+        if emitted is not None:
+            defs.append(emitted)
+    return defs
+
+
+def _group_by_tag(root: ET.Element) -> defaultdict[str, list[ET.Element]]:
+    """Group elements with a non-empty presentation cluster by local tag name."""
+    groups: defaultdict[str, list[ET.Element]] = defaultdict(list)
+    for elem in root.iter():
+        if _cluster(elem):
+            groups[_local(elem.tag)].append(elem)
+    return groups
+
+
+def _group_by_residual(
+    root: ET.Element,
+) -> tuple[dict[tuple[tuple[str, str], ...], list[ET.Element]], list[tuple[tuple[str, str], ...]]]:
+    """Group elements by their residual cluster (sorted-items key), keeping first-seen order.
+
+    Returns:
+        `(groups, order)` — the cluster-key → elements map and the keys in the
+        order they were first encountered (so class numbering is deterministic).
+    """
+    groups: dict[tuple[tuple[str, str], ...], list[ET.Element]] = {}
+    order: list[tuple[tuple[str, str], ...]] = []
+    for elem in root.iter():
+        residual = _cluster(elem)
+        if not residual:
+            continue
+        key = tuple(sorted(residual.items()))
+        if key not in groups:
+            groups[key] = []
+            order.append(key)
+        groups[key].append(elem)
+    return groups, order
+
+
+def _emit_class(
+    elems: list[ET.Element],
+    cluster: dict[str, str],
+    counter: Iterator[int],
+    elem_classes: defaultdict[int, list[str]],
+) -> tuple[str, dict[str, str]] | None:
+    """Emit one shared class for `cluster` across `elems`, stripping it inline.
+
+    The shared "threshold → name → strip → record" tail of both passes.
+
+    Args:
+        elems: The elements that share `cluster`.
+        cluster: The attribute (name → value) set to hoist into a class.
+        counter: Source of sequential class numbers.
+        elem_classes: Per-element class list, appended to in place.
+
+    Returns:
+        The `(class_name, cluster-copy)` definition, or `None` when the group
+        has fewer than two members or `cluster` is empty (no class assigned).
+    """
+    if len(elems) < 2 or not cluster:
+        return None
+    class_name = _next_class(counter)
+    for elem in elems:
+        for attr in cluster:
+            if attr in elem.attrib:
+                del elem.attrib[attr]
+        elem_classes[id(elem)].append(class_name)
+    return class_name, dict(cluster)
+
+
+def _next_class(counter: Iterator[int]) -> str:
+    """Return the next sequential class name (`c1`, `c2`, ...)."""
+    return f"c{next(counter)}"
 
 
 def _cluster(elem: ET.Element) -> dict[str, str]:
