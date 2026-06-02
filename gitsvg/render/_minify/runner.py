@@ -76,7 +76,6 @@ def minify(svg: str, config: MinifyConfig, theme: RendererSettings) -> str:
         svg = round_numbers(svg, decimals=config.rounding_decimals)
     if config.extract_css_classes:
         svg = extract_css_classes(svg)
-    # Reserved slot 8: `<symbol>` + `<use>` dedup (L2+).
     if config.strip_whitespace:
         svg = strip_inter_element_whitespace(svg)
     return svg

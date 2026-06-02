@@ -126,12 +126,6 @@ _PYDANTIC_TYPE_TO_CODE: dict[str, str] = {
 }
 
 
-# Pydantic emits many parsing/type errors with names ending in `_type` or
-# `_parsing` (e.g. int_parsing, string_type, float_parsing, list_type,
-# bool_parsing). They all map to E102 (wrong type).
-_TYPE_OR_PARSING_SUFFIXES = ("_type", "_parsing")
-
-
 # Numeric range constraints emit names that end in these comparators.
 _NUMERIC_RANGE_TYPES = frozenset(
     {
@@ -171,18 +165,16 @@ def _resolve_code(err_type: str) -> str:
         err_type: The `type` field from a pydantic error dict.
 
     Returns:
-        The corresponding gitsvg code. Falls back to `"E102"` (wrong
-        type) when the pydantic type ends in `_type` or `_parsing`,
-        and to `"E103"` (numeric range) for known comparator types.
-        Unknown types fall through to `"E102"` as a safe default —
-        the catalog message will still surface the pydantic detail.
+        The corresponding gitsvg code. Known numeric-comparator types
+        map to `"E103"` (numeric range); every other type — including
+        pydantic's many `_type` / `_parsing` variants and any unknown
+        type — falls back to `"E102"` (wrong type), where the catalog
+        message still surfaces the pydantic detail.
     """
     if err_type in _PYDANTIC_TYPE_TO_CODE:
         return _PYDANTIC_TYPE_TO_CODE[err_type]
     if err_type in _NUMERIC_RANGE_TYPES:
         return "E103"
-    if err_type.endswith(_TYPE_OR_PARSING_SUFFIXES):
-        return "E102"
     return "E102"
 
 
