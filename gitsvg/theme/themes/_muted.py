@@ -1,13 +1,11 @@
-"""Muted theme — the pre-refresh default look, preserved as a named theme.
+"""Muted theme — a muted, professional, mechanical look.
 
-`MutedTheme` is the escape hatch back to the appearance the package
-default carried before the saturation / merge-dot refresh. It pins
-three `_resolve_*` methods to their pre-refresh values — the branch
-palette, the connector style, and the merge-commit style; every other
-field inherits from `DefaultTheme`, so the two themes stay in lockstep
-on geometry, spacings, typography, and label angles. (`muted` pins
-`rounded` to keep the pre-refresh elbow connector even if the default's
-connector style changes.)
+`MutedTheme` softens the branch palette and uses the plainer connector
+and merge-dot styles. It pins three `_resolve_*` methods — the palette,
+the connector style (`rounded`, pinned explicitly so it holds even if
+the default's connector changes), and the merge-commit style
+(`circle`); every other field inherits from `DefaultTheme`, so the two
+stay in lockstep on geometry, spacings, typography, and label angles.
 
 Selecting it is one field on a `theme` op: `{"op": "theme", "name":
 "muted"}`.
@@ -19,17 +17,16 @@ from gitsvg.theme._merge_commit_style import MergeCommitStyle
 
 
 class MutedTheme(DefaultTheme):
-    """The pre-refresh default look — softer palette, rounded connectors, circle merge dots.
+    """Muted palette, professional, mechanical look — rounded connectors, circle merge dots.
 
     Pins `_resolve_colors`, `_resolve_branch_line_style`, and
-    `_resolve_merge_commit_style` to the values the package default
-    carried before the refresh. Every other field inherits from
+    `_resolve_merge_commit_style`; every other field inherits from
     `DefaultTheme`.
     """
 
     @classmethod
     def _resolve_colors(cls) -> dict[str, str]:
-        """The pre-refresh branch palette — same hues, a touch grayer/softer than today's default."""
+        """The muted branch palette — grayer, softer hues than the default."""
         return {
             "main": "#5c6370",
             "branch1": "#6a9f8d",
@@ -40,10 +37,10 @@ class MutedTheme(DefaultTheme):
 
     @classmethod
     def _resolve_branch_line_style(cls) -> BranchLineStyle:
-        """The pre-refresh connector shape — the rounded quarter-arc elbow."""
+        """The rounded quarter-arc elbow connector."""
         return BranchLineStyle.ROUNDED
 
     @classmethod
     def _resolve_merge_commit_style(cls) -> MergeCommitStyle:
-        """The pre-refresh merge-commit dot style — the plain circle dot."""
+        """The plain circle merge-commit dot."""
         return MergeCommitStyle.CIRCLE

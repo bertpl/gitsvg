@@ -407,9 +407,8 @@ class DefaultTheme(Theme):
         Soft but not gray: `main` is a darkened blue-gray spine, and the
         four `branch*` slots are gently saturated green / blue / mauve /
         purple that stay legible without shouting. Hue is held across the
-        whole palette relative to the `muted` named theme (the
-        pre-refresh look); only `main`'s lightness and the four branches'
-        saturation differ.
+        whole palette relative to the `muted` named theme; only `main`'s
+        lightness and the four branches' saturation differ.
         """
         return {
             "main": "#4a4f5a",
