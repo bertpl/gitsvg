@@ -2,6 +2,8 @@
 
 from pathlib import Path
 
+import pytest
+
 from gitsvg.errors import ErrorCode, _codes, all_codes, find_error_code
 
 
@@ -65,45 +67,30 @@ def test_scan_catalog_returns_codes_in_sorted_order(tmp_path: Path) -> None:
 # ==================================================================================================
 #  _extract_summary
 # ==================================================================================================
-def test_extract_summary_with_dash_separator() -> None:
+@pytest.mark.parametrize(
+    ("heading", "code", "expected"),
+    [
+        ("# E001 - Invalid JSON\n\nMore text.\n", "E001", "Invalid JSON"),
+        ("# E210: replaces rule violated\n", "E210", "replaces rule violated"),
+        ("# Whatever heading text\n", "E001", "Whatever heading text"),
+        ("Just a paragraph.\n", "E001", ""),
+        # First non-blank line is an H2; the H1 convention is violated, so return empty.
+        ("## Cause\n\n# E001 - title\n", "E001", ""),
+    ],
+    ids=[
+        "dash-separator",
+        "colon-separator",
+        "no-separator-falls-back-to-full-heading",
+        "no-h1-returns-empty",
+        "h2-first-returns-empty",
+    ],
+)
+def test_extract_summary(heading: str, code: str, expected: str) -> None:
     # --- act --------------------------
-    summary = _codes._extract_summary("# E001 - Invalid JSON\n\nMore text.\n", "E001")
+    summary = _codes._extract_summary(heading, code)
 
     # --- assert -----------------------
-    assert summary == "Invalid JSON"
-
-
-def test_extract_summary_with_colon_separator() -> None:
-    # --- act --------------------------
-    summary = _codes._extract_summary("# E210: replaces rule violated\n", "E210")
-
-    # --- assert -----------------------
-    assert summary == "replaces rule violated"
-
-
-def test_extract_summary_falls_back_to_full_heading_when_pattern_does_not_match() -> None:
-    # --- act --------------------------
-    summary = _codes._extract_summary("# Whatever heading text\n", "E001")
-
-    # --- assert -----------------------
-    assert summary == "Whatever heading text"
-
-
-def test_extract_summary_returns_empty_when_no_h1_heading() -> None:
-    # --- act --------------------------
-    summary = _codes._extract_summary("Just a paragraph.\n", "E001")
-
-    # --- assert -----------------------
-    assert summary == ""
-
-
-def test_extract_summary_ignores_h2_headings() -> None:
-    # --- act --------------------------
-    summary = _codes._extract_summary("## Cause\n\n# E001 - title\n", "E001")
-
-    # --- assert -----------------------
-    # First non-blank line is the H2; convention violated, return empty.
-    assert summary == ""
+    assert summary == expected
 
 
 # ==================================================================================================
