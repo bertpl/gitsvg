@@ -17,7 +17,7 @@ from gitsvg.layout import Layout, LayoutBranch
 from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._geometry import grid_to_pixel
 from gitsvg.render._label_widths import pill_width
-from gitsvg.render._primitives._pill import draw_pill_box
+from gitsvg.render._primitives.pill import draw_pill_box
 from gitsvg.render._renderer_settings import RendererSettings
 from gitsvg.render._table import TableColumns, TableField, fit_text, flatten_message
 

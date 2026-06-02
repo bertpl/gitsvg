@@ -11,7 +11,7 @@ import pytest
 from gitsvg.layout import compute_layout
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.render import render
-from gitsvg.render._primitives._merge_dot_styles import (
+from gitsvg.render._primitives.merge_dot_styles import (
     _CHECKMARK_DOT_RADIUS_SCALE,
     _MERGE_DOT_BUILDERS,
     _draw_checkmark,

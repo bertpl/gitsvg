@@ -16,7 +16,7 @@ renderer's slice of the resolved theme"; the inheritance is a
 mechanical convenience that keeps the field block DRY. When future
 fields land in `LayoutSettings`, `RendererSettings` narrows by
 redeclaring the relevant fields as excluded (or, more likely, by
-moving to a sibling shape).
+moving to a sibling schema).
 """
 
 from gitsvg.theme._theme import Theme

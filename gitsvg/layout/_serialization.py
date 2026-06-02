@@ -21,7 +21,7 @@ churn it:
 
 `grid` / `commits` serialize straight from their dataclasses via
 `dataclasses.asdict` (the commits dict flattens to a list, each entry
-carrying its own `id`, so all collections share a uniform shape).
+carrying its own `id`, so all collections share a uniform schema).
 `branches` are translated explicitly (`_branch_to_json`) so the public
 schema stays the single lane / start / end view even though the internal
 `LayoutBranch` now carries a list of lane segments. `arcs` and

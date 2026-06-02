@@ -25,7 +25,7 @@ import drawsvg as draw
 
 from gitsvg.layout import GridSlot, LayoutArcKind
 from gitsvg.render._canvas import RenderCanvas
-from gitsvg.render._primitives._connector_styles import (
+from gitsvg.render._primitives.connector_styles import (
     _CONNECTOR_BUILDERS,
     _LANE_CHANGE_BUILDERS,
     _connector_geometry,
