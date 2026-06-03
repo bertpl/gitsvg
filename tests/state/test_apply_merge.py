@@ -69,6 +69,24 @@ def test_merge_from_empty_rooted_branch_uses_its_branch_off_commit_as_second_par
     assert state.commits["mg"].parents == ["c2", "c1"]
 
 
+def test_self_merge_from_equals_into_emits_e209() -> None:
+    # Merging a branch into itself is rejected (mirrors the E210 pull_request guard);
+    # previously it silently produced a degenerate single-parent commit.
+    # --- arrange ----------------------
+    text = (
+        '{"op": "branch", "name": "main"}\n'
+        '{"op": "commit", "branch": "main", "id": "c1", "msg": "a"}\n'
+        '{"op": "merge", "from": "main", "into": "main"}\n'
+    )
+
+    # --- act --------------------------
+    state, report = build_state_from_jsonl(text)
+
+    # --- assert -----------------------
+    assert [e.code for e in report.errors] == ["E209"]
+    assert list(state.commits) == ["c1"]  # rejected before any merge commit is added
+
+
 def test_merge_with_unknown_from_branch_emits_e200() -> None:
     # --- arrange ----------------------
     text = '{"op": "branch", "name": "main"}\n{"op": "merge", "from": "ghost", "into": "main"}\n'
