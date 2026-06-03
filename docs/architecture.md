@@ -21,9 +21,13 @@ hints) and `Theme` (resolved presentational constants). `Theme` itself
 stays at the orchestration layer: the CLI calls `Theme.split()` to
 produce `LayoutSettings` (consumed by `layout`) and `RendererSettings`
 (consumed by `render`). Neither stage imports `Theme` directly — see
-invariant #8. Cross-cutting subpackages (`file_format/`, `errors/`,
-`theme/`, `cli/`) are consumed by pipeline stages without being part
-of the flow.
+invariant #8. Between `state` and `layout`, a cross-cutting `validate`
+step (`gitsvg/validate/`) runs the end-of-stream checks that need the
+fully-applied `State` and resolved `Theme` — cross-reference (E400/E401)
+and resolved-config conflicts (E221-E224); it emits only errors, not
+data for `layout`, so the transform flow above is unchanged. Other
+cross-cutting subpackages (`file_format/`, `errors/`, `theme/`, `cli/`)
+are consumed by pipeline stages without being part of the flow.
 
 **Rationale.** Pipeline shape is the package's load-bearing
 architecture. Locking the five-stage flow as an explicit rule
@@ -79,10 +83,13 @@ dataclass, and on `RenderCanvas` carries a trailing comment
 naming its axis classification. Three classes:
 
 - **`axis-symmetric`** — magnitude with no axis preference
-  (radii, stroke widths, font sizes, paddings).
+  (radii, stroke widths, font sizes, paddings, and the four
+  visual-side margins — resolved screen-space pixels whose grid
+  anchor flips with orientation, so they bind to no axis; see
+  invariant #4's pixel exception).
 - **`axis-bound: <axis>`** — magnitude bound to a specific grid
   axis (`branch-axis` or `commit-axis`). Slot indices, slot
-  counts, spacings, margins.
+  counts, spacings.
 - **`direction-bound: <axis>, <direction>`** — magnitude with a
   baked-in direction along an axis. These are the orientation-leaky
   fields: they survive the bottom-to-top default but break under
@@ -242,19 +249,22 @@ Confining all orientation-specific code to the renderer means future
 orientations or per-orientation fine-tuning add no surface area to
 layout, state, or theme application.
 
-**Enforcement.** Code-review discipline. The invariant is the
-layout-state boundary, not the renderer's internal structure.
-Inside `gitsvg/layout/` or `gitsvg/state/`, any reference to screen
-direction (`x`, `y`, "above", "below", "left", "right") or any branch
-on `theme.orientation` is the trigger for review pushback. Inside
-`gitsvg/render/`, orientation branching is unrestricted — primitives,
-the geometry module, and the canvas-dimension code may all consult
-orientation as needed.
+**Enforcement.** `tests/architecture/test_orientation_blind.py`
+AST-scans `gitsvg/layout/` and `gitsvg/state/` and fails on any
+`Orientation` reference or `.orientation` access — the executable
+form of the rule, with no exemptions. Screen-direction words (`x`,
+`y`, "above", "below", "left", "right") in those packages stay
+code-review discipline. Consulting orientation is unrestricted in
+`gitsvg/render/` (mapping the canonical grid to pixels) and in
+`gitsvg/validate/` (feature-support gates such as E223) — neither
+produces canonical geometry, so neither is bound by the rule.
 
 **Locked in:** v0.1.6; renderer-internal scope relaxed in v0.2.0
 after clarifying that the invariant exists to keep layout and state
 orientation-blind, not to confine orientation logic to a sub-set of
-renderer modules.
+renderer modules. Made test-enforced, and the validate-stage
+feature-gate carve-out added, in v0.2.7 when the last `state/`
+orientation branch (the E223 gate) moved to `gitsvg/validate/`.
 
 ## 8. Pipeline-stage settings split
 

@@ -12,10 +12,10 @@ counts.
 import sys
 from pathlib import Path
 
+from gitsvg.cli._pipeline import apply_and_validate
 from gitsvg.errors import ValidationReport
 from gitsvg.imports import resolve_imports
 from gitsvg.parse import parse_jsonl_file
-from gitsvg.state import apply_ops, check_end_of_file
 
 LOCAL_DIR = Path("local/test_examples")
 
@@ -24,8 +24,7 @@ def validate_one(path: Path) -> ValidationReport:
     """Run the full validate pipeline on `path` and return the report."""
     parsed_ops, report = parse_jsonl_file(path)
     expanded = resolve_imports(parsed_ops, file=path, report=report)
-    state, _theme = apply_ops(expanded, report)
-    check_end_of_file(state, report)
+    apply_and_validate(expanded, report)
     return report
 
 

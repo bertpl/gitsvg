@@ -17,13 +17,17 @@ op handler receives the builder for signature uniformity but leaves
 it alone. The engine calls `builder.build()` once at end-of-apply to
 produce the fully-resolved `Theme`.
 
+Cross-cutting, end-of-stream validation (resolved-config conflicts,
+dangling cross-references) runs downstream in `gitsvg.validate`, not
+here — the engine's job ends at producing `(state, theme)`.
+
 `import` ops are expanded away upstream by `gitsvg.imports.resolve_imports`
 before `apply_ops` runs, so they normally do not reach the engine. Any
 leftover `ImportOp` (e.g. when a caller skips the resolver) is treated
 as a no-op here.
 """
 
-from gitsvg.errors import ValidationError, ValidationReport
+from gitsvg.errors import ValidationReport
 from gitsvg.file_format.ops import (
     BranchOp,
     CommitOp,
@@ -46,7 +50,7 @@ from gitsvg.state._apply import (
     apply_remove_op,
 )
 from gitsvg.state._state import State
-from gitsvg.theme import CommitLabelLayout, CommitRowMode, Theme, ThemeBuilder
+from gitsvg.theme import Theme, ThemeBuilder
 
 # Leaf-path import: pulls in `State` for the shared handler signature,
 # so the package-level `gitsvg.theme.__init__` deliberately does not
@@ -55,7 +59,9 @@ from gitsvg.theme import CommitLabelLayout, CommitRowMode, Theme, ThemeBuilder
 from gitsvg.theme._apply import apply_theme_op
 
 
-def apply_ops(parsed_ops: list[ParsedOp], report: ValidationReport) -> tuple[State, Theme]:
+def apply_ops(
+    parsed_ops: list[ParsedOp], report: ValidationReport, builder: ThemeBuilder | None = None
+) -> tuple[State, Theme]:
     """Apply parsed ops to a fresh `(State, Theme)`, accumulating semantic errors.
 
     Threads a single `ThemeBuilder` through the apply pass — theme,
@@ -64,10 +70,17 @@ def apply_ops(parsed_ops: list[ParsedOp], report: ValidationReport) -> tuple[Sta
     via its chosen subclass's `build(user_set)` classmethod, with
     state-derived per-branch color overrides written onto the result.
 
+    Cross-field config conflicts and dangling-reference checks are not
+    run here; they live in `gitsvg.validate`, downstream of this pass.
+
     Args:
         parsed_ops: Schema-validated ops in source order.
         report: Report to which semantic errors are appended. The report
             may already hold parser errors; this function only adds.
+        builder: Optional caller-supplied accumulator. Pass one in to read
+            what it accumulated (`user_set`, `user_set_lines`) after
+            applying — e.g. to build `UserOverrides` for the validate
+            stage. Omit it and a fresh builder is used internally.
 
     Returns:
         `(state, theme)` — the fully-applied structural state and the
@@ -75,164 +88,11 @@ def apply_ops(parsed_ops: list[ParsedOp], report: ValidationReport) -> tuple[Sta
         attempted and the surviving pair is returned for inspection.
     """
     state = State()
-    builder = ThemeBuilder()
+    builder = builder if builder is not None else ThemeBuilder()
     for parsed in parsed_ops:
         _apply_one(state, builder, parsed, report)
     theme = builder.build()
-    _check_auto_lane_change_conflicts(state, builder, theme, report)
-    _check_table_mode_conflicts(builder, theme, report)
     return state, theme
-
-
-def _check_auto_lane_change_conflicts(
-    state: State, builder: ThemeBuilder, theme: Theme, report: ValidationReport
-) -> None:
-    """Emit the `auto_lane_change` mutual-exclusion errors (E221, E222).
-
-    Both checks need the resolved `Theme` (the flag value) plus a side
-    input the resolved theme alone can't supply — the per-branch pins on
-    `State` for E221, and which fields the user explicitly set
-    (`ThemeBuilder.user_set`) for E222. So they live here at the
-    `apply_ops` orchestration point rather than in the state-only
-    end-of-file pass or the per-op theme-apply handler.
-
-    Args:
-        state: The fully-applied state, carrying per-branch pins.
-        builder: The theme builder, carrying the explicit `user_set`
-            overrides and their originating op lines.
-        theme: The resolved theme, carrying `auto_lane_change` and
-            `merge_lane_clearance`.
-        report: Receives the conflict errors.
-    """
-    _check_branch_pos_conflicts(state, theme, report)
-    _check_merge_lane_clearance_conflict(builder, theme, report)
-
-
-def _check_branch_pos_conflicts(state: State, theme: Theme, report: ValidationReport) -> None:
-    """Emit E221 for each `branch_pos:` pin when `auto_lane_change` is on.
-
-    A pin fixes a branch's lane for life; `auto_lane_change` keeps lanes
-    free to migrate. The two are mutually exclusive.
-
-    Args:
-        state: The fully-applied state, carrying per-branch pins.
-        theme: The resolved theme, carrying `auto_lane_change`.
-        report: Receives one E221 per pinned branch.
-    """
-    if not theme.auto_lane_change:
-        return
-    for branch in state.branches.values():
-        if branch.branch_pos is None:
-            continue
-        report.add(
-            ValidationError(
-                file=branch.declaration_file,
-                line=branch.declaration_line,
-                code="E221",
-                message=(
-                    f"branch {branch.name!r} sets branch_pos, which conflicts with "
-                    f"theme.auto_lane_change (a pinned lane cannot also migrate)"
-                ),
-                field="branch_pos",
-            )
-        )
-
-
-def _check_merge_lane_clearance_conflict(builder: ThemeBuilder, theme: Theme, report: ValidationReport) -> None:
-    """Emit E222 when `merge_lane_clearance` is set while `auto_lane_change` is off.
-
-    `merge_lane_clearance` only governs how a migrating sibling repacks
-    around a merged source's reserved lane — machinery the flag-off path
-    never runs. An explicit value under a disabled flag is therefore dead
-    config and is rejected rather than silently ignored.
-
-    The trigger is membership in `builder.user_set`, not value-≠-default:
-    the user set the field, which is the mistake, even at its default `1`.
-    Checking at end-of-apply (not per-op) means a named-theme switch that
-    wipes prior overrides — the default `keep_prior_overrides=False`
-    behavior — clears the field from `user_set` first, so switching
-    themes is the documented escape hatch.
-
-    Args:
-        builder: The theme builder, carrying `user_set` and the
-            originating op lines (`user_set_lines`).
-        theme: The resolved theme, carrying `auto_lane_change`.
-        report: Receives one E222 when the conflict holds.
-    """
-    if theme.auto_lane_change:
-        return
-    if "merge_lane_clearance" not in builder.user_set:
-        return
-    file, line = builder.user_set_lines["merge_lane_clearance"]
-    report.add(
-        ValidationError(
-            file=file,
-            line=line,
-            code="E222",
-            message=(
-                "theme.merge_lane_clearance has no effect unless theme.auto_lane_change "
-                "is enabled (enable auto_lane_change or drop merge_lane_clearance)"
-            ),
-            field="merge_lane_clearance",
-        )
-    )
-
-
-def _check_table_mode_conflicts(builder: ThemeBuilder, theme: Theme, report: ValidationReport) -> None:
-    """Emit the table-mode mutual-exclusion errors (E223, E224).
-
-    `commit_label_layout: table` lays commit metadata out as a column
-    table beside the graph — a layout only the vertical orientations
-    support, and one that needs exactly one commit per row. So table mode
-    conflicts with a horizontal orientation (E223) and with an explicit
-    `commit_row_mode: shared` (E224). Both are checked on the resolved
-    theme at end-of-apply, mirroring the `auto_lane_change` conflicts: the
-    final resolved layout is what matters, and a later named-theme switch
-    that drops table mode clears the conflict on its own.
-
-    `split()` already forces `commit_row_mode → unique` under table mode,
-    so E224 fires only when the user *explicitly* set `shared` — the
-    contradiction is the mistake, not the (silently honored) unset case.
-
-    Args:
-        builder: The theme builder, carrying `user_set` and the
-            originating op lines (`user_set_lines`).
-        theme: The resolved theme, carrying `commit_label_layout` and
-            `orientation`.
-        report: Receives the conflict errors.
-    """
-    if theme.commit_label_layout != CommitLabelLayout.TABLE:
-        return
-
-    if not theme.orientation.is_vertical:
-        file, line = builder.user_set_lines.get("commit_label_layout", (None, 0))
-        report.add(
-            ValidationError(
-                file=file,
-                line=line,
-                code="E223",
-                message=(
-                    "theme.commit_label_layout 'table' is supported only in vertical orientations "
-                    f"(got {theme.orientation.value!r}); use a vertical orientation or 'inline' labels"
-                ),
-                field="commit_label_layout",
-            )
-        )
-
-    if builder.user_set.get("commit_row_mode") == CommitRowMode.SHARED:
-        file, line = builder.user_set_lines.get("commit_row_mode", (None, 0))
-        report.add(
-            ValidationError(
-                file=file,
-                line=line,
-                code="E224",
-                message=(
-                    "theme.commit_row_mode 'shared' conflicts with commit_label_layout 'table' "
-                    "(table mode lays one commit per row); drop commit_row_mode or set it to 'unique'"
-                ),
-                field="commit_row_mode",
-            )
-        )
 
 
 def _apply_one(state: State, builder: ThemeBuilder, parsed: ParsedOp, report: ValidationReport) -> None:

@@ -1,14 +1,14 @@
-"""Tests for end-of-file cross-reference validation."""
+"""Tests for cross-reference validation (E400, E401)."""
 
 from gitsvg.errors import ValidationReport
-from gitsvg.state import check_end_of_file
+from gitsvg.validate import check_cross_reference
 from tests.state._helpers import build_state_from_jsonl
 
 
 # ==================================================================================================
-#  Clean state — no EOF errors
+#  Clean state — no cross-reference errors
 # ==================================================================================================
-def test_clean_state_produces_no_eof_errors() -> None:
+def test_clean_state_produces_no_errors() -> None:
     # --- arrange ----------------------
     text = (
         '{"op": "branch", "name": "main"}\n'
@@ -19,12 +19,12 @@ def test_clean_state_produces_no_eof_errors() -> None:
 
     # --- act --------------------------
     state, report = build_state_from_jsonl(text)
-    eof_report = ValidationReport()
-    check_end_of_file(state, eof_report)
+    cross_ref_report = ValidationReport()
+    check_cross_reference(state, cross_ref_report)
 
     # --- assert -----------------------
     assert report.is_clean()
-    assert eof_report.is_clean()
+    assert cross_ref_report.is_clean()
 
 
 # ==================================================================================================
@@ -41,7 +41,7 @@ def test_dangling_branch_root_via_from_commit_emits_e400() -> None:
 
     # --- act --------------------------
     state, report = build_state_from_jsonl(text)
-    check_end_of_file(state, report)
+    check_cross_reference(state, report)
 
     # --- assert -----------------------
     assert [(e.line, e.code, e.field) for e in report.errors] == [(3, "E400", "from_commit")]
@@ -59,7 +59,7 @@ def test_dangling_branch_root_via_from_branch_emits_e400() -> None:
 
     # --- act --------------------------
     state, report = build_state_from_jsonl(text)
-    check_end_of_file(state, report)
+    check_cross_reference(state, report)
 
     # --- assert -----------------------
     assert [(e.line, e.code, e.field) for e in report.errors] == [(3, "E400", "from_branch")]
@@ -72,7 +72,7 @@ def test_branch_with_no_resolved_root_does_not_dangle() -> None:
 
     # --- act --------------------------
     state, report = build_state_from_jsonl(text)
-    check_end_of_file(state, report)
+    check_cross_reference(state, report)
 
     # --- assert -----------------------
     assert report.is_clean()
@@ -93,7 +93,7 @@ def test_dangling_chain_parent_emits_e401() -> None:
 
     # --- act --------------------------
     state, report = build_state_from_jsonl(text)
-    check_end_of_file(state, report)
+    check_cross_reference(state, report)
 
     # --- assert -----------------------
     e401_errors = [e for e in report.errors if e.code == "E401"]
@@ -116,7 +116,7 @@ def test_dangling_merge_parent_emits_e401() -> None:
 
     # --- act --------------------------
     state, report = build_state_from_jsonl(text)
-    check_end_of_file(state, report)
+    check_cross_reference(state, report)
 
     # --- assert -----------------------
     e401_errors = [e for e in report.errors if e.code == "E401"]
@@ -127,7 +127,7 @@ def test_dangling_merge_parent_emits_e401() -> None:
 # ==================================================================================================
 #  Rebuild pattern — remove + re-add restores state
 # ==================================================================================================
-def test_rebuild_pattern_with_same_id_restores_state_and_passes_eof() -> None:
+def test_rebuild_pattern_with_same_id_restores_state_and_passes() -> None:
     # --- arrange ----------------------
     text = (
         '{"op": "branch", "name": "main"}\n'
@@ -139,7 +139,7 @@ def test_rebuild_pattern_with_same_id_restores_state_and_passes_eof() -> None:
 
     # --- act --------------------------
     state, report = build_state_from_jsonl(text)
-    check_end_of_file(state, report)
+    check_cross_reference(state, report)
 
     # --- assert -----------------------
     assert report.is_clean()
@@ -159,7 +159,7 @@ def test_rebuild_pattern_for_branch_remove_then_redeclare() -> None:
 
     # --- act --------------------------
     state, report = build_state_from_jsonl(text)
-    check_end_of_file(state, report)
+    check_cross_reference(state, report)
 
     # --- assert -----------------------
     assert report.is_clean()
@@ -186,7 +186,7 @@ def test_multiple_missing_parents_emit_one_error_per_dangling_parent() -> None:
 
     # --- act --------------------------
     state, report = build_state_from_jsonl(text)
-    check_end_of_file(state, report)
+    check_cross_reference(state, report)
 
     # --- assert -----------------------
     e401_errors = [e for e in report.errors if e.code == "E401"]

@@ -10,11 +10,11 @@ from pathlib import Path
 
 import pytest
 
+from gitsvg.cli._pipeline import apply_and_validate
 from gitsvg.imports import resolve_imports
 from gitsvg.layout import compute_layout
 from gitsvg.parse import parse_jsonl_file
 from gitsvg.render import compute_minify_config, minify, render
-from gitsvg.state import apply_ops, check_end_of_file
 from tests.render.test_minify._dom_compare import assert_dom_equivalent
 
 EXAMPLES_DIR = Path(__file__).parent.parent.parent.parent / "examples"
@@ -25,8 +25,7 @@ def _render_at_level(path: Path, level: int) -> str:
     """Render `path` end-to-end through the pipeline at `level`; return SVG markup."""
     parsed_ops, report = parse_jsonl_file(path)
     expanded = resolve_imports(parsed_ops, file=path, report=report)
-    state, theme = apply_ops(expanded, report)
-    check_end_of_file(state, report)
+    state, theme = apply_and_validate(expanded, report)
     assert report.is_clean(), f"{path.name}: unexpected validation errors {[e.format() for e in report.errors]}"
     layout = compute_layout(state)
     _, renderer_settings = theme.split()

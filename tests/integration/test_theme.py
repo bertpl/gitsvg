@@ -7,10 +7,10 @@ patching one field, and the final SVG carrying the resolved values.
 
 from pathlib import Path
 
+from gitsvg.cli._pipeline import apply_and_validate
 from gitsvg.layout import compute_layout
 from gitsvg.parse import parse_jsonl_file, parse_jsonl_text
 from gitsvg.render import render
-from gitsvg.state import apply_ops, check_end_of_file
 
 _FIXTURE = Path(__file__).parent.parent / "fixtures" / "inputs" / "happy_theme.gitsvg.jsonl"
 
@@ -20,8 +20,7 @@ def test_happy_theme_fixture_validates_cleanly() -> None:
     parsed, report = parse_jsonl_file(_FIXTURE)
 
     # --- act --------------------------
-    state, _theme = apply_ops(parsed, report)
-    check_end_of_file(state, report)
+    apply_and_validate(parsed, report)
 
     # --- assert -----------------------
     assert report.is_clean(), [e.format() for e in report.errors]
@@ -33,8 +32,7 @@ def test_happy_theme_resolved_theme_carries_overrides_and_cascade() -> None:
     label_font_size override should survive (different field)."""
     # --- arrange / act ----------------
     parsed, report = parse_jsonl_file(_FIXTURE)
-    state, theme = apply_ops(parsed, report)
-    check_end_of_file(state, report)
+    state, theme = apply_and_validate(parsed, report)
     assert report.is_clean()
 
     # --- assert -----------------------
@@ -46,8 +44,7 @@ def test_happy_theme_resolved_theme_carries_overrides_and_cascade() -> None:
 def test_happy_theme_renders_with_background_rect() -> None:
     # --- arrange ----------------------
     parsed, report = parse_jsonl_file(_FIXTURE)
-    state, theme = apply_ops(parsed, report)
-    check_end_of_file(state, report)
+    state, theme = apply_and_validate(parsed, report)
 
     # --- act --------------------------
     svg = render(compute_layout(state), theme).as_svg()
