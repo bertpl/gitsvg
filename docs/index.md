@@ -61,3 +61,5 @@ layout modes — and the [Input format](format.md) page for the operation set.
 - **[Input format](format.md)** — the nine operations and how a diagram is built.
 - **[Python API](api.md)** — `gitsvg.render_text()` for embedding gitsvg in
   other tools.
+- **[Integrations](integrations.md)** — the GitHub Action and MkDocs plugin
+  for rendering diagrams in CI and in your docs.

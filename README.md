@@ -276,6 +276,13 @@ Selecting a named theme also wipes any `theme:` field overrides and `branch.colo
 
 `gitsvg schema` and `gitsvg errors` are designed for agents and tooling: an LLM-based agent producing input can fetch the schema for a single op and the catalog entry for any error it hits, without reading the rest of the documentation.
 
+## Integrations
+
+Keep diagram source under version control and render it where you need it:
+
+- **[gitsvg-action](https://github.com/bertpl/gitsvg-action)** — a GitHub Action to render, validate, or drift-check `.gitsvg.jsonl` diagrams in CI (`uses: bertpl/gitsvg-action@v1`).
+- **[mkdocs-gitsvg](https://github.com/bertpl/mkdocs-gitsvg)** — a MkDocs plugin that renders ` ```gitsvg ` fenced blocks to inline SVG at build time (in active development).
+
 ## License
 
 [MIT](https://github.com/bertpl/gitsvg/blob/main/LICENSE).

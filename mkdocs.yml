@@ -34,6 +34,7 @@ nav:
   - CLI reference: cli.md
   - Input format: format.md
   - Python API: api.md
+  - Integrations: integrations.md
   - Architecture: architecture.md
 
 markdown_extensions:
