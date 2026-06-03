@@ -23,7 +23,7 @@ orientation-aware screen endpoints for the two line-shaped
 primitives.
 """
 
-from gitsvg._value_types import Orientation
+from gitsvg._shared.value_types import Orientation
 from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._renderer_settings import RendererSettings
 from gitsvg.theme import _resolve_int_or_float

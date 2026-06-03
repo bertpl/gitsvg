@@ -12,7 +12,7 @@ smaller fonts, so pill proportions stay coherent without separate
 overrides. Margins anchor to spacings and shrink the same way.
 """
 
-from gitsvg._value_types import Orientation
+from gitsvg._shared.value_types import Orientation
 from gitsvg.theme._default_theme import DefaultTheme
 
 

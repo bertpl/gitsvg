@@ -58,7 +58,7 @@ Heuristic notes:
 
 from collections.abc import Iterator
 
-from gitsvg._value_types import CommitRowMode
+from gitsvg._shared.value_types import CommitRowMode
 from gitsvg.layout._layout import (
     GridSlot,
     LaneSegment,

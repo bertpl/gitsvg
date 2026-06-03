@@ -13,7 +13,7 @@ Covers:
 import pytest
 from pydantic import ValidationError
 
-from gitsvg._value_types import Orientation
+from gitsvg._shared.value_types import Orientation
 from gitsvg.file_format.ops.impl._theme import ThemeOp
 from gitsvg.theme import DefaultTheme
 

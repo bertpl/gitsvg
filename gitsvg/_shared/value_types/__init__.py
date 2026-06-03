@@ -11,16 +11,16 @@ lived inside `theme/` while `theme` imported `LabelSide` back from
 
 Each type keeps its own submodule (mirroring the one-type-per-file
 layout used elsewhere) and is re-exported here, so callers import from
-the package: `from gitsvg._value_types import Orientation`.
+the package: `from gitsvg._shared.value_types import Orientation`.
 """
 
-from gitsvg._value_types._box_anchor import BoxAnchor, validate_box_anchor
-from gitsvg._value_types._branch_line_style import BranchLineStyle
-from gitsvg._value_types._commit_label_layout import CommitLabelLayout
-from gitsvg._value_types._commit_row_mode import CommitRowMode
-from gitsvg._value_types._label_side import LabelSide
-from gitsvg._value_types._merge_commit_style import MergeCommitStyle
-from gitsvg._value_types._orientation import Orientation, normalize_orientation
+from gitsvg._shared.value_types._box_anchor import BoxAnchor, validate_box_anchor
+from gitsvg._shared.value_types._branch_line_style import BranchLineStyle
+from gitsvg._shared.value_types._commit_label_layout import CommitLabelLayout
+from gitsvg._shared.value_types._commit_row_mode import CommitRowMode
+from gitsvg._shared.value_types._label_side import LabelSide
+from gitsvg._shared.value_types._merge_commit_style import MergeCommitStyle
+from gitsvg._shared.value_types._orientation import Orientation, normalize_orientation
 
 __all__ = [
     "BoxAnchor",

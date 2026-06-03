@@ -2,7 +2,7 @@
 
 import drawsvg as draw
 
-from gitsvg._value_types import MergeCommitStyle
+from gitsvg._shared.value_types import MergeCommitStyle
 from gitsvg.layout import LayoutCommit
 from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._geometry import grid_to_pixel

@@ -1,6 +1,6 @@
 """Resolution tests for `theme.branch_line_style`."""
 
-from gitsvg._value_types import BranchLineStyle
+from gitsvg._shared.value_types import BranchLineStyle
 from gitsvg.theme import DefaultTheme
 
 

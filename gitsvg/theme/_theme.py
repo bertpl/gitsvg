@@ -32,7 +32,7 @@ from typing import Any, Self
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from gitsvg._value_types import (
+from gitsvg._shared.value_types import (
     BoxAnchor,
     BranchLineStyle,
     CommitLabelLayout,

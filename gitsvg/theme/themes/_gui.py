@@ -18,7 +18,7 @@ named theme, since table mode moves the labels out of the graph region
 so the lanes no longer need to clear free-floating text.
 """
 
-from gitsvg._value_types import CommitLabelLayout, Orientation
+from gitsvg._shared.value_types import CommitLabelLayout, Orientation
 from gitsvg.theme._default_theme import DefaultTheme
 
 

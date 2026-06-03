@@ -25,7 +25,7 @@ from collections.abc import Callable
 
 import drawsvg as draw
 
-from gitsvg._value_types import MergeCommitStyle
+from gitsvg._shared.value_types import MergeCommitStyle
 from gitsvg.render._renderer_settings import RendererSettings
 
 # `checkmark` dot ring radius as a multiple of the base radius — the hollow

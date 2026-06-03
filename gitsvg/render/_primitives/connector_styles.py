@@ -31,7 +31,7 @@ from dataclasses import dataclass
 
 import drawsvg as draw
 
-from gitsvg._value_types import BranchLineStyle
+from gitsvg._shared.value_types import BranchLineStyle
 from gitsvg.layout import GridSlot
 from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._geometry import grid_to_pixel

@@ -17,7 +17,7 @@ layout engine never reads it.
 from dataclasses import dataclass
 from typing import Literal
 
-from gitsvg._value_types import CommitLabelLayout, LabelSide, Orientation
+from gitsvg._shared.value_types import CommitLabelLayout, LabelSide, Orientation
 from gitsvg.layout import Layout
 from gitsvg.render._label_widths import commit_label_width, pill_height, pill_width
 from gitsvg.render._renderer_settings import RendererSettings

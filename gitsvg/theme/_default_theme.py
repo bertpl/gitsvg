@@ -20,7 +20,7 @@ the original was orientation-dependent.
 
 from typing import Any, Self
 
-from gitsvg._value_types import (
+from gitsvg._shared.value_types import (
     BoxAnchor,
     BranchLineStyle,
     CommitLabelLayout,

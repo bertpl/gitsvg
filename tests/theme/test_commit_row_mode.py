@@ -1,6 +1,6 @@
 """Resolution + split-routing tests for `theme.commit_row_mode`."""
 
-from gitsvg._value_types import CommitRowMode
+from gitsvg._shared.value_types import CommitRowMode
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.state import apply_ops
 from gitsvg.theme import DefaultTheme

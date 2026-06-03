@@ -11,7 +11,7 @@ Selecting it is one field on a `theme` op: `{"op": "theme", "name":
 "muted"}`.
 """
 
-from gitsvg._value_types import BranchLineStyle, MergeCommitStyle
+from gitsvg._shared.value_types import BranchLineStyle, MergeCommitStyle
 from gitsvg.theme._default_theme import DefaultTheme
 
 

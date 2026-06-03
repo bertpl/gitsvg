@@ -15,7 +15,7 @@ hints, and pin policy for the rebase-rebuild pattern).
 
 from pydantic import BaseModel, ConfigDict
 
-from gitsvg._value_types import CommitRowMode
+from gitsvg._shared.value_types import CommitRowMode
 
 
 class LayoutSettings(BaseModel):
