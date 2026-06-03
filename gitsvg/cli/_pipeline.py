@@ -1,45 +1,22 @@
-"""Shared validate-pipeline helper for the CLI subcommands.
+"""Shared file-based validate-pipeline helper for the CLI subcommands.
 
 Every command that consumes a `.gitsvg.jsonl` input file (`render`,
 `validate`, and the introspection commands) runs the same upfront
 sequence: parse → import resolution → per-op state apply →
 cross-cutting validation. This module centralises that body so the
 subcommands stay focused on what happens *after* the pipeline (write
-SVG, emit JSON, etc.).
+SVG, emit JSON, etc.). The post-parse half (`apply_and_validate`) is
+shared with the public text entry point and lives in `gitsvg._pipeline`.
 """
 
 from pathlib import Path
 
+from gitsvg._pipeline import apply_and_validate
 from gitsvg.errors import ValidationReport
 from gitsvg.imports import resolve_imports
-from gitsvg.parse import ParsedOp, parse_jsonl_file
-from gitsvg.state import State, apply_ops
-from gitsvg.theme import Theme, ThemeBuilder
-from gitsvg.validate import UserOverrides, check_cross_reference, check_resolved_config
-
-
-def apply_and_validate(parsed_ops: list[ParsedOp], report: ValidationReport) -> tuple[State, Theme]:
-    """Apply ops, then run the cross-cutting end-of-stream validation.
-
-    The post-parse half of the validate pipeline: applies the ops to a
-    fresh state and theme, then runs the two validation passes that need
-    the fully-applied result — resolved-config conflicts (on the theme +
-    the `UserOverrides` record) and dangling cross-references (on the
-    state graph).
-
-    Args:
-        parsed_ops: Schema-validated ops (imports already resolved).
-        report: Report to which semantic and validation errors are appended.
-
-    Returns:
-        `(state, theme)` — the fully-applied state and resolved theme.
-    """
-    builder = ThemeBuilder()
-    state, theme = apply_ops(parsed_ops, report, builder=builder)
-    overrides = UserOverrides.collect(state, builder)
-    check_resolved_config(theme, overrides, report)
-    check_cross_reference(state, report)
-    return state, theme
+from gitsvg.parse import parse_jsonl_file
+from gitsvg.state import State
+from gitsvg.theme import Theme
 
 
 def run_validate_pipeline(input_path: Path) -> tuple[State, ValidationReport, Theme]:

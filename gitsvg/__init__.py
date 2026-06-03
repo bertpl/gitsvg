@@ -13,10 +13,24 @@ respectively. Cross-cutting subpackages sit alongside the pipeline:
 reports), `theme/` (the `Theme` dataclass + theme-op applier),
 `cli/` (Click entry points).
 
+The package's public API is intentionally small: `render_text` (a JSONL
+op-stream string → inline-embeddable SVG string), the
+`GitsvgValidationError` it raises on bad input, and the
+`ValidationReport` that error carries.
+
 See `docs/architecture.md` for the locked-in pipeline rule and the
 companion invariants.
 """
 
 from importlib.metadata import version
 
+from gitsvg._render_text import GitsvgValidationError, ValidationReport, render_text
+
 __version__ = version("gitsvg")
+
+__all__ = [
+    "GitsvgValidationError",
+    "ValidationReport",
+    "__version__",
+    "render_text",
+]
