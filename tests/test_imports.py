@@ -46,7 +46,7 @@ def test_simple_import_inlines_predecessor(tmp_path: Path) -> None:
     # --- assert -----------------------
     assert report.is_clean()
     assert [type(p.op).__name__ for p in expanded] == ["BranchOp", "CommitOp", "CommitOp"]
-    # Provenance should point at the original files
+    # Source locations should point at the original files
     assert expanded[0].file == str(base.resolve())
     assert expanded[2].file == str(derived)
 
@@ -225,7 +225,7 @@ def test_imported_file_parse_errors_surface_in_report(tmp_path: Path) -> None:
     assert any(e.code == "E001" for e in report.errors)
 
 
-def test_provenance_points_at_imported_file_for_imported_ops(tmp_path: Path) -> None:
+def test_imported_ops_point_at_their_source_file(tmp_path: Path) -> None:
     """Errors raised against an imported op should name the imported file."""
     # --- arrange ----------------------
     base = tmp_path / "base.jsonl"
