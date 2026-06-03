@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fractional values for the numeric `theme:` size fields (spacings, radii, line width) no longer crash with a traceback; sub-pixel values are now honored, and whole numbers render exactly as before.
 - Branching off — or merging from — a branch with no commits of its own now resolves to the commit that branch points at (its branch-off commit), instead of detaching the new branch or dropping the merge's second parent.
 - A `merge` op with `from` and `into` set to the same branch is now rejected (new error `E209`), matching the existing `pull_request` guard (E210); it previously produced a degenerate single-parent commit.
+- Exclude click 8.3.0/8.3.1, which broke the optional-value `--small` flag (fixed in click 8.3.2).
 
 ### Security
 
