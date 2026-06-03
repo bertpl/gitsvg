@@ -186,22 +186,17 @@ class State:
             branch.commit_ids.remove(commit_id)
 
     def branch_tip(self, name: str) -> str | None:
-        """Return the id of the latest commit on `name`, or None when empty.
+        """Return the commit `name`'s ref points at — its tip, or its branch-off commit when empty.
 
-        Raises no error for unknown branches — callers that need a
-        bound check use `has_branch` first.
-        """
-        branch = self.branches.get(name)
-        return branch.commit_ids[-1] if branch and branch.commit_ids else None
+        Mirrors git's ref semantics: a branch with commits points at its
+        last commit (`commit_ids[-1]`); an empty branch points at the
+        commit it was branched from (`rooted_on_commit`); a never-committed
+        first branch points at nothing (`None`). This single quantity is
+        also the structural first parent every new commit on the branch
+        inherits, and the commit a derived branch roots on.
 
-    def chain_parent(self, name: str) -> str | None:
-        """Return the commit a new commit on `name` descends from — its chain parent.
-
-        The branch's current tip when it has commits, otherwise the
-        commit it was rooted on (the source-branch tip or `from_commit`
-        captured at declaration). None only for the never-committed
-        first branch. This is the structural first parent every commit
-        on the branch inherits from branch membership.
+        Raises no error for unknown branches — callers that need a bound
+        check use `has_branch` first.
         """
         branch = self.branches.get(name)
         if branch is None:

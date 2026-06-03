@@ -62,8 +62,8 @@ def apply_commit_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, repor
 
     # --- Resolve canonical parents --------------
     # Read after removal and before the append below, so the chain parent is
-    # the post-removal tip and never points at the new commit itself.
-    chain_parent = state.chain_parent(op.branch)
+    # the post-removal ref target and never points at the new commit itself.
+    chain_parent = state.branch_tip(op.branch)
     parents = [chain_parent] if chain_parent is not None else []
 
     # --- Add the commit -------------------------

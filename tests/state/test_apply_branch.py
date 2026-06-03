@@ -29,7 +29,9 @@ def test_branch_from_branch_resolves_root_to_source_tip() -> None:
     assert state.branches["feat"].rooted_on_commit == "c1"
 
 
-def test_branch_from_empty_source_branch_has_no_root_commit() -> None:
+def test_branch_from_unborn_source_branch_has_no_root_commit() -> None:
+    # Source `main` has no commits and no branch-off commit (unborn) → no ref
+    # target to root on.
     # --- arrange ----------------------
     text = '{"op": "branch", "name": "main"}\n{"op": "branch", "name": "feat", "from_branch": "main"}\n'
 
@@ -39,6 +41,25 @@ def test_branch_from_empty_source_branch_has_no_root_commit() -> None:
     # --- assert -----------------------
     assert report.is_clean()
     assert state.branches["feat"].rooted_on_commit is None
+
+
+def test_branch_from_empty_rooted_source_roots_on_its_branch_off_commit() -> None:
+    # Source `feat` has no commits of its own but points at `c1` (branched off
+    # main): a branch off `feat` roots on `c1`, where feat's ref points — not None.
+    # --- arrange ----------------------
+    text = (
+        '{"op": "branch", "name": "main"}\n'
+        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
+        '{"op": "branch", "name": "feat", "from_commit": "c1"}\n'
+        '{"op": "branch", "name": "sub", "from_branch": "feat"}\n'
+    )
+
+    # --- act --------------------------
+    state, report = build_state_from_jsonl(text)
+
+    # --- assert -----------------------
+    assert report.is_clean()
+    assert state.branches["sub"].rooted_on_commit == "c1"
 
 
 def test_duplicate_branch_name_emits_e202() -> None:

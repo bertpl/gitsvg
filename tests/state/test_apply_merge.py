@@ -47,6 +47,28 @@ def test_merge_into_empty_branch_uses_rooted_on_as_chain_parent() -> None:
     assert state.commits["mg"].parents == ["c1", "f1"]
 
 
+def test_merge_from_empty_rooted_branch_uses_its_branch_off_commit_as_second_parent() -> None:
+    """Merging from a branch with no commits of its own: the from-side parent is
+    the commit that branch points at (its branch-off commit), not dropped — so
+    the result is a real two-parent merge."""
+    # --- arrange ----------------------
+    text = (
+        '{"op": "branch", "name": "main"}\n'
+        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
+        '{"op": "commit", "branch": "main", "id": "c2", "msg": "y"}\n'
+        '{"op": "branch", "name": "feat", "from_commit": "c1"}\n'
+        '{"op": "merge", "from": "feat", "into": "main", "as": "mg"}\n'
+    )
+
+    # --- act --------------------------
+    state, report = build_state_from_jsonl(text)
+
+    # --- assert -----------------------
+    assert report.is_clean()
+    # feat has no commits, so its ref points at c1 → second parent, not dropped.
+    assert state.commits["mg"].parents == ["c2", "c1"]
+
+
 def test_merge_with_unknown_from_branch_emits_e200() -> None:
     # --- arrange ----------------------
     text = '{"op": "branch", "name": "main"}\n{"op": "merge", "from": "ghost", "into": "main"}\n'

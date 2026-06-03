@@ -25,13 +25,24 @@ def test_is_first_branch_false_after_first_branch_added() -> None:
     assert state.is_first_branch() is False
 
 
-def test_branch_tip_returns_none_for_empty_branch() -> None:
+def test_branch_tip_of_unborn_branch_is_none() -> None:
+    # An unborn branch has no commits and no branch-off commit → no ref target.
     # --- arrange ----------------------
     state = State()
     state.branches["main"] = BranchState(id="b0", name="main")
 
     # --- act / assert -----------------
     assert state.branch_tip("main") is None
+
+
+def test_branch_tip_of_empty_rooted_branch_is_its_branch_off_commit() -> None:
+    # An empty branch's ref points at the commit it was branched from.
+    # --- arrange ----------------------
+    state = State()
+    state.branches["feat"] = BranchState(id="b1", name="feat", rooted_on_commit="c1")
+
+    # --- act / assert -----------------
+    assert state.branch_tip("feat") == "c1"
 
 
 def test_branch_tip_returns_last_commit_id() -> None:
