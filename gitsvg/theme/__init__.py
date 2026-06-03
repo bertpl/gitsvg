@@ -13,12 +13,9 @@ state-derived per-branch color overrides. The state engine calls
 A `theme:` op carrying `name` reassigns `theme_cls` (via
 `set_theme_cls`) and, unless the op also carries
 `keep_prior_overrides: true`, wipes both accumulator dicts (via
-`clear_overrides`).
-
-The `theme:` op apply handler (`gitsvg.theme._apply.apply_theme_op`)
-imports `State` for the shared apply-handler signature and is
-therefore imported via its leaf path from the state engine to avoid
-a package-load cycle. Same pattern as `file_format/ops/framework/`.
+`clear_overrides`). The op's apply handler lives with its peers under
+`gitsvg.state._apply`; the registry of selectable named themes is
+`gitsvg.theme._named_themes.NAMED_THEMES`.
 """
 
 from gitsvg.theme._builder import ThemeBuilder

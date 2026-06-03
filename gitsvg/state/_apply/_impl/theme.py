@@ -1,4 +1,10 @@
-"""Apply a `theme` op to a `ThemeBuilder` — drive the per-op cascade."""
+"""Apply a `theme` op to the `ThemeBuilder` — drive the per-op cascade.
+
+Sibling of the state-mutating op handlers, but unlike them it touches
+only the `ThemeBuilder`, never `State`: a `theme:` op carries no
+structural change. It still accepts `state` for the shared
+apply-handler signature the engine dispatches on.
+"""
 
 import copy
 from typing import cast
@@ -7,28 +13,8 @@ from gitsvg.errors import ValidationError, ValidationReport
 from gitsvg.file_format.ops import ThemeOp
 from gitsvg.parse import ParsedOp
 from gitsvg.state._state import State
-from gitsvg.theme._builder import ThemeBuilder
-from gitsvg.theme._default_theme import DefaultTheme
-from gitsvg.theme._theme import Theme
-from gitsvg.theme.themes import CompactTheme, DarkTheme, GuiTheme, MutedTheme
-
-# ==================================================================================================
-#  Named-theme registry
-# ==================================================================================================
-# Built-in named themes the user can select with `{"op": "theme", "name": "..."}`.
-# Setting a name swaps the `ThemeBuilder.theme_cls` to the named subclass; the
-# subsequent wipe of accumulated overrides is conditional on the op's
-# `keep_prior_overrides` flag (default `False` = wipe, matching v0.1.4's
-# documented `{name: "default"}` behavior). New entries land here; no other
-# change needed.
-NAMED_THEMES: dict[str, type[Theme]] = {
-    "default": DefaultTheme,
-    "muted": MutedTheme,
-    "dark": DarkTheme,
-    "compact": CompactTheme,
-    "gui": GuiTheme,
-}
-
+from gitsvg.theme import ThemeBuilder
+from gitsvg.theme._named_themes import NAMED_THEMES
 
 # ==================================================================================================
 #  Apply
@@ -85,7 +71,6 @@ def apply_theme_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, report
         parsed: The validated parsed op record.
         report: Receives semantic errors.
     """
-    del state  # signature uniformity; theme ops don't read or write state
     op = cast(ThemeOp, parsed.op)
     file = parsed.file
     line = parsed.line
