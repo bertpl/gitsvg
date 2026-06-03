@@ -36,6 +36,18 @@ def apply_merge_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, report
     file = parsed.file
     line = parsed.line
 
+    if op.from_ == op.into:
+        report.add(
+            ValidationError(
+                file=file,
+                line=line,
+                code="E209",
+                message=f"merge 'from' and 'into' must differ (both are {op.from_!r})",
+                field="from",
+            )
+        )
+        return
+
     if not state.has_branch(op.from_):
         add_branch_not_declared(report, file=file, line=line, branch=op.from_, field="from")
         return
