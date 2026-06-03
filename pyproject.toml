@@ -34,11 +34,17 @@ dev = [
     "pre-commit>=4.0",
     "fonttools>=4.55.0",
 ]
+docs = [
+    "mkdocs>=1.6",
+    "mkdocs-material>=9.5",
+]
 
 [project.scripts]
 gitsvg = "gitsvg.cli._cli:cli"
 
 [project.urls]
+Homepage = "https://gitsvg.readthedocs.io/"
+Documentation = "https://gitsvg.readthedocs.io/"
 Source = "https://github.com/bertpl/gitsvg"
 Changelog = "https://github.com/bertpl/gitsvg/blob/main/CHANGELOG.md"
 Issues = "https://github.com/bertpl/gitsvg/issues"

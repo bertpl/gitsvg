@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Hosted documentation site at [gitsvg.readthedocs.io](https://gitsvg.readthedocs.io/).
+
 ### Changed
 
 ### Deprecated
