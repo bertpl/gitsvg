@@ -14,12 +14,12 @@ holds the implementation so `gitsvg/__init__.py` stays thin.
 
 from pathlib import Path
 
-from gitsvg._pipeline import apply_and_validate
-from gitsvg.errors import ValidationReport
-from gitsvg.imports import resolve_imports
-from gitsvg.layout import compute_layout
-from gitsvg.parse import parse_jsonl_text
-from gitsvg.render import render
+from ._pipeline import apply_and_validate
+from .errors import ValidationReport
+from .imports import resolve_imports
+from .layout import compute_layout
+from .parse import parse_jsonl_text
+from .render import render
 
 # Source label for in-memory input: stands in for a file path in error
 # locations and as the (path-less) base for import resolution.

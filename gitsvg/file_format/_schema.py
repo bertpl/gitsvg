@@ -8,7 +8,7 @@ JSON Schema.
 
 from typing import Any
 
-from gitsvg.file_format.ops import OP_BY_NAME, OP_NAMES
+from .ops import OP_BY_NAME, OP_NAMES
 
 
 # ==================================================================================================

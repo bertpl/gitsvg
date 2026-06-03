@@ -28,7 +28,7 @@ happens here.
 
 from typing import Any
 
-from gitsvg.state._state import State
+from ._state import State
 
 
 def state_to_json(state: State) -> dict[str, Any]:

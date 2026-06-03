@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 
-from gitsvg.errors._codes import find_error_code
+from ._codes import find_error_code
 
 
 @dataclass(frozen=True, slots=True)

@@ -25,12 +25,13 @@ import drawsvg as draw
 
 from gitsvg.layout import GridSlot, LayoutArcKind
 from gitsvg.render._canvas import RenderCanvas
-from gitsvg.render._primitives.connector_styles import (
+from gitsvg.render._renderer_settings import RendererSettings
+
+from .connector_styles import (
     _CONNECTOR_BUILDERS,
     _LANE_CHANGE_BUILDERS,
     _connector_geometry,
 )
-from gitsvg.render._renderer_settings import RendererSettings
 
 
 def draw_arc(

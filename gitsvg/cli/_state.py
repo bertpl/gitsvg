@@ -27,9 +27,10 @@ gitsvg 1.0 — pin a version when caching the schema.
 
 from pathlib import Path
 
-from gitsvg.cli._introspect import introspection_command, run_introspection_command
 from gitsvg.state import State, state_to_json
 from gitsvg.theme import Theme
+
+from ._introspect import introspection_command, run_introspection_command
 
 
 def _state_payload(state: State, _theme: Theme) -> object:

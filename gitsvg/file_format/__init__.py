@@ -6,6 +6,6 @@ This package defines the gitsvg operations as pydantic models
 the `gitsvg schema` CLI command.
 """
 
-from gitsvg.file_format._schema import list_op_names, op_one_liner, op_schema, schema_index
+from ._schema import list_op_names, op_one_liner, op_schema, schema_index
 
 __all__ = ["list_op_names", "op_one_liner", "op_schema", "schema_index"]

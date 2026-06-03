@@ -17,7 +17,8 @@ from pydantic import ValidationError as PydanticValidationError
 
 from gitsvg.errors import ValidationError, ValidationReport
 from gitsvg.file_format.ops import OP_ADAPTER, OP_NAMES
-from gitsvg.parse._parsed_op import ParsedOp
+
+from ._parsed_op import ParsedOp
 
 
 # ==================================================================================================

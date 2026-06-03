@@ -25,8 +25,9 @@ primitives.
 
 from gitsvg._shared.numeric import resolve_int_or_float
 from gitsvg._shared.value_types import Orientation
-from gitsvg.render._canvas import RenderCanvas
-from gitsvg.render._renderer_settings import RendererSettings
+
+from ._canvas import RenderCanvas
+from ._renderer_settings import RendererSettings
 
 
 def grid_to_pixel(branch_pos: int, commit_pos: int, canvas: RenderCanvas) -> tuple[float, float]:

@@ -24,7 +24,7 @@ companion invariants.
 
 from importlib.metadata import version
 
-from gitsvg._render_text import GitsvgValidationError, ValidationReport, render_text
+from ._render_text import GitsvgValidationError, ValidationReport, render_text
 
 __version__ = version("gitsvg")
 

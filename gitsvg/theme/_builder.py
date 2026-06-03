@@ -40,8 +40,9 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from gitsvg._shared.value_types import LabelSide
-from gitsvg.theme._default_theme import DefaultTheme
-from gitsvg.theme._theme import Theme
+
+from ._default_theme import DefaultTheme
+from ._theme import Theme
 
 
 @dataclass(slots=True)

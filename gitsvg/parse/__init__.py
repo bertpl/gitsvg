@@ -11,8 +11,8 @@ the report rather than raising; consumers print the report or react to it
 as needed.
 """
 
-from gitsvg.parse._parsed_op import ParsedOp
-from gitsvg.parse._parser import parse_jsonl_file, parse_jsonl_text
+from ._parsed_op import ParsedOp
+from ._parser import parse_jsonl_file, parse_jsonl_text
 
 __all__ = [
     "ParsedOp",

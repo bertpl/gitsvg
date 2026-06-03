@@ -34,7 +34,7 @@ import re
 from dataclasses import dataclass
 from importlib.resources.abc import Traversable
 
-from gitsvg.errors._catalog import default_catalog_dir
+from ._catalog import default_catalog_dir
 
 
 # ==================================================================================================

@@ -12,9 +12,9 @@ live downstream of the apply pass rather than inside any per-op handler.
   from the applied state and the theme builder.
 """
 
-from gitsvg.validate._cross_reference import check_cross_reference
-from gitsvg.validate._resolved_config import check_resolved_config
-from gitsvg.validate._user_overrides import UserOverrides
+from ._cross_reference import check_cross_reference
+from ._resolved_config import check_resolved_config
+from ._user_overrides import UserOverrides
 
 __all__ = [
     "UserOverrides",

@@ -39,7 +39,9 @@ from gitsvg.file_format.ops import (
     ThemeOp,
 )
 from gitsvg.parse import ParsedOp
-from gitsvg.state._apply import (
+from gitsvg.theme import Theme, ThemeBuilder
+
+from ._apply import (
     apply_branch_op,
     apply_commit_op,
     apply_grid_op,
@@ -49,8 +51,7 @@ from gitsvg.state._apply import (
     apply_remove_op,
     apply_theme_op,
 )
-from gitsvg.state._state import State
-from gitsvg.theme import Theme, ThemeBuilder
+from ._state import State
 
 
 def apply_ops(

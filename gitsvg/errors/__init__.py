@@ -13,10 +13,10 @@ Modules:
 External callers should import from this package directly.
 """
 
-from gitsvg.errors._catalog import default_catalog_dir, load_catalog_entry
-from gitsvg.errors._codes import ErrorCode, all_codes, find_error_code
-from gitsvg.errors._report import ValidationReport
-from gitsvg.errors._validation_error import ValidationError
+from ._catalog import default_catalog_dir, load_catalog_entry
+from ._codes import ErrorCode, all_codes, find_error_code
+from ._report import ValidationReport
+from ._validation_error import ValidationError
 
 __all__ = [
     "ErrorCode",

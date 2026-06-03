@@ -18,9 +18,9 @@ A `theme:` op carrying `name` reassigns `theme_cls` (via
 `gitsvg.theme._named_themes.NAMED_THEMES`.
 """
 
-from gitsvg.theme._builder import ThemeBuilder
-from gitsvg.theme._default_theme import DefaultTheme
-from gitsvg.theme._theme import Theme
+from ._builder import ThemeBuilder
+from ._default_theme import DefaultTheme
+from ._theme import Theme
 
 DEFAULT_THEME = DefaultTheme.build({})
 """The resolved default theme — `DefaultTheme.build({})` with no user overrides.

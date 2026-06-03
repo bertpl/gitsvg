@@ -13,8 +13,8 @@ The renderer supplies resolved widths, fonts, and the absolute table
 origin; this package owns the math.
 """
 
-from gitsvg.render._table.columns import TableColumn, TableColumns, TableField, compute_table_columns
-from gitsvg.render._table.text import fit_text, flatten_message
+from .columns import TableColumn, TableColumns, TableField, compute_table_columns
+from .text import fit_text, flatten_message
 
 __all__ = [
     "TableColumn",

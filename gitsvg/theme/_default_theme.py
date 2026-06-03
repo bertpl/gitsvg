@@ -29,7 +29,8 @@ from gitsvg._shared.value_types import (
     MergeCommitStyle,
     Orientation,
 )
-from gitsvg.theme._theme import Theme
+
+from ._theme import Theme
 
 
 class DefaultTheme(Theme):

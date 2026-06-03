@@ -3,13 +3,14 @@
 import click
 
 from gitsvg import __version__
-from gitsvg.cli._errors import errors_command
-from gitsvg.cli._layout import layout_command
-from gitsvg.cli._render import render_command
-from gitsvg.cli._schema import schema_command
-from gitsvg.cli._state import state_command
-from gitsvg.cli._theme import theme_command
-from gitsvg.cli._validate import validate_command
+
+from ._errors import errors_command
+from ._layout import layout_command
+from ._render import render_command
+from ._schema import schema_command
+from ._state import state_command
+from ._theme import theme_command
+from ._validate import validate_command
 
 
 @click.group()
