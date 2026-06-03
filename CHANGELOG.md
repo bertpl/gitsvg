@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - New `gitsvg theme` command to inspect the built-in named themes — index, per-theme resolved values, and a bare-name list.
+- New public `gitsvg.render_text()` API — renders a JSONL op-stream string to an inline-embeddable SVG string; raises `GitsvgValidationError` on invalid input.
 
 ### Changed
 
