@@ -20,8 +20,8 @@ def apply_remove_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, repor
     Targets that don't exist in current state produce E200/E201/E214
     errors but the rest of the list still attempts to remove. This
     matches the format spec's permissive stance on cross-references —
-    dangling references are tolerated mid-file and end-of-file
-    validation (`check_end_of_file` in `gitsvg.state._eof`) flags any
+    dangling references are tolerated mid-file and the cross-reference
+    validation (`check_cross_reference` in `gitsvg.validate`) flags any
     that aren't restored.
 
     Branch removal also enforces that no open pull-request still

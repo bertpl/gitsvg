@@ -5,16 +5,15 @@ remove PR → merge. Asserts that every intermediate step validates
 cleanly and that the final state holds the expected entities.
 """
 
+from gitsvg.cli._pipeline import apply_and_validate
 from gitsvg.errors import ValidationReport
 from gitsvg.parse import parse_jsonl_text
-from gitsvg.state import apply_ops, check_end_of_file
 
 
 def _validate(jsonl: str) -> tuple[ValidationReport, object]:
-    """Run parse + apply + EOF check on `jsonl` and return `(report, state)`."""
+    """Run parse + apply + validation on `jsonl` and return `(report, state)`."""
     parsed, report = parse_jsonl_text(jsonl, file="x.jsonl")
-    state, _theme = apply_ops(parsed, report)
-    check_end_of_file(state, report)
+    state, _theme = apply_and_validate(parsed, report)
     return report, state
 
 

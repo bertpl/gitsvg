@@ -1,4 +1,4 @@
-"""End-of-file cross-reference check — runs after every op has been applied.
+"""Cross-reference check — runs after every op has been applied.
 
 The state engine is permissive about cross-references during apply: removing
 a branch or commit that other entities reference is allowed, on the
@@ -17,10 +17,10 @@ Two classes of dangling reference are flagged:
 """
 
 from gitsvg.errors import ValidationError, ValidationReport
-from gitsvg.state._state import State
+from gitsvg.state import State
 
 
-def check_end_of_file(state: State, report: ValidationReport) -> None:
+def check_cross_reference(state: State, report: ValidationReport) -> None:
     """Walk final state and emit errors for any dangling references.
 
     Args:

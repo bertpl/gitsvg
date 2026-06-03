@@ -13,11 +13,11 @@ guard.
 import sys
 from pathlib import Path
 
+from gitsvg.cli._pipeline import apply_and_validate
 from gitsvg.imports import resolve_imports
 from gitsvg.layout import compute_layout
 from gitsvg.parse import parse_jsonl_file
 from gitsvg.render import compute_minify_config, minify, render
-from gitsvg.state import apply_ops, check_end_of_file
 
 EXAMPLES_DIR = Path("examples")
 LEVELS = (0, 1, 2, 3)
@@ -27,8 +27,7 @@ def _render_at_level(input_path: Path, level: int) -> str:
     """Render `input_path` at minification `level`; return SVG markup."""
     parsed_ops, report = parse_jsonl_file(input_path)
     expanded = resolve_imports(parsed_ops, file=input_path, report=report)
-    state, theme = apply_ops(expanded, report)
-    check_end_of_file(state, report)
+    state, theme = apply_and_validate(expanded, report)
     if not report.is_clean():
         for err in report.errors:
             print(f"  {err.format()}", file=sys.stderr)

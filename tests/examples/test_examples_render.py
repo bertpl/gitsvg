@@ -10,12 +10,12 @@ from pathlib import Path
 
 import pytest
 
+from gitsvg.cli._pipeline import apply_and_validate
 from gitsvg.errors import ValidationReport
 from gitsvg.imports import resolve_imports
 from gitsvg.layout import compute_layout
 from gitsvg.parse import parse_jsonl_file
 from gitsvg.render import compute_minify_config, minify, render
-from gitsvg.state import apply_ops, check_end_of_file
 
 EXAMPLES_DIR = Path(__file__).parent.parent.parent / "examples"
 
@@ -49,8 +49,7 @@ def test_example_validates_and_renders(path: Path) -> None:
     # --- act --------------------------
     parsed_ops, report = parse_jsonl_file(path)
     expanded = resolve_imports(parsed_ops, file=path, report=report)
-    state, theme = apply_ops(expanded, report)
-    check_end_of_file(state, report)
+    state, theme = apply_and_validate(expanded, report)
     layout_settings, _ = theme.split()
     layout = compute_layout(state, layout_settings)
     drawing = render(layout, theme)
@@ -68,8 +67,7 @@ def test_example_renders_smaller_under_small_flag(path: Path) -> None:
     # --- arrange / act ----------------
     parsed_ops, report = parse_jsonl_file(path)
     expanded = resolve_imports(parsed_ops, file=path, report=report)
-    state, theme = apply_ops(expanded, report)
-    check_end_of_file(state, report)
+    state, theme = apply_and_validate(expanded, report)
     layout_settings, renderer_settings = theme.split()
     drawing = render(compute_layout(state, layout_settings), renderer_settings)
     default_svg = drawing.as_svg()

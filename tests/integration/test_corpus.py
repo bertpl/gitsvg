@@ -1,8 +1,8 @@
 """Integration tests over the synthetic input corpus.
 
 Walks `tests/fixtures/inputs/` and runs the full validate pipeline
-(parse → import-resolve → state-apply → end-of-file check) on each
-fixture file. Happy fixtures must validate cleanly. Sad fixtures must
+(parse → import-resolve → state-apply → validation) on each fixture
+file. Happy fixtures must validate cleanly. Sad fixtures must
 emit at least the expected error code(s) — additional cascading errors
 are allowed.
 """
@@ -11,10 +11,10 @@ from pathlib import Path
 
 import pytest
 
+from gitsvg.cli._pipeline import apply_and_validate
 from gitsvg.errors import ValidationReport
 from gitsvg.imports import resolve_imports
 from gitsvg.parse import parse_jsonl_file
-from gitsvg.state import apply_ops, check_end_of_file
 
 CORPUS_DIR = Path(__file__).parent.parent / "fixtures" / "inputs"
 
@@ -26,8 +26,7 @@ def _validate(path: Path) -> ValidationReport:
     """Run the full validate pipeline on `path` and return the report."""
     parsed_ops, report = parse_jsonl_file(path)
     expanded = resolve_imports(parsed_ops, file=path, report=report)
-    state, _theme = apply_ops(expanded, report)
-    check_end_of_file(state, report)
+    apply_and_validate(expanded, report)
     return report
 
 
