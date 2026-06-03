@@ -13,7 +13,7 @@ import sys
 
 import click
 
-from gitsvg.theme._apply import NAMED_THEMES
+from gitsvg.theme._named_themes import NAMED_THEMES
 
 
 # ==================================================================================================

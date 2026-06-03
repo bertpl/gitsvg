@@ -1,12 +1,11 @@
-"""Per-op apply handlers for state-mutating ops — one module per op type.
+"""Per-op apply handlers — one module per op type.
 
-Each module exposes a single `apply_<op>_op` handler that mutates
-state in place when the op applies cleanly and appends semantic errors
-to the report. Handlers share a uniform signature with the wider
-apply-handler family (which includes the theme-mutating handler under
-`gitsvg.theme._apply`); the shared builder argument lets that family
-route theme overrides — state-only handlers leave it untouched, the
-`branch:` handler writes per-branch color overrides to it.
+Each module exposes a single `apply_<op>_op` handler sharing the
+uniform `(state, builder, parsed, report)` signature the engine
+dispatches on. Most mutate `State` in place (the `branch:` / `remove:`
+handlers also write per-branch overrides to the `ThemeBuilder`); the
+`theme:` handler mutates only the `ThemeBuilder`, never `State`. Every
+handler appends semantic errors to the report.
 """
 
 from gitsvg.state._apply._impl.branch import apply_branch_op
@@ -16,6 +15,7 @@ from gitsvg.state._apply._impl.highlight import apply_highlight_op
 from gitsvg.state._apply._impl.merge import apply_merge_op
 from gitsvg.state._apply._impl.pull_request import apply_pull_request_op
 from gitsvg.state._apply._impl.remove import apply_remove_op
+from gitsvg.state._apply._impl.theme import apply_theme_op
 
 __all__ = [
     "apply_branch_op",
@@ -25,4 +25,5 @@ __all__ = [
     "apply_merge_op",
     "apply_pull_request_op",
     "apply_remove_op",
+    "apply_theme_op",
 ]

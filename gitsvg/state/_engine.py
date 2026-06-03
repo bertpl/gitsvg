@@ -1,12 +1,11 @@
 """State engine — apply parsed ops in order, producing `(State, Theme)`.
 
 `apply_ops` is the only entry point. It dispatches each `ParsedOp` to
-the right per-op handler — state-mutating handlers under
-`gitsvg.state._apply`, the theme-mutating handler under
-`gitsvg.theme._apply` — accumulating semantic errors into the
-provided `ValidationReport`. Schema-failed lines never reach this
-layer; they were dropped by the parser before becoming `ParsedOp`
-records.
+its per-op handler under `gitsvg.state._apply` (the `theme:` handler
+included, though it mutates only the `ThemeBuilder`) — accumulating
+semantic errors into the provided `ValidationReport`. Schema-failed
+lines never reach this layer; they were dropped by the parser before
+becoming `ParsedOp` records.
 
 Theme construction threads a single `ThemeBuilder` through the apply
 pass. Theme ops mutate the builder's `theme_cls` and `user_set` (and,
@@ -48,15 +47,10 @@ from gitsvg.state._apply import (
     apply_merge_op,
     apply_pull_request_op,
     apply_remove_op,
+    apply_theme_op,
 )
 from gitsvg.state._state import State
 from gitsvg.theme import Theme, ThemeBuilder
-
-# Leaf-path import: pulls in `State` for the shared handler signature,
-# so the package-level `gitsvg.theme.__init__` deliberately does not
-# re-export `apply_theme_op` (cycle-avoidance pattern matching
-# `file_format/ops/framework/`).
-from gitsvg.theme._apply import apply_theme_op
 
 
 def apply_ops(
