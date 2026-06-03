@@ -23,10 +23,10 @@ orientation-aware screen endpoints for the two line-shaped
 primitives.
 """
 
+from gitsvg._shared.numeric import resolve_int_or_float
 from gitsvg._shared.value_types import Orientation
 from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._renderer_settings import RendererSettings
-from gitsvg.theme import _resolve_int_or_float
 
 
 def grid_to_pixel(branch_pos: int, commit_pos: int, canvas: RenderCanvas) -> tuple[float, float]:
@@ -86,7 +86,7 @@ def offset_position(
     orientation.
 
     Resolving the grid offsets to integer pixels (via
-    `_resolve_int_or_float`) before adding to the anchor preserves
+    `resolve_int_or_float`) before adding to the anchor preserves
     int formatting in the SVG attribute output for whole-number
     offsets.
 
@@ -104,8 +104,8 @@ def offset_position(
     Returns:
         The resulting `(x, y)` in SVG pixel coordinates.
     """
-    branch_offset_px = _resolve_int_or_float(branch_axis_offset_in_lanes * canvas.branch_spacing)
-    commit_offset_px = _resolve_int_or_float(commit_axis_offset_in_rows * canvas.commit_spacing)
+    branch_offset_px = resolve_int_or_float(branch_axis_offset_in_lanes * canvas.branch_spacing)
+    commit_offset_px = resolve_int_or_float(commit_axis_offset_in_rows * canvas.commit_spacing)
     anchor_x, anchor_y = grid_to_pixel(anchor_branch_pos, anchor_commit_pos, canvas)
     return _apply_pixel_offset(anchor_x, anchor_y, branch_offset_px, commit_offset_px, canvas.orientation)
 

@@ -20,6 +20,7 @@ the original was orientation-dependent.
 
 from typing import Any, Self
 
+from gitsvg._shared.numeric import resolve_int_or_float
 from gitsvg._shared.value_types import (
     BoxAnchor,
     BranchLineStyle,
@@ -28,7 +29,7 @@ from gitsvg._shared.value_types import (
     MergeCommitStyle,
     Orientation,
 )
-from gitsvg.theme._theme import Theme, _resolve_int_or_float
+from gitsvg.theme._theme import Theme
 
 
 class DefaultTheme(Theme):
@@ -103,10 +104,10 @@ class DefaultTheme(Theme):
         branch pill), `rl` uses `×1.0`.
         """
         if orientation.is_vertical:
-            return _resolve_int_or_float(1.0 * branch_spacing)
+            return resolve_int_or_float(1.0 * branch_spacing)
         if orientation == Orientation.LR:
-            return _resolve_int_or_float(1.5 * commit_spacing)
-        return _resolve_int_or_float(1.0 * commit_spacing)
+            return resolve_int_or_float(1.5 * commit_spacing)
+        return resolve_int_or_float(1.0 * commit_spacing)
 
     @classmethod
     def _resolve_margin_right(
@@ -120,10 +121,10 @@ class DefaultTheme(Theme):
         right; widened to fit the branch pill).
         """
         if orientation.is_vertical:
-            return _resolve_int_or_float(1.0 * branch_spacing)
+            return resolve_int_or_float(1.0 * branch_spacing)
         if orientation == Orientation.RL:
-            return _resolve_int_or_float(1.5 * commit_spacing)
-        return _resolve_int_or_float(1.0 * commit_spacing)
+            return resolve_int_or_float(1.5 * commit_spacing)
+        return resolve_int_or_float(1.0 * commit_spacing)
 
     @classmethod
     def _resolve_margin_top(cls, orientation: Orientation, branch_spacing: float, commit_spacing: float) -> int | float:
@@ -133,8 +134,8 @@ class DefaultTheme(Theme):
         to `branch_spacing × 1.0`.
         """
         if orientation.is_vertical:
-            return _resolve_int_or_float(0.5 * commit_spacing)
-        return _resolve_int_or_float(1.0 * branch_spacing)
+            return resolve_int_or_float(0.5 * commit_spacing)
+        return resolve_int_or_float(1.0 * branch_spacing)
 
     @classmethod
     def _resolve_margin_bottom(
@@ -142,8 +143,8 @@ class DefaultTheme(Theme):
     ) -> int | float:
         """Per-orientation `margin_bottom` default (px). Mirror of `_resolve_margin_top`."""
         if orientation.is_vertical:
-            return _resolve_int_or_float(0.5 * commit_spacing)
-        return _resolve_int_or_float(1.0 * branch_spacing)
+            return resolve_int_or_float(0.5 * commit_spacing)
+        return resolve_int_or_float(1.0 * branch_spacing)
 
     # --------------------------------------------------------------------------
     #  Strokes & geometry (mostly static)

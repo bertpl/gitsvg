@@ -2,7 +2,7 @@
 
 import pytest
 
-from gitsvg.theme import is_color_visible
+from gitsvg._shared.color import is_color_visible
 
 
 @pytest.mark.parametrize(

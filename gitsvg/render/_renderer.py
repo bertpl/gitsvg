@@ -45,6 +45,7 @@ from collections import defaultdict
 
 import drawsvg as draw
 
+from gitsvg._shared.color import is_color_visible
 from gitsvg.layout import GridSlot, Layout, LayoutArc, LayoutBranch, LayoutPullRequest
 from gitsvg.render._canvas import compute_canvas, is_table_active
 from gitsvg.render._colors import resolve_branch_color
@@ -59,7 +60,7 @@ from gitsvg.render._primitives.commit_table import draw_commit_table
 from gitsvg.render._primitives.pull_request_pill import draw_pull_request_pill
 from gitsvg.render._renderer_settings import RendererSettings
 from gitsvg.render._table import compute_table_columns
-from gitsvg.theme import DEFAULT_THEME, is_color_visible
+from gitsvg.theme import DEFAULT_THEME
 
 
 def _branch_through_point(layout: Layout, point: GridSlot) -> LayoutBranch:
