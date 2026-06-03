@@ -19,9 +19,8 @@ A `theme:` op carrying `name` reassigns `theme_cls` (via
 """
 
 from gitsvg.theme._builder import ThemeBuilder
-from gitsvg.theme._color import is_color_visible
 from gitsvg.theme._default_theme import DefaultTheme
-from gitsvg.theme._theme import Theme, _resolve_int_or_float
+from gitsvg.theme._theme import Theme
 
 DEFAULT_THEME = DefaultTheme.build({})
 """The resolved default theme — `DefaultTheme.build({})` with no user overrides.
@@ -35,6 +34,4 @@ __all__ = [
     "DefaultTheme",
     "Theme",
     "ThemeBuilder",
-    "_resolve_int_or_float",
-    "is_color_visible",
 ]

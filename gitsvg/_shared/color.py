@@ -5,10 +5,6 @@ anything. The renderer reads it to skip a no-op fill (so an unset or
 fully-transparent band stays byte-identical to no band at all), and the
 same predicate backs the validation that rejects a band color set to a
 visible value where it has no effect.
-
-Lives in `theme/` because both the renderer and the state engine
-already depend on the theme package, so a neutral home here avoids
-coupling the two stages to each other.
 """
 
 

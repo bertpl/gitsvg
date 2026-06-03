@@ -32,6 +32,7 @@ from typing import Any, Self
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from gitsvg._shared.numeric import resolve_int_or_float
 from gitsvg._shared.value_types import (
     BoxAnchor,
     BranchLineStyle,
@@ -227,7 +228,7 @@ class Theme(BaseModel):
         ratio-stored fields already get via their resolved-pixel accessors,
         so output is unchanged for the whole-number values diagrams have
         always used."""
-        return _resolve_int_or_float(v) if v is not None else None
+        return resolve_int_or_float(v) if v is not None else None
 
     @field_validator("branch_spacing", "commit_spacing")
     @classmethod
@@ -364,44 +365,44 @@ class Theme(BaseModel):
     @property
     def arc_corner_radius(self) -> int | float:
         """Resolved pixel corner radius for branch-off / merge arcs."""
-        return _resolve_int_or_float(
+        return resolve_int_or_float(
             self.arc_corner_radius_in_grid_units * min(self.branch_spacing, self.commit_spacing)
         )
 
     @property
     def label_offset(self) -> int | float:
         """Resolved pixel offset between a commit dot and its label, along the branch axis."""
-        return _resolve_int_or_float(self.label_offset_branch_axis_in_lanes * self.branch_spacing)
+        return resolve_int_or_float(self.label_offset_branch_axis_in_lanes * self.branch_spacing)
 
     @property
     def guide_overshoot(self) -> int | float:
         """Resolved pixel overshoot — how far a branch guide extends past the commit-axis margin edges."""
-        return _resolve_int_or_float(self.guide_overshoot_in_rows * self.commit_spacing)
+        return resolve_int_or_float(self.guide_overshoot_in_rows * self.commit_spacing)
 
     @property
     def pill_padding_x(self) -> int | float:
         """Resolved pill-padding-x (px) — extra width beyond the rendered text."""
-        return _resolve_int_or_float(self.pill_padding_x_in_font_sizes * self.branch_label_font_size)
+        return resolve_int_or_float(self.pill_padding_x_in_font_sizes * self.branch_label_font_size)
 
     @property
     def pill_padding_y(self) -> int | float:
         """Resolved pill-padding-y (px) — extra height beyond the font size."""
-        return _resolve_int_or_float(self.pill_padding_y_in_font_sizes * self.branch_label_font_size)
+        return resolve_int_or_float(self.pill_padding_y_in_font_sizes * self.branch_label_font_size)
 
     @property
     def pill_corner_radius(self) -> int | float:
         """Resolved pill corner radius (px) for `rx` / `ry`."""
-        return _resolve_int_or_float(self.pill_corner_radius_in_font_sizes * self.branch_label_font_size)
+        return resolve_int_or_float(self.pill_corner_radius_in_font_sizes * self.branch_label_font_size)
 
     @property
     def label_line_padding(self) -> int | float:
         """Resolved extra height per line (px) in a multi-line label stack."""
-        return _resolve_int_or_float(self.label_line_padding_in_font_sizes * self.label_font_size)
+        return resolve_int_or_float(self.label_line_padding_in_font_sizes * self.label_font_size)
 
     @property
     def table_cell_padding_x(self) -> int | float:
         """Resolved table horizontal spacing unit (px) — cell inset and intra-cell gaps."""
-        return _resolve_int_or_float(self.table_cell_padding_x_in_font_sizes * self.label_font_size)
+        return resolve_int_or_float(self.table_cell_padding_x_in_font_sizes * self.label_font_size)
 
     # --------------------------------------------------------------------------
     #  Per-branch resolved-value lookups
@@ -418,13 +419,3 @@ class Theme(BaseModel):
             `label_side` on its `branch:` op.
         """
         return self.branch_label_side_overrides.get(branch_id, self.label_side_default)
-
-
-def _resolve_int_or_float(value: float) -> int | float:
-    """Cast a whole-number float to int; return float otherwise.
-
-    Used by `Theme`'s resolved-pixel properties so the SVG attribute
-    formatting matches the pre-ratio defaults exactly (drawsvg writes
-    integer values without a decimal point and float values with one).
-    """
-    return int(value) if value == int(value) else value
