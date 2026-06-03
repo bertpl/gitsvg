@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## 0.2.7 (2026-06-03)
 
 ### Added
 
@@ -16,8 +16,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Breaking:** named-theme inspection moved from `gitsvg schema` to the new `gitsvg theme` command: `schema theme <name>` → `theme <name>`, `schema themes` → `theme --list-names`.
 - US English spelling normalized across user-facing text — CLI `gitsvg schema` field descriptions and error-catalog entries — and the documentation. No behavioral change.
-
-### Deprecated
 
 ### Removed
 
@@ -30,9 +28,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Branching off — or merging from — a branch with no commits of its own now resolves to the commit that branch points at (its branch-off commit), instead of detaching the new branch or dropping the merge's second parent.
 - A `merge` op with `from` and `into` set to the same branch is now rejected (new error `E209`), matching the existing `pull_request` guard (E210); it previously produced a degenerate single-parent commit.
 - Exclude click 8.3.0/8.3.1, which broke the optional-value `--small` flag (fixed in click 8.3.2).
-
-### Security
-
 ## 0.2.6 (2026-06-01)
 
 ### Added
