@@ -66,7 +66,7 @@ def apply_merge_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, report
         return
 
     parents: list[str] = []
-    for parent_id in (state.chain_parent(op.into), state.branch_tip(op.from_)):
+    for parent_id in (state.branch_tip(op.into), state.branch_tip(op.from_)):
         if parent_id is not None and parent_id not in parents:
             parents.append(parent_id)
 
