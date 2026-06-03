@@ -18,8 +18,9 @@ the layout/state orientation-blind invariant binds the geometry stages,
 not this validation pass (see `docs/architecture.md` invariant 7).
 """
 
+from gitsvg._value_types import CommitLabelLayout, CommitRowMode
 from gitsvg.errors import ValidationError, ValidationReport
-from gitsvg.theme import CommitLabelLayout, CommitRowMode, Theme
+from gitsvg.theme import Theme
 from gitsvg.validate._user_overrides import UserOverrides
 
 

@@ -4,6 +4,16 @@ from typing import Annotated, Literal
 
 from pydantic import BeforeValidator, Field, field_validator
 
+from gitsvg._value_types import (
+    BoxAnchor,
+    BranchLineStyle,
+    CommitLabelLayout,
+    CommitRowMode,
+    MergeCommitStyle,
+    Orientation,
+    normalize_orientation,
+    validate_box_anchor,
+)
 from gitsvg.file_format.ops.framework._base import OpBase
 from gitsvg.file_format.ops.framework._types import (
     HexColor,
@@ -12,12 +22,6 @@ from gitsvg.file_format.ops.framework._types import (
     NonNegativeFloat,
     NonNegativeInt,
 )
-from gitsvg.theme._box_anchor import BoxAnchor, validate_box_anchor
-from gitsvg.theme._branch_line_style import BranchLineStyle
-from gitsvg.theme._commit_label_layout import CommitLabelLayout
-from gitsvg.theme._commit_row_mode import CommitRowMode
-from gitsvg.theme._merge_commit_style import MergeCommitStyle
-from gitsvg.theme._orientation import Orientation, normalize_orientation
 
 Opacity = Annotated[float, Field(ge=0, le=1)]
 """Float in `[0, 1]` — for opacity fields where SVG semantics are bounded."""

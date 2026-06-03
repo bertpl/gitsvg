@@ -3,7 +3,7 @@
 import pytest
 from pydantic import ValidationError
 
-from gitsvg.file_format import LabelSide
+from gitsvg._value_types import LabelSide
 from gitsvg.file_format.ops import (
     OP_ADAPTER,
     OP_BY_NAME,

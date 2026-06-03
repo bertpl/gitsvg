@@ -39,7 +39,7 @@ across the apply pass and dispatches to the chosen `theme_cls`.
 from dataclasses import dataclass, field
 from typing import Any
 
-from gitsvg.file_format import LabelSide
+from gitsvg._value_types import LabelSide
 from gitsvg.theme._default_theme import DefaultTheme
 from gitsvg.theme._theme import Theme
 

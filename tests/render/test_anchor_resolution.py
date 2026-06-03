@@ -13,8 +13,9 @@ The rotation-wrap helper (`rotated_target`) stays in
 import drawsvg as draw
 import pytest
 
+from gitsvg._value_types import Orientation
 from gitsvg.render._anchor_resolution import rotated_target
-from gitsvg.theme import DefaultTheme, Orientation
+from gitsvg.theme import DefaultTheme
 
 
 # ==================================================================================================

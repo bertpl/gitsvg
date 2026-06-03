@@ -6,8 +6,8 @@ rather than `KeyError`-ing at render time. Parallels
 `test_connector_style_registry.py` for the branch-off / merge registry.
 """
 
+from gitsvg._value_types import BranchLineStyle
 from gitsvg.render._primitives.connector_styles import _LANE_CHANGE_BUILDERS
-from gitsvg.theme import BranchLineStyle
 
 
 def test_every_branch_line_style_has_a_lane_change_builder() -> None:

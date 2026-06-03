@@ -1,6 +1,7 @@
 """Resolution tests for `theme.merge_commit_style`."""
 
-from gitsvg.theme import DefaultTheme, MergeCommitStyle
+from gitsvg._value_types import MergeCommitStyle
+from gitsvg.theme import DefaultTheme
 
 
 def test_default_merge_commit_style_is_checkmark() -> None:

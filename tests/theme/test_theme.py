@@ -1,7 +1,7 @@
 """Tests for the `Theme` Pydantic model and `DEFAULT_THEME` baseline values."""
 
-from gitsvg.file_format import LabelSide
-from gitsvg.theme import DEFAULT_THEME, BranchLineStyle, DefaultTheme, MergeCommitStyle, Orientation, Theme
+from gitsvg._value_types import BranchLineStyle, LabelSide, MergeCommitStyle, Orientation
+from gitsvg.theme import DEFAULT_THEME, DefaultTheme, Theme
 
 
 # ==================================================================================================

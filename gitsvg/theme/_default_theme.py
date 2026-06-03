@@ -20,12 +20,14 @@ the original was orientation-dependent.
 
 from typing import Any, Self
 
-from gitsvg.theme._box_anchor import BoxAnchor
-from gitsvg.theme._branch_line_style import BranchLineStyle
-from gitsvg.theme._commit_label_layout import CommitLabelLayout
-from gitsvg.theme._commit_row_mode import CommitRowMode
-from gitsvg.theme._merge_commit_style import MergeCommitStyle
-from gitsvg.theme._orientation import Orientation
+from gitsvg._value_types import (
+    BoxAnchor,
+    BranchLineStyle,
+    CommitLabelLayout,
+    CommitRowMode,
+    MergeCommitStyle,
+    Orientation,
+)
 from gitsvg.theme._theme import Theme, _resolve_int_or_float
 
 

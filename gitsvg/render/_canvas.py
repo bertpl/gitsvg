@@ -17,12 +17,11 @@ layout engine never reads it.
 from dataclasses import dataclass
 from typing import Literal
 
-from gitsvg.file_format import LabelSide
+from gitsvg._value_types import CommitLabelLayout, LabelSide, Orientation
 from gitsvg.layout import Layout
 from gitsvg.render._label_widths import commit_label_width, pill_height, pill_width
 from gitsvg.render._renderer_settings import RendererSettings
 from gitsvg.render._table import compute_table_columns
-from gitsvg.theme import CommitLabelLayout, Orientation
 
 # Auto-fit safety margin between content (pill / outward label) and the canvas
 # edge — keeps the rendered geometry from butting right up against the SVG

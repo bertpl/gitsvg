@@ -4,7 +4,7 @@ from typing import Literal, Self
 
 from pydantic import Field, model_validator
 
-from gitsvg.file_format._label_side import LabelSide
+from gitsvg._value_types import LabelSide
 from gitsvg.file_format.ops.framework._base import OpBase
 from gitsvg.file_format.ops.framework._types import HexColor, IdStr, NonNegativeInt
 

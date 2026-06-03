@@ -6,9 +6,10 @@ checkmark merge dots), and that `muted` pins exactly those three fields
 back so it reproduces the pre-refresh default everywhere else.
 """
 
+from gitsvg._value_types import BranchLineStyle, MergeCommitStyle, Orientation
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.state import apply_ops
-from gitsvg.theme import DEFAULT_THEME, BranchLineStyle, MergeCommitStyle, Orientation
+from gitsvg.theme import DEFAULT_THEME
 from gitsvg.theme.themes import MutedTheme
 
 # The three fields the refresh changed, with their pre-refresh values.

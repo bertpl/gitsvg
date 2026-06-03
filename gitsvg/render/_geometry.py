@@ -23,9 +23,10 @@ orientation-aware screen endpoints for the two line-shaped
 primitives.
 """
 
+from gitsvg._value_types import Orientation
 from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._renderer_settings import RendererSettings
-from gitsvg.theme import Orientation, _resolve_int_or_float
+from gitsvg.theme import _resolve_int_or_float
 
 
 def grid_to_pixel(branch_pos: int, commit_pos: int, canvas: RenderCanvas) -> tuple[float, float]:
