@@ -10,9 +10,9 @@ is finished by the time `apply_ops` runs. The resolver takes a list of
 flat expanded list with the same structure — the state engine sees no
 `import` ops, only the underlying op stream.
 
-Each `ParsedOp` carries `(file, line)` provenance from the parser, so
-downstream errors point at the original location regardless of how
-deeply the file was imported.
+Each `ParsedOp` carries its `(file, line)` source location from the
+parser, so downstream errors point at the original location regardless
+of how deeply the file was imported.
 """
 
 from pathlib import Path

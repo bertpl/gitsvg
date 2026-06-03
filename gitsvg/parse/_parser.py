@@ -2,8 +2,8 @@
 
 Reads a `.gitsvg.jsonl` file (or in-memory text) line by line, parses each
 non-empty line as JSON, dispatches to the right pydantic op model via the
-`op:` discriminator, and accumulates errors with `(file, line, field, code,
-message)` provenance into a `ValidationReport`.
+`op:` discriminator, and accumulates errors — each carrying `(file, line,
+field, code, message)` — into a `ValidationReport`.
 
 The parser does not raise — it accumulates. A line that fails one phase is
 skipped, but the parser continues to the next line so the agent gets the
@@ -44,7 +44,7 @@ def parse_jsonl_text(text: str, *, file: str = "<input>") -> tuple[list[ParsedOp
 
     Args:
         text: The full JSONL content.
-        file: Logical file path used for error provenance. Tests pass
+        file: Logical file path used for error reporting. Tests pass
             an arbitrary label; production callers pass the real path.
 
     Returns:
@@ -74,8 +74,8 @@ def _parse_one_line(raw: str, *, file: str, line: int) -> ParsedOp | list[Valida
 
     Args:
         raw: The raw line text (already known to be non-empty).
-        file: Source file path for error provenance.
-        line: 1-based line number for error provenance.
+        file: Source file path for error reporting.
+        line: 1-based line number for error reporting.
 
     Returns:
         A `ParsedOp` if the line is fully valid, or a list of one or
@@ -144,8 +144,8 @@ def _map_pydantic_error(err: dict, *, file: str, line: int) -> ValidationError:
 
     Args:
         err: One element from `PydanticValidationError.errors()`.
-        file: Source file path for error provenance.
-        line: 1-based line number for error provenance.
+        file: Source file path for error reporting.
+        line: 1-based line number for error reporting.
 
     Returns:
         A `ValidationError` whose `code` matches the pydantic error
