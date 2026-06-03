@@ -9,11 +9,11 @@ neither has to import the other. The CLI's file-based
 compose on top of it.
 """
 
-from gitsvg.errors import ValidationReport
-from gitsvg.parse import ParsedOp
-from gitsvg.state import State, apply_ops
-from gitsvg.theme import Theme, ThemeBuilder
-from gitsvg.validate import UserOverrides, check_cross_reference, check_resolved_config
+from .errors import ValidationReport
+from .parse import ParsedOp
+from .state import State, apply_ops
+from .theme import Theme, ThemeBuilder
+from .validate import UserOverrides, check_cross_reference, check_resolved_config
 
 
 def apply_and_validate(parsed_ops: list[ParsedOp], report: ValidationReport) -> tuple[State, Theme]:

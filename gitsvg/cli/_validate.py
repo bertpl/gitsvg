@@ -18,9 +18,10 @@ from pathlib import Path
 
 import click
 
-from gitsvg.cli._bulk import print_report_errors
-from gitsvg.cli._pipeline import run_validate_pipeline
 from gitsvg.errors import ValidationReport
+
+from ._bulk import print_report_errors
+from ._pipeline import run_validate_pipeline
 
 
 # ==================================================================================================

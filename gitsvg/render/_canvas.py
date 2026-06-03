@@ -19,9 +19,10 @@ from typing import Literal
 
 from gitsvg._shared.value_types import CommitLabelLayout, LabelSide, Orientation
 from gitsvg.layout import Layout
-from gitsvg.render._label_widths import commit_label_width, pill_height, pill_width
-from gitsvg.render._renderer_settings import RendererSettings
-from gitsvg.render._table import compute_table_columns
+
+from ._label_widths import commit_label_width, pill_height, pill_width
+from ._renderer_settings import RendererSettings
+from ._table import compute_table_columns
 
 # Auto-fit safety margin between content (pill / outward label) and the canvas
 # edge — keeps the rendered geometry from butting right up against the SVG

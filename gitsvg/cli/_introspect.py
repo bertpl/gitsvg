@@ -17,11 +17,12 @@ from typing import NoReturn
 
 import click
 
-from gitsvg.cli._bulk import print_report_errors, process_input
-from gitsvg.cli._pipeline import run_validate_pipeline
 from gitsvg.errors import ValidationReport
 from gitsvg.state import State
 from gitsvg.theme import Theme
+
+from ._bulk import print_report_errors, process_input
+from ._pipeline import run_validate_pipeline
 
 PayloadFn = Callable[[State, Theme], object]
 """Builds the JSON-serializable payload from the resolved state and theme."""

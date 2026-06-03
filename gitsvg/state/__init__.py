@@ -10,9 +10,9 @@ Public surface:
   exposed for downstream consumers (layout, rendering) and for tests.
 """
 
-from gitsvg.state._engine import apply_ops
-from gitsvg.state._serialization import state_to_json
-from gitsvg.state._state import BranchState, CommitState, GridState, State
+from ._engine import apply_ops
+from ._serialization import state_to_json
+from ._state import BranchState, CommitState, GridState, State
 
 __all__ = [
     "BranchState",

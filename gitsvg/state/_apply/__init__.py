@@ -13,7 +13,7 @@ the `ThemeBuilder` and leaves `State` untouched — shares the uniform
 type. External callers import the handlers from this package directly.
 """
 
-from gitsvg.state._apply._impl import (
+from ._impl import (
     apply_branch_op,
     apply_commit_op,
     apply_grid_op,

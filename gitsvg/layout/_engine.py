@@ -59,7 +59,9 @@ Heuristic notes:
 from collections.abc import Iterator
 
 from gitsvg._shared.value_types import CommitRowMode
-from gitsvg.layout._layout import (
+from gitsvg.state import BranchState, CommitState, GridState, State
+
+from ._layout import (
     GridSlot,
     LaneSegment,
     Layout,
@@ -69,10 +71,9 @@ from gitsvg.layout._layout import (
     LayoutGrid,
     LayoutPullRequest,
 )
-from gitsvg.layout._layout_arc_kind import LayoutArcKind
-from gitsvg.layout._layout_settings import LayoutSettings
-from gitsvg.layout._occupancy import Occupancy
-from gitsvg.state import BranchState, CommitState, GridState, State
+from ._layout_arc_kind import LayoutArcKind
+from ._layout_settings import LayoutSettings
+from ._occupancy import Occupancy
 
 
 def compute_layout(state: State, layout_settings: LayoutSettings | None = None) -> Layout:

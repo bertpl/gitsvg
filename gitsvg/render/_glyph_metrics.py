@@ -16,7 +16,7 @@ import logging
 from dataclasses import dataclass
 from typing import Final
 
-from gitsvg.render._glyph_widths import (
+from ._glyph_widths import (
     inter_bold,
     inter_regular,
     monospace_bold,

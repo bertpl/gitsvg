@@ -14,13 +14,13 @@ layout used elsewhere) and is re-exported here, so callers import from
 the package: `from gitsvg._shared.value_types import Orientation`.
 """
 
-from gitsvg._shared.value_types._box_anchor import BoxAnchor, validate_box_anchor
-from gitsvg._shared.value_types._branch_line_style import BranchLineStyle
-from gitsvg._shared.value_types._commit_label_layout import CommitLabelLayout
-from gitsvg._shared.value_types._commit_row_mode import CommitRowMode
-from gitsvg._shared.value_types._label_side import LabelSide
-from gitsvg._shared.value_types._merge_commit_style import MergeCommitStyle
-from gitsvg._shared.value_types._orientation import Orientation, normalize_orientation
+from ._box_anchor import BoxAnchor, validate_box_anchor
+from ._branch_line_style import BranchLineStyle
+from ._commit_label_layout import CommitLabelLayout
+from ._commit_row_mode import CommitRowMode
+from ._label_side import LabelSide
+from ._merge_commit_style import MergeCommitStyle
+from ._orientation import Orientation, normalize_orientation
 
 __all__ = [
     "BoxAnchor",

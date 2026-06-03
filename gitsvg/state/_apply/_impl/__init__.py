@@ -8,14 +8,14 @@ handlers also write per-branch overrides to the `ThemeBuilder`); the
 handler appends semantic errors to the report.
 """
 
-from gitsvg.state._apply._impl.branch import apply_branch_op
-from gitsvg.state._apply._impl.commit import apply_commit_op
-from gitsvg.state._apply._impl.grid import apply_grid_op
-from gitsvg.state._apply._impl.highlight import apply_highlight_op
-from gitsvg.state._apply._impl.merge import apply_merge_op
-from gitsvg.state._apply._impl.pull_request import apply_pull_request_op
-from gitsvg.state._apply._impl.remove import apply_remove_op
-from gitsvg.state._apply._impl.theme import apply_theme_op
+from .branch import apply_branch_op
+from .commit import apply_commit_op
+from .grid import apply_grid_op
+from .highlight import apply_highlight_op
+from .merge import apply_merge_op
+from .pull_request import apply_pull_request_op
+from .remove import apply_remove_op
+from .theme import apply_theme_op
 
 __all__ = [
     "apply_branch_op",

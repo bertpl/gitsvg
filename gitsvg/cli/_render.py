@@ -21,11 +21,12 @@ from pathlib import Path
 
 import click
 
-from gitsvg.cli._bulk import process_input
-from gitsvg.cli._pipeline import run_validate_pipeline
 from gitsvg.errors import ValidationReport
 from gitsvg.layout import compute_layout
 from gitsvg.render import compute_minify_config, minify, render
+
+from ._bulk import process_input
+from ._pipeline import run_validate_pipeline
 
 
 @click.command(name="render")

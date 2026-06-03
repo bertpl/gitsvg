@@ -25,7 +25,7 @@ lane-reuse, future left-to-right orientations) all produce the same
 
 from dataclasses import dataclass, field
 
-from gitsvg.layout._layout_arc_kind import LayoutArcKind
+from ._layout_arc_kind import LayoutArcKind
 
 
 @dataclass(slots=True)

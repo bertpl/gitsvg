@@ -1,14 +1,14 @@
 """Op-implementation modules — one pydantic model per operation."""
 
-from gitsvg.file_format.ops.impl._branch import BranchOp
-from gitsvg.file_format.ops.impl._commit import CommitOp
-from gitsvg.file_format.ops.impl._grid import GridOp
-from gitsvg.file_format.ops.impl._highlight import HighlightOp
-from gitsvg.file_format.ops.impl._import import ImportOp
-from gitsvg.file_format.ops.impl._merge import MergeOp
-from gitsvg.file_format.ops.impl._pull_request import PullRequestOp
-from gitsvg.file_format.ops.impl._remove import RemoveOp
-from gitsvg.file_format.ops.impl._theme import ThemeOp
+from ._branch import BranchOp
+from ._commit import CommitOp
+from ._grid import GridOp
+from ._highlight import HighlightOp
+from ._import import ImportOp
+from ._merge import MergeOp
+from ._pull_request import PullRequestOp
+from ._remove import RemoveOp
+from ._theme import ThemeOp
 
 __all__ = [
     "BranchOp",

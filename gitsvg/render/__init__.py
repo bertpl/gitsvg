@@ -10,7 +10,7 @@ Public surface:
   to drive from a `MinifyLevel`.
 """
 
-from gitsvg.render._minify import MinifyConfig, MinifyLevel, compute_minify_config, minify
-from gitsvg.render._renderer import render
+from ._minify import MinifyConfig, MinifyLevel, compute_minify_config, minify
+from ._renderer import render
 
 __all__ = ["MinifyConfig", "MinifyLevel", "compute_minify_config", "minify", "render"]

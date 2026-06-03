@@ -21,7 +21,8 @@ not this validation pass (see `docs/architecture.md` invariant 7).
 from gitsvg._shared.value_types import CommitLabelLayout, CommitRowMode
 from gitsvg.errors import ValidationError, ValidationReport
 from gitsvg.theme import Theme
-from gitsvg.validate._user_overrides import UserOverrides
+
+from ._user_overrides import UserOverrides
 
 
 def check_resolved_config(theme: Theme, overrides: UserOverrides, report: ValidationReport) -> None:

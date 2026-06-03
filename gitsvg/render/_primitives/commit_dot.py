@@ -6,8 +6,9 @@ from gitsvg._shared.value_types import MergeCommitStyle
 from gitsvg.layout import LayoutCommit
 from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._geometry import grid_to_pixel
-from gitsvg.render._primitives.merge_dot_styles import _MERGE_DOT_BUILDERS
 from gitsvg.render._renderer_settings import RendererSettings
+
+from .merge_dot_styles import _MERGE_DOT_BUILDERS
 
 
 def draw_commit_dot(

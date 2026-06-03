@@ -47,20 +47,21 @@ import drawsvg as draw
 
 from gitsvg._shared.color import is_color_visible
 from gitsvg.layout import GridSlot, Layout, LayoutArc, LayoutBranch, LayoutPullRequest
-from gitsvg.render._canvas import compute_canvas, is_table_active
-from gitsvg.render._colors import resolve_branch_color
-from gitsvg.render._primitives.arc import draw_arc
-from gitsvg.render._primitives.branch_guide import draw_branch_guide
-from gitsvg.render._primitives.branch_line import draw_branch_line
-from gitsvg.render._primitives.branch_pill import draw_branch_pill
-from gitsvg.render._primitives.commit_dot import draw_commit_dot
-from gitsvg.render._primitives.commit_label import draw_commit_label
-from gitsvg.render._primitives.commit_row_band import draw_commit_row_band
-from gitsvg.render._primitives.commit_table import draw_commit_table
-from gitsvg.render._primitives.pull_request_pill import draw_pull_request_pill
-from gitsvg.render._renderer_settings import RendererSettings
-from gitsvg.render._table import compute_table_columns
 from gitsvg.theme import DEFAULT_THEME
+
+from ._canvas import compute_canvas, is_table_active
+from ._colors import resolve_branch_color
+from ._primitives.arc import draw_arc
+from ._primitives.branch_guide import draw_branch_guide
+from ._primitives.branch_line import draw_branch_line
+from ._primitives.branch_pill import draw_branch_pill
+from ._primitives.commit_dot import draw_commit_dot
+from ._primitives.commit_label import draw_commit_label
+from ._primitives.commit_row_band import draw_commit_row_band
+from ._primitives.commit_table import draw_commit_table
+from ._primitives.pull_request_pill import draw_pull_request_pill
+from ._renderer_settings import RendererSettings
+from ._table import compute_table_columns
 
 
 def _branch_through_point(layout: Layout, point: GridSlot) -> LayoutBranch:

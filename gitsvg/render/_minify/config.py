@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 
-from gitsvg.render._minify.level import MinifyLevel
+from .level import MinifyLevel
 
 
 @dataclass(frozen=True)

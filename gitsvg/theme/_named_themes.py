@@ -8,9 +8,9 @@ Maps each public name to its `Theme` subclass: `default` to the base
 reads it to list and describe the themes.
 """
 
-from gitsvg.theme._default_theme import DefaultTheme
-from gitsvg.theme._theme import Theme
-from gitsvg.theme.themes import CompactTheme, DarkTheme, GuiTheme, MutedTheme
+from ._default_theme import DefaultTheme
+from ._theme import Theme
+from .themes import CompactTheme, DarkTheme, GuiTheme, MutedTheme
 
 # New named themes land here; no other wiring is needed — both the apply
 # handler and the `gitsvg theme` command read the registry dynamically.

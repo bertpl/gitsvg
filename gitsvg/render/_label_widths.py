@@ -7,8 +7,9 @@ which sizes geometry safely against every font in
 """
 
 from gitsvg.layout import LayoutCommit
-from gitsvg.render._glyph_metrics import text_width
-from gitsvg.render._renderer_settings import RendererSettings
+
+from ._glyph_metrics import text_width
+from ._renderer_settings import RendererSettings
 
 
 def pill_width(text: str, theme: RendererSettings) -> float:

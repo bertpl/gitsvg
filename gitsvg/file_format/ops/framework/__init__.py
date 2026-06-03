@@ -9,8 +9,8 @@ leaf path (`gitsvg.file_format.ops.framework._base`), not via this
 package, to avoid circular imports during `_union` loading.
 """
 
-from gitsvg.file_format.ops.framework._base import OpBase
-from gitsvg.file_format.ops.framework._union import (
+from ._base import OpBase
+from ._union import (
     ALL_OP_TYPES,
     OP_ADAPTER,
     OP_BY_NAME,

@@ -1,6 +1,6 @@
 """ValidationReport — collection of `ValidationError` records from a run."""
 
-from gitsvg.errors._validation_error import ValidationError
+from ._validation_error import ValidationError
 
 
 class ValidationReport:

@@ -33,8 +33,8 @@ internal trunk / branch terms.
 import dataclasses
 from typing import Any
 
-from gitsvg.layout._layout import Layout, LayoutArc, LayoutBranch, LayoutPullRequest
-from gitsvg.layout._layout_arc_kind import LayoutArcKind
+from ._layout import Layout, LayoutArc, LayoutBranch, LayoutPullRequest
+from ._layout_arc_kind import LayoutArcKind
 
 
 def _branch_to_json(branch: LayoutBranch) -> dict[str, Any]:

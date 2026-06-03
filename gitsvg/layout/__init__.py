@@ -14,8 +14,8 @@ fonts, pixel dimensions, and every other presentational decision live
 on the resolved `Theme` the renderer reads.
 """
 
-from gitsvg.layout._engine import compute_layout
-from gitsvg.layout._layout import (
+from ._engine import compute_layout
+from ._layout import (
     GridSlot,
     LaneSegment,
     Layout,
@@ -25,8 +25,8 @@ from gitsvg.layout._layout import (
     LayoutGrid,
     LayoutPullRequest,
 )
-from gitsvg.layout._layout_arc_kind import LayoutArcKind
-from gitsvg.layout._serialization import layout_to_json
+from ._layout_arc_kind import LayoutArcKind
+from ._serialization import layout_to_json
 
 __all__ = [
     "GridSlot",
