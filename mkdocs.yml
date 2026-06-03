@@ -1,0 +1,53 @@
+site_name: gitsvg
+site_description: CLI that renders git tree visualizations as SVG from JSONL input.
+site_url: https://gitsvg.readthedocs.io/
+repo_url: https://github.com/bertpl/gitsvg
+repo_name: bertpl/gitsvg
+edit_uri: ""
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.top
+    - content.code.copy
+    - toc.integrate
+
+nav:
+  - Home: index.md
+  - Examples: examples.md
+  - CLI reference: cli.md
+  - Input format: format.md
+  - Python API: api.md
+  - Architecture: architecture.md
+
+markdown_extensions:
+  - admonition
+  - toc:
+      permalink: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - tables
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/bertpl/gitsvg
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/gitsvg/

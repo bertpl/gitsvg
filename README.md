@@ -6,6 +6,9 @@ CLI that renders git tree visualizations as SVG from JSONL input.
 [![PyPI](https://img.shields.io/pypi/v/gitsvg.svg)](https://pypi.org/project/gitsvg/)
 [![Python](https://img.shields.io/pypi/pyversions/gitsvg.svg)](https://pypi.org/project/gitsvg/)
 [![License](https://img.shields.io/badge/license-MIT-blue)](https://github.com/bertpl/gitsvg/blob/main/LICENSE)
+[![Docs](https://img.shields.io/badge/docs-readthedocs-blue)](https://gitsvg.readthedocs.io/)
+
+📖 **Documentation:** [gitsvg.readthedocs.io](https://gitsvg.readthedocs.io/)
 
 ## Installation
 

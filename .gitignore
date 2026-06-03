@@ -28,6 +28,10 @@ local/
 Thumbs.db
 Desktop.ini
 
+# Docs site build output
+site/
+docs-requirements.txt
+
 # AI assistants
 .claude/
 CLAUDE.md
