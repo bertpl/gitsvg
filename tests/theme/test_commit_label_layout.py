@@ -4,9 +4,10 @@ Table mode forces `commit_row_mode → unique` at the `Theme.split()`
 boundary; the layout engine never sees `commit_label_layout` itself.
 """
 
+from gitsvg._shared.value_types import CommitLabelLayout, CommitRowMode
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.state import apply_ops
-from gitsvg.theme import CommitLabelLayout, CommitRowMode, DefaultTheme
+from gitsvg.theme import DefaultTheme
 
 
 def test_default_commit_label_layout_is_inline() -> None:

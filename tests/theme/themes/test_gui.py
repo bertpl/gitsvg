@@ -1,8 +1,8 @@
 """Tests for `GuiTheme` — desktop-git-GUI look: table layout + Fork palette."""
 
+from gitsvg._shared.value_types import BranchLineStyle, CommitLabelLayout, MergeCommitStyle, Orientation
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.state import apply_ops
-from gitsvg.theme import BranchLineStyle, CommitLabelLayout, MergeCommitStyle, Orientation
 from gitsvg.theme.themes import GuiTheme
 
 

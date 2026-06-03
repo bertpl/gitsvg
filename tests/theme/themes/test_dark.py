@@ -1,10 +1,10 @@
 """Tests for `DarkTheme` — One Dark-inspired palette overrides + render smoke."""
 
+from gitsvg._shared.value_types import BranchLineStyle, Orientation
 from gitsvg.layout import compute_layout
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.render import render
 from gitsvg.state import apply_ops
-from gitsvg.theme import BranchLineStyle, Orientation
 from gitsvg.theme.themes import DarkTheme
 
 

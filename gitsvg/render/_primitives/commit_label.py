@@ -29,7 +29,7 @@ Layout:
 
 import drawsvg as draw
 
-from gitsvg.file_format import LabelSide
+from gitsvg._shared.value_types import LabelSide
 from gitsvg.layout import LayoutCommit
 from gitsvg.render._anchor_resolution import rotated_target
 from gitsvg.render._canvas import RenderCanvas

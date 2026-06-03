@@ -1,6 +1,7 @@
 """Resolution tests for `theme.branch_line_style`."""
 
-from gitsvg.theme import BranchLineStyle, DefaultTheme
+from gitsvg._shared.value_types import BranchLineStyle
+from gitsvg.theme import DefaultTheme
 
 
 def test_default_branch_line_style_is_bezier() -> None:

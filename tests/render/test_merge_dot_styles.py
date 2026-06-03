@@ -8,6 +8,7 @@ untouched, and every (orientation, style) pair renders cleanly.
 import drawsvg as draw
 import pytest
 
+from gitsvg._shared.value_types import MergeCommitStyle
 from gitsvg.layout import compute_layout
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.render import render
@@ -18,7 +19,7 @@ from gitsvg.render._primitives.merge_dot_styles import (
     _draw_circle,
 )
 from gitsvg.state import apply_ops
-from gitsvg.theme import DEFAULT_THEME, MergeCommitStyle
+from gitsvg.theme import DEFAULT_THEME
 
 # Renderer settings for builder-level tests (supplies stroke color / width).
 _, _RT = DEFAULT_THEME.split()

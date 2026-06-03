@@ -31,11 +31,11 @@ from dataclasses import dataclass
 
 import drawsvg as draw
 
+from gitsvg._shared.value_types import BranchLineStyle
 from gitsvg.layout import GridSlot
 from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._geometry import grid_to_pixel
 from gitsvg.render._renderer_settings import RendererSettings
-from gitsvg.theme._branch_line_style import BranchLineStyle
 
 # Sub-pixel tolerance below which a connector segment degenerates (collapses
 # to a straight line). Pure numerical-precision guard; never scales.

@@ -2,13 +2,14 @@
 
 import xml.etree.ElementTree as ET
 
+from gitsvg._shared.value_types import Orientation
 from gitsvg.layout import compute_layout
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.render import render
 from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._geometry import commit_row_band_rect
 from gitsvg.state import apply_ops
-from gitsvg.theme import DEFAULT_THEME, DefaultTheme, Orientation
+from gitsvg.theme import DEFAULT_THEME, DefaultTheme
 
 # A single branch with four commits → commit rows 0, 1, 2, 3 (n_commits == 4),
 # so odd-index rows 1 and 3 carry a band.

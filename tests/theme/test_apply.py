@@ -2,7 +2,7 @@
 
 import pytest
 
-from gitsvg.file_format import LabelSide
+from gitsvg._shared.value_types import LabelSide
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.state import apply_ops
 from gitsvg.theme import DEFAULT_THEME

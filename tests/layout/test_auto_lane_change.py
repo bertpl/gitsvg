@@ -292,7 +292,7 @@ def test_forward_reference_completes_under_the_sweep() -> None:
 def test_composes_with_unique_commit_rows() -> None:
     """`auto_lane_change` and `commit_row_mode = unique` compose without error."""
     # --- arrange ----------------------
-    from gitsvg.theme import CommitRowMode
+    from gitsvg._shared.value_types import CommitRowMode
 
     parsed, report = parse_jsonl_text(_MIGRATION_TEXT, file="x.jsonl")
     state, _theme = apply_ops(parsed, report)

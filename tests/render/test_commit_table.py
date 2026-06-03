@@ -2,12 +2,13 @@
 
 import xml.etree.ElementTree as ET
 
+from gitsvg._shared.value_types import CommitLabelLayout, Orientation
 from gitsvg.layout import compute_layout
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.render import render
 from gitsvg.render._canvas import compute_canvas, is_table_active
 from gitsvg.state import apply_ops
-from gitsvg.theme import CommitLabelLayout, DefaultTheme, Orientation
+from gitsvg.theme import DefaultTheme
 
 
 def _table_render(text: str, **overrides):

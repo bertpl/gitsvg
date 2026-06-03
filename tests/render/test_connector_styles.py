@@ -10,6 +10,7 @@ import re
 import drawsvg as draw
 import pytest
 
+from gitsvg._shared.value_types import BranchLineStyle
 from gitsvg.layout import compute_layout
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.render import render
@@ -24,7 +25,6 @@ from gitsvg.render._primitives.connector_styles import (
     _ConnectorGeometry,
 )
 from gitsvg.state import apply_ops
-from gitsvg.theme import BranchLineStyle
 
 # A representative non-degenerate connector: one lane and one row apart.
 _GEOM = _ConnectorGeometry(

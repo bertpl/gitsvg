@@ -32,13 +32,16 @@ from typing import Any, Self
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from gitsvg.file_format import LabelSide
-from gitsvg.theme._box_anchor import BoxAnchor, validate_box_anchor
-from gitsvg.theme._branch_line_style import BranchLineStyle
-from gitsvg.theme._commit_label_layout import CommitLabelLayout
-from gitsvg.theme._commit_row_mode import CommitRowMode
-from gitsvg.theme._merge_commit_style import MergeCommitStyle
-from gitsvg.theme._orientation import Orientation
+from gitsvg._shared.value_types import (
+    BoxAnchor,
+    BranchLineStyle,
+    CommitLabelLayout,
+    CommitRowMode,
+    LabelSide,
+    MergeCommitStyle,
+    Orientation,
+    validate_box_anchor,
+)
 
 
 class Theme(BaseModel):
