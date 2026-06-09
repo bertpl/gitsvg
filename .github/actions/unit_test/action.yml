@@ -1,6 +1,7 @@
 name: Unit test
 description: |
-  Set up Python and run pytest at a chosen dependency resolution.
+  Set up Python and run pytest at a chosen dependency resolution, optionally
+  under coverage (uploading the data file for a cross-matrix combine).
 
 inputs:
   python-version:
@@ -14,6 +15,14 @@ inputs:
       oldest supported dependency range).
     required: false
     default: highest
+  coverage:
+    description: |
+      "true" runs tests under coverage and uploads the per-combo data file as
+      an artifact, for the cross-matrix combine/gate. "false" (default, e.g.
+      branch-push CI) runs plain pytest — a partial matrix can't produce a
+      trustworthy cumulative number, so it isn't gated there.
+    required: false
+    default: "false"
 
 runs:
   using: composite
@@ -23,12 +32,31 @@ runs:
       with:
         python-version: ${{ inputs.python-version }}
 
-    - name: Run pytest (resolution=${{ inputs.resolution }})
+    - name: Drop the lockfile so --resolution takes effect
       shell: bash
-      run: |
-        # Drop the lockfile so the resolution strategy takes effect: with a
-        # lock present uv reuses its pins and silently ignores --resolution.
-        # `highest` then tests the newest compatible deps and `lowest-direct`
-        # the declared floors, bracketing the full published range.
-        rm -f uv.lock
-        uv run --resolution ${{ inputs.resolution }} --group dev pytest tests --durations=20
+      run: rm -f uv.lock  # with a lock present uv reuses its pins and ignores --resolution
+
+    - name: Run pytest (resolution=${{ inputs.resolution }})
+      if: inputs.coverage != 'true'
+      shell: bash
+      run: uv run --resolution ${{ inputs.resolution }} --group dev pytest tests --durations=20
+
+    - name: Run pytest under coverage (resolution=${{ inputs.resolution }})
+      if: inputs.coverage == 'true'
+      shell: bash
+      env:
+        # the conftest hook dumps collected node-ids here; the coverage job
+        # unions them across combos into the cumulative test count
+        GITSVG_NODEID_DUMP: test-ids-${{ inputs.python-version }}-${{ runner.os }}-${{ inputs.resolution }}.txt
+      run: uv run --resolution ${{ inputs.resolution }} --group dev coverage run -m pytest tests --durations=20
+
+    - name: Upload coverage + node-id data
+      if: inputs.coverage == 'true'
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      with:
+        name: coverage-data-${{ inputs.python-version }}-${{ runner.os }}-${{ inputs.resolution }}
+        path: |
+          .coverage.*
+          test-ids-*.txt
+        include-hidden-files: true  # .coverage.* are dotfiles; v4 excludes them by default
+        if-no-files-found: error
