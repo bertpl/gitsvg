@@ -8,9 +8,11 @@ Unreleased section, commits, and pushes main + tag atomically.
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import subprocess
 import sys
+import tempfile
 import urllib.error
 import urllib.request
 from datetime import date
@@ -214,19 +216,52 @@ def step_10_finalize_changelog(version: str) -> None:
     CHANGELOG.write_text(text)
 
 
-def _total_coverage() -> int:
-    """Run the suite under coverage and return the rounded total percentage."""
-    run_command(["uv", "run", "--group", "dev", "coverage", "run", "-m", "pytest", "tests"])
-    run_command(["uv", "run", "--group", "dev", "coverage", "combine"])
-    total = run_command(["uv", "run", "--group", "dev", "coverage", "report", "--format=total"])
-    return round(float(total.strip()))
+# warn if the cumulative union exceeds this multiple of the largest single combo
+TEST_COUNT_UNION_RATIO_WARN = 1.5
 
 
-def _collected_test_count() -> int:
-    """Return the number of tests pytest collects."""
-    out = run_command(["uv", "run", "pytest", "--collect-only", "-q"])
-    m = re.search(r"(\d+) tests? collected", out)
-    return int(m.group(1)) if m else sum(1 for line in out.splitlines() if "::" in line)
+def _latest_main_coverage_run() -> tuple[str, str]:
+    """Return (run_id, head_sha) of the latest successful 'Push to Main' run."""
+    out = run_command(
+        [
+            "gh",
+            "run",
+            "list",
+            "--workflow",
+            "push_to_main.yml",
+            "--branch",
+            "main",
+            "--status",
+            "success",
+            "--limit",
+            "1",
+            "--json",
+            "databaseId,headSha",
+        ]
+    )
+    runs = json.loads(out)
+    if not runs:
+        fail_with_message("no successful 'Push to Main' run found to source coverage metrics from")
+    return str(runs[0]["databaseId"]), runs[0]["headSha"]
+
+
+def _fetch_release_metrics() -> dict[str, float]:
+    """Download CI's cumulative metrics for the commit being released.
+
+    The numbers come from the matrix combine job, not a local run, so the
+    badge matches the CI gate exactly. Fails if the latest green main run is
+    not the commit at HEAD (i.e. CI on current main hasn't gone green yet).
+    """
+    run_id, head_sha = _latest_main_coverage_run()
+    local_head = run_command(["git", "rev-parse", "HEAD"]).strip()
+    if head_sha != local_head:
+        fail_with_message(
+            f"latest main coverage run is for {head_sha[:8]}, not HEAD {local_head[:8]} — "
+            "wait for CI on current main to go green before releasing"
+        )
+    with tempfile.TemporaryDirectory() as tmp:
+        run_command(["gh", "run", "download", run_id, "--name", "release-metrics", "--dir", tmp])
+        return json.loads((Path(tmp) / "metrics.json").read_text())
 
 
 def _coverage_color(pct: int) -> str:
@@ -237,16 +272,25 @@ def _coverage_color(pct: int) -> str:
 
 
 def refresh_readme_badges() -> None:
-    """Rewrite the README coverage + test-count badges from a local coverage run."""
-    coverage = _total_coverage()
-    n_tests = _collected_test_count()
+    """Stamp the README coverage + test-count badges from CI's cumulative metrics."""
+    metrics = _fetch_release_metrics()
+    coverage = round(metrics["coverage_pct"])
+    union = int(metrics["test_union"])
+    max_combo = int(metrics["test_max"])
+    if max_combo and union > TEST_COUNT_UNION_RATIO_WARN * max_combo:
+        print(
+            f"\nWARNING: cumulative test count ({union}) exceeds "
+            f"{TEST_COUNT_UNION_RATIO_WARN}x the largest single combo ({max_combo}). "
+            "Node-id mismatches across combos can inflate the union — verify before publishing.\n",
+            file=sys.stderr,
+        )
     text = README.read_text()
     text = re.sub(
         r"badge/coverage-\d+%25-[a-z]+",
         f"badge/coverage-{coverage}%25-{_coverage_color(coverage)}",
         text,
     )
-    text = re.sub(r"badge/tests-\d+-blue", f"badge/tests-{n_tests}-blue", text)
+    text = re.sub(r"badge/tests-\d+-blue", f"badge/tests-{union}-blue", text)
     README.write_text(text)
 
 

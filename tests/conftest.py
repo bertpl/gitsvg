@@ -3,12 +3,24 @@
 Shared fixtures — accessible from any test file under `tests/`.
 """
 
+import os
 from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
 
 from gitsvg.errors import _codes
+
+
+def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
+    """Dump collected node-ids to ``$GITSVG_NODEID_DUMP`` when set.
+
+    CI sets this per matrix combo so the coverage job can union the node-ids
+    across combos into the cumulative test count. A no-op on normal runs.
+    """
+    dump_path = os.environ.get("GITSVG_NODEID_DUMP")
+    if dump_path:
+        Path(dump_path).write_text("\n".join(item.nodeid for item in items) + "\n")
 
 
 @pytest.fixture

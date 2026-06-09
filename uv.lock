@@ -368,6 +368,7 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "coverage" },
     { name = "fonttools" },
     { name = "pre-commit" },
     { name = "pytest" },
@@ -390,10 +391,11 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "coverage", specifier = "==7.13.5" },
     { name = "fonttools", specifier = ">=4.55.0" },
     { name = "pre-commit", specifier = ">=4.0" },
-    { name = "pytest", specifier = ">=9.0" },
-    { name = "pytest-cov", specifier = ">=6.0" },
+    { name = "pytest", specifier = "==9.0.3" },
+    { name = "pytest-cov", specifier = "==7.1.0" },
     { name = "ruff", specifier = ">=0.14.0" },
     { name = "ty", specifier = "==0.0.46" },
 ]

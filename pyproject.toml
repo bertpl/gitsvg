@@ -31,8 +31,13 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "pytest>=9.0",
-    "pytest-cov>=6.0",
+    # Test harness pinned exactly so every matrix combo (highest + lowest-direct)
+    # runs an identical pytest — node-ids are then deterministic across combos,
+    # which the cumulative test-count union relies on. pytest is dev-only, so
+    # this is orthogonal to the runtime dependency-floor matrix.
+    "pytest==9.0.3",
+    "pytest-cov==7.1.0",
+    "coverage==7.13.5",  # CI drives `coverage` directly (combine across the matrix)
     "ruff>=0.14.0",
     "ty==0.0.46",  # preview type checker — pin exactly; its ruleset is still evolving
     "pre-commit>=4.0",
