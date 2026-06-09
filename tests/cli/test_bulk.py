@@ -120,7 +120,7 @@ def test_mirror_output_path_rejects_non_gitsvg_suffix(tmp_path: Path) -> None:
     input_file = input_root / "x.txt"
 
     # --- act / assert -----------------
-    with pytest.raises(ValueError, match="gitsvg.jsonl"):
+    with pytest.raises(ValueError, match=r"gitsvg\.jsonl"):
         mirror_output_path(input_file, input_root, output_root, ".svg")
 
 

@@ -62,7 +62,11 @@ class CompactTheme(DefaultTheme):
 
     @classmethod
     def _resolve_label_font_size(cls) -> float:
-        """Commit-message font size — `9.5`, the half-step below `DefaultTheme`'s `11` that keeps long messages from crowding the tighter rows."""
+        """Commit-message font size — `9.5`.
+
+        The half-step below `DefaultTheme`'s `11` that keeps long messages
+        from crowding the tighter rows.
+        """
         return 9.5
 
     @classmethod

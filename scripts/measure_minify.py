@@ -62,7 +62,7 @@ def main() -> int:
     print(header)
     print("-" * len(header))
 
-    totals = {level: 0 for level in LEVELS}
+    totals = dict.fromkeys(LEVELS, 0)
     for input_path in inputs:
         sizes = {level: len(_render_at_level(input_path, level).encode("utf-8")) for level in LEVELS}
         baseline = sizes[0]

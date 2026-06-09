@@ -42,10 +42,9 @@ def hoist_font_family_to_root(svg: str) -> str:
         svg,
     )
     # Add it to the <svg ...> opening tag, just before the closing `>`.
-    svg = re.sub(
+    return re.sub(
         r"(<svg\b[^>]*?)>",
         rf'\1 font-family="{common_value}">',
         svg,
         count=1,
     )
-    return svg

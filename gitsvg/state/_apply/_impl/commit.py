@@ -2,7 +2,7 @@
 
 from typing import cast
 
-from gitsvg.errors import ValidationError, ValidationReport
+from gitsvg.errors import ValidationReport
 from gitsvg.file_format.ops import CommitOp
 from gitsvg.parse import ParsedOp
 from gitsvg.state._apply._checks import check_replaces_rules
@@ -31,7 +31,7 @@ def apply_commit_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, repor
     stored list is the single canonical parent set every downstream
     consumer reads. Multi-parent commits come only from the `merge` op.
     """
-    op = cast(CommitOp, parsed.op)
+    op = cast("CommitOp", parsed.op)
     file = parsed.file
     line = parsed.line
 

@@ -28,7 +28,7 @@ downstream consumers (renderer, canvas auto-fit, primitives) read
 just as before.
 """
 
-from typing import Any, Self
+from typing import TYPE_CHECKING, Any, Self
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -43,6 +43,10 @@ from gitsvg._shared.value_types import (
     Orientation,
     validate_box_anchor,
 )
+
+if TYPE_CHECKING:
+    from gitsvg.layout._layout_settings import LayoutSettings
+    from gitsvg.render._renderer_settings import RendererSettings
 
 
 class Theme(BaseModel):
@@ -222,12 +226,13 @@ class Theme(BaseModel):
     )
     @classmethod
     def _whole_values_render_as_int(cls, v: float | None) -> float | None:
-        """Store a whole-number size as `int` so the SVG renders it without a
-        decimal point (`5`, not `5.0`); fractional values pass through as
-        `float` for sub-pixel output. This is the same treatment the
-        ratio-stored fields already get via their resolved-pixel accessors,
-        so output is unchanged for the whole-number values diagrams have
-        always used."""
+        """Store a whole-number size as `int` so the SVG renders it without a decimal point.
+
+        `5`, not `5.0`; fractional values pass through as `float` for
+        sub-pixel output. This is the same treatment the ratio-stored fields
+        already get via their resolved-pixel accessors, so output is
+        unchanged for the whole-number values diagrams have always used.
+        """
         return resolve_int_or_float(v) if v is not None else None
 
     @field_validator("branch_spacing", "commit_spacing")

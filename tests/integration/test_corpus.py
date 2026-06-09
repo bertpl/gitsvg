@@ -68,7 +68,7 @@ SAD_FIXTURES: list[tuple[str, set[str]]] = [
 ]
 
 
-@pytest.mark.parametrize("filename, expected_codes", SAD_FIXTURES)
+@pytest.mark.parametrize(("filename", "expected_codes"), SAD_FIXTURES)
 def test_sad_fixture_emits_expected_codes(filename: str, expected_codes: set[str]) -> None:
     # --- act --------------------------
     report = _validate(CORPUS_DIR / filename)

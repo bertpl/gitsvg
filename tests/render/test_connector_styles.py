@@ -78,7 +78,8 @@ def test_straight_emits_a_line_and_no_curve() -> None:
 
     # --- assert -----------------------
     assert "L" in d
-    assert "A" not in d and "C" not in d
+    assert "A" not in d
+    assert "C" not in d
 
 
 def test_rounded_emits_one_quarter_arc() -> None:

@@ -30,15 +30,15 @@ from .impl import (
 
 __all__ = [
     "ALL_OP_TYPES",
+    "OP_ADAPTER",
+    "OP_BY_NAME",
+    "OP_NAMES",
     "BranchOp",
     "CommitOp",
     "GridOp",
     "HighlightOp",
     "ImportOp",
     "MergeOp",
-    "OP_ADAPTER",
-    "OP_BY_NAME",
-    "OP_NAMES",
     "OpBase",
     "OpUnion",
     "PullRequestOp",

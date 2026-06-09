@@ -22,7 +22,7 @@ from gitsvg.file_format.ops import (
 #  Happy-path: minimal valid input per op
 # ==================================================================================================
 @pytest.mark.parametrize(
-    "raw, expected_cls",
+    ("raw", "expected_cls"),
     [
         ({"op": "import", "path": "./other.gitsvg.jsonl"}, ImportOp),
         ({"op": "grid"}, GridOp),

@@ -6,7 +6,7 @@ from gitsvg.render._minify import round_numbers
 
 
 @pytest.mark.parametrize(
-    "raw, decimals, expected",
+    ("raw", "decimals", "expected"),
     [
         # 1-decimal rounding
         ('x="105.32"', 1, 'x="105.3"'),

@@ -87,7 +87,7 @@ def test_config_is_frozen(level: MinifyLevel) -> None:
         config.level = 99  # type: ignore[misc]
 
 
-@pytest.mark.parametrize("level, expected_decimals", [(0, 0), (1, 6), (2, 4), (3, 2)])
+@pytest.mark.parametrize(("level", "expected_decimals"), [(0, 0), (1, 6), (2, 4), (3, 2)])
 def test_rounding_decimals_ladder(level: MinifyLevel, expected_decimals: int) -> None:
     # --- act --------------------------
     config = compute_minify_config(level)
@@ -99,7 +99,7 @@ def test_rounding_decimals_ladder(level: MinifyLevel, expected_decimals: int) ->
 def test_minify_config_is_a_dataclass_with_explicit_fields() -> None:
     """Sanity check: `MinifyConfig` exposes the documented set of fields."""
     # --- arrange / act ----------------
-    fields = {f for f in MinifyConfig.__dataclass_fields__}
+    fields = set(MinifyConfig.__dataclass_fields__)
 
     # --- assert -----------------------
     expected = {

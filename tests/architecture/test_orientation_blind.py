@@ -38,9 +38,9 @@ def _orientation_uses(path: Path) -> list[int]:
     tree = ast.parse(path.read_text())
     lines: list[int] = []
     for node in ast.walk(tree):
-        if isinstance(node, ast.Attribute) and node.attr == "orientation":
-            lines.append(node.lineno)
-        elif isinstance(node, ast.Name) and node.id == "Orientation":
+        if (isinstance(node, ast.Attribute) and node.attr == "orientation") or (
+            isinstance(node, ast.Name) and node.id == "Orientation"
+        ):
             lines.append(node.lineno)
     return sorted(lines)
 

@@ -9,7 +9,7 @@ from pathlib import Path
 
 from gitsvg.cli._pipeline import apply_and_validate
 from gitsvg.layout import compute_layout
-from gitsvg.parse import parse_jsonl_file, parse_jsonl_text
+from gitsvg.parse import parse_jsonl_file
 from gitsvg.render import render
 
 _FIXTURE = Path(__file__).parent.parent / "fixtures" / "inputs" / "happy_theme.gitsvg.jsonl"
@@ -32,7 +32,7 @@ def test_happy_theme_resolved_theme_carries_overrides_and_cascade() -> None:
     label_font_size override should survive (different field)."""
     # --- arrange / act ----------------
     parsed, report = parse_jsonl_file(_FIXTURE)
-    state, theme = apply_and_validate(parsed, report)
+    _state, theme = apply_and_validate(parsed, report)
     assert report.is_clean()
 
     # --- assert -----------------------

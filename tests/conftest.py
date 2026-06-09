@@ -31,7 +31,7 @@ def populated_registry(
     """
     registry = _codes._scan_catalog(fixtures_catalog_dir)
     monkeypatch.setattr(_codes, "_REGISTERED_CODES", registry)
-    yield registry
+    return registry
 
 
 @pytest.fixture
@@ -43,4 +43,4 @@ def empty_registry(monkeypatch: pytest.MonkeyPatch) -> Iterator[dict[str, _codes
     """
     fresh: dict[str, _codes.ErrorCode] = {}
     monkeypatch.setattr(_codes, "_REGISTERED_CODES", fresh)
-    yield fresh
+    return fresh

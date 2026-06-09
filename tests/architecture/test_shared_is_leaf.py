@@ -41,9 +41,13 @@ def _external_gitsvg_imports(path: Path) -> list[str]:
             for alias in node.names:
                 if _is_external_gitsvg(alias.name):
                     offenders.append(alias.name)
-        elif isinstance(node, ast.ImportFrom):
-            if node.level == 0 and node.module is not None and _is_external_gitsvg(node.module):
-                offenders.append(node.module)
+        elif (
+            isinstance(node, ast.ImportFrom)
+            and node.level == 0
+            and node.module is not None
+            and _is_external_gitsvg(node.module)
+        ):
+            offenders.append(node.module)
     return offenders
 
 

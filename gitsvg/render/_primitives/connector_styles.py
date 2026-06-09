@@ -1,5 +1,4 @@
-"""Connector style builders — per-style path geometry, the shared geometry
-derivation, and the style registry.
+"""Connector style builders — per-style path geometry, the shared geometry derivation, and the style registry.
 
 A connector joins a trunk point and a branch point on two lanes (see
 `arc.py` for the role semantics). `theme.branch_line_style` selects how

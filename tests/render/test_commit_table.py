@@ -76,8 +76,10 @@ def test_table_draws_message_and_hash_in_the_table_region() -> None:
 
     # --- assert -----------------------
     contents = [t.text for t in texts]
-    assert "init" in contents and "second" in contents  # message column
-    assert "abc1234" in contents and "def5678" in contents  # hash column
+    assert "init" in contents
+    assert "second" in contents
+    assert "abc1234" in contents
+    assert "def5678" in contents
     # Every table cell sits at or past the table origin (right of the graph).
     cell_xs = [float(t.attrib["x"]) for t in texts if t.text in {"init", "second", "abc1234", "def5678"}]
     assert all(x >= canvas.table_x_origin for x in cell_xs)

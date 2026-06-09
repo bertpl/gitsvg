@@ -217,7 +217,7 @@ def test_replaces_can_reuse_a_vacated_id() -> None:
 # ==================================================================================================
 #  Highlight via commit field
 # ==================================================================================================
-@pytest.mark.parametrize("highlight_value, expected", [(True, True), (False, False), (None, False)])
+@pytest.mark.parametrize(("highlight_value", "expected"), [(True, True), (False, False), (None, False)])
 def test_highlight_field_propagates_to_commit_state(highlight_value: bool | None, expected: bool) -> None:
     # --- arrange ----------------------
     flag_field = f', "highlight": {str(highlight_value).lower()}' if highlight_value is not None else ""
@@ -237,7 +237,7 @@ def test_highlight_field_propagates_to_commit_state(highlight_value: bool | None
 # ==================================================================================================
 #  Gap field
 # ==================================================================================================
-@pytest.mark.parametrize("gap_value, expected", [(2, 2), (0, 0), (None, 0)])
+@pytest.mark.parametrize(("gap_value", "expected"), [(2, 2), (0, 0), (None, 0)])
 def test_gap_field_propagates_to_commit_state(gap_value: int | None, expected: int) -> None:
     # --- arrange ----------------------
     gap_field = f', "gap": {gap_value}' if gap_value is not None else ""

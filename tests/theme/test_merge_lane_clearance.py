@@ -49,7 +49,7 @@ def test_merge_lane_clearance_resolves_through_apply() -> None:
 def test_negative_merge_lane_clearance_rejected_at_schema() -> None:
     """A negative value is a schema-constraint violation (E103) with a line number."""
     # --- arrange / act ----------------
-    parsed, report = parse_jsonl_text('{"op": "theme", "merge_lane_clearance": -1}\n', file="x.jsonl")
+    _parsed, report = parse_jsonl_text('{"op": "theme", "merge_lane_clearance": -1}\n', file="x.jsonl")
 
     # --- assert -----------------------
     assert not report.is_clean()

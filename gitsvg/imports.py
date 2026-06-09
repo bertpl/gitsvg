@@ -95,7 +95,7 @@ def _expand(
 
     # --- Cycle check ----------------------------
     if target in cycle_stack:
-        chain = " -> ".join(str(p) for p in cycle_stack + [target])
+        chain = " -> ".join(str(p) for p in [*cycle_stack, target])
         report.add(
             ValidationError(
                 file=import_parsed.file,
@@ -143,7 +143,7 @@ def _expand(
     expanded = _expand(
         imported_parsed,
         current_file=target,
-        cycle_stack=cycle_stack + [target],
+        cycle_stack=[*cycle_stack, target],
         depth=depth + 1,
         depth_limit=depth_limit,
         report=report,

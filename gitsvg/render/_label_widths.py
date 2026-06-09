@@ -1,5 +1,4 @@
-"""Pixel-width helpers used by the auto-fit margin code and by the
-label primitives that need a width before drawing.
+"""Pixel-width helpers used by the auto-fit margin code and by the label primitives that need a width before drawing.
 
 Both functions delegate to :func:`gitsvg.render._glyph_metrics.text_width`,
 which sizes geometry safely against every font in
@@ -44,7 +43,7 @@ def pill_height(theme: RendererSettings) -> int | float:
 
 
 def commit_label_width(commit: LayoutCommit, theme: RendererSettings) -> float:
-    """Return the widest line's pixel width across a commit's label stack.
+    r"""Return the widest line's pixel width across a commit's label stack.
 
     Considers each ``msg`` line (split on ``"\\n"``) at
     ``theme.label_font_size``, plus the optional ``hash`` line at

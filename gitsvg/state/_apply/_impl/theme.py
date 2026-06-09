@@ -7,14 +7,16 @@ apply-handler signature the engine dispatches on.
 """
 
 import copy
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 from gitsvg.errors import ValidationError, ValidationReport
-from gitsvg.file_format.ops import ThemeOp
 from gitsvg.parse import ParsedOp
 from gitsvg.state._state import State
 from gitsvg.theme import ThemeBuilder
 from gitsvg.theme._named_themes import NAMED_THEMES
+
+if TYPE_CHECKING:
+    from gitsvg.file_format.ops import ThemeOp
 
 # ==================================================================================================
 #  Apply
@@ -71,7 +73,7 @@ def apply_theme_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, report
         parsed: The validated parsed op record.
         report: Receives semantic errors.
     """
-    op = cast(ThemeOp, parsed.op)
+    op = cast("ThemeOp", parsed.op)
     file = parsed.file
     line = parsed.line
 

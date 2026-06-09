@@ -1,4 +1,4 @@
-"""Deterministic resolution of `hash: "auto"` on commits.
+r"""Deterministic resolution of `hash: "auto"` on commits.
 
 When a commit op (or merge op) sets `hash: "auto"`, the renderer needs
 a stable 7-character hex string that mirrors real-git rebase semantics:

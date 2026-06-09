@@ -1,12 +1,14 @@
 """Apply a `highlight` op to state — flip the highlight flag on a commit."""
 
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 from gitsvg.errors import ValidationError, ValidationReport
-from gitsvg.file_format.ops import HighlightOp
 from gitsvg.parse import ParsedOp
 from gitsvg.state._state import State
 from gitsvg.theme import ThemeBuilder
+
+if TYPE_CHECKING:
+    from gitsvg.file_format.ops import HighlightOp
 
 
 def apply_highlight_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, report: ValidationReport) -> None:
@@ -15,7 +17,7 @@ def apply_highlight_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, re
     The targeted commit must exist (E201). Highlighting an already-
     highlighted commit is a no-op (idempotent).
     """
-    op = cast(HighlightOp, parsed.op)
+    op = cast("HighlightOp", parsed.op)
     if not state.has_commit(op.commit):
         report.add(
             ValidationError(

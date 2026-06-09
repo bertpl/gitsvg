@@ -14,7 +14,6 @@ from gitsvg.parse import parse_jsonl_text
 from gitsvg.render import render
 from gitsvg.render._primitives.merge_dot_styles import (
     _CHECKMARK_DOT_RADIUS_SCALE,
-    _MERGE_DOT_BUILDERS,
     _draw_checkmark,
     _draw_circle,
 )
