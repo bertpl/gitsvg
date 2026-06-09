@@ -1,14 +1,22 @@
+# Hybrid pre-commit setup:
+#   - Project code-analysis tools (ruff, ty) and the lockfile check run as
+#     LOCAL `uv` hooks, so they use the exact versions pinned in uv.lock on
+#     uv's interpreter — identical to `make lint` and the CI pre-commit job,
+#     never a system Python or a second tool version.
+#   - Generic, standalone utilities run as MANAGED, `rev:`-pinned hooks
+#     (kept current by Dependabot / `pre-commit autoupdate`).
+#
+# One `pre-commit install` wires up both the pre-commit and commit-msg stages.
+default_install_hook_types: [pre-commit, commit-msg]
+
+# design/ is never tracked; examples/*.svg are generated render output (and the
+# example .gitsvg.jsonl inputs are byte-exact fixtures the README + tests pin).
 exclude: ^(design|examples)/
 
 repos:
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
-    hooks:
-      - id: check-yaml
-      - id: check-toml
-      - id: end-of-file-fixer
-      - id: trailing-whitespace
-
+  # ----------------------------------------------------------------------------
+  #  Local: project code-analysis tools (uv-pinned, single source = uv.lock)
+  # ----------------------------------------------------------------------------
   - repo: local
     hooks:
       - id: ruff-format
@@ -25,3 +33,65 @@ repos:
         types: [python]
         files: ^(gitsvg|tests|scripts)/
         pass_filenames: true
+      - id: ty
+        name: ty check
+        entry: uv run ty check
+        language: system
+        types: [python]
+        # ty is a whole-program checker: a staged-files-only run would miss
+        # cross-module breakage, so it runs the project as configured by
+        # [tool.ty] (not the staged subset) whenever any Python file changes.
+        pass_filenames: false
+      - id: uv-lock
+        name: uv lock --check
+        entry: uv lock --check
+        language: system
+        files: ^(pyproject\.toml|uv\.lock)$
+        pass_filenames: false
+
+  # ----------------------------------------------------------------------------
+  #  Managed: file hygiene
+  # ----------------------------------------------------------------------------
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-yaml
+      - id: check-toml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-added-large-files
+        args: [--maxkb=512]
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: debug-statements
+
+  # ----------------------------------------------------------------------------
+  #  Managed: utilities
+  # ----------------------------------------------------------------------------
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.4.2
+    hooks:
+      - id: codespell
+        additional_dependencies: [tomli]  # read [tool.codespell] from pyproject.toml
+
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.12
+    hooks:
+      - id: actionlint
+
+  - repo: https://github.com/python-jsonschema/check-jsonschema
+    rev: 0.37.2
+    hooks:
+      - id: check-github-workflows
+
+  # ----------------------------------------------------------------------------
+  #  Commit-msg stage: enforce the <prefix>: subject convention
+  # ----------------------------------------------------------------------------
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v4.4.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+        # `release` is the automated `make release` commit subject; the other
+        # six match CONTRIBUTING's branch/commit prefix set.
+        args: [feat, fix, chore, docs, refactor, test, release]
