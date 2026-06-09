@@ -33,6 +33,17 @@ def test_format_includes_field_when_set(populated_registry: dict) -> None:
     assert rendered == "x.jsonl:7: [E998] branch: missing required field"
 
 
+def test_format_omits_location_when_file_is_none(populated_registry: dict) -> None:
+    # --- arrange ----------------------
+    err = ValidationError(file=None, line=0, code="E999", message="no source location")
+
+    # --- act --------------------------
+    rendered = err.format()
+
+    # --- assert -----------------------
+    assert rendered == "[E999] no source location"
+
+
 def test_validation_error_is_frozen_and_hashable(populated_registry: dict) -> None:
     # --- arrange ----------------------
     err = ValidationError(file="x.jsonl", line=1, code="E999", message="msg")

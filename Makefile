@@ -6,7 +6,7 @@ help:
 	@echo '  build          Build package'
 	@echo '  test           Run pytest'
 	@echo '  format         Format and fix with ruff'
-	@echo '  lint           Ruff check'
+	@echo '  lint           Ruff check + ty type-check'
 	@echo '  update-deps    Re-resolve uv.lock to latest versions'
 	@echo '  install        Re-install gitsvg stand-alone tool'
 	@echo '  validate-local Validate every .gitsvg.jsonl under local/test_examples/'
@@ -31,6 +31,7 @@ format:
 
 lint:
 	uv run ruff check gitsvg tests scripts
+	uv run ty check
 
 update-deps:
 	uv lock --upgrade

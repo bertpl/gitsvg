@@ -18,6 +18,7 @@ output file is written for a failing input.
 
 import sys
 from pathlib import Path
+from typing import TYPE_CHECKING, cast
 
 import click
 
@@ -27,6 +28,9 @@ from gitsvg.render import compute_minify_config, minify, render
 
 from ._bulk import process_input
 from ._pipeline import run_validate_pipeline
+
+if TYPE_CHECKING:
+    from gitsvg.render import MinifyLevel
 
 
 @click.command(name="render")
@@ -98,7 +102,8 @@ def _render_one(input_path: Path, output_path: Path, minify_level: int) -> Valid
     layout_settings, renderer_settings = theme.split()
     layout = compute_layout(state, layout_settings)
     drawing = render(layout, renderer_settings)
-    config = compute_minify_config(minify_level)
+    # Click's IntRange(0, 3) on the --small option guarantees a valid MinifyLevel.
+    config = compute_minify_config(cast("MinifyLevel", minify_level))
     if config.level == 0:
         drawing.save_svg(str(output_path))
     else:

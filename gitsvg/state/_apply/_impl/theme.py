@@ -110,7 +110,9 @@ def apply_theme_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, report
 
     # --- Step 1: named-theme switch -----------
     if has_name:
-        theme_cls = NAMED_THEMES.get(op.name)
+        # `op.name` is `str | None`; an explicit `name: null` falls through to
+        # the unknown-theme branch below, same as any unrecognized name.
+        theme_cls = NAMED_THEMES.get(op.name) if op.name is not None else None
         if theme_cls is None:
             known = ", ".join(sorted(NAMED_THEMES))
             report.add(

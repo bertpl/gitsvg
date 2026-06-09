@@ -100,7 +100,7 @@ class GuiTheme(DefaultTheme):
         return 3
 
     @classmethod
-    def _resolve_merge_commit_radius(cls, commit_radius: int) -> int:
+    def _resolve_merge_commit_radius(cls, commit_radius: float) -> float:
         """Merge dots stay at `5`.
 
         Independent of the smaller ordinary-dot `commit_radius`, so merges
