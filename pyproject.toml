@@ -23,7 +23,10 @@ classifiers = [
 dependencies = [
     "click>=8.2.0,!=8.3.0,!=8.3.1",
     "drawsvg>=2.4.0",
-    "pydantic>=2.10.0",
+    # pydantic-core ships no Python 3.14 wheel before pydantic 2.12.0, so the
+    # 2.10.0 floor is unbuildable there; raise the floor on 3.14 only.
+    "pydantic>=2.10.0; python_version < '3.14'",
+    "pydantic>=2.12.0; python_version >= '3.14'",
 ]
 
 [dependency-groups]

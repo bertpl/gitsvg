@@ -3,20 +3,30 @@ name: Unit tests (full matrix)
 on:
   workflow_call:
 
+permissions:
+  contents: read
+
 jobs:
   core:
-    name: py${{ matrix.python }} / ${{ matrix.os }}
+    name: py${{ matrix.python }} / ${{ matrix.os }} / ${{ matrix.resolution }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        python: ["3.11", "3.12", "3.13", "3.14"]
-        os: [ubuntu-latest]
         include:
-          - python: "3.14"
-            os: macos-latest
+          # newest compatible dependencies across the support matrix
+          - { python: "3.11", os: ubuntu-latest, resolution: highest }
+          - { python: "3.12", os: ubuntu-latest, resolution: highest }
+          - { python: "3.13", os: ubuntu-latest, resolution: highest }
+          - { python: "3.14", os: ubuntu-latest, resolution: highest }
+          - { python: "3.14", os: macos-latest, resolution: highest }
+          # declared dependency floors (oldest supported range): oldest python
+          # with oldest deps, and newest python with oldest deps (wheel stress)
+          - { python: "3.11", os: ubuntu-latest, resolution: lowest-direct }
+          - { python: "3.14", os: ubuntu-latest, resolution: lowest-direct }
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
       - uses: ./.github/actions/unit_test
         with:
           python-version: ${{ matrix.python }}
+          resolution: ${{ matrix.resolution }}

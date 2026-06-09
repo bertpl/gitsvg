@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Validation errors without a source location no longer print a `None:0:` prefix.
+- Raise the `pydantic` minimum to 2.12.0 on Python 3.14, where the declared 2.10.0 floor has no installable wheel.
 
 ### Security
 

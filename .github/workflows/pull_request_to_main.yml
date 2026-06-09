@@ -3,7 +3,14 @@ name: Pull Request to Main
 on:
   pull_request:
     branches: [main]
-    types: [opened, synchronize]
+    types: [opened, synchronize, edited]  # `edited` re-runs the PR-title check on title edits
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   validate-branch-name:
@@ -18,11 +25,27 @@ jobs:
             exit 1
           fi
 
+  validate-pr-title:
+    runs-on: ubuntu-latest
+    steps:
+      # The repo squash-merges, so the PR title becomes the commit subject on
+      # main — this is the CI complement to the local commit-msg hook. Skipped
+      # for Dependabot, whose PR titles don't follow the <type>: convention.
+      - name: Check PR title
+        if: github.actor != 'dependabot[bot]'
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          if [[ ! "$PR_TITLE" =~ ^(feat|fix|chore|docs|refactor|test):[[:space:]].+ ]]; then
+            echo "::error::PR title '$PR_TITLE' does not match '<type>: <summary>' (type in feat|fix|chore|docs|refactor|test)"
+            exit 1
+          fi
+
   require-changelog:
     needs: [validate-branch-name]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
         with:
           fetch-depth: 0
       - name: Check changelog updated for feat/ and fix/ branches
@@ -41,14 +64,12 @@ jobs:
           echo "::error::feat/ and fix/ PRs must update CHANGELOG.md (add a bullet under '## Unreleased')."
           exit 1
 
-  lint:
+  pre-commit:
     needs: [validate-branch-name]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: astral-sh/setup-uv@v7
-      - run: uv sync --group dev
-      - run: uv run ruff check gitsvg tests scripts
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+      - uses: ./.github/actions/pre_commit
 
   test:
     needs: [validate-branch-name]

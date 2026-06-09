@@ -4,11 +4,14 @@ on:
   push:
     tags: [v*]
 
+permissions:
+  contents: read
+
 jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
       - uses: ./.github/actions/validate_version_trigger
 
   test:
@@ -19,27 +22,29 @@ jobs:
     runs-on: ubuntu-latest
     environment: prod
     permissions:
-      id-token: write
+      contents: read       # job-level perms replace the top-level block, so re-list read for checkout
+      id-token: write      # trusted publishing to PyPI
     steps:
-      - uses: actions/checkout@v5
-      - uses: astral-sh/setup-uv@v7
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+      - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7
       - run: uv build
-      - uses: pypa/gh-action-pypi-publish@release/v1
+      - uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b # v1.14.0
 
   github-release:
     needs: publish
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: write      # write implies the read checkout needs
     steps:
-      - uses: actions/checkout@v5
-      - uses: astral-sh/setup-uv@v7
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+      - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7
       - name: Extract release notes from CHANGELOG.md
         run: uv run python scripts/extract_changelog.py > release_notes.md
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
         run: |
-          gh release create "${{ github.ref_name }}" \
-            --title "${{ github.ref_name }}" \
+          gh release create "$TAG" \
+            --title "$TAG" \
             --notes-file release_notes.md
