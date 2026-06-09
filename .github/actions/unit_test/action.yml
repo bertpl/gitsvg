@@ -1,25 +1,34 @@
 name: Unit test
 description: |
-  Set up Python, install dependencies, and run pytest.
+  Set up Python and run pytest at a chosen dependency resolution.
 
 inputs:
   python-version:
     description: Python version. Empty string uses .python-version.
     required: false
     default: ""
+  resolution:
+    description: |
+      uv dependency-resolution strategy: "highest" (newest compatible — the
+      default) or "lowest-direct" (the declared floors, to exercise the
+      oldest supported dependency range).
+    required: false
+    default: highest
 
 runs:
   using: composite
   steps:
     - name: Set up uv
-      uses: astral-sh/setup-uv@v7
+      uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7
       with:
         python-version: ${{ inputs.python-version }}
 
-    - name: Install Python dependencies
+    - name: Run pytest (resolution=${{ inputs.resolution }})
       shell: bash
-      run: uv sync --group dev
-
-    - name: Run pytest
-      shell: bash
-      run: uv run pytest tests --durations=20
+      run: |
+        # Drop the lockfile so the resolution strategy takes effect: with a
+        # lock present uv reuses its pins and silently ignores --resolution.
+        # `highest` then tests the newest compatible deps and `lowest-direct`
+        # the declared floors, bracketing the full published range.
+        rm -f uv.lock
+        uv run --resolution ${{ inputs.resolution }} --group dev pytest tests --durations=20
