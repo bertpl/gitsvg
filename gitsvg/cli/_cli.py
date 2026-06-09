@@ -16,7 +16,7 @@ from ._validate import validate_command
 @click.group()
 @click.version_option(__version__, prog_name="gitsvg")
 def cli() -> None:
-    """Gitsvg - render git tree visualizations as SVG from JSONL input."""
+    """Render git tree visualizations as SVG from JSONL input."""
 
 
 cli.add_command(schema_command)
