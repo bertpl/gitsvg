@@ -1,4 +1,4 @@
-.PHONY: help dev-setup build test format lint update-deps install release validate-local render-local refresh-examples rebuild-glyph-widths
+.PHONY: help dev-setup build test format lint typecheck update-deps install release validate-local render-local refresh-examples rebuild-glyph-widths
 
 help:
 	@echo 'Commands:'
@@ -7,6 +7,7 @@ help:
 	@echo '  test           Run pytest'
 	@echo '  format         Format and fix with ruff'
 	@echo '  lint           Ruff check'
+	@echo '  typecheck      Type-check with ty'
 	@echo '  update-deps    Re-resolve uv.lock to latest versions'
 	@echo '  install        Re-install gitsvg stand-alone tool'
 	@echo '  validate-local Validate every .gitsvg.jsonl under local/test_examples/'
@@ -31,6 +32,9 @@ format:
 
 lint:
 	uv run ruff check gitsvg tests scripts
+
+typecheck:
+	uv run ty check
 
 update-deps:
 	uv lock --upgrade

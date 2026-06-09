@@ -15,7 +15,7 @@ class ValidationError:
     catalog entry simply cannot be emitted.
 
     Attributes:
-        file: Source file path where the error originates.
+        file: Source file path the error originates from, or `None` for errors with no specific source location.
         line: 1-based line number within `file`.
         code: Error code (e.g. `"E210"`). Must be registered in the catalog.
         message: Short, human-readable error message.
@@ -27,7 +27,7 @@ class ValidationError:
             `gitsvg/errors/catalog/`).
     """
 
-    file: str
+    file: str | None
     line: int
     code: str
     message: str

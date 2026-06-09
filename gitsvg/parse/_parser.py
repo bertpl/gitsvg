@@ -11,7 +11,9 @@ full picture in one run.
 """
 
 import json
+from collections.abc import Mapping
 from pathlib import Path
+from typing import Any
 
 from pydantic import ValidationError as PydanticValidationError
 
@@ -140,7 +142,7 @@ _NUMERIC_RANGE_TYPES = frozenset(
 )
 
 
-def _map_pydantic_error(err: dict, *, file: str, line: int) -> ValidationError:
+def _map_pydantic_error(err: Mapping[str, Any], *, file: str, line: int) -> ValidationError:
     """Map a single pydantic error dict to a gitsvg `ValidationError`.
 
     Args:
