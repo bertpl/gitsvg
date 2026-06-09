@@ -74,3 +74,20 @@ jobs:
   test:
     needs: [validate-branch-name]
     uses: ./.github/workflows/_unit_tests.yml
+
+  ci-gate:
+    name: CI gate
+    # The single stable required check on main: branch protection requires only
+    # this, so the test matrix / job set can change without re-touching repo
+    # settings. `always()` is load-bearing — without it the gate is skipped when
+    # an upstream job fails, and GitHub treats a skipped required check as
+    # passing. Fails on any failure/cancellation; success and skipped are OK.
+    if: always()
+    needs: [validate-branch-name, validate-pr-title, require-changelog, pre-commit, test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail if any required job did not succeed
+        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        run: |
+          echo "::error::One or more required jobs failed."
+          exit 1
