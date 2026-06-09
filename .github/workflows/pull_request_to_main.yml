@@ -13,7 +13,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  validate-branch-name:
+  # Cheap PR-metadata gates bundled into one job, so the expensive jobs fail
+  # fast behind a single check: a bad branch name / PR title / missing
+  # changelog stops the test matrix before it starts.
+  preflight:
     runs-on: ubuntu-latest
     steps:
       - name: Check branch name
@@ -25,12 +28,9 @@ jobs:
             exit 1
           fi
 
-  validate-pr-title:
-    runs-on: ubuntu-latest
-    steps:
       # The repo squash-merges, so the PR title becomes the commit subject on
-      # main — this is the CI complement to the local commit-msg hook. Skipped
-      # for Dependabot, whose PR titles don't follow the <type>: convention.
+      # main — the CI complement to the local commit-msg hook. Skipped for
+      # Dependabot, whose PR titles don't follow the <type>: convention.
       - name: Check PR title
         if: github.actor != 'dependabot[bot]'
         env:
@@ -41,10 +41,6 @@ jobs:
             exit 1
           fi
 
-  require-changelog:
-    needs: [validate-branch-name]
-    runs-on: ubuntu-latest
-    steps:
       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
         with:
           fetch-depth: 0
@@ -65,14 +61,14 @@ jobs:
           exit 1
 
   pre-commit:
-    needs: [validate-branch-name]
+    needs: [preflight]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
       - uses: ./.github/actions/pre_commit
 
   test:
-    needs: [validate-branch-name]
+    needs: [preflight]
     uses: ./.github/workflows/_unit_tests.yml
 
   ci-gate:
@@ -81,9 +77,10 @@ jobs:
     # this, so the test matrix / job set can change without re-touching repo
     # settings. `always()` is load-bearing — without it the gate is skipped when
     # an upstream job fails, and GitHub treats a skipped required check as
-    # passing. Fails on any failure/cancellation; success and skipped are OK.
+    # passing. Fails on any failure/cancellation; success and skipped are OK
+    # (a skipped pre-commit/test means preflight failed, which itself trips it).
     if: always()
-    needs: [validate-branch-name, validate-pr-title, require-changelog, pre-commit, test]
+    needs: [preflight, pre-commit, test]
     runs-on: ubuntu-latest
     steps:
       - name: Fail if any required job did not succeed
