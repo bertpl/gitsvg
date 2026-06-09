@@ -42,6 +42,11 @@ class ValidationError:
             )
 
     def format(self) -> str:
-        """Return the default plain-text rendering: `file:line: [code] field: message`."""
+        """Return the default plain-text rendering.
+
+        `file:line: [code] field: message`, or `[code] field: message` when
+        the error has no source location (`file is None`).
+        """
         field_part = f" {self.field}:" if self.field else ""
-        return f"{self.file}:{self.line}: [{self.code}]{field_part} {self.message}"
+        location = f"{self.file}:{self.line}: " if self.file is not None else ""
+        return f"{location}[{self.code}]{field_part} {self.message}"

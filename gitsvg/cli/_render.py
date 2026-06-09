@@ -102,6 +102,7 @@ def _render_one(input_path: Path, output_path: Path, minify_level: int) -> Valid
     layout_settings, renderer_settings = theme.split()
     layout = compute_layout(state, layout_settings)
     drawing = render(layout, renderer_settings)
+    # Click's IntRange(0, 3) on the --small option guarantees a valid MinifyLevel.
     config = compute_minify_config(cast("MinifyLevel", minify_level))
     if config.level == 0:
         drawing.save_svg(str(output_path))
