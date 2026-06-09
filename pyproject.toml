@@ -107,6 +107,13 @@ include = ["gitsvg"]
 # checks the rest of the library.
 exclude = ["gitsvg/render/", "gitsvg/theme/_theme.py"]
 
+[tool.codespell]
+# Skip generated / non-prose files: the lockfile, rendered SVGs, generated
+# glyph-width LUTs, and the example layout/state snapshots.
+skip = "uv.lock,*.svg,gitsvg/render/_glyph_widths/*,tests/examples/_layout_snapshots/*,tests/examples/_state_snapshots/*"
+# Intentional hyphenated spellings used consistently across the prose + code.
+ignore-words-list = "pre-empt,re-declare,re-declared"
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
