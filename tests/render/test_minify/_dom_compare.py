@@ -108,7 +108,7 @@ def assert_dom_equivalent(svg_a: str, svg_b: str, label_a: str = "A", label_b: s
     canon_b = canonicalise(svg_b)
     if canon_a == canon_b:
         return
-    for i, (ca, cb) in enumerate(zip(canon_a, canon_b)):
+    for i, (ca, cb) in enumerate(zip(canon_a, canon_b, strict=False)):
         if ca != cb:
             start = max(0, i - 40)
             end_a = min(len(canon_a), i + 60)

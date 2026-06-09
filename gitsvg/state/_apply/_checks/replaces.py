@@ -12,12 +12,14 @@ author-declared commit parents — a commit can no longer name a parent, so
 the rule became vacuous.
 """
 
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 from gitsvg.errors import ValidationError, ValidationReport
-from gitsvg.file_format.ops import CommitOp
 from gitsvg.parse import ParsedOp
 from gitsvg.state._state import State
+
+if TYPE_CHECKING:
+    from gitsvg.file_format.ops import CommitOp
 
 
 def check_replaces_rules(state: State, parsed: ParsedOp, report: ValidationReport) -> bool:
@@ -33,7 +35,7 @@ def check_replaces_rules(state: State, parsed: ParsedOp, report: ValidationRepor
         the squash). False when any rule fails — the caller should skip
         applying the op.
     """
-    op = cast(CommitOp, parsed.op)
+    op = cast("CommitOp", parsed.op)
     file = parsed.file
     line = parsed.line
     replaces = list(op.replaces or [])
@@ -48,9 +50,7 @@ def check_replaces_rules(state: State, parsed: ParsedOp, report: ValidationRepor
         return False
     if not _check_rule_4_no_other_branch_rooted(state, replaced_set, target_branch, file, line, report):
         return False
-    if not _check_rule_5_no_external_parents(state, replaced_set, file, line, report):
-        return False
-    return True
+    return _check_rule_5_no_external_parents(state, replaced_set, file, line, report)
 
 
 # ==================================================================================================

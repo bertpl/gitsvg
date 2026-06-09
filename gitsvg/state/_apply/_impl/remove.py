@@ -1,13 +1,15 @@
 """Apply a `remove` op to state — destructive removal of commits, branches, or pull-requests."""
 
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 from gitsvg.errors import ValidationError, ValidationReport
-from gitsvg.file_format.ops import RemoveOp
 from gitsvg.parse import ParsedOp
 from gitsvg.state._apply._errors import add_branch_not_declared
 from gitsvg.state._state import State
 from gitsvg.theme import ThemeBuilder
+
+if TYPE_CHECKING:
+    from gitsvg.file_format.ops import RemoveOp
 
 
 def apply_remove_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, report: ValidationReport) -> None:
@@ -28,7 +30,7 @@ def apply_remove_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, repor
     references the branch as either `from` or `into` (E214) — explicit
     close-before-remove keeps the PR lifecycle legible.
     """
-    op = cast(RemoveOp, parsed.op)
+    op = cast("RemoveOp", parsed.op)
     file = parsed.file
     line = parsed.line
 

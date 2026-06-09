@@ -18,6 +18,7 @@ in future subclasses syntactically identical regardless of whether
 the original was orientation-dependent.
 """
 
+from collections.abc import Callable
 from typing import Any, Self
 
 from gitsvg._shared.numeric import resolve_int_or_float
@@ -172,7 +173,12 @@ class DefaultTheme(Theme):
 
     @classmethod
     def _resolve_merge_commit_radius(cls, commit_radius: float) -> float:
-        """Merge-commit-dot radius (px) — defaults to the resolved `commit_radius` (including a theme-overridden value), so merge and ordinary dots match unless `merge_commit_radius` is set explicitly."""
+        """Merge-commit-dot radius (px).
+
+        Defaults to the resolved `commit_radius` (including a theme-overridden
+        value), so merge and ordinary dots match unless `merge_commit_radius`
+        is set explicitly.
+        """
         return commit_radius
 
     @classmethod
@@ -532,7 +538,7 @@ class DefaultTheme(Theme):
             A fully-populated `DefaultTheme` instance.
         """
 
-        def pick(name: str, default_fn, *args) -> Any:
+        def pick(name: str, default_fn: Callable[..., object], *args: object) -> Any:  # noqa: ANN401
             """Return the user-set value for `name` if present, else `default_fn(*args)`."""
             return user_set[name] if name in user_set else default_fn(*args)
 

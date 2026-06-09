@@ -30,7 +30,7 @@ def _ensure_fixture() -> Path:
 
 
 @pytest.mark.parametrize(
-    "flag_args, exit_code",
+    ("flag_args", "exit_code"),
     [
         # Absent (no --small) → level 0; runs cleanly.
         ([], 0),

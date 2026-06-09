@@ -6,7 +6,7 @@ discriminator. Downstream code should prefer `OP_ADAPTER` (a pydantic
 adapter dispatches on `op:` and returns the correct subclass.
 """
 
-from typing import Annotated, Union, get_args
+from typing import Annotated, get_args
 
 from pydantic import BaseModel, Field, TypeAdapter
 
@@ -59,17 +59,7 @@ OP_NAMES: list[str] = list(OP_BY_NAME.keys())
 #  Discriminated union + adapter
 # ==================================================================================================
 OpUnion = Annotated[
-    Union[
-        ImportOp,
-        GridOp,
-        ThemeOp,
-        BranchOp,
-        CommitOp,
-        MergeOp,
-        PullRequestOp,
-        RemoveOp,
-        HighlightOp,
-    ],
+    ImportOp | GridOp | ThemeOp | BranchOp | CommitOp | MergeOp | PullRequestOp | RemoveOp | HighlightOp,
     Field(discriminator="op"),
 ]
 

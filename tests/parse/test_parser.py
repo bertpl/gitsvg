@@ -1,5 +1,6 @@
 """Tests for the JSONL parser and the pydantic-error → gitsvg-code mapping."""
 
+from dataclasses import FrozenInstanceError
 from pathlib import Path
 
 import pytest
@@ -109,7 +110,7 @@ def test_non_object_line_emits_e004() -> None:
 #  Schema-phase errors (E100-E108)
 # ==================================================================================================
 @pytest.mark.parametrize(
-    "raw, expected_code, expected_field",
+    ("raw", "expected_code", "expected_field"),
     [
         ('{"op": "branch", "name": "main", "unknown": 1}', "E100", "unknown"),
         ('{"op": "branch"}', "E101", "name"),
@@ -178,5 +179,5 @@ def test_parsed_op_is_immutable() -> None:
     parsed = ParsedOp(op=op, file="x.jsonl", line=1)
 
     # --- act / assert -----------------
-    with pytest.raises(Exception):
+    with pytest.raises(FrozenInstanceError):
         parsed.line = 2  # type: ignore[misc]

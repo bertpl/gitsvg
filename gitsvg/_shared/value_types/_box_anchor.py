@@ -1,4 +1,4 @@
-"""`BoxAnchor` — normalized `(u, v)` location inside an un-rotated bounding box.
+r"""`BoxAnchor` — normalized `(u, v)` location inside an un-rotated bounding box.
 
 A `BoxAnchor` is a `(u, v)` pair in `[0, 1]²` that says where inside a
 text-bearing primitive's un-rotated bounding box the world anchor

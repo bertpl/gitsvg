@@ -193,4 +193,5 @@ def test_multiple_missing_parents_emit_one_error_per_dangling_parent() -> None:
     assert len(e401_errors) == 2
     assert {e.field for e in e401_errors} == {"parents"}
     joined = " ".join(e.message for e in e401_errors)
-    assert "c1" in joined and "f1" in joined
+    assert "c1" in joined
+    assert "f1" in joined

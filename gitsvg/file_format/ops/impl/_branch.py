@@ -31,7 +31,10 @@ class BranchOp(OpBase):
     )
     label_side: LabelSide | None = Field(
         default=None,
-        description="Branch-axis-index side commit labels render on (`before` = lower-index side; `after` = higher-index side). Orientation-invariant; the renderer maps to a pixel side per `theme.orientation`.",
+        description=(
+            "Branch-axis-index side commit labels render on (`before` = lower-index side; `after` = higher-index "
+            "side). Orientation-invariant; the renderer maps to a pixel side per `theme.orientation`."
+        ),
     )
     branch_pos: NonNegativeInt | None = Field(
         default=None,

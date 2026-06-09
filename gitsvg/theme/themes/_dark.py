@@ -29,7 +29,10 @@ class DarkTheme(DefaultTheme):
 
     @classmethod
     def _resolve_background_color(cls) -> str:
-        """Cool dark blue-gray canvas (One Dark `bg`) — softer than pure black, family-coherent with the palette below."""
+        """Cool dark blue-gray canvas (One Dark `bg`).
+
+        Softer than pure black, family-coherent with the palette below.
+        """
         return "#282c34"
 
     @classmethod
@@ -58,7 +61,11 @@ class DarkTheme(DefaultTheme):
 
     @classmethod
     def _resolve_hash_color(cls) -> str:
-        """Mid-gray that sits clearly between `label_color` (`#abb2bf`) and `background_color` (`#282c34`) — preserves the secondary-line hierarchy while staying legible at the small hash font size."""
+        """Mid-gray between `label_color` (`#abb2bf`) and `background_color` (`#282c34`).
+
+        Preserves the secondary-line hierarchy while staying legible at the
+        small hash font size.
+        """
         return "#7f848e"
 
     @classmethod

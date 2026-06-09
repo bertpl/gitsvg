@@ -80,7 +80,10 @@ class GuiTheme(DefaultTheme):
 
     @classmethod
     def _resolve_commit_row_band_color(cls) -> str | None:
-        """Faint mid-gray zebra stripe on alternate commit rows — `#808080` at `0.05` alpha (`0x0D`), barely-there row tracking."""
+        """Faint mid-gray zebra stripe on alternate commit rows.
+
+        `#808080` at `0.05` alpha (`0x0D`) — barely-there row tracking.
+        """
         return "#8080800D"
 
     # --------------------------------------------------------------------------
@@ -98,12 +101,19 @@ class GuiTheme(DefaultTheme):
 
     @classmethod
     def _resolve_merge_commit_radius(cls, commit_radius: int) -> int:
-        """Merge dots stay at `5` (independent of the smaller ordinary-dot `commit_radius`) so merges read as the structural anchors."""
+        """Merge dots stay at `5`.
+
+        Independent of the smaller ordinary-dot `commit_radius`, so merges
+        read as the structural anchors.
+        """
         return 5
 
     @classmethod
     def _resolve_highlight_radius(cls) -> int:
-        """Highlighted-dot radius `4` (down from the default `7`) — a modest bump over the `3` ordinary dot, not a jump."""
+        """Highlighted-dot radius `4` (down from the default `7`).
+
+        A modest bump over the `3` ordinary dot, not a jump.
+        """
         return 4
 
     # --------------------------------------------------------------------------
@@ -124,7 +134,10 @@ class GuiTheme(DefaultTheme):
 
     @classmethod
     def _resolve_hash_color(cls) -> str:
-        """Hash-column color — equal to the commit-message color, dropping the secondary-line de-emphasis in table layout."""
+        """Hash-column color — equal to the commit-message color.
+
+        Drops the secondary-line de-emphasis in table layout.
+        """
         return cls._resolve_label_color()
 
     # --------------------------------------------------------------------------

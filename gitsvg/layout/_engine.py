@@ -56,7 +56,7 @@ Heuristic notes:
   (including any open pull-request's projected merge row).
 """
 
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 
 from gitsvg._shared.value_types import CommitRowMode
 from gitsvg.state import BranchState, CommitState, GridState, State
@@ -234,10 +234,7 @@ def _compute_commit_pos(
     parent_positions = [
         commit_pos_by_id[parent_id] for parent_id in commit_state.parents if parent_id in commit_pos_by_id
     ]
-    if parent_positions:
-        base = max(parent_positions)
-    else:
-        base = branch_starts[commit_state.branch] - 1
+    base = max(parent_positions) if parent_positions else branch_starts[commit_state.branch] - 1
     return base + 1 + commit_state.gap
 
 
@@ -541,7 +538,7 @@ def _resolve_parent_anchor(
     positions: dict[str, int],
     commit_pos_by_id: dict[str, int],
     branch_starts: dict[str, int],
-    ensure_assigned,
+    ensure_assigned: Callable[[str], None],
 ) -> tuple[int | None, int]:
     """Resolve the parent (branch_pos, commit_pos) anchor for a new branch.
 
@@ -667,7 +664,7 @@ def _lane_change_arcs(branches: list[LayoutBranch]) -> list[LayoutArc]:
     """
     arcs: list[LayoutArc] = []
     for branch in branches:
-        for prev, nxt in zip(branch.segments, branch.segments[1:]):
+        for prev, nxt in zip(branch.segments, branch.segments[1:], strict=False):
             arcs.append(
                 LayoutArc(
                     kind=LayoutArcKind.LANE_CHANGE,

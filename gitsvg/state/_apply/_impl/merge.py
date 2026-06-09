@@ -1,9 +1,8 @@
 """Apply a `merge` op to state — emits a two-parent commit on `into`."""
 
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 from gitsvg.errors import ValidationError, ValidationReport
-from gitsvg.file_format.ops import MergeOp
 from gitsvg.parse import ParsedOp
 from gitsvg.state._apply._errors import add_branch_not_declared, add_commit_id_already_used
 from gitsvg.state._auto_hash import compute_auto_hash
@@ -11,6 +10,9 @@ from gitsvg.state._state import CommitState, State
 from gitsvg.theme import ThemeBuilder
 
 from .commit import _generate_auto_commit_id
+
+if TYPE_CHECKING:
+    from gitsvg.file_format.ops import MergeOp
 
 
 def apply_merge_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, report: ValidationReport) -> None:
@@ -32,7 +34,7 @@ def apply_merge_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, report
        legible and prevents silent PR consumption.
     4. When `as:` is set, the id must not already be used (E203).
     """
-    op = cast(MergeOp, parsed.op)
+    op = cast("MergeOp", parsed.op)
     file = parsed.file
     line = parsed.line
 

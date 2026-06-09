@@ -63,7 +63,8 @@ def test_unique_mode_keeps_commits_below_their_parents() -> None:
 
     # --- assert -----------------------
     assert len(set(rows.values())) == len(rows)  # all distinct
-    assert rows["m1"] > rows["c2"] and rows["m1"] > rows["f1"]  # merge below both parents
+    assert rows["m1"] > rows["c2"]
+    assert rows["m1"] > rows["f1"]
 
 
 def test_unique_mode_composes_with_gap() -> None:

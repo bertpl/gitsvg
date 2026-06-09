@@ -1,13 +1,15 @@
 """Apply a `branch` op — root resolution, uniqueness check, optional theme color."""
 
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 from gitsvg.errors import ValidationError, ValidationReport
-from gitsvg.file_format.ops import BranchOp
 from gitsvg.parse import ParsedOp
 from gitsvg.state._apply._errors import add_branch_not_declared
 from gitsvg.state._state import BranchState, State
 from gitsvg.theme import ThemeBuilder
+
+if TYPE_CHECKING:
+    from gitsvg.file_format.ops import BranchOp
 
 
 def apply_branch_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, report: ValidationReport) -> None:
@@ -33,7 +35,7 @@ def apply_branch_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, repor
 
     On any failure neither state nor builder is mutated.
     """
-    op = cast(BranchOp, parsed.op)
+    op = cast("BranchOp", parsed.op)
     file = parsed.file
     line = parsed.line
 

@@ -1,4 +1,4 @@
-"""Draw a commit's label — `msg` (primary lines) plus optional `hash` (secondary line).
+r"""Draw a commit's label — `msg` (primary lines) plus optional `hash` (secondary line).
 
 Layout:
 
@@ -111,7 +111,7 @@ def draw_commit_label(d: draw.Drawing, commit: LayoutCommit, canvas: RenderCanva
 
 
 def _build_lines(commit: LayoutCommit, theme: RendererSettings) -> list[tuple[str, int, str, str]]:
-    """Return the line stack as `(text, font_size, color, font_weight)` tuples.
+    r"""Return the line stack as `(text, font_size, color, font_weight)` tuples.
 
     Order: each `msg` split on `"\\n"` becomes a primary line; the
     optional `hash` follows as a single secondary line.

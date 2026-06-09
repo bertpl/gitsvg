@@ -1,8 +1,6 @@
 """Tests for the `pull_request` apply handler and the validation rules
 it enforces together with `remove` and `merge`."""
 
-import pytest
-
 from tests.state._helpers import build_state_from_jsonl
 
 

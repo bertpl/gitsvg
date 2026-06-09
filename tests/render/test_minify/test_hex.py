@@ -6,7 +6,7 @@ from gitsvg.render._minify import shorten_hex_colors
 
 
 @pytest.mark.parametrize(
-    "raw, expected",
+    ("raw", "expected"),
     [
         # Pair-wise matches shorten.
         ('fill="#aabbcc"', 'fill="#abc"'),

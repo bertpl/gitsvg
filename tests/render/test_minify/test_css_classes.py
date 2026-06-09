@@ -192,7 +192,8 @@ def test_font_size_is_emitted_with_px_unit() -> None:
 
     # --- assert -----------------------
     assert "font-size:11px" in result
-    assert "font-size:11;" not in result and "font-size:11}" not in result
+    assert "font-size:11;" not in result
+    assert "font-size:11}" not in result
 
 
 def test_invalid_xml_returns_unchanged() -> None:

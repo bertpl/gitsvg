@@ -1,5 +1,4 @@
-"""Connector orchestrator — resolve a connector's geometry and dispatch
-to its style builder.
+"""Connector orchestrator — resolve a connector's geometry and dispatch to its style builder.
 
 A connector joins a **trunk point** (where it tees into an ongoing
 branch — the parent commit for a branch-off, the merge commit for a

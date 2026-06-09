@@ -1,13 +1,15 @@
 """Apply a `pull_request` op to state — opens a pending merge between two branches."""
 
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 from gitsvg.errors import ValidationError, ValidationReport
-from gitsvg.file_format.ops import PullRequestOp
 from gitsvg.parse import ParsedOp
 from gitsvg.state._apply._errors import add_branch_not_declared
 from gitsvg.state._state import PullRequestState, State
 from gitsvg.theme import ThemeBuilder
+
+if TYPE_CHECKING:
+    from gitsvg.file_format.ops import PullRequestOp
 
 
 def apply_pull_request_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, report: ValidationReport) -> None:
@@ -28,7 +30,7 @@ def apply_pull_request_op(state: State, builder: ThemeBuilder, parsed: ParsedOp,
     5. No open pull-request may already exist with the same
        `(from, into)` pair (E212).
     """
-    op = cast(PullRequestOp, parsed.op)
+    op = cast("PullRequestOp", parsed.op)
     file = parsed.file
     line = parsed.line
 

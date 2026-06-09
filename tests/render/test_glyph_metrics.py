@@ -15,7 +15,7 @@ from gitsvg.render._glyph_widths import inter_bold, inter_regular, sans_serif_re
 #  parse_chain
 # ==================================================================================================
 @pytest.mark.parametrize(
-    "raw, expected",
+    ("raw", "expected"),
     [
         ("Inter, sans-serif", ["inter", "sans-serif"]),
         ("'Inter', sans-serif", ["inter", "sans-serif"]),

@@ -20,7 +20,7 @@ from gitsvg.imports import resolve_imports
 from gitsvg.layout import compute_layout
 from gitsvg.parse import parse_jsonl_file
 from gitsvg.render import render
-from gitsvg.state import apply_ops
+from gitsvg.state import State, apply_ops
 from gitsvg.theme import Theme
 from gitsvg.theme._named_themes import NAMED_THEMES
 
@@ -63,7 +63,7 @@ _OUTER_MARGIN = 8  # outer padding around the whole composition, px
 # ==================================================================================================
 #  Per-theme render
 # ==================================================================================================
-def _render_through_theme(state, source_theme: Theme, theme_name: str) -> draw.Drawing:
+def _render_through_theme(state: State, source_theme: Theme, theme_name: str) -> draw.Drawing:
     """Render the shared state through a single named theme.
 
     Per-branch overrides authored on the source diagram (`branch.color`,
@@ -120,7 +120,16 @@ def _inner_svg_content(svg_text: str) -> str:
 # ==================================================================================================
 #  Compose tiles
 # ==================================================================================================
-def _tile(d: draw.Drawing, name: str, inner: draw.Drawing, *, tile_x, tile_y_box, tile_width, tile_height) -> None:
+def _tile(
+    d: draw.Drawing,
+    name: str,
+    inner: draw.Drawing,
+    *,
+    tile_x: float,
+    tile_y_box: float,
+    tile_width: float,
+    tile_height: float,
+) -> None:
     """Draw one labeled, bordered tile (label band + viewport + nested render) onto `d`.
 
     The nested render keeps its intrinsic aspect ratio: it is scaled down
@@ -268,7 +277,7 @@ def _build_preview(
 # ==================================================================================================
 #  Main
 # ==================================================================================================
-def _load_state(input_path: Path):
+def _load_state(input_path: Path) -> tuple[State, Theme]:
     """Parse, import-resolve, and apply a `.gitsvg.jsonl` file into render-ready state.
 
     Args:

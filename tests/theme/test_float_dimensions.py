@@ -54,7 +54,7 @@ def test_whole_size_override_normalizes_to_int(field: str) -> None:
     assert isinstance(value, int)
 
 
-@pytest.mark.parametrize("value, expected_type", [(8, int), (5.5, float)])
+@pytest.mark.parametrize(("value", "expected_type"), [(8, int), (5.5, float)])
 def test_split_preserves_size_value_type_on_renderer_slice(value: float, expected_type: type) -> None:
     """The whole→int / fractional→float normalization survives the
     `RendererSettings` round-trip in `split()`, so the renderer formats the
@@ -84,7 +84,7 @@ def test_fractional_theme_op_validates_cleanly_through_apply() -> None:
 
 
 @pytest.mark.parametrize(
-    "radius, expected_attr, forbidden_attr",
+    ("radius", "expected_attr", "forbidden_attr"),
     [(7.5, 'r="7.5"', None), (6, 'r="6"', 'r="6.0"')],
 )
 def test_commit_radius_render_formatting(radius: float, expected_attr: str, forbidden_attr: str | None) -> None:
