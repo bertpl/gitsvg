@@ -29,7 +29,7 @@ SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+$")
 # ==================================================================================================
 #  helpers
 # ==================================================================================================
-def run_command(cmd: list[str], **kw) -> str:
+def run_command(cmd: list[str], **kw: object) -> str:
     """Run a subprocess and return stdout, or exit on failure."""
     result = subprocess.run(cmd, capture_output=True, text=True, **kw)
     if result.returncode != 0:
