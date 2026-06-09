@@ -19,6 +19,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 PYPROJECT = REPO_ROOT / "pyproject.toml"
 CHANGELOG = REPO_ROOT / "CHANGELOG.md"
+README = REPO_ROOT / "README.md"
 PYTHON_VERSIONS_FILE = REPO_ROOT / ".python-versions"
 
 PACKAGE_NAME = "gitsvg"
@@ -213,10 +214,47 @@ def step_10_finalize_changelog(version: str) -> None:
     CHANGELOG.write_text(text)
 
 
+def _total_coverage() -> int:
+    """Run the suite under coverage and return the rounded total percentage."""
+    run_command(["uv", "run", "--group", "dev", "coverage", "run", "-m", "pytest", "tests"])
+    run_command(["uv", "run", "--group", "dev", "coverage", "combine"])
+    total = run_command(["uv", "run", "--group", "dev", "coverage", "report", "--format=total"])
+    return round(float(total.strip()))
+
+
+def _collected_test_count() -> int:
+    """Return the number of tests pytest collects."""
+    out = run_command(["uv", "run", "pytest", "--collect-only", "-q"])
+    m = re.search(r"(\d+) tests? collected", out)
+    return int(m.group(1)) if m else sum(1 for line in out.splitlines() if "::" in line)
+
+
+def _coverage_color(pct: int) -> str:
+    """Map a coverage percentage to a shields.io badge color."""
+    if pct >= 90:
+        return "brightgreen"
+    return "yellow" if pct >= 75 else "red"
+
+
+def refresh_readme_badges() -> None:
+    """Rewrite the README coverage + test-count badges from a local coverage run."""
+    coverage = _total_coverage()
+    n_tests = _collected_test_count()
+    text = README.read_text()
+    text = re.sub(
+        r"badge/coverage-\d+%25-[a-z]+",
+        f"badge/coverage-{coverage}%25-{_coverage_color(coverage)}",
+        text,
+    )
+    text = re.sub(r"badge/tests-\d+-blue", f"badge/tests-{n_tests}-blue", text)
+    README.write_text(text)
+
+
 def step_11_commit_release(version: str) -> None:
-    """Create the release commit."""
-    print_step(11, f"commit 'release: {version}'")
-    run_command(["git", "add", "pyproject.toml", "uv.lock", "CHANGELOG.md"])
+    """Refresh README badges, then create the release commit."""
+    print_step(11, f"refresh README badges + commit 'release: {version}'")
+    refresh_readme_badges()
+    run_command(["git", "add", "pyproject.toml", "uv.lock", "CHANGELOG.md", "README.md"])
     run_command(["git", "commit", "-m", f"release: {version}"])
 
 

@@ -122,9 +122,12 @@ testpaths = ["tests"]
 
 [tool.coverage.run]
 source = ["gitsvg"]
+relative_files = true  # so per-OS matrix data files combine without a [paths] map
+parallel = true        # unique data file per run, for cross-job `coverage combine`
 
 [tool.coverage.report]
 precision = 2
+fail_under = 90        # cumulative gate, enforced on the combined matrix data
 exclude_also = [
     "@abstractmethod",
     "@abc.abstractmethod",

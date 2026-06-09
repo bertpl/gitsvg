@@ -30,3 +30,25 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
           resolution: ${{ matrix.resolution }}
+          coverage: "true"  # each combo uploads its data; the coverage job unions + gates
+
+  coverage:
+    name: coverage
+    # Cumulative gate: combine every combo's data into one picture before
+    # checking the floor, so version-/dependency-divergent code paths (only
+    # hit on some combos) don't read as uncovered. Lives here so it runs
+    # wherever this workflow is used and sits under `CI gate` via `test`.
+    needs: [core]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+      - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7
+      - name: Download coverage data from all matrix combos
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          pattern: coverage-data-*
+          merge-multiple: true
+      - name: Combine and report (fails below the [tool.coverage.report] floor)
+        run: |
+          uv run --group dev coverage combine
+          uv run --group dev coverage report
