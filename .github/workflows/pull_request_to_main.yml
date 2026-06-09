@@ -20,6 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check branch name
+        if: github.actor != 'dependabot[bot]'  # Dependabot branches don't follow the prefix convention
         env:
           BRANCH: ${{ github.head_ref }}
         run: |
