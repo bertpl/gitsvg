@@ -99,9 +99,6 @@ runtime-evaluated-base-classes = ["pydantic.BaseModel"]
 "tests/**" = ["D", "ANN"]    # AAA tests: no docstrings, lighter typing
 "__init__.py" = ["F401"]     # re-export modules: naked imports, no `as` alias
 
-[tool.ty.environment]
-python-version = "3.11"
-
 [tool.ty.src]
 include = ["gitsvg"]
 # Excluded: render/ and theme/_theme.py concentrate the Optional-typed
