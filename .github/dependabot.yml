@@ -1,0 +1,15 @@
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    # "/" scans .github/workflows; composite actions under .github/actions need
+    # their own entry for their `uses:` pins to be tracked (validate_version_trigger
+    # uses no external actions, so it's omitted).
+    directories:
+      - "/"
+      - "/.github/actions/unit_test"
+      - "/.github/actions/pre_commit"
+    schedule:
+      interval: "weekly"
+    groups:
+      actions:  # one batched PR for all action bumps
+        patterns: ["*"]
