@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## 0.3.1 (2026-06-10)
 
 ### Added
 
@@ -15,17 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - PyPI development-status classifier bumped from `3 - Alpha` to `4 - Beta`.
 
-### Deprecated
-
-### Removed
-
 ### Fixed
 
 - Validation errors without a source location no longer print a `None:0:` prefix.
 - Raise the `pydantic` minimum to 2.12.0 on Python 3.14, where the declared 2.10.0 floor has no installable wheel.
-
-### Security
-
 ## 0.3.0 (2026-06-03)
 
 ### Added
