@@ -39,16 +39,19 @@ runs:
     - name: Run pytest (resolution=${{ inputs.resolution }})
       if: inputs.coverage != 'true'
       shell: bash
-      run: uv run --resolution ${{ inputs.resolution }} --group dev pytest tests --durations=20
+      env:
+        RESOLUTION: ${{ inputs.resolution }}  # via env, not inline — inputs are untrusted in run: blocks
+      run: uv run --resolution "$RESOLUTION" --group dev pytest tests --durations=20
 
     - name: Run pytest under coverage (resolution=${{ inputs.resolution }})
       if: inputs.coverage == 'true'
       shell: bash
       env:
+        RESOLUTION: ${{ inputs.resolution }}  # via env, not inline — inputs are untrusted in run: blocks
         # the conftest hook dumps collected node-ids here; the coverage job
         # unions them across combos into the cumulative test count
         GITSVG_NODEID_DUMP: test-ids-${{ inputs.python-version }}-${{ runner.os }}-${{ inputs.resolution }}.txt
-      run: uv run --resolution ${{ inputs.resolution }} --group dev coverage run -m pytest tests --durations=20
+      run: uv run --resolution "$RESOLUTION" --group dev coverage run -m pytest tests --durations=20
 
     - name: Upload coverage + node-id data
       if: inputs.coverage == 'true'

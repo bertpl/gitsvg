@@ -13,3 +13,21 @@ updates:
     groups:
       actions:  # one batched PR for all action bumps
         patterns: ["*"]
+    # Let releases age before PRs open: auto-merged patch/minor bumps then sit
+    # long enough for upstream compromises to surface before they can land.
+    cooldown:
+      default-days: 7  # zizmor's dependabot-cooldown floor; ~no-op at weekly cadence anyway
+      semver-major-days: 14
+
+  - package-ecosystem: "uv"
+    # Bumps uv.lock (and pyproject pins) for the runtime + dev/lint/type tooling
+    # the lockfile deliberately pins — those rot without automated updates.
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      python:  # one batched PR for all Python-dependency bumps
+        patterns: ["*"]
+    cooldown:
+      default-days: 7  # zizmor's dependabot-cooldown floor; ~no-op at weekly cadence anyway
+      semver-major-days: 14
