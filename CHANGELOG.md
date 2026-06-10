@@ -9,7 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- The package now ships a PEP 561 `py.typed` marker, so type checkers see the public API as typed.
+
 ### Changed
+
+- PyPI development-status classifier bumped from `3 - Alpha` to `4 - Beta`.
 
 ### Deprecated
 

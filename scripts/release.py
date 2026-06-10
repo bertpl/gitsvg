@@ -264,7 +264,7 @@ def _fetch_release_metrics() -> dict[str, float]:
         return json.loads((Path(tmp) / "metrics.json").read_text())
 
 
-def _coverage_color(pct: int) -> str:
+def _coverage_color(pct: float) -> str:
     """Map a coverage percentage to a shields.io badge color."""
     if pct >= 90:
         return "brightgreen"
@@ -274,7 +274,7 @@ def _coverage_color(pct: int) -> str:
 def refresh_readme_badges() -> None:
     """Stamp the README coverage + test-count badges from CI's cumulative metrics."""
     metrics = _fetch_release_metrics()
-    coverage = round(metrics["coverage_pct"])
+    coverage_pct = float(metrics["coverage_pct"])
     union = int(metrics["test_union"])
     max_combo = int(metrics["test_max"])
     if max_combo and union > TEST_COUNT_UNION_RATIO_WARN * max_combo:
@@ -286,8 +286,8 @@ def refresh_readme_badges() -> None:
         )
     text = README.read_text()
     text = re.sub(
-        r"badge/coverage-\d+%25-[a-z]+",
-        f"badge/coverage-{coverage}%25-{_coverage_color(coverage)}",
+        r"badge/coverage-[\d.]+%25-[a-z]+",
+        f"badge/coverage-{coverage_pct:.2f}%25-{_coverage_color(coverage_pct)}",
         text,
     )
     text = re.sub(r"badge/tests-\d+-blue", f"badge/tests-{union}-blue", text)
