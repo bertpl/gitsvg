@@ -4,21 +4,24 @@ version = "0.3.0"
 description = "CLI that renders git tree visualizations as SVG from JSONL input."
 readme = "README.md"
 license = "MIT"
+license-files = ["LICENSE"]
 authors = [
-    { name = "Bert Pluymers", email = "bert.pluymers@gmail.com" }
+    { name = "Bert Pluymers" }
 ]
 requires-python = ">=3.11"
 keywords = ["git", "svg", "visualization", "diagram", "cli"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
     "Topic :: Multimedia :: Graphics",
     "Topic :: Software Development :: Version Control :: Git",
+    "Typing :: Typed",
 ]
 dependencies = [
     "click>=8.2.0,!=8.3.0,!=8.3.1",
@@ -52,7 +55,7 @@ docs = [
 gitsvg = "gitsvg.cli._cli:cli"
 
 [project.urls]
-Homepage = "https://gitsvg.readthedocs.io/"
+Homepage = "https://github.com/bertpl/gitsvg"
 Documentation = "https://gitsvg.readthedocs.io/"
 Source = "https://github.com/bertpl/gitsvg"
 Changelog = "https://github.com/bertpl/gitsvg/blob/main/CHANGELOG.md"
