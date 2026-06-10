@@ -127,7 +127,13 @@ def compute_layout(state: State, layout_settings: LayoutSettings | None = None) 
     # rows further for a merged / PR'd source (default one), because the
     # connector climbs the source lane through the merge row, so a sibling
     # may only reclaim the lane afterwards.
-    line_ends, occ_ends = _branch_extents(state, commit_pos_by_id, branch_ends, layout_settings.merge_lane_clearance)
+    line_ends, occ_ends = _branch_extents(
+        state,
+        commit_pos_by_id,
+        branch_ends,
+        layout_settings.merge_lane_clearance,
+        layout_settings.pull_request_extend_target_line,
+    )
     if layout_settings.auto_lane_change:
         segments_by_name = _assign_lane_segments(state, branch_starts, line_ends, occ_ends)
     else:
@@ -336,6 +342,7 @@ def _branch_extents(
     commit_pos_by_id: dict[str, int],
     branch_ends: dict[str, int],
     clearance: int,
+    extend_pr_target_line: bool,
 ) -> tuple[dict[str, int], dict[str, int]]:
     """Per-branch line-draw extent and lane-occupancy extent.
 
@@ -344,17 +351,21 @@ def _branch_extents(
 
     - **`line_end`** — how far the *line* is drawn. The connector's
       **source** reaches `landing_row - 1` (then hops across); its
-      **target** reaches `landing_row` (where the connector arrives — a
-      no-op for a real merge, whose commit is already there; for an open
-      PR it extends the target line to the projected merge point).
+      **target** reaches `landing_row` when `extend_pr_target_line` is
+      on — a no-op for a real merge, whose commit is already there, so
+      the toggle only governs an open PR's target: extended, its line
+      reaches the projected merge point the connector lands on; off
+      (the default), the line ends at its tip commit and the dashed
+      connector lands one row past it. The skip applies to every
+      connector precisely because merges are unaffected either way.
     - **`occ_end`** — how far the *lane* is reserved. The **source**
       reserves `clearance` rows past its line (`landing_row - 1 +
       clearance`), because the connector climbs the source lane through
       the merge row; a sibling may reclaim the lane only afterwards. With
       the default `clearance = 1` that is `landing_row` itself. The
-      **target** reserves through `landing_row` regardless of clearance (a
-      correctness floor for the PR landing, not a spacing knob). So
-      `occ_end` is `line_end` for everyone except a connector source.
+      **target** reserves through `landing_row` regardless of clearance
+      or the line toggle (a correctness floor for the PR landing, not a
+      spacing knob), so lane assignment is identical in both line modes.
 
     Args:
         state: The validated state (commits, parents, open PRs).
@@ -362,6 +373,9 @@ def _branch_extents(
         branch_ends: Each branch's last-commit row.
         clearance: Rows a merged / PR'd source holds its lane past its
             drawn line (`theme.merge_lane_clearance`; default `1`).
+        extend_pr_target_line: Whether an open PR's target line is drawn
+            through the projected merge row
+            (`theme.pull_request_extend_target_line`; default off).
 
     Returns:
         `(line_ends, occ_ends)`, each keyed by branch name, with
@@ -371,7 +385,8 @@ def _branch_extents(
     occ_end = dict(branch_ends)
     for source, target, landing_row in _outgoing_connectors(state, commit_pos_by_id, branch_ends):
         line_end[source] = max(line_end[source], landing_row - 1)
-        line_end[target] = max(line_end[target], landing_row)
+        if extend_pr_target_line:
+            line_end[target] = max(line_end[target], landing_row)
         occ_end[source] = max(occ_end[source], landing_row - 1 + clearance)
         occ_end[target] = max(occ_end[target], landing_row)
     return line_end, occ_end

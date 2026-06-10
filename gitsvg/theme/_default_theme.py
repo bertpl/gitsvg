@@ -66,6 +66,11 @@ class DefaultTheme(Theme):
         """Rows a merged / PR'd source holds its lane past its line — one (reserve through the merge row)."""
         return 1
 
+    @classmethod
+    def _resolve_pull_request_extend_target_line(cls) -> bool:
+        """Open-PR target-line extension — off (the target line ends at its tip commit)."""
+        return False
+
     # --------------------------------------------------------------------------
     #  Spacings
     # --------------------------------------------------------------------------
@@ -555,6 +560,9 @@ class DefaultTheme(Theme):
             commit_row_mode=pick("commit_row_mode", cls._resolve_commit_row_mode),
             auto_lane_change=pick("auto_lane_change", cls._resolve_auto_lane_change),
             merge_lane_clearance=pick("merge_lane_clearance", cls._resolve_merge_lane_clearance),
+            pull_request_extend_target_line=pick(
+                "pull_request_extend_target_line", cls._resolve_pull_request_extend_target_line
+            ),
             branch_spacing=branch_spacing,
             commit_spacing=commit_spacing,
             margin_left=pick("margin_left", cls._resolve_margin_left, orientation, branch_spacing, commit_spacing),
