@@ -8,7 +8,10 @@ permissions:
 jobs:
   auto-merge:
     runs-on: ubuntu-latest
-    if: github.actor == 'dependabot[bot]'
+    # PR author, not github.actor: the actor is whoever triggered the event
+    # (e.g. a human re-running checks), so it can grant or drop the exemption
+    # incorrectly; the author is the property the gate actually means.
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
     permissions:
       contents: write       # to merge
       pull-requests: write  # to approve + enable auto-merge
