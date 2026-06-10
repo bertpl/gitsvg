@@ -73,6 +73,7 @@ class Theme(BaseModel):
     commit_row_mode: CommitRowMode | None = None  # axis-bound: commit-axis (row packing)
     auto_lane_change: bool | None = None  # axis-bound: branch-axis (mid-life lane migration)
     merge_lane_clearance: int | None = None  # axis-bound: commit-axis (rows a merged source holds its lane)
+    pull_request_extend_target_line: bool | None = None  # axis-bound: commit-axis (target line to projected merge)
 
     # --------------------------------------------------------------------------
     #  Spacing (px)
@@ -326,7 +327,8 @@ class Theme(BaseModel):
         narrow.
 
         `LayoutSettings` carries the layout-policy fields
-        (`commit_row_mode`, `auto_lane_change`, `merge_lane_clearance`),
+        (`commit_row_mode`, `auto_lane_change`, `merge_lane_clearance`,
+        `pull_request_extend_target_line`),
         with `commit_row_mode` resolved to `unique` when
         `commit_label_layout` is `table`; `RendererSettings` structurally
         mirrors `Theme` and carries every field — the layout-policy ones
@@ -356,6 +358,7 @@ class Theme(BaseModel):
                 commit_row_mode=effective_row_mode,
                 auto_lane_change=self.auto_lane_change,
                 merge_lane_clearance=self.merge_lane_clearance,
+                pull_request_extend_target_line=self.pull_request_extend_target_line,
             ),
             RendererSettings(**self.model_dump()),
         )

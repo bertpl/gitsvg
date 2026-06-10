@@ -118,6 +118,15 @@ class ThemeOp(OpBase):
             "effect under `auto_lane_change` — setting it while that flag is off is rejected (E222)."
         ),
     )
+    pull_request_extend_target_line: bool | None = Field(
+        default=None,
+        description=(
+            "When `true`, an open pull request extends its target branch's line to the projected merge row, so the "
+            "PR connector lands on the line; when `false` (default) the target line ends at its tip commit and the "
+            "dashed connector lands one row past it. Purely visual — lane occupancy and the connector itself are "
+            "identical either way, and real merges are unaffected (their merge commit already sits on the target)."
+        ),
+    )
 
     # --- Spacing (px) -----------------------------------
     branch_spacing: NonNegativeFloat | None = Field(

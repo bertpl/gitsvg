@@ -31,3 +31,4 @@ class LayoutSettings(BaseModel):
     commit_row_mode: CommitRowMode = CommitRowMode.SHARED
     auto_lane_change: bool = False
     merge_lane_clearance: int = 1
+    pull_request_extend_target_line: bool = False

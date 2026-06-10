@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Open pull requests no longer extend the target branch line to the projected merge point; set `theme.pull_request_extend_target_line: true` to restore the previous look.
+
 ### Deprecated
 
 ### Removed

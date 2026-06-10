@@ -12,11 +12,11 @@
         {
           "lane": 0,
           "start": 0,
-          "end": 3
+          "end": 1
         }
       ],
       "start": 0,
-      "end": 3,
+      "end": 1,
       "tip_commit_id": "m2"
     },
     {
