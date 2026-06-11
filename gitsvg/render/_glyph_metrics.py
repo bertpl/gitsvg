@@ -13,6 +13,7 @@ function never raises and downstream geometry stays well-defined.
 """
 
 import logging
+import math
 from dataclasses import dataclass
 from typing import Final
 
@@ -166,5 +167,10 @@ def text_width(
         factor = _HEURISTIC_FACTOR_BOLD if bold else _HEURISTIC_FACTOR_NORMAL
         return len(text) * font_size * factor
 
-    em_width = sum(max(lut.width_of(ch) for lut in luts) for ch in text)
-    return em_width * font_size
+    # math.fsum: correctly-rounded float summation, bit-identical on every
+    # Python version (builtin sum() switched to compensated summation in
+    # 3.12, changing the last bits of the result and with them the rendered
+    # SVG bytes). The rounding then trims float-noise tails from the
+    # multiply; a millionth of a pixel is far below visual relevance.
+    em_width = math.fsum(max(lut.width_of(ch) for lut in luts) for ch in text)
+    return round(em_width * font_size, 6)

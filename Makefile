@@ -45,10 +45,10 @@ validate-local:
 render-local:
 	uv run gitsvg render local/test_examples -o local/test_examples
 
-# Re-render every committed example then rebuild the tiled themes preview.
-# Order matters: the bulk render would otherwise overwrite the tile via the
-# indirect 10_named_themes.gitsvg.jsonl -> 10_named_themes.svg render, so the
-# preview script runs at the end to restore the actual tile.
+# Re-render every committed example, then rebuild the tiled themes preview
+# (`10_named_themes.svg`, the one SVG with no same-named input — its name is
+# pinned by the raw URLs in already-released READMEs). The two steps write
+# disjoint files, so their order doesn't matter.
 refresh-examples:
 	uv run gitsvg render examples -o examples
 	uv run python scripts/build_themed_preview.py

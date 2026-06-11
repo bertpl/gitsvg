@@ -26,9 +26,9 @@
 <circle cx="242.37185399999998" cy="75.0" r="7" fill="#ff7f0e" stroke="white" stroke-width="1.5" />
 <circle cx="132.37185399999998" cy="25.0" r="7.7" fill="white" stroke="#d62728" stroke-width="4" />
 <path d="M128.87185399999998,25.56 L131.25185399999998,27.94 L136.01185399999997,22.759999999999998" stroke="#d62728" stroke-width="2.24" fill="none" stroke-linecap="round" stroke-linejoin="round" />
-<rect x="107.24574536363635" y="340.90909090909093" width="50.25221727272728" height="24.18181818181818" rx="5.090909090909091" ry="5.090909090909091" fill="#d62728" opacity="0.85" />
+<rect x="107.24574536363635" y="340.90909090909093" width="50.25221727272727" height="24.18181818181818" rx="5.090909090909091" ry="5.090909090909091" fill="#d62728" opacity="0.85" />
 <text x="132.37185399999998" y="353.0" font-size="14.0" text-anchor="middle" dominant-baseline="middle" fill="white" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="500">main</text>
-<rect x="201.67348236363634" y="290.90909090909093" width="81.39674327272728" height="24.18181818181818" rx="5.090909090909091" ry="5.090909090909091" fill="#1f77b4" opacity="0.85" />
+<rect x="201.67348236363637" y="290.90909090909093" width="81.39674327272726" height="24.18181818181818" rx="5.090909090909091" ry="5.090909090909091" fill="#1f77b4" opacity="0.85" />
 <text x="242.37185399999998" y="303.0" font-size="14.0" text-anchor="middle" dominant-baseline="middle" fill="white" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="500">feature-a</text>
 <rect x="322.7340213636364" y="290.90909090909093" width="59.275665272727274" height="24.18181818181818" rx="5.090909090909091" ry="5.090909090909091" fill="#2ca02c" opacity="0.85" />
 <text x="352.371854" y="303.0" font-size="14.0" text-anchor="middle" dominant-baseline="middle" fill="white" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="500">bugfix</text>
