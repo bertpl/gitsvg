@@ -2,6 +2,11 @@
 
 Thanks for your interest in contributing.
 
+## Security
+
+Found a vulnerability? Please report it privately — see
+[`SECURITY.md`](SECURITY.md). Do not open a public issue for it.
+
 ## Architecture
 
 [`docs/architecture.md`](docs/architecture.md) is the canonical reference for the
