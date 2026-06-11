@@ -44,6 +44,24 @@ def test_format_omits_location_when_file_is_none(populated_registry: dict) -> No
     assert rendered == "[E999] no source location"
 
 
+def test_format_appends_suggestion_as_did_you_mean(populated_registry: dict) -> None:
+    # --- arrange ----------------------
+    err = ValidationError(
+        file="x.jsonl",
+        line=7,
+        code="E998",
+        message="branch 'mian' is not declared",
+        field="branch",
+        suggestion="main",
+    )
+
+    # --- act --------------------------
+    rendered = err.format()
+
+    # --- assert -----------------------
+    assert rendered == "x.jsonl:7: [E998] branch: branch 'mian' is not declared — did you mean 'main'?"
+
+
 def test_validation_error_is_frozen_and_hashable(populated_registry: dict) -> None:
     # --- arrange ----------------------
     err = ValidationError(file="x.jsonl", line=1, code="E999", message="msg")

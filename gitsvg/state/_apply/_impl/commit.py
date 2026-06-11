@@ -37,7 +37,7 @@ def apply_commit_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, repor
 
     # --- Branch reference -----------------------
     if not state.has_branch(op.branch):
-        add_branch_not_declared(report, file=file, line=line, branch=op.branch, field="branch")
+        add_branch_not_declared(report, file=file, line=line, branch=op.branch, field="branch", declared=state.branches)
         return
 
     # --- Replaces rules -------------------------

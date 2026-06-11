@@ -75,7 +75,15 @@ def apply_branch_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, repor
                 if state.has_commit(op.from_branch)
                 else ""
             )
-            add_branch_not_declared(report, file=file, line=line, branch=op.from_branch, field="from_branch", hint=hint)
+            add_branch_not_declared(
+                report,
+                file=file,
+                line=line,
+                branch=op.from_branch,
+                field="from_branch",
+                declared=state.branches,
+                hint=hint,
+            )
             return
         rooted_on = state.branch_tip(op.from_branch)
 
