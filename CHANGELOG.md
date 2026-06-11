@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## 0.3.3 (2026-06-11)
 
 ### Added
 
@@ -16,10 +16,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - The PyPI project page now embeds example images pinned to the release tag instead of floating on the `main` branch.
 
-### Deprecated
-
-### Removed
-
 ### Fixed
 
 - Rendered SVGs are now byte-identical across Python versions — label-width arithmetic no longer depends on the interpreter's `sum()` behavior, and width values lose their float-noise decimal tails.
@@ -27,7 +23,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Security
 
 - `import` paths are now confined to the top-level input file's directory tree, and `render_text()` rejects `import` ops outright; previously `../` and absolute paths could read files outside the input's tree.
-
 ## 0.3.2 (2026-06-10)
 
 ### Changed

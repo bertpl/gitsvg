@@ -1,6 +1,6 @@
 [project]
 name = "gitsvg"
-version = "0.3.2"
+version = "0.3.3"
 description = "CLI that renders git tree visualizations as SVG from JSONL input."
 # readme is dynamic: hatch-fancy-pypi-readme builds the PyPI long-description
 # from README.md, rewriting its relative example links to tag-pinned raw URLs
