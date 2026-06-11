@@ -1,6 +1,6 @@
 """Build the multi-theme preview SVG checked in as `examples/10_named_themes.svg`.
 
-Reads `examples/10_named_themes.gitsvg.jsonl`, renders it once per
+Reads `examples/10_named_themes_base.gitsvg.jsonl`, renders it once per
 registered named theme, and tiles the per-theme SVGs into a single
 labeled preview SVG. Rerun whenever themes change or when the
 underlying input file changes.
@@ -28,7 +28,7 @@ from gitsvg.theme._named_themes import NAMED_THEMES
 #  Paths
 # ==================================================================================================
 REPO_ROOT = Path(__file__).resolve().parent.parent
-INPUT_PATH = REPO_ROOT / "examples" / "10_named_themes.gitsvg.jsonl"
+INPUT_PATH = REPO_ROOT / "examples" / "10_named_themes_base.gitsvg.jsonl"
 OUTPUT_PATH = REPO_ROOT / "examples" / "10_named_themes.svg"
 
 # The `gui` theme is a table-layout theme, so it gets its own richer input
