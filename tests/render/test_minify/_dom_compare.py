@@ -137,52 +137,65 @@ def _is_bare_number(value: str) -> bool:
         return False
 
 
-def _resolve_css_classes(root: ET.Element) -> None:
-    """Inline CSS class declarations and remove `<style>` blocks (in-place).
+def _parse_style_rules(css_text: str) -> dict[str, dict[str, str]]:
+    """Parse simple `.cN{prop:val;prop:val}` rules into a name → declarations map."""
+    rules: dict[str, dict[str, str]] = {}
+    for match in _CSS_RULE_RE.finditer(css_text):
+        decls: dict[str, str] = {}
+        for decl in match.group(2).split(";"):
+            if ":" in decl:
+                prop, val = decl.split(":", 1)
+                decls[prop.strip()] = val.strip()
+        rules[match.group(1)] = decls
+    return rules
 
-    Parses every `<style>` block under `root` as a sequence of simple
-    `.cN{prop:val;prop:val}` rules. For each element with a `class`
-    attribute, looks up each named class and writes its declarations
-    inline (unless the element already has an inline value for that
-    attribute, which wins by CSS specificity). Then removes the
-    `class` attribute and the `<style>` block.
-    """
+
+def _collect_styles(root: ET.Element) -> tuple[dict[str, dict[str, str]], list[tuple[ET.Element, ET.Element]]]:
+    """Gather every `<style>` block under `root`: its parsed rules and its (parent, node) location."""
     class_defs: dict[str, dict[str, str]] = {}
     style_locations: list[tuple[ET.Element, ET.Element]] = []
     for parent in root.iter():
         for child in list(parent):
             if _local(child.tag) == "style":
                 if child.text:
-                    for match in _CSS_RULE_RE.finditer(child.text):
-                        name = match.group(1)
-                        decls: dict[str, str] = {}
-                        for decl in match.group(2).split(";"):
-                            if ":" in decl:
-                                prop, val = decl.split(":", 1)
-                                decls[prop.strip()] = val.strip()
-                        class_defs[name] = decls
+                    class_defs.update(_parse_style_rules(child.text))
                 style_locations.append((parent, child))
+    return class_defs, style_locations
 
-    for elem in root.iter():
-        cls_attr = elem.attrib.get("class")
-        if not cls_attr:
-            continue
-        for name in cls_attr.split():
-            decls = class_defs.get(name)
-            if not decls:
+
+def _inline_element_classes(elem: ET.Element, class_defs: dict[str, dict[str, str]]) -> None:
+    """Write `elem`'s class declarations inline and drop its `class` attribute.
+
+    An existing inline attribute wins by CSS specificity and is left
+    untouched.
+    """
+    for name in elem.attrib["class"].split():
+        for attr, value in class_defs.get(name, {}).items():
+            if attr in elem.attrib:
                 continue
-            for attr, value in decls.items():
-                if attr not in elem.attrib:
-                    # CSS values may carry a `px` unit suffix that bare
-                    # SVG attribute values do not (e.g. CSS `font-size:11px`
-                    # vs attribute `font-size="11"`). Strip the suffix
-                    # when copying into attribute form so the canonical
-                    # comparison sees the same string from both sides.
-                    if value.endswith("px") and _is_bare_number(value[:-2]):
-                        value = value[:-2]
-                    elem.set(attr, value)
-        del elem.attrib["class"]
+            # CSS values may carry a `px` unit suffix that bare SVG
+            # attribute values do not (e.g. CSS `font-size:11px` vs
+            # attribute `font-size="11"`). Strip the suffix when copying
+            # into attribute form so the canonical comparison sees the
+            # same string from both sides.
+            if value.endswith("px") and _is_bare_number(value[:-2]):
+                value = value[:-2]
+            elem.set(attr, value)
+    del elem.attrib["class"]
 
+
+def _resolve_css_classes(root: ET.Element) -> None:
+    """Inline CSS class declarations and remove `<style>` blocks (in-place).
+
+    Parses every `<style>` block under `root` as a sequence of simple
+    `.cN{prop:val;prop:val}` rules, writes each classed element's
+    declarations inline, then removes the `class` attributes and the
+    `<style>` blocks.
+    """
+    class_defs, style_locations = _collect_styles(root)
+    for elem in root.iter():
+        if elem.attrib.get("class"):
+            _inline_element_classes(elem, class_defs)
     for parent, child in style_locations:
         parent.remove(child)
 

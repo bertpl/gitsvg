@@ -35,57 +35,79 @@ def apply_remove_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, repor
     line = parsed.line
 
     if op.commits:
-        for index, commit_id in enumerate(op.commits):
-            if not state.has_commit(commit_id):
-                add_commit_not_declared(
-                    report, file=file, line=line, commit_id=commit_id, field=f"commits.{index}", declared=state.commits
-                )
-                continue
-            state.remove_commit(commit_id)
-        return
+        _remove_commits(state, op.commits, file=file, line=line, report=report)
+    elif op.branches:
+        _remove_branches(state, builder, op.branches, file=file, line=line, report=report)
+    elif op.pull_requests:
+        _remove_pull_requests(state, op.pull_requests, file=file, line=line, report=report)
 
-    if op.branches:
-        for index, branch_name in enumerate(op.branches):
-            if not state.has_branch(branch_name):
-                add_branch_not_declared(
-                    report, file=file, line=line, branch=branch_name, field=f"branches.{index}", declared=state.branches
-                )
-                continue
-            blocking_prs = [
-                pr for pr in state.pull_requests.values() if branch_name in (pr.from_branch, pr.into_branch)
-            ]
-            if blocking_prs:
-                pr_ids = ", ".join(repr(pr.id) for pr in blocking_prs)
-                report.add(
-                    ValidationError(
-                        file=file,
-                        line=line,
-                        code="E214",
-                        message=(
-                            f"cannot remove branch {branch_name!r}: open pull_request(s) {pr_ids} "
-                            f"still reference it; close them first"
-                        ),
-                        field=f"branches.{index}",
-                    )
-                )
-                continue
-            _remove_branch_with_cascade(state, builder, branch_name)
-        return
 
-    if op.pull_requests:
-        for index, pr_id in enumerate(op.pull_requests):
-            if not state.has_pull_request(pr_id):
-                report.add(
-                    ValidationError(
-                        file=file,
-                        line=line,
-                        code="E215",
-                        message=f"pull_request {pr_id!r} is not declared",
-                        field=f"pull_requests.{index}",
-                    )
+def _remove_commits(state: State, commit_ids: list[str], *, file: str, line: int, report: ValidationReport) -> None:
+    """Remove each commit in `commit_ids`; undeclared ids get E201 and are skipped."""
+    for index, commit_id in enumerate(commit_ids):
+        if not state.has_commit(commit_id):
+            add_commit_not_declared(
+                report, file=file, line=line, commit_id=commit_id, field=f"commits.{index}", declared=state.commits
+            )
+            continue
+        state.remove_commit(commit_id)
+
+
+def _remove_branches(
+    state: State,
+    builder: ThemeBuilder,
+    branch_names: list[str],
+    *,
+    file: str,
+    line: int,
+    report: ValidationReport,
+) -> None:
+    """Remove each branch in `branch_names`, cascading to its commits.
+
+    Undeclared names get E200; a branch still referenced by an open
+    pull-request gets E214 (close-before-remove). Either way the rest
+    of the list still attempts to remove.
+    """
+    for index, branch_name in enumerate(branch_names):
+        if not state.has_branch(branch_name):
+            add_branch_not_declared(
+                report, file=file, line=line, branch=branch_name, field=f"branches.{index}", declared=state.branches
+            )
+            continue
+        blocking_prs = [pr for pr in state.pull_requests.values() if branch_name in (pr.from_branch, pr.into_branch)]
+        if blocking_prs:
+            pr_ids = ", ".join(repr(pr.id) for pr in blocking_prs)
+            report.add(
+                ValidationError(
+                    file=file,
+                    line=line,
+                    code="E214",
+                    message=(
+                        f"cannot remove branch {branch_name!r}: open pull_request(s) {pr_ids} "
+                        f"still reference it; close them first"
+                    ),
+                    field=f"branches.{index}",
                 )
-                continue
-            state.pull_requests.pop(pr_id, None)
+            )
+            continue
+        _remove_branch_with_cascade(state, builder, branch_name)
+
+
+def _remove_pull_requests(state: State, pr_ids: list[str], *, file: str, line: int, report: ValidationReport) -> None:
+    """Remove each pull-request in `pr_ids`; undeclared ids get E215 and are skipped."""
+    for index, pr_id in enumerate(pr_ids):
+        if not state.has_pull_request(pr_id):
+            report.add(
+                ValidationError(
+                    file=file,
+                    line=line,
+                    code="E215",
+                    message=f"pull_request {pr_id!r} is not declared",
+                    field=f"pull_requests.{index}",
+                )
+            )
+            continue
+        state.pull_requests.pop(pr_id, None)
 
 
 # ==================================================================================================
