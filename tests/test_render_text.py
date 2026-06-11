@@ -1,5 +1,7 @@
 """Tests for the public `gitsvg.render_text` entry point."""
 
+from pathlib import Path
+
 import pytest
 
 import gitsvg
@@ -45,14 +47,40 @@ def test_render_text_invalid_raises_carrying_the_report() -> None:
     assert len(excinfo.value.report.errors) > 0
 
 
-def test_render_text_import_op_fails_without_a_base_path() -> None:
+def test_render_text_rejects_import_ops_with_e306() -> None:
     # --- arrange ----------------------
-    source = '{"op": "import", "path": "./nonexistent_base.gitsvg.jsonl"}\n'
+    source = '{"op": "import", "path": "./some_base.gitsvg.jsonl"}\n'
 
-    # --- act / assert -----------------
-    # An in-memory string has no base path to resolve the import against.
-    with pytest.raises(GitsvgValidationError):
+    # --- act --------------------------
+    with pytest.raises(GitsvgValidationError) as excinfo:
         render_text(source)
+
+    # --- assert -----------------------
+    assert "E306" in {e.code for e in excinfo.value.report.errors}
+
+
+def test_render_text_never_reads_an_existing_file_via_import(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """An import whose target exists (CWD-relative or absolute) is rejected, not read."""
+    # --- arrange ----------------------
+    # A real, valid file both reachable relative to CWD and via its absolute path.
+    foreign = tmp_path / "foreign.gitsvg.jsonl"
+    foreign.write_text('{"op": "branch", "name": "exfiltrated-branch"}\n')
+    monkeypatch.chdir(tmp_path)
+    relative_source = '{"op": "import", "path": "./foreign.gitsvg.jsonl"}\n'
+    absolute_source = f'{{"op": "import", "path": "{foreign}"}}\n'
+
+    for source in (relative_source, absolute_source):
+        # --- act ----------------------
+        with pytest.raises(GitsvgValidationError) as excinfo:
+            render_text(source)
+
+        # --- assert -------------------
+        codes = {e.code for e in excinfo.value.report.errors}
+        assert "E306" in codes
+        # Rejected before any read: no parse/read errors for the foreign
+        # file, and its content never surfaces anywhere in the failure.
+        assert not codes & {"E001", "E302"}
+        assert "exfiltrated-branch" not in str(excinfo.value)
 
 
 def test_render_text_id_prefix_is_accepted_and_output_stays_stable() -> None:

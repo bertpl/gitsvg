@@ -28,7 +28,7 @@ gitsvg schema <op>      # e.g. gitsvg schema commit
 | `pull_request` | Declare a pending merge between two branches. Both endpoints live-track the current branch tips; renders as a dashed arc with an optional title pill. |
 | `remove` | Remove branches from the diagram — used for the rebase-style remove-and-rebuild pattern and to close a pull request before merging. |
 | `highlight` | Mark an existing commit with an enlarged dot and a bold label. |
-| `import` | Replay another `.gitsvg.jsonl` file inline as a prelude, then continue with the current file's ops. |
+| `import` | Replay another `.gitsvg.jsonl` file inline as a prelude, then continue with the current file's ops. The path must be relative and stay inside the top-level input file's directory. |
 | `theme` | Override the presentational surface (spacings, sizes, fonts, palette, background, orientation, layout modes). A `name` selects a built-in theme to resolve from. |
 | `grid` | Pin the diagram's slot counts (`n_commits`, `n_branches`) instead of letting the renderer auto-fit. |
 

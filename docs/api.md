@@ -27,8 +27,8 @@ its `xmlns`, so the result inlines directly into an HTML document.
 **Parameters**
 
 - **`source`** — the op-stream as `.gitsvg.jsonl` text (one JSON op per line).
-  An `import` op has no base path to resolve against and will fail validation;
-  inline the imported ops instead.
+  An `import` op is rejected (error `E306`) — in-memory input has no directory
+  to resolve imports against; inline the imported ops instead.
 - **`id_prefix`** — optional prefix for element ids in the emitted SVG, so
   multiple inline diagrams on one page can't collide. Empty (the default) keeps
   drawsvg's default prefix.

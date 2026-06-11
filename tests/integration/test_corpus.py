@@ -65,6 +65,8 @@ SAD_FIXTURES: list[tuple[str, set[str]]] = [
     ("bad_eof_dangling.gitsvg.jsonl", {"E400", "E401"}),
     ("bad_import_cycle_a.gitsvg.jsonl", {"E300"}),
     ("bad_import_missing.gitsvg.jsonl", {"E302"}),
+    ("bad_import_escape_parent.gitsvg.jsonl", {"E305"}),
+    ("bad_import_absolute.gitsvg.jsonl", {"E305"}),
 ]
 
 

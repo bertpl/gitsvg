@@ -8,9 +8,11 @@ field would make the example raise a *different* code, or none).
 
 It guards example-block drift, not prose drift in the Cause / How-to-fix text.
 
-Exempted: the import-resolution family (E300–E304), whose examples need on-disk
-file structure (a cycle is two files, a missing import needs an absent path);
-those are covered by the fixture-based tests under `tests/imports/`.
+Exempted: the import-resolution family (E300–E306), whose examples need on-disk
+file structure or a non-file entry point (a cycle is two files, a missing
+import needs an absent path, E306 fires only for in-memory input); those are
+covered by the behavior tests in `tests/test_imports.py` and
+`tests/test_render_text.py`.
 """
 
 from pathlib import Path
@@ -22,7 +24,7 @@ from gitsvg.errors import all_codes, load_catalog_entry
 from gitsvg.imports import resolve_imports
 from gitsvg.parse import parse_jsonl_text
 
-_IMPORT_FAMILY = frozenset({"E300", "E301", "E302", "E303", "E304"})
+_IMPORT_FAMILY = frozenset({"E300", "E301", "E302", "E303", "E304", "E305", "E306"})
 _RUNNABLE_CODES = sorted(c.code for c in all_codes() if c.code not in _IMPORT_FAMILY)
 
 
