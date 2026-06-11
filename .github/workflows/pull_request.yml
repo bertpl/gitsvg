@@ -1,8 +1,11 @@
-name: Pull Request to Main
+name: Pull Request
 
 on:
   pull_request:
-    branches: [main]
+    # No base-branch filter: stacked PRs (base = another feature branch) get
+    # the same pipeline as main-based ones. Without this, a stacked PR's
+    # follow-up pushes would run no CI at all — the push workflow skips
+    # branches that have an open PR, assuming this workflow covers them.
     types: [opened, synchronize, edited]  # `edited` re-runs the PR-title check on title edits
 
 permissions:
