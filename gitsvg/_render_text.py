@@ -22,7 +22,8 @@ from .parse import parse_jsonl_text
 from .render import render
 
 # Source label for in-memory input: stands in for a file path in error
-# locations and as the (path-less) base for import resolution.
+# locations. In-memory input has no directory for imports to resolve
+# against, so import resolution runs with `allow_imports=False`.
 _TEXT_INPUT_LABEL = "<input>"
 
 
@@ -56,8 +57,9 @@ def render_text(source: str, *, id_prefix: str = "") -> str:
 
     Args:
         source: The op-stream as `.gitsvg.jsonl` text (one JSON op per
-            line). An `import` op has no base path to resolve against and
-            will fail validation; inline the imported ops instead.
+            line). An `import` op is rejected (error `E306`) — in-memory
+            input has no directory to resolve imports against; inline
+            the imported ops instead.
         id_prefix: Optional prefix for element ids in the emitted SVG, so
             multiple inline diagrams on one page can't collide. Empty
             (the default) keeps drawsvg's default prefix.
@@ -71,7 +73,7 @@ def render_text(source: str, *, id_prefix: str = "") -> str:
             individual errors.
     """
     parsed_ops, report = parse_jsonl_text(source, file=_TEXT_INPUT_LABEL)
-    expanded_ops = resolve_imports(parsed_ops, file=Path(_TEXT_INPUT_LABEL), report=report)
+    expanded_ops = resolve_imports(parsed_ops, file=Path(_TEXT_INPUT_LABEL), report=report, allow_imports=False)
     state, theme = apply_and_validate(expanded_ops, report)
     if not report.is_clean():
         raise GitsvgValidationError(report)

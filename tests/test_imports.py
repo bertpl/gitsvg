@@ -1,7 +1,10 @@
 """Tests for the import resolver — happy paths, cycles, depth, missing files,
-malformed import position."""
+malformed import position, path sandboxing, and in-memory-input rejection."""
 
+import os
 from pathlib import Path
+
+import pytest
 
 from gitsvg.errors import ValidationReport
 from gitsvg.file_format.ops import BranchOp, CommitOp
@@ -223,6 +226,128 @@ def test_imported_file_parse_errors_surface_in_report(tmp_path: Path) -> None:
     # --- assert -----------------------
     # The imported file's E001 makes it through.
     assert any(e.code == "E001" for e in report.errors)
+
+
+# ==================================================================================================
+#  Path sandbox (E305)
+# ==================================================================================================
+def test_parent_escape_emits_e305_without_reading_the_file(tmp_path: Path) -> None:
+    """A `../` path out of the top-level file's directory is rejected before any read."""
+    # --- arrange ----------------------
+    outside = tmp_path / "outside.jsonl"
+    outside.write_text('{"op": "branch", "name": "secret-branch"}\n')
+    sub = tmp_path / "sub"
+    sub.mkdir()
+    main = sub / "main.jsonl"
+    main.write_text('{"op": "import", "path": "../outside.jsonl"}\n{"op": "branch", "name": "main"}\n')
+
+    # --- act --------------------------
+    expanded, report = _resolve(main)
+
+    # --- assert -----------------------
+    # E305 only — no E302/E001 from the out-of-tree file, i.e. no read happened.
+    assert [e.code for e in report.errors] == ["E305"]
+    assert all(not isinstance(p.op, BranchOp) or p.op.name != "secret-branch" for p in expanded)
+    # The message names the requested path, never the resolved target.
+    assert "../outside.jsonl" in report.errors[0].message
+    assert str(outside.resolve()) not in report.errors[0].message
+
+
+def test_absolute_path_emits_e305_even_inside_the_root(tmp_path: Path) -> None:
+    """Absolute paths are rejected outright, even when they point inside the root."""
+    # --- arrange ----------------------
+    base = tmp_path / "base.jsonl"
+    base.write_text('{"op": "branch", "name": "main"}\n')
+    main = tmp_path / "main.jsonl"
+    main.write_text(f'{{"op": "import", "path": "{base.resolve()}"}}\n')
+
+    # --- act --------------------------
+    expanded, report = _resolve(main)
+
+    # --- assert -----------------------
+    assert [e.code for e in report.errors] == ["E305"]
+    assert expanded == []
+
+
+def test_nested_import_escape_emits_e305(tmp_path: Path) -> None:
+    """Containment is checked against the *top-level* file's directory for the whole chain."""
+    # --- arrange ----------------------
+    outside = tmp_path / "outside.jsonl"
+    outside.write_text('{"op": "branch", "name": "main"}\n')
+    sub = tmp_path / "sub"
+    sub.mkdir()
+    inner = sub / "inner.jsonl"
+    inner.write_text('{"op": "import", "path": "../outside.jsonl"}\n')
+    main = sub / "main.jsonl"
+    main.write_text('{"op": "import", "path": "./inner.jsonl"}\n')
+
+    # --- act --------------------------
+    _, report = _resolve(main)
+
+    # --- assert -----------------------
+    assert [e.code for e in report.errors] == ["E305"]
+
+
+def test_descent_below_the_root_is_allowed(tmp_path: Path) -> None:
+    """A subdirectory import stays inside the root and resolves normally."""
+    # --- arrange ----------------------
+    shared = tmp_path / "shared"
+    shared.mkdir()
+    base = shared / "base.jsonl"
+    base.write_text('{"op": "branch", "name": "main"}\n')
+    main = tmp_path / "main.jsonl"
+    main.write_text('{"op": "import", "path": "./shared/base.jsonl"}\n')
+
+    # --- act --------------------------
+    expanded, report = _resolve(main)
+
+    # --- assert -----------------------
+    assert report.is_clean()
+    assert len(expanded) == 1
+
+
+@pytest.mark.skipif(os.name == "nt", reason="symlink creation needs privileges on Windows")
+def test_symlink_escape_emits_e305(tmp_path: Path) -> None:
+    """A within-root symlink resolving outside the root is an escape."""
+    # --- arrange ----------------------
+    outside_dir = tmp_path / "outside"
+    outside_dir.mkdir()
+    outside = outside_dir / "real.jsonl"
+    outside.write_text('{"op": "branch", "name": "main"}\n')
+    root = tmp_path / "root"
+    root.mkdir()
+    (root / "link.jsonl").symlink_to(outside)
+    main = root / "main.jsonl"
+    main.write_text('{"op": "import", "path": "./link.jsonl"}\n')
+
+    # --- act --------------------------
+    _, report = _resolve(main)
+
+    # --- assert -----------------------
+    assert [e.code for e in report.errors] == ["E305"]
+
+
+# ==================================================================================================
+#  In-memory input (E306)
+# ==================================================================================================
+def test_allow_imports_false_emits_e306_and_keeps_rest(tmp_path: Path) -> None:
+    # --- arrange ----------------------
+    base = tmp_path / "base.jsonl"
+    base.write_text('{"op": "branch", "name": "main"}\n')
+    main = tmp_path / "main.jsonl"
+    main.write_text('{"op": "import", "path": "./base.jsonl"}\n{"op": "branch", "name": "feat"}\n')
+    parsed, report = parse_jsonl_file(main)
+
+    # --- act --------------------------
+    expanded = resolve_imports(parsed, file=main, report=report, allow_imports=False)
+
+    # --- assert -----------------------
+    # The import is rejected without resolving (the target exists and is valid);
+    # the ops after it survive.
+    assert [e.code for e in report.errors] == ["E306"]
+    assert len(expanded) == 1
+    assert isinstance(expanded[0].op, BranchOp)
+    assert expanded[0].op.name == "feat"
 
 
 def test_imported_ops_point_at_their_source_file(tmp_path: Path) -> None:

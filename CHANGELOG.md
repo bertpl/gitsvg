@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- New error codes `E305` (import path escapes the top-level file's directory) and `E306` (`import` not available for in-memory input).
+
 ### Changed
 
 ### Deprecated
@@ -18,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 ### Security
+
+- `import` paths are now confined to the top-level input file's directory tree, and `render_text()` rejects `import` ops outright; previously `../` and absolute paths could read files outside the input's tree.
 
 ## 0.3.2 (2026-06-10)
 
