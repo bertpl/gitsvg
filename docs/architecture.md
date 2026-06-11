@@ -272,13 +272,21 @@ orientation branch (the E223 gate) moved to `gitsvg/validate/`.
 apply pass and the layout / renderer stages. The pipeline stages
 consume disjoint slices: `LayoutSettings` (the home for layout-
 affecting fields — currently `commit_row_mode`, `auto_lane_change`,
-and `merge_lane_clearance`, which `compute_layout(state,
-layout_settings)` consults) and `RendererSettings` (every current
-theme field). Both slices are produced by `Theme.split()`; neither
-stage imports `Theme` directly. `RendererSettings` is a `Theme`
-subclass so the field declarations, validators, and resolved-pixel
-property accessors stay DRY; the class identity is what marks the
-boundary.
+`merge_lane_clearance`, and `pull_request_extend_target_line`, which
+`compute_layout(state, layout_settings)` consults) and
+`RendererSettings` (every current theme field). Both slices are
+produced by `Theme.split()`; neither stage imports `Theme` directly.
+Both slices are standalone frozen schemas with **concrete
+(non-Optional) field types**: `Theme`'s `T | None` means "unset
+pre-build," and that unresolved state must not cross the split —
+constructing a slice from the resolved theme's dump is also the
+runtime check that resolution filled every field. The only `None`s
+that survive onto a slice are the fields where `None` is itself a
+resolved value (`background_color` = transparent,
+`commit_row_band_color` = no bands). `RendererSettings` re-declares
+`Theme`'s field block deliberately: a statically declared mirror is
+what lets a type checker verify the renderer end-to-end, where a
+dynamically derived model would be invisible to it.
 
 **Rationale.** Pinning each stage to a narrow type lets layout and
 renderer vary independently. `RendererSettings` can grow new visual
@@ -287,14 +295,16 @@ affecting fields (lane reuse policy, branch-axis hint, etc.) have a
 clear home that won't accidentally touch renderer code. The split
 also makes the orchestration boundary type-visible — the CLI's
 `theme.split()` is the single point where the two stage views
-materialise.
+materialise — and type-sound: `ty` checks the whole library with no
+per-directory exclusions.
 
-**Enforcement.** Architecture meta-test under
-`tests/architecture/test_pipeline_split.py`. It parses every module
+**Enforcement.** Architecture meta-tests under
+`tests/architecture/test_pipeline_split.py`. One parses every module
 under `gitsvg/layout/` and `gitsvg/render/` and asserts none of them
-import the `Theme` name. One exemption:
-`gitsvg/render/_renderer_settings.py`, which inherits from `Theme` to
-define `RendererSettings` and therefore necessarily imports the
-parent class.
+import the `Theme` name (no exemptions); the other asserts
+`RendererSettings` mirrors `Theme` field-for-field, so the deliberate
+duplication cannot drift.
 
-**Locked in:** v0.1.9.
+**Locked in:** v0.1.9; amended in v0.3.3 (`RendererSettings` became a
+standalone non-Optional schema instead of a `Theme` subclass; the
+meta-test exemption for its module was removed).

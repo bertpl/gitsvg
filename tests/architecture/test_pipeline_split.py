@@ -9,9 +9,10 @@ that none of them import the `Theme` name directly — re-introducing
 a `Theme` import silently re-couples the stage to the orchestration
 class.
 
-Exempted: `gitsvg/render/_renderer_settings.py` defines
-`RendererSettings` as a `Theme` subclass and necessarily imports the
-parent class.
+No exemptions: `RendererSettings` is a standalone schema mirroring
+`Theme`'s field block with concrete types, so not even its defining
+module imports `Theme`. A companion test asserts the two field sets
+stay identical, so the mirrored block cannot drift.
 """
 
 import ast
@@ -20,15 +21,8 @@ from pathlib import Path
 import pytest
 
 import gitsvg
-
-# Files allowed to import `Theme` despite living under a stage package.
-# `_renderer_settings.py` defines `RendererSettings` as a `Theme` subclass
-# (the bridge between the orchestration class and the renderer slice).
-_EXEMPT_FILES: frozenset[Path] = frozenset(
-    {
-        Path(gitsvg.__file__).parent / "render" / "_renderer_settings.py",
-    }
-)
+from gitsvg.render._renderer_settings import RendererSettings
+from gitsvg.theme import Theme
 
 
 def _stage_modules(stage_subdir: str) -> list[Path]:
@@ -78,11 +72,29 @@ def test_stage_modules_do_not_import_theme(stage: str) -> None:
     # --- act / assert -----------------
     violations: list[str] = []
     for module_path in modules:
-        if module_path in _EXEMPT_FILES:
-            continue
         if _imports_theme(module_path):
             violations.append(str(module_path.relative_to(Path(gitsvg.__file__).parent.parent)))
     assert not violations, (
         f"{stage}/ modules must consume the {stage} slice via Theme.split(); "
         f"the following modules still import Theme: {violations}"
+    )
+
+
+def test_renderer_settings_mirrors_theme_field_for_field() -> None:
+    """`RendererSettings` re-declares `Theme`'s field block with concrete types.
+
+    The duplication is deliberate (a static type checker cannot see
+    through a dynamically derived model), so this guard is what keeps
+    the two blocks from drifting: a field added to one must be added
+    to the other.
+    """
+    # --- arrange ----------------------
+    theme_fields = set(Theme.model_fields)
+    renderer_fields = set(RendererSettings.model_fields)
+
+    # --- assert -----------------------
+    assert theme_fields == renderer_fields, (
+        f"Theme/RendererSettings field drift — "
+        f"only on Theme: {sorted(theme_fields - renderer_fields)}, "
+        f"only on RendererSettings: {sorted(renderer_fields - theme_fields)}"
     )

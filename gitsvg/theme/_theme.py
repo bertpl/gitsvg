@@ -22,10 +22,9 @@ time and document the invariants alongside the field.
 Position/size fields with a natural anchor stay stored as ratios
 (suffixed `_in_lanes` / `_in_rows` / `_in_grid_units` /
 `_in_font_sizes`) anchored to the relevant spacing or font size.
-Pixel-valued accessors with the corresponding unsuffixed names live
-as properties below the field block — read-only resolved values that
-downstream consumers (renderer, canvas auto-fit, primitives) read
-just as before.
+The pixel-valued accessors with the corresponding unsuffixed names
+live on `RendererSettings` — they read resolved values, which only
+exist on the renderer slice.
 """
 
 from typing import TYPE_CHECKING, Any, Self
@@ -330,9 +329,11 @@ class Theme(BaseModel):
         (`commit_row_mode`, `auto_lane_change`, `merge_lane_clearance`,
         `pull_request_extend_target_line`),
         with `commit_row_mode` resolved to `unique` when
-        `commit_label_layout` is `table`; `RendererSettings` structurally
-        mirrors `Theme` and carries every field — the layout-policy ones
-        ride along unused on the renderer slice.
+        `commit_label_layout` is `table`; `RendererSettings` mirrors
+        `Theme`'s field block with concrete (non-Optional) types and
+        carries every field — the layout-policy ones ride along unused
+        on the renderer slice. Constructing it from the dump is also
+        the runtime check that resolution filled every field.
 
         Returns:
             A `(layout_settings, renderer_settings)` pair carrying the
@@ -343,6 +344,14 @@ class Theme(BaseModel):
         # both of which already import from `gitsvg.theme`.
         from gitsvg.layout._layout_settings import LayoutSettings
         from gitsvg.render._renderer_settings import RendererSettings
+
+        # split() runs only on a built (fully-resolved) theme; narrow the
+        # layout-policy Optionals so both an unresolved value and the type
+        # checker fail loudly here rather than downstream.
+        assert self.commit_row_mode is not None
+        assert self.auto_lane_change is not None
+        assert self.merge_lane_clearance is not None
+        assert self.pull_request_extend_target_line is not None
 
         # Table mode lays one commit per row, so it forces `unique` row packing
         # regardless of the `commit_row_mode` field. This is the single place
@@ -362,68 +371,3 @@ class Theme(BaseModel):
             ),
             RendererSettings(**self.model_dump()),
         )
-
-    # --------------------------------------------------------------------------
-    #  Resolved-pixel accessors for ratio-stored fields
-    # --------------------------------------------------------------------------
-    # Read-only: the renderer / canvas auto-fit / primitives read these
-    # (e.g. `theme.arc_corner_radius`) and get the resolved pixel value,
-    # computed lazily from the stored ratio × the relevant spacing.
-
-    @property
-    def arc_corner_radius(self) -> int | float:
-        """Resolved pixel corner radius for branch-off / merge arcs."""
-        return resolve_int_or_float(
-            self.arc_corner_radius_in_grid_units * min(self.branch_spacing, self.commit_spacing)
-        )
-
-    @property
-    def label_offset(self) -> int | float:
-        """Resolved pixel offset between a commit dot and its label, along the branch axis."""
-        return resolve_int_or_float(self.label_offset_branch_axis_in_lanes * self.branch_spacing)
-
-    @property
-    def guide_overshoot(self) -> int | float:
-        """Resolved pixel overshoot — how far a branch guide extends past the commit-axis margin edges."""
-        return resolve_int_or_float(self.guide_overshoot_in_rows * self.commit_spacing)
-
-    @property
-    def pill_padding_x(self) -> int | float:
-        """Resolved pill-padding-x (px) — extra width beyond the rendered text."""
-        return resolve_int_or_float(self.pill_padding_x_in_font_sizes * self.branch_label_font_size)
-
-    @property
-    def pill_padding_y(self) -> int | float:
-        """Resolved pill-padding-y (px) — extra height beyond the font size."""
-        return resolve_int_or_float(self.pill_padding_y_in_font_sizes * self.branch_label_font_size)
-
-    @property
-    def pill_corner_radius(self) -> int | float:
-        """Resolved pill corner radius (px) for `rx` / `ry`."""
-        return resolve_int_or_float(self.pill_corner_radius_in_font_sizes * self.branch_label_font_size)
-
-    @property
-    def label_line_padding(self) -> int | float:
-        """Resolved extra height per line (px) in a multi-line label stack."""
-        return resolve_int_or_float(self.label_line_padding_in_font_sizes * self.label_font_size)
-
-    @property
-    def table_cell_padding_x(self) -> int | float:
-        """Resolved table horizontal spacing unit (px) — cell inset and intra-cell gaps."""
-        return resolve_int_or_float(self.table_cell_padding_x_in_font_sizes * self.label_font_size)
-
-    # --------------------------------------------------------------------------
-    #  Per-branch resolved-value lookups
-    # --------------------------------------------------------------------------
-    def branch_label_side(self, branch_id: str) -> LabelSide:
-        """Resolve a branch's `label_side` — per-branch override, then theme default.
-
-        Args:
-            branch_id: The branch's stable internal id (`BranchState.id`).
-
-        Returns:
-            The resolved `LabelSide` for the branch. Falls through to
-            `self.label_side_default` when the branch never set
-            `label_side` on its `branch:` op.
-        """
-        return self.branch_label_side_overrides.get(branch_id, self.label_side_default)

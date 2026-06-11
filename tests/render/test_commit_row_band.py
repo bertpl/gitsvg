@@ -91,7 +91,7 @@ def test_default_theme_emits_no_band_rects() -> None:
     layout = _layout(_FOUR_ROWS)
 
     # --- act --------------------------
-    svg = render(layout, DEFAULT_THEME).as_svg()
+    svg = render(layout, DEFAULT_THEME.split()[1]).as_svg()
 
     # --- assert -----------------------
     assert '<rect x="0"' not in svg
@@ -104,7 +104,7 @@ def test_visible_band_color_stripes_odd_rows() -> None:
     theme = DefaultTheme.build({"commit_row_band_color": _BAND})
 
     # --- act --------------------------
-    svg = render(layout, theme).as_svg()
+    svg = render(layout, theme.split()[1]).as_svg()
     bands = _band_rects(svg, _BAND)
 
     # --- assert -----------------------
@@ -120,7 +120,7 @@ def test_bands_sit_below_commit_dots() -> None:
     theme = DefaultTheme.build({"commit_row_band_color": _BAND})
 
     # --- act --------------------------
-    svg = render(layout, theme).as_svg()
+    svg = render(layout, theme.split()[1]).as_svg()
     els = list(ET.fromstring(svg).iter())
     tags = [el.tag.split("}")[-1] for el in els]
     fills = [el.attrib.get("fill") for el in els]
@@ -138,7 +138,7 @@ def test_fully_transparent_band_color_emits_nothing() -> None:
     theme = DefaultTheme.build({"commit_row_band_color": "#00000000"})
 
     # --- act --------------------------
-    svg = render(layout, theme).as_svg()
+    svg = render(layout, theme.split()[1]).as_svg()
 
     # --- assert -----------------------
     assert '<rect x="0"' not in svg

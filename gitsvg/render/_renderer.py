@@ -152,7 +152,7 @@ def render(layout: Layout, theme: RendererSettings | None = None) -> draw.Drawin
     # when the band color is unset / fully transparent, so default output
     # stays byte-identical.
     band_color = theme.commit_row_band_color
-    if is_color_visible(band_color):
+    if band_color is not None and is_color_visible(band_color):
         for commit_pos in range(1, canvas.n_commits, 2):
             draw_commit_row_band(d, commit_pos, band_color, canvas)
 

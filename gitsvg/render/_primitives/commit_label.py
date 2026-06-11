@@ -110,13 +110,13 @@ def draw_commit_label(d: draw.Drawing, commit: LayoutCommit, canvas: RenderCanva
         )
 
 
-def _build_lines(commit: LayoutCommit, theme: RendererSettings) -> list[tuple[str, int, str, str]]:
+def _build_lines(commit: LayoutCommit, theme: RendererSettings) -> list[tuple[str, float, str, str]]:
     r"""Return the line stack as `(text, font_size, color, font_weight)` tuples.
 
     Order: each `msg` split on `"\\n"` becomes a primary line; the
     optional `hash` follows as a single secondary line.
     """
-    lines: list[tuple[str, int, str, str]] = []
+    lines: list[tuple[str, float, str, str]] = []
     msg_weight = "700" if commit.highlight else "400"
     if commit.msg is not None:
         for msg_line in commit.msg.split("\n"):

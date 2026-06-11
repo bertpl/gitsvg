@@ -10,7 +10,8 @@ def _render_from(text: str):
     parsed, report = parse_jsonl_text(text, file="x.jsonl")
     state, theme = apply_ops(parsed, report)
     layout = compute_layout(state)
-    return render(layout, theme)
+    _, renderer_settings = theme.split()
+    return render(layout, renderer_settings)
 
 
 # ==================================================================================================

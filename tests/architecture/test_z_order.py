@@ -37,7 +37,7 @@ def _drawable_tags_in_order(text: str) -> list[str]:
     """Render `text` and return the local tag names of drawn elements in document order."""
     parsed, report = parse_jsonl_text(text, file="x.jsonl")
     state, theme = apply_ops(parsed, report)
-    svg = render(compute_layout(state), theme).as_svg()
+    svg = render(compute_layout(state), theme.split()[1]).as_svg()
     drawables = {"path", "circle", "rect", "text", "line"}
     return [el.tag.split("}")[-1] for el in ET.fromstring(svg).iter() if el.tag.split("}")[-1] in drawables]
 

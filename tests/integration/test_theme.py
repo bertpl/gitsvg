@@ -47,7 +47,7 @@ def test_happy_theme_renders_with_background_rect() -> None:
     state, theme = apply_and_validate(parsed, report)
 
     # --- act --------------------------
-    svg = render(compute_layout(state), theme).as_svg()
+    svg = render(compute_layout(state), theme.split()[1]).as_svg()
 
     # --- assert -----------------------
     assert 'fill="#fffaf0"' in svg

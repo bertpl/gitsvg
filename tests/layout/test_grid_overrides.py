@@ -20,7 +20,7 @@ def _layout_and_canvas(text: str):
     parsed, report = parse_jsonl_text(text, file="x.jsonl")
     state, theme = apply_ops(parsed, report)
     layout = compute_layout(state)
-    return layout, theme, compute_canvas(layout, theme)
+    return layout, theme, compute_canvas(layout, theme.split()[1])
 
 
 # ==================================================================================================
