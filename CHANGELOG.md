@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Rendered SVGs are now byte-identical across Python versions — label-width arithmetic no longer depends on the interpreter's `sum()` behavior, and width values lose their float-noise decimal tails.
+
 ### Security
 
 - `import` paths are now confined to the top-level input file's directory tree, and `render_text()` rejects `import` ops outright; previously `../` and absolute paths could read files outside the input's tree.
