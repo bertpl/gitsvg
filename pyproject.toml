@@ -93,10 +93,14 @@ select = [
     "ANN",     # flake8-annotations
     "D",       # pydocstyle (Google convention; D401 enforced)
     "RUF",     # ruff-native
+    "C901",    # mccabe complexity gate (threshold below)
 ]
 ignore = [
     "RUF001", "RUF002", "RUF003",  # intentional typography (→, ×, en-dash), not "ambiguous"
 ]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
