@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING, cast
 
 from gitsvg.errors import ValidationError, ValidationReport
 from gitsvg.parse import ParsedOp
+from gitsvg.state._apply._errors import add_commit_not_declared
 from gitsvg.state._state import State
 
 if TYPE_CHECKING:
@@ -66,14 +67,8 @@ def _check_rule_1_existence(
     """Rule 1: every id in `replaces:` exists in current state."""
     for rid in replaces:
         if not state.has_commit(rid):
-            report.add(
-                ValidationError(
-                    file=file,
-                    line=line,
-                    code="E201",
-                    message=f"replaces references undefined commit {rid!r}",
-                    field="replaces",
-                )
+            add_commit_not_declared(
+                report, file=file, line=line, commit_id=rid, field="replaces", declared=state.commits
             )
             return False
     return True

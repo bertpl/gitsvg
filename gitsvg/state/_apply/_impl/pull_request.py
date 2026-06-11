@@ -47,11 +47,11 @@ def apply_pull_request_op(state: State, builder: ThemeBuilder, parsed: ParsedOp,
         return
 
     if not state.has_branch(op.from_):
-        add_branch_not_declared(report, file=file, line=line, branch=op.from_, field="from")
+        add_branch_not_declared(report, file=file, line=line, branch=op.from_, field="from", declared=state.branches)
         return
 
     if not state.has_branch(op.into):
-        add_branch_not_declared(report, file=file, line=line, branch=op.into, field="into")
+        add_branch_not_declared(report, file=file, line=line, branch=op.into, field="into", declared=state.branches)
         return
 
     pr_id = op.id if op.id is not None else _generate_auto_pr_id(state)

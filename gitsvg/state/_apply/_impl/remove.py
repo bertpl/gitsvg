@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, cast
 
 from gitsvg.errors import ValidationError, ValidationReport
 from gitsvg.parse import ParsedOp
-from gitsvg.state._apply._errors import add_branch_not_declared
+from gitsvg.state._apply._errors import add_branch_not_declared, add_commit_not_declared
 from gitsvg.state._state import State
 from gitsvg.theme import ThemeBuilder
 
@@ -37,14 +37,8 @@ def apply_remove_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, repor
     if op.commits:
         for index, commit_id in enumerate(op.commits):
             if not state.has_commit(commit_id):
-                report.add(
-                    ValidationError(
-                        file=file,
-                        line=line,
-                        code="E201",
-                        message=f"commit {commit_id!r} is not declared",
-                        field=f"commits.{index}",
-                    )
+                add_commit_not_declared(
+                    report, file=file, line=line, commit_id=commit_id, field=f"commits.{index}", declared=state.commits
                 )
                 continue
             state.remove_commit(commit_id)
@@ -53,7 +47,9 @@ def apply_remove_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, repor
     if op.branches:
         for index, branch_name in enumerate(op.branches):
             if not state.has_branch(branch_name):
-                add_branch_not_declared(report, file=file, line=line, branch=branch_name, field=f"branches.{index}")
+                add_branch_not_declared(
+                    report, file=file, line=line, branch=branch_name, field=f"branches.{index}", declared=state.branches
+                )
                 continue
             blocking_prs = [
                 pr for pr in state.pull_requests.values() if branch_name in (pr.from_branch, pr.into_branch)

@@ -2,8 +2,9 @@
 
 from typing import TYPE_CHECKING, cast
 
-from gitsvg.errors import ValidationError, ValidationReport
+from gitsvg.errors import ValidationReport
 from gitsvg.parse import ParsedOp
+from gitsvg.state._apply._errors import add_commit_not_declared
 from gitsvg.state._state import State
 from gitsvg.theme import ThemeBuilder
 
@@ -19,14 +20,8 @@ def apply_highlight_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, re
     """
     op = cast("HighlightOp", parsed.op)
     if not state.has_commit(op.commit):
-        report.add(
-            ValidationError(
-                file=parsed.file,
-                line=parsed.line,
-                code="E201",
-                message=f"commit {op.commit!r} is not declared",
-                field="commit",
-            )
+        add_commit_not_declared(
+            report, file=parsed.file, line=parsed.line, commit_id=op.commit, field="commit", declared=state.commits
         )
         return
     state.commits[op.commit].highlight = True

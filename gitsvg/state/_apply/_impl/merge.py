@@ -51,11 +51,11 @@ def apply_merge_op(state: State, builder: ThemeBuilder, parsed: ParsedOp, report
         return
 
     if not state.has_branch(op.from_):
-        add_branch_not_declared(report, file=file, line=line, branch=op.from_, field="from")
+        add_branch_not_declared(report, file=file, line=line, branch=op.from_, field="from", declared=state.branches)
         return
 
     if not state.has_branch(op.into):
-        add_branch_not_declared(report, file=file, line=line, branch=op.into, field="into")
+        add_branch_not_declared(report, file=file, line=line, branch=op.into, field="into", declared=state.branches)
         return
 
     for pr in state.pull_requests.values():
