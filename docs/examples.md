@@ -12,7 +12,7 @@ orientation, and layout modes.
 
 A single branch with a few commits — the minimum viable diagram.
 
-![Linear history](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/01_linear.svg)
+![Linear history](assets/examples/01_linear.svg)
 
 ```jsonl
 {"op": "branch", "name": "main", "label_side": "before"}
@@ -27,7 +27,7 @@ A single branch with a few commits — the minimum viable diagram.
 A `feature` branch forks off `main`, accumulates a couple of commits, then
 merges back.
 
-![Branch and merge](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/02_branch_merge.svg)
+![Branch and merge](assets/examples/02_branch_merge.svg)
 
 ```jsonl
 {"op": "branch", "name": "main", "label_side": "before"}
@@ -45,7 +45,7 @@ Two concurrent branches share lanes 1 and 2; after both merge, a later
 `feature-b` reclaims the now-free lane 1 instead of starting a new one. Lane
 assignment is automatic and geometry-driven.
 
-![Multiple branches with lane reuse](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/03_multi_branch.svg)
+![Multiple branches with lane reuse](assets/examples/03_multi_branch.svg)
 
 ```jsonl
 {"op": "branch", "name": "main", "label_side": "before"}
@@ -67,7 +67,7 @@ assignment is automatic and geometry-driven.
 The `highlight` op marks an existing commit with an enlarged dot and a bold
 label — useful for drawing attention to a release or a key milestone.
 
-![Highlighted release commit](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/04_highlight.svg)
+![Highlighted release commit](assets/examples/04_highlight.svg)
 
 ```jsonl
 {"op": "branch", "name": "main", "label_side": "before"}
@@ -85,7 +85,7 @@ A `feature` branch is removed and re-declared on top of a more recent `main`
 commit, with the same commit IDs as before. This is the rebase-style "move my
 work onto the new tip" pattern, expressed as primitives.
 
-![Remove and rebuild](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/05_remove_rebuild.svg)
+![Remove and rebuild](assets/examples/05_remove_rebuild.svg)
 
 ```jsonl
 {"op": "branch", "name": "main", "label_side": "before"}
@@ -107,7 +107,7 @@ The `import` op replays another file as a prelude — here it picks up the
 rebased state from Example 5. A single new commit then squashes `f1` and `f2`
 into one via `replaces`.
 
-![Import and squash](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/06_import_squash.svg)
+![Import and squash](assets/examples/06_import_squash.svg)
 
 ```jsonl
 {"op": "import", "path": "05_remove_rebuild.gitsvg.jsonl"}
@@ -123,7 +123,7 @@ at the source-tip commit. The typical lifecycle closes the PR with `remove`
 and then runs a real `merge`; this example stops before either, so the open PR
 remains visible in the final state.
 
-![Open pull request](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/07_pull_request.svg)
+![Open pull request](assets/examples/07_pull_request.svg)
 
 ```jsonl
 {"op": "branch", "name": "main", "label_side": "before"}
@@ -142,7 +142,7 @@ the branch-color palette, the background, and more. Here we import Example 3
 unchanged and apply a saturated palette with thicker strokes, larger labels,
 and a warm background.
 
-![Recolored palette](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/08_themed.svg)
+![Recolored palette](assets/examples/08_themed.svg)
 
 ```jsonl
 {"op": "import", "path": "03_multi_branch.gitsvg.jsonl"}
@@ -159,7 +159,7 @@ orientation. Accepted values include the canonical short codes (`bt`, `tb`,
 `lr`, `rl`) and common aliases (Mermaid's `TD`, CSS's `ltr` / `rtl`, long forms
 like `bottom_to_top`, and `top_down` / `bottom_up`).
 
-![Horizontal orientation](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/09_horizontal.svg)
+![Horizontal orientation](assets/examples/09_horizontal.svg)
 
 ```jsonl
 {"op": "branch", "name": "main", "label_side": "before"}
@@ -191,7 +191,7 @@ Selecting one is a single field on a `theme` op (`{"op": "theme", "name": "dark"
 The preview below tiles `default`, `muted`, `dark`, and `compact` on a shared
 input, with the table-layout `gui` theme shown beneath on its own diagram.
 
-![Built-in named themes](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/10_named_themes.svg)
+![Built-in named themes](assets/examples/10_named_themes.svg)
 
 Selecting a named theme also wipes any `theme` field overrides and
 `branch.color` overrides accumulated earlier. To layer a chosen theme on top of
@@ -205,7 +205,7 @@ gives every commit its own row, assigned in authoring order — so reading along
 the commit axis recovers the exact order events were declared, even when work
 on several branches interleaves.
 
-![Unique commit rows](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/11_unique_rows.svg)
+![Unique commit rows](assets/examples/11_unique_rows.svg)
 
 ```jsonl
 {"op": "branch", "name": "main", "label_side": "before"}
@@ -230,7 +230,7 @@ merges its lane sits empty while outer branches stay stranded. Setting
 do: as each lower lane frees up, the surviving branches migrate inward. The
 shift is drawn as a short connector in the branch line's own style.
 
-![Auto lane change](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/12_auto_lane_change.svg)
+![Auto lane change](assets/examples/12_auto_lane_change.svg)
 
 ```jsonl
 {"op": "branch", "name": "main", "label_side": "before"}
@@ -258,4 +258,4 @@ would — the graph on the left, a per-commit table on the right (message and
 hash columns), and each branch's name as a colored pill at the commit its ref
 points to. It is best seen at full size.
 
-![Desktop-GUI table theme](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/13_gui_table.svg)
+![Desktop-GUI table theme](assets/examples/13_gui_table.svg)

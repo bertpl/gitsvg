@@ -2,7 +2,10 @@
 name = "gitsvg"
 version = "0.3.2"
 description = "CLI that renders git tree visualizations as SVG from JSONL input."
-readme = "README.md"
+# readme is dynamic: hatch-fancy-pypi-readme builds the PyPI long-description
+# from README.md, rewriting its relative example links to tag-pinned raw URLs
+# (config under [tool.hatch.metadata.hooks.fancy-pypi-readme]).
+dynamic = ["readme"]
 license = "MIT"
 license-files = ["LICENSE"]
 authors = [
@@ -49,6 +52,7 @@ dev = [
 docs = [
     "mkdocs>=1.6",
     "mkdocs-material>=9.5",
+    "mkdocs-gen-files>=0.5",
 ]
 
 [project.scripts]
@@ -62,8 +66,28 @@ Changelog = "https://github.com/bertpl/gitsvg/blob/main/CHANGELOG.md"
 Issues = "https://github.com/bertpl/gitsvg/issues"
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "hatch-fancy-pypi-readme"]
 build-backend = "hatchling.build"
+
+# PyPI long-description: README.md with relative example links rewritten to
+# raw URLs pinned to the release tag, so every PyPI page references its own
+# immutable tree. The README itself stays relative — GitHub renders relative
+# paths against whatever ref is viewed, keeping main free to move files.
+[tool.hatch.metadata.hooks.fancy-pypi-readme]
+content-type = "text/markdown"
+
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
+path = "README.md"
+
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.substitutions]]
+# Image embeds: ![alt](examples/foo.svg) → tag-pinned raw URL.
+pattern = '\]\((examples/[^)]+\.svg)\)'
+replacement = '](https://raw.githubusercontent.com/bertpl/gitsvg/v$HFPR_VERSION/\1)'
+
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.substitutions]]
+# The examples-folder link: [`examples/`](examples/) → tag-pinned tree URL.
+pattern = '\]\(examples/\)'
+replacement = '](https://github.com/bertpl/gitsvg/tree/v$HFPR_VERSION/examples)'
 
 [tool.hatch.build.targets.sdist]
 packages = ["gitsvg"]
