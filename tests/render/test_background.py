@@ -20,7 +20,7 @@ def test_default_theme_emits_no_background_rect() -> None:
     layout = _layout('{"op": "branch", "name": "main"}\n{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n')
 
     # --- act --------------------------
-    svg = render(layout, DEFAULT_THEME).as_svg()
+    svg = render(layout, DEFAULT_THEME.split()[1]).as_svg()
 
     # --- assert -----------------------
     # No `<rect>` covering the whole canvas. The pill rects are present, but
@@ -54,7 +54,7 @@ def test_theme_with_background_emits_full_canvas_rect_first() -> None:
     theme = DefaultTheme.build({"background_color": "#ff00ff"})
 
     # --- act --------------------------
-    svg = render(layout, theme).as_svg()
+    svg = render(layout, theme.split()[1]).as_svg()
 
     # --- assert -----------------------
     # The background rect carries the chosen color and starts at the origin.

@@ -16,7 +16,7 @@ def _layout_and_theme(jsonl: str):
     """Parse → apply → layout → (layout, theme)."""
     parsed, report = parse_jsonl_text(jsonl, file="x.jsonl")
     state, theme = apply_ops(parsed, report)
-    return compute_layout(state), theme
+    return compute_layout(state), theme.split()[1]
 
 
 # ==================================================================================================

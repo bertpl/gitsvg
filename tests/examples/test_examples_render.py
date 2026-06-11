@@ -50,9 +50,9 @@ def test_example_validates_and_renders(path: Path) -> None:
     parsed_ops, report = parse_jsonl_file(path)
     expanded = resolve_imports(parsed_ops, file=path, report=report)
     state, theme = apply_and_validate(expanded, report)
-    layout_settings, _ = theme.split()
+    layout_settings, renderer_settings = theme.split()
     layout = compute_layout(state, layout_settings)
-    drawing = render(layout, theme)
+    drawing = render(layout, renderer_settings)
     svg_text = drawing.as_svg()
 
     # --- assert -----------------------

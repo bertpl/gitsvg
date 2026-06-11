@@ -24,8 +24,9 @@ def _render_with_orientation(orientation: str):
     parsed, report = parse_jsonl_text(text, file="x.jsonl")
     state, theme = apply_ops(parsed, report)
     layout = compute_layout(state)
-    canvas = compute_canvas(layout, theme)
-    drawing = render(layout, theme)
+    _, renderer_settings = theme.split()
+    canvas = compute_canvas(layout, renderer_settings)
+    drawing = render(layout, renderer_settings)
     return drawing.as_svg(), canvas
 
 

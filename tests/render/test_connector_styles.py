@@ -180,7 +180,7 @@ def test_renders_in_every_orientation_and_style(orientation: str, style: str) ->
     assert report.is_clean(), f"{orientation}/{style}: unexpected validation errors"
 
     # --- act --------------------------
-    svg = render(compute_layout(state), theme).as_svg()
+    svg = render(compute_layout(state), theme.split()[1]).as_svg()
 
     # --- assert -----------------------
     assert "<path" in svg  # the branch-off and merge connectors rendered

@@ -37,7 +37,7 @@ def _render(jsonl: str) -> str:
     parsed, report = parse_jsonl_text(jsonl, file="x.jsonl")
     state, theme = apply_ops(parsed, report)
     assert report.is_clean(), report.errors
-    return render(compute_layout(state), theme).as_svg()
+    return render(compute_layout(state), theme.split()[1]).as_svg()
 
 
 def _with_style(style: MergeCommitStyle) -> str:

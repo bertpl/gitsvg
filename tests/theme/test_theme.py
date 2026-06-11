@@ -29,8 +29,9 @@ def test_default_theme_values_pin_the_byte_identical_baseline() -> None:
     assert DEFAULT_THEME.commit_radius == 5
     assert DEFAULT_THEME.commit_stroke_width == 1.5
     assert DEFAULT_THEME.highlight_radius == 7
-    assert DEFAULT_THEME.arc_corner_radius == 20  # ratio property, 0.4 * min(100,50)
-    assert DEFAULT_THEME.label_offset == 12  # ratio property, 0.12 * 100
+    # Ratio accessors live on the renderer slice.
+    assert DEFAULT_THEME.split()[1].arc_corner_radius == 20  # 0.4 * min(100,50)
+    assert DEFAULT_THEME.split()[1].label_offset == 12  # 0.12 * 100
     assert DEFAULT_THEME.branch_guide_width == 0.7
     assert DEFAULT_THEME.branch_guide_dash == "4,4"
     assert DEFAULT_THEME.label_font_size == 11
@@ -70,32 +71,39 @@ def test_default_theme_label_side_default_is_after() -> None:
 
 
 # ==================================================================================================
-#  Per-branch label-side resolver
+#  Per-branch label-side resolver (lives on the renderer slice)
 # ==================================================================================================
 def test_branch_label_side_falls_through_to_default_when_unset() -> None:
     # --- arrange ----------------------
-    theme = Theme()  # `label_side_default` carries its model default (`AFTER`).
+    _, renderer_settings = DEFAULT_THEME.split()  # `label_side_default` resolves to `AFTER`
 
     # --- act / assert -----------------
-    assert theme.branch_label_side("b0") == LabelSide.AFTER
+    assert renderer_settings.branch_label_side("b0") == LabelSide.AFTER
 
 
 def test_branch_label_side_returns_per_branch_override_when_set() -> None:
     # --- arrange ----------------------
-    theme = Theme(branch_label_side_overrides={"b0": LabelSide.BEFORE})
+    base = DEFAULT_THEME.split()[1]
+    renderer_settings = base.model_copy(update={"branch_label_side_overrides": {"b0": LabelSide.BEFORE}})
 
     # --- act / assert -----------------
-    assert theme.branch_label_side("b0") == LabelSide.BEFORE
-    assert theme.branch_label_side("b1") == LabelSide.AFTER  # fall-through to default
+    assert renderer_settings.branch_label_side("b0") == LabelSide.BEFORE
+    assert renderer_settings.branch_label_side("b1") == LabelSide.AFTER  # fall-through to default
 
 
 def test_branch_label_side_default_field_governs_unset_branches() -> None:
     # --- arrange ----------------------
-    theme = Theme(label_side_default=LabelSide.BEFORE, branch_label_side_overrides={"b0": LabelSide.AFTER})
+    base = DEFAULT_THEME.split()[1]
+    renderer_settings = base.model_copy(
+        update={
+            "label_side_default": LabelSide.BEFORE,
+            "branch_label_side_overrides": {"b0": LabelSide.AFTER},
+        }
+    )
 
     # --- act / assert -----------------
-    assert theme.branch_label_side("b0") == LabelSide.AFTER  # explicit override wins
-    assert theme.branch_label_side("b1") == LabelSide.BEFORE  # falls through to the flipped default
+    assert renderer_settings.branch_label_side("b0") == LabelSide.AFTER  # explicit override wins
+    assert renderer_settings.branch_label_side("b1") == LabelSide.BEFORE  # falls through to the flipped default
 
 
 def test_theme_constructible_with_explicit_values() -> None:

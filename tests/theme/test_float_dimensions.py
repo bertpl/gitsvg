@@ -101,7 +101,7 @@ def test_commit_radius_render_formatting(radius: float, expected_attr: str, forb
     assert report.is_clean(), [e.format() for e in report.errors]
 
     # --- act --------------------------
-    svg = render(compute_layout(state), theme).as_svg()
+    svg = render(compute_layout(state), theme.split()[1]).as_svg()
 
     # --- assert -----------------------
     assert expected_attr in svg
