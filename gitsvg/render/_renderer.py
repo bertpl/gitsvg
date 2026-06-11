@@ -100,7 +100,7 @@ def _get_occupied_lanes(layout: Layout) -> list[int]:
 
 
 @dataclass(frozen=True, slots=True)
-class _RenderPass:
+class _RenderContext:
     """Shared inputs every layer-drawing helper reads.
 
     Bundled once in `render()` so each `_draw_*` helper takes the same
@@ -155,7 +155,7 @@ def render(layout: Layout, theme: RendererSettings | None = None) -> draw.Drawin
         """Resolve `branch_id` to its rendered color using the closed-over index map and theme."""
         return resolve_branch_color(branch_id, declaration_index_by_id.get(branch_id, 0), theme)
 
-    ctx = _RenderPass(
+    ctx = _RenderContext(
         layout=layout,
         canvas=canvas,
         theme=theme,
@@ -183,7 +183,7 @@ def render(layout: Layout, theme: RendererSettings | None = None) -> draw.Drawin
 # ==================================================================================================
 #  Layer helpers (one per z-order entry, called in back-to-front order)
 # ==================================================================================================
-def _draw_background(d: draw.Drawing, ctx: _RenderPass) -> None:
+def _draw_background(d: draw.Drawing, ctx: _RenderContext) -> None:
     """Fill the full canvas when `background_color` is visible; nothing otherwise."""
     if is_color_visible(ctx.theme.background_color):
         d.append(
@@ -197,7 +197,7 @@ def _draw_background(d: draw.Drawing, ctx: _RenderPass) -> None:
         )
 
 
-def _draw_commit_row_bands(d: draw.Drawing, ctx: _RenderPass) -> None:
+def _draw_commit_row_bands(d: draw.Drawing, ctx: _RenderContext) -> None:
     """Paint zebra stripes on alternate commit-axis rows (odd index → row 0 bare).
 
     Spans the full canvas just above the background. Skipped entirely
@@ -210,13 +210,13 @@ def _draw_commit_row_bands(d: draw.Drawing, ctx: _RenderPass) -> None:
             draw_commit_row_band(d, commit_pos, band_color, ctx.canvas)
 
 
-def _draw_branch_guides(d: draw.Drawing, ctx: _RenderPass) -> None:
+def _draw_branch_guides(d: draw.Drawing, ctx: _RenderContext) -> None:
     """Draw a faint dashed guide at every occupied lane."""
     for lane in _get_occupied_lanes(ctx.layout):
         draw_branch_guide(d, lane, ctx.canvas, ctx.theme)
 
 
-def _draw_branch_bands(d: draw.Drawing, ctx: _RenderPass) -> None:
+def _draw_branch_bands(d: draw.Drawing, ctx: _RenderContext) -> None:
     """Draw each branch's arcs, line, and PR arcs as one color-coherent group.
 
     Buckets every connector under the branch whose color it carries
@@ -259,13 +259,13 @@ def _draw_branch_bands(d: draw.Drawing, ctx: _RenderPass) -> None:
             )
 
 
-def _draw_commit_dots(d: draw.Drawing, ctx: _RenderPass) -> None:
+def _draw_commit_dots(d: draw.Drawing, ctx: _RenderContext) -> None:
     """Draw every commit dot, above the line band and below all text."""
     for commit in ctx.layout.commits.values():
         draw_commit_dot(d, commit, ctx.color_for(commit.branch_id), ctx.canvas, ctx.theme)
 
 
-def _draw_branch_pills(d: draw.Drawing, ctx: _RenderPass) -> None:
+def _draw_branch_pills(d: draw.Drawing, ctx: _RenderContext) -> None:
     """Draw the branch-name pills.
 
     Skipped in table mode — the branch name moves to a tip pill in the
@@ -276,14 +276,14 @@ def _draw_branch_pills(d: draw.Drawing, ctx: _RenderPass) -> None:
             draw_branch_pill(d, branch, ctx.color_for(branch.id), ctx.canvas, ctx.theme)
 
 
-def _draw_pull_request_pills(d: draw.Drawing, ctx: _RenderPass) -> None:
+def _draw_pull_request_pills(d: draw.Drawing, ctx: _RenderContext) -> None:
     """Draw the pull-request title pills."""
     for pr in ctx.layout.pull_requests:
         color = ctx.color_for(_branch_through_point(ctx.layout, pr.branch_point).id)
         draw_pull_request_pill(d, pr, color, ctx.canvas, ctx.theme)
 
 
-def _draw_commit_labels(d: draw.Drawing, ctx: _RenderPass) -> None:
+def _draw_commit_labels(d: draw.Drawing, ctx: _RenderContext) -> None:
     """Draw the commit labels — free-floating in inline mode, the table region in table mode."""
     if ctx.table_columns is not None:
         draw_commit_table(
