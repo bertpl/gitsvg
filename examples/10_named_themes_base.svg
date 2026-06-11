@@ -27,11 +27,11 @@
 <path d="M103.992171,25.4 L105.692171,27.1 L109.092171,23.4" stroke="#4a4f5a" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round" />
 <rect x="86.75022849999999" y="340.5" width="39.483885" height="19.0" rx="4" ry="4" fill="#4a4f5a" opacity="0.85" />
 <text x="106.49217099999998" y="350.0" font-size="11.0" text-anchor="middle" dominant-baseline="middle" fill="white" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="500">main</text>
-<rect x="174.51487899999998" y="290.5" width="63.954584000000004" height="19.0" rx="4" ry="4" fill="#56b393" opacity="0.85" />
+<rect x="174.51487899999998" y="290.5" width="63.954584" height="19.0" rx="4" ry="4" fill="#56b393" opacity="0.85" />
 <text x="206.49217099999998" y="300.0" font-size="11.0" text-anchor="middle" dominant-baseline="middle" fill="white" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="500">feature-a</text>
 <rect x="283.20530249999996" y="290.5" width="46.573737" height="19.0" rx="4" ry="4" fill="#6b8bc2" opacity="0.85" />
 <text x="306.492171" y="300.0" font-size="11.0" text-anchor="middle" dominant-baseline="middle" fill="white" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="500">bugfix</text>
-<rect x="174.3940275" y="90.5" width="64.19628700000001" height="19.0" rx="4" ry="4" fill="#c06b8b" opacity="0.85" />
+<rect x="174.3940275" y="90.5" width="64.196287" height="19.0" rx="4" ry="4" fill="#c06b8b" opacity="0.85" />
 <text x="206.49217099999998" y="100.0" font-size="11.0" text-anchor="middle" dominant-baseline="middle" fill="white" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="500">feature-b</text>
 <text x="94.492171" y="317.5" font-size="11.0" text-anchor="end" dominant-baseline="middle" fill="#383838" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">initial commit</text>
 <text x="94.492171" y="332.5" font-size="9.0" text-anchor="end" dominant-baseline="middle" fill="#707070" font-family="'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="400">1b35060</text>
