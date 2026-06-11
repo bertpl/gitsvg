@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- The PyPI project page now embeds example images pinned to the release tag instead of floating on the `main` branch.
+
 ### Deprecated
 
 ### Removed

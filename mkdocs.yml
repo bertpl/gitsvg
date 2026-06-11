@@ -37,6 +37,14 @@ nav:
   - Integrations: integrations.md
   - Architecture: architecture.md
 
+plugins:
+  - search
+  # Copies examples/*.svg into the site at build time (assets/examples/),
+  # so docs pages embed site-local images instead of floating raw URLs.
+  - gen-files:
+      scripts:
+        - docs/gen_example_assets.py
+
 markdown_extensions:
   - admonition
   - toc:

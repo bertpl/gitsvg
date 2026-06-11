@@ -41,13 +41,13 @@ gitsvg validate diagram.gitsvg.jsonl
 
 ## Diagrams
 
-The [`examples/`](examples/) folder ships ten self-contained input files demonstrating the format. The first seven examples cover the diagram operations; the [Theming](#theming) section below covers visual customization. Each subsection shows the rendered output and the source it came from.
+The [`examples/`](examples/) folder ships self-contained input files demonstrating the format. The first seven examples cover the diagram operations; the [Theming](#theming) section below covers visual customization. Each subsection shows the rendered output and the source it came from.
 
 ### Example 1: Linear history
 
 A single branch with a few commits. The minimum viable diagram.
 
-![Linear history](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/01_linear.svg)
+![Linear history](examples/01_linear.svg)
 
 ```jsonl
 {"op": "branch", "name": "main", "label_side": "before"}
@@ -61,7 +61,7 @@ A single branch with a few commits. The minimum viable diagram.
 
 A `feature` branch forks off `main`, accumulates a couple of commits, then merges back.
 
-![Branch and merge](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/02_branch_merge.svg)
+![Branch and merge](examples/02_branch_merge.svg)
 
 ```jsonl
 {"op": "branch", "name": "main", "label_side": "before"}
@@ -77,7 +77,7 @@ A `feature` branch forks off `main`, accumulates a couple of commits, then merge
 
 Two concurrent branches share lanes 1 and 2; after both merge, a later `feature-b` reclaims the now-free lane 1 instead of starting a new one. Lane assignment is automatic and geometry-driven.
 
-![Multiple branches with lane reuse](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/03_multi_branch.svg)
+![Multiple branches with lane reuse](examples/03_multi_branch.svg)
 
 ```jsonl
 {"op": "branch", "name": "main", "label_side": "before"}
@@ -98,7 +98,7 @@ Two concurrent branches share lanes 1 and 2; after both merge, a later `feature-
 
 The `highlight` op marks an existing commit with an enlarged dot and a bold label — useful for drawing attention to a release or a key milestone.
 
-![Highlighted release commit](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/04_highlight.svg)
+![Highlighted release commit](examples/04_highlight.svg)
 
 ```jsonl
 {"op": "branch", "name": "main", "label_side": "before"}
@@ -114,7 +114,7 @@ The `highlight` op marks an existing commit with an enlarged dot and a bold labe
 
 A `feature` branch is removed and re-declared on top of a more recent `main` commit, with the same commit IDs as before. This is the rebase-style "move my work onto the new tip" pattern, expressed as primitives.
 
-![Remove and rebuild](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/05_remove_rebuild.svg)
+![Remove and rebuild](examples/05_remove_rebuild.svg)
 
 ```jsonl
 {"op": "branch", "name": "main", "label_side": "before"}
@@ -134,7 +134,7 @@ A `feature` branch is removed and re-declared on top of a more recent `main` com
 
 The `import` op replays another file as a prelude — here it picks up the rebased state from Example 5. A single new commit then squashes `f1` and `f2` into one via `replaces:`.
 
-![Import and squash](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/06_import_squash.svg)
+![Import and squash](examples/06_import_squash.svg)
 
 ```jsonl
 {"op": "import", "path": "05_remove_rebuild.gitsvg.jsonl"}
@@ -145,7 +145,7 @@ The `import` op replays another file as a prelude — here it picks up the rebas
 
 The `pull_request` op declares a pending merge between two branches. Both endpoints live-track the current branch tips: as commits accumulate on either side, the dashed arc advances. The optional `title` renders as a pill anchored at the source-tip commit. The typical lifecycle closes the PR with `remove` and then runs a real `merge`; this example stops before either, so the open PR remains visible in the final state.
 
-![Open pull request](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/07_pull_request.svg)
+![Open pull request](examples/07_pull_request.svg)
 
 ```jsonl
 {"op": "branch", "name": "main", "label_side": "before"}
@@ -165,7 +165,7 @@ The `theme` op customizes the diagram's presentational surface — spacings, siz
 
 Here we import Example 3 unchanged and apply a saturated palette with thicker strokes, larger labels, and a warm background.
 
-![Recolored palette](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/08_themed.svg)
+![Recolored palette](examples/08_themed.svg)
 
 ```jsonl
 {"op": "import", "path": "03_multi_branch.gitsvg.jsonl"}
@@ -176,7 +176,7 @@ Here we import Example 3 unchanged and apply a saturated palette with thicker st
 
 A `theme.orientation` of `lr` flips the diagram left-to-right: the commit axis grows rightward and branches stack downward. The same input renders identically in `bt` (default, bottom-to-top), `tb` (top-to-bottom), and `rl` (right-to-left); pill placement, margin defaults, and label-side mapping all adjust per orientation. Accepted values include the canonical short codes (`bt`, `tb`, `lr`, `rl`) and common aliases (Mermaid's `TD`, CSS's `ltr` / `rtl`, long forms like `bottom_to_top`, and `top_down` / `bottom_up`).
 
-![Horizontal orientation](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/09_horizontal.svg)
+![Horizontal orientation](examples/09_horizontal.svg)
 
 ```jsonl
 {"op": "branch", "name": "main", "label_side": "before"}
@@ -197,7 +197,7 @@ A `theme.orientation` of `lr` flips the diagram left-to-right: the commit axis g
 
 By default (`commit_row_mode: shared`) commits on different branches may share a row, which keeps diagrams compact. Setting `theme.commit_row_mode` to `unique` gives every commit its own row, assigned in authoring order — so reading along the commit axis recovers the exact order events were declared, even when work on several branches interleaves. Useful for storytelling diagrams where the sequence of events is the point.
 
-![Unique commit rows](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/11_unique_rows.svg)
+![Unique commit rows](examples/11_unique_rows.svg)
 
 ```jsonl
 {"op": "branch", "name": "main", "label_side": "before"}
@@ -218,7 +218,7 @@ By default (`commit_row_mode: shared`) commits on different branches may share a
 
 By default a branch keeps its lane for its whole life, so once an inner branch merges its lane sits empty while outer branches stay stranded. Setting `theme.auto_lane_change` to `true` compacts the graph the way real git tools do: as each lower lane frees up, the surviving branches migrate inward, so the live branches always occupy the lowest lanes. The shift is drawn as a short connector in the branch line's own style — here `feat-b` slides into the lane `feat-a` vacates, and `feat-c` follows into `feat-b`'s.
 
-![Auto lane change](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/12_auto_lane_change.svg)
+![Auto lane change](examples/12_auto_lane_change.svg)
 
 ```jsonl
 {"op": "branch", "name": "main", "label_side": "before"}
@@ -257,11 +257,11 @@ Selecting one is a single field on a `theme` op:
 
 The shipped preview below tiles the refreshed `default` next to the `muted`, `dark`, and `compact` themes on a shared input file, with the table-layout `gui` theme shown beneath on its own richer diagram:
 
-![Built-in named themes](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/10_named_themes.svg)
+![Built-in named themes](examples/10_named_themes.svg)
 
 The `gui` theme is best seen at full size. Its shipped example (`examples/13_gui_table.gitsvg.jsonl`) renders a multi-branch history the way a desktop git client would — the graph on the left, a per-commit table on the right, and each branch's name as a colored pill at the commit its ref points to:
 
-![Desktop-GUI table theme](https://raw.githubusercontent.com/bertpl/gitsvg/main/examples/13_gui_table.svg)
+![Desktop-GUI table theme](examples/13_gui_table.svg)
 
 Selecting a named theme also wipes any `theme:` field overrides and `branch.color` overrides accumulated earlier — useful for "use exactly this theme." To layer a chosen theme on top of those overrides instead (e.g. when importing a diagram that already carries its own theming), pass `keep_prior_overrides: true` on the same op.
 
