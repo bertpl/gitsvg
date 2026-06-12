@@ -19,6 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
+- Release artifacts now ship SLSA build provenance, attached to each GitHub Release and verifiable with `gh attestation verify`.
+- Added a security policy (`SECURITY.md`) with a private vulnerability-reporting channel.
+
 ## 0.3.3 (2026-06-11)
 
 ### Added
