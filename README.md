@@ -10,6 +10,7 @@ CLI that renders git tree visualizations as SVG from JSONL input.
 [![License](https://img.shields.io/badge/license-MIT-blue)](https://github.com/bertpl/gitsvg/blob/main/LICENSE)
 [![Docs](https://img.shields.io/badge/docs-readthedocs-blue)](https://gitsvg.readthedocs.io/)
 [![code style: ruff](https://img.shields.io/badge/code%20style-ruff-261230)](https://github.com/astral-sh/ruff)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/bertpl/gitsvg/badge)](https://scorecard.dev/viewer/?uri=github.com/bertpl/gitsvg)
 
 ## Installation
 
