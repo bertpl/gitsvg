@@ -54,6 +54,13 @@ docs = [
     "mkdocs-material>=9.5",
     "mkdocs-gen-files>=0.5",
 ]
+fuzz = [
+    # atheris drives fuzz/fuzz_parse.py. It ships Linux-only wheels (cp311–
+    # cp313) and no 3.14 wheel yet, so the markers confine it to where it
+    # actually installs and keep `uv lock` clean across the full matrix. CI
+    # runs the harness on ubuntu / 3.13; see .github/workflows/fuzz.yml.
+    "atheris>=3.0.0; python_version < '3.14' and sys_platform == 'linux'",
+]
 
 [project.scripts]
 gitsvg = "gitsvg.cli._cli:cli"

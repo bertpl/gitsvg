@@ -50,6 +50,22 @@ via the `pytest` suite. `make validate-local` is the additional
 developer-side regression guard for any private inputs you keep
 locally.
 
+## Fuzzing
+
+`fuzz/fuzz_parse.py` is an [atheris](https://github.com/google/atheris)
+target over `render_text` — the untrusted-input boundary. It asserts
+that any input either renders to well-formed SVG or is rejected with a
+`GitsvgValidationError`; any other exception is a finding. Run a bounded
+session locally (requires Linux — atheris ships Linux-only wheels):
+
+```bash
+uv run --group fuzz python fuzz/fuzz_parse.py -atheris_runs=100000
+```
+
+CI runs the same bounded command on every PR to `main` and weekly
+(`.github/workflows/fuzz.yml`). It stands alone and does not gate the
+rest of CI.
+
 ## Branching
 
 Branch names follow the pattern:
