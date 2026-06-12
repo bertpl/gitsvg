@@ -44,7 +44,12 @@ jobs:
         id: attest
         uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # v4.1.0
         with:
-          subject-path: "dist/*"
+          # List the artifact patterns explicitly rather than `dist/*`: uv build
+          # drops a `dist/.gitignore` into the output dir, which a glob would
+          # otherwise sweep into the provenance as a spurious subject.
+          subject-path: |
+            dist/*.whl
+            dist/*.tar.gz
       - name: Stage the provenance bundle under a stable name
         env:
           BUNDLE_PATH: ${{ steps.attest.outputs.bundle-path }}  # via env, not inline — keep it out of the run: template
