@@ -1,0 +1,41 @@
+name: CodeQL
+
+# Static analysis (SAST) for the Python package. Advisory, not blocking:
+# this is an independent security scanner, deliberately NOT part of the
+# `CI gate` aggregation — a code-scanning alert should surface without
+# failing an unrelated PR. Complements zizmor/actionlint (which lint the
+# workflows, not the package code).
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 6 * * 2"  # weekly, Tuesday 06:00 UTC — catches new query packs between PRs
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    name: Analyze (python)
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write  # upload analysis results to code scanning
+      contents: read          # checkout
+      actions: read           # read workflow run metadata (CodeQL requirement)
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@dd903d2e4f5405488e5ef1422510ee31c8b32357 # v3.36.2
+        with:
+          languages: python  # pure-Python package: no build step, CodeQL analyzes sources directly
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@dd903d2e4f5405488e5ef1422510ee31c8b32357 # v3.36.2
