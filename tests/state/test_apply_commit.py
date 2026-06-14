@@ -3,6 +3,7 @@ parents validation, id uniqueness, and the seven `replaces:` rules."""
 
 import pytest
 
+from tests._jsonl import build_jsonl
 from tests.state._helpers import build_state_from_jsonl
 
 
@@ -11,7 +12,7 @@ from tests.state._helpers import build_state_from_jsonl
 # ==================================================================================================
 def test_commit_appends_to_branch() -> None:
     # --- arrange ----------------------
-    text = '{"op": "branch", "name": "main"}\n{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
+    text = build_jsonl({"op": "branch", "name": "main"}, {"op": "commit", "branch": "main", "id": "c1", "msg": "x"})
 
     # --- act --------------------------
     state, report = build_state_from_jsonl(text)
@@ -24,11 +25,11 @@ def test_commit_appends_to_branch() -> None:
 
 def test_auto_id_generation_uses_underscore_c_n_namespace() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "first"}\n'
-        '{"op": "commit", "branch": "main", "msg": "auto"}\n'
-        '{"op": "commit", "branch": "main", "msg": "auto"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "first"},
+        {"op": "commit", "branch": "main", "msg": "auto"},
+        {"op": "commit", "branch": "main", "msg": "auto"},
     )
 
     # --- act --------------------------
@@ -42,11 +43,11 @@ def test_auto_id_generation_uses_underscore_c_n_namespace() -> None:
 def test_auto_id_skips_already_used_underscore_c_n_ids() -> None:
     """An explicit `_c2` (rare; reserved-pattern but legal) makes auto-id pick `_c1` then `_c3`."""
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "_c2", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "msg": "x"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "_c2", "msg": "x"},
+        {"op": "commit", "branch": "main", "msg": "x"},
+        {"op": "commit", "branch": "main", "msg": "x"},
     )
 
     # --- act --------------------------
@@ -61,7 +62,7 @@ def test_auto_id_skips_already_used_underscore_c_n_ids() -> None:
 # ==================================================================================================
 def test_commit_on_undeclared_branch_emits_e200() -> None:
     # --- act --------------------------
-    _, report = build_state_from_jsonl('{"op": "commit", "branch": "main", "msg": "x"}\n')
+    _, report = build_state_from_jsonl(build_jsonl({"op": "commit", "branch": "main", "msg": "x"}))
 
     # --- assert -----------------------
     assert [e.code for e in report.errors] == ["E200"]
@@ -69,10 +70,10 @@ def test_commit_on_undeclared_branch_emits_e200() -> None:
 
 def test_duplicate_commit_id_emits_e203() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "first"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "second"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "first"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "second"},
     )
 
     # --- act --------------------------
@@ -88,7 +89,9 @@ def test_duplicate_commit_id_emits_e203() -> None:
 def test_replaces_rule_1_undefined_commit_emits_e201() -> None:
     """Rule 1: every id in replaces must exist."""
     # --- arrange ----------------------
-    text = '{"op": "branch", "name": "main"}\n{"op": "commit", "branch": "main", "msg": "x", "replaces": ["ghost"]}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"}, {"op": "commit", "branch": "main", "msg": "x", "replaces": ["ghost"]}
+    )
 
     # --- act --------------------------
     _, report = build_state_from_jsonl(text)
@@ -100,12 +103,12 @@ def test_replaces_rule_1_undefined_commit_emits_e201() -> None:
 def test_replaces_rule_2_cross_branch_emits_e205() -> None:
     """Rule 2: replaced commits must be on the new commit's branch."""
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "feat", "id": "f1", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "m2", "msg": "squash", "replaces": ["m1", "f1"]}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+        {"op": "branch", "name": "feat", "from_branch": "main"},
+        {"op": "commit", "branch": "feat", "id": "f1", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "m2", "msg": "squash", "replaces": ["m1", "f1"]},
     )
 
     # --- act --------------------------
@@ -118,12 +121,12 @@ def test_replaces_rule_2_cross_branch_emits_e205() -> None:
 def test_replaces_rule_3_non_contiguous_tail_emits_e206() -> None:
     """Rule 3: replaced commits must form a contiguous range at the tail."""
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "c2", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "c3", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "c4", "msg": "squash", "replaces": ["c1", "c3"]}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "c2", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "c3", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "c4", "msg": "squash", "replaces": ["c1", "c3"]},
     )
 
     # --- act --------------------------
@@ -136,11 +139,11 @@ def test_replaces_rule_3_non_contiguous_tail_emits_e206() -> None:
 def test_replaces_rule_4_other_branch_rooted_emits_e207() -> None:
     """Rule 4: no other branch rooted on a replaced commit."""
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_commit": "c1"}\n'
-        '{"op": "commit", "branch": "main", "id": "c2", "msg": "squash", "replaces": ["c1"]}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "x"},
+        {"op": "branch", "name": "feat", "from_commit": "c1"},
+        {"op": "commit", "branch": "main", "id": "c2", "msg": "squash", "replaces": ["c1"]},
     )
 
     # --- act --------------------------
@@ -159,14 +162,14 @@ def test_replaces_rule_5_external_parents_emits_e208() -> None:
     rule 5 — this isolates the E208 path.
     """
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c0", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_commit": "c0"}\n'
-        '{"op": "commit", "branch": "feat", "id": "f0", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "merge", "from": "main", "into": "feat", "as": "mg"}\n'
-        '{"op": "commit", "branch": "main", "id": "c2", "msg": "squash", "replaces": ["c1"]}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c0", "msg": "x"},
+        {"op": "branch", "name": "feat", "from_commit": "c0"},
+        {"op": "commit", "branch": "feat", "id": "f0", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "x"},
+        {"op": "merge", "from": "main", "into": "feat", "as": "mg"},
+        {"op": "commit", "branch": "main", "id": "c2", "msg": "squash", "replaces": ["c1"]},
     )
 
     # --- act --------------------------
@@ -179,11 +182,11 @@ def test_replaces_rule_5_external_parents_emits_e208() -> None:
 def test_replaces_happy_path_atomically_squashes_tail() -> None:
     """A valid squash removes the listed commits and adds the new one."""
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "c2", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "c3", "msg": "squashed", "replaces": ["c1", "c2"]}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "c2", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "c3", "msg": "squashed", "replaces": ["c1", "c2"]},
     )
 
     # --- act --------------------------
@@ -199,10 +202,10 @@ def test_replaces_happy_path_atomically_squashes_tail() -> None:
 def test_replaces_can_reuse_a_vacated_id() -> None:
     """The new commit may reuse an id that's being vacated by replaces."""
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "renamed", "replaces": ["c1"]}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "renamed", "replaces": ["c1"]},
     )
 
     # --- act --------------------------
@@ -220,10 +223,10 @@ def test_replaces_can_reuse_a_vacated_id() -> None:
 @pytest.mark.parametrize(("highlight_value", "expected"), [(True, True), (False, False), (None, False)])
 def test_highlight_field_propagates_to_commit_state(highlight_value: bool | None, expected: bool) -> None:
     # --- arrange ----------------------
-    flag_field = f', "highlight": {str(highlight_value).lower()}' if highlight_value is not None else ""
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        f'{{"op": "commit", "branch": "main", "id": "c1", "msg": "x"{flag_field}}}\n'
+    extra = {"highlight": highlight_value} if highlight_value is not None else {}
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "x", **extra},
     )
 
     # --- act --------------------------
@@ -240,9 +243,10 @@ def test_highlight_field_propagates_to_commit_state(highlight_value: bool | None
 @pytest.mark.parametrize(("gap_value", "expected"), [(2, 2), (0, 0), (None, 0)])
 def test_gap_field_propagates_to_commit_state(gap_value: int | None, expected: int) -> None:
     # --- arrange ----------------------
-    gap_field = f', "gap": {gap_value}' if gap_value is not None else ""
-    text = (
-        f'{{"op": "branch", "name": "main"}}\n{{"op": "commit", "branch": "main", "id": "c1", "msg": "x"{gap_field}}}\n'
+    extra = {"gap": gap_value} if gap_value is not None else {}
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "x", **extra},
     )
 
     # --- act --------------------------
@@ -260,12 +264,12 @@ def test_replaces_commit_inherits_earliest_replaced_gap_when_op_gap_unset() -> N
     """A `replaces:` commit without `op.gap` inherits the earliest replaced
     commit's gap, preserving any visual breathing room the original chain had."""
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "c2", "msg": "x", "gap": 2}\n'
-        '{"op": "commit", "branch": "main", "id": "c3", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "csquash", "msg": "squash", "replaces": ["c2", "c3"]}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "c2", "msg": "x", "gap": 2},
+        {"op": "commit", "branch": "main", "id": "c3", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "csquash", "msg": "squash", "replaces": ["c2", "c3"]},
     )
 
     # --- act --------------------------
@@ -280,11 +284,11 @@ def test_replaces_commit_inherits_earliest_replaced_gap_when_op_gap_unset() -> N
 def test_replaces_commit_op_gap_overrides_inheritance() -> None:
     """An explicit `op.gap` on a `replaces:` commit wins over inheritance."""
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "c2", "msg": "x", "gap": 5}\n'
-        '{"op": "commit", "branch": "main", "id": "csquash", "msg": "squash", "replaces": ["c2"], "gap": 1}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "c2", "msg": "x", "gap": 5},
+        {"op": "commit", "branch": "main", "id": "csquash", "msg": "squash", "replaces": ["c2"], "gap": 1},
     )
 
     # --- act --------------------------
@@ -298,11 +302,11 @@ def test_replaces_commit_op_gap_overrides_inheritance() -> None:
 def test_replaces_commit_inherits_zero_when_replaced_had_no_gap() -> None:
     """The common case: replaced commits had gap=0; squash inherits 0."""
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "c2", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "csquash", "msg": "squash", "replaces": ["c2"]}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "c2", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "csquash", "msg": "squash", "replaces": ["c2"]},
     )
 
     # --- act --------------------------
@@ -316,13 +320,12 @@ def test_replaces_with_unordered_list_picks_earliest_in_branch_order() -> None:
     """The `replaces:` list order is user-controlled; inheritance picks the
     earliest replaced commit in branch.commit_ids order, not list order."""
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "c2", "msg": "x", "gap": 3}\n'
-        '{"op": "commit", "branch": "main", "id": "c3", "msg": "x", "gap": 7}\n'
-        # `replaces` list reverses the order — but inheritance still picks c2's gap.
-        '{"op": "commit", "branch": "main", "id": "csquash", "msg": "squash", "replaces": ["c3", "c2"]}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "c2", "msg": "x", "gap": 3},
+        {"op": "commit", "branch": "main", "id": "c3", "msg": "x", "gap": 7},
+        {"op": "commit", "branch": "main", "id": "csquash", "msg": "squash", "replaces": ["c3", "c2"]},
     )
 
     # --- act --------------------------

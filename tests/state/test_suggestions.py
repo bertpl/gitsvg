@@ -3,6 +3,7 @@ names declared so far and rendered by `ValidationError.format()`."""
 
 import pytest
 
+from tests._jsonl import build_jsonl
 from tests.state._helpers import build_state_from_jsonl
 
 
@@ -19,7 +20,10 @@ from tests.state._helpers import build_state_from_jsonl
 )
 def test_e200_suggestion_from_declared_branches(declared: str, typo: str, expected: str | None) -> None:
     # --- arrange ----------------------
-    text = f'{{"op": "branch", "name": "{declared}"}}\n{{"op": "commit", "branch": "{typo}", "msg": "x"}}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": declared},
+        {"op": "commit", "branch": typo, "msg": "x"},
+    )
 
     # --- act --------------------------
     _, report = build_state_from_jsonl(text)
@@ -31,7 +35,10 @@ def test_e200_suggestion_from_declared_branches(declared: str, typo: str, expect
 
 def test_e200_suggestion_renders_in_formatted_output() -> None:
     # --- arrange ----------------------
-    text = '{"op": "branch", "name": "main"}\n{"op": "commit", "branch": "mian", "msg": "x"}\n'  # codespell:ignore mian
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "mian", "msg": "x"},  # codespell:ignore mian
+    )
 
     # --- act --------------------------
     _, report = build_state_from_jsonl(text)
@@ -43,10 +50,10 @@ def test_e200_suggestion_renders_in_formatted_output() -> None:
 def test_e200_suggestion_considers_only_branches_declared_so_far() -> None:
     """A branch declared *after* the failing op is not a candidate."""
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "trunk"}\n'
-        '{"op": "commit", "branch": "feat", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "trunk"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "trunk"},
+        {"op": "commit", "branch": "feat", "msg": "x"},
+        {"op": "branch", "name": "feat", "from_branch": "trunk"},
     )
 
     # --- act --------------------------
@@ -63,10 +70,10 @@ def test_e200_hint_and_suggestion_co_render() -> None:
     # --- arrange ----------------------
     # A commit literally named "mian" exists (fires the from_commit hint) and  # codespell:ignore mian
     # branch "main" is the closest declared branch (fires the suggestion).
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "mian", "msg": "x"}\n'  # codespell:ignore mian
-        '{"op": "branch", "name": "feat", "from_branch": "mian"}\n'  # codespell:ignore mian
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "mian", "msg": "x"},  # codespell:ignore mian
+        {"op": "branch", "name": "feat", "from_branch": "mian"},  # codespell:ignore mian
     )
 
     # --- act --------------------------
@@ -85,10 +92,10 @@ def test_e200_hint_and_suggestion_co_render() -> None:
 # ==================================================================================================
 def test_e201_highlight_suggests_closest_commit() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "feature-1", "msg": "x"}\n'
-        '{"op": "highlight", "commit": "feature1"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "feature-1", "msg": "x"},
+        {"op": "highlight", "commit": "feature1"},
     )
 
     # --- act --------------------------
@@ -101,10 +108,10 @@ def test_e201_highlight_suggests_closest_commit() -> None:
 
 def test_e201_replaces_suggests_closest_commit() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c2", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "c3", "msg": "y", "replaces": ["c2x"]}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c2", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "c3", "msg": "y", "replaces": ["c2x"]},
     )
 
     # --- act --------------------------
@@ -118,10 +125,10 @@ def test_e201_replaces_suggests_closest_commit() -> None:
 
 def test_e201_remove_suggests_closest_commit() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "setup-ci", "msg": "x"}\n'
-        '{"op": "remove", "commits": ["setup-cl"]}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "setup-ci", "msg": "x"},
+        {"op": "remove", "commits": ["setup-cl"]},
     )
 
     # --- act --------------------------

@@ -10,6 +10,7 @@ import re
 import pytest
 
 from gitsvg.state._auto_hash import compute_auto_hash
+from tests._jsonl import build_jsonl
 from tests.state._helpers import build_state_from_jsonl
 
 
@@ -80,7 +81,7 @@ def test_compute_auto_hash_distinguishes_no_parents_from_one_parent() -> None:
 # ==================================================================================================
 def test_root_commit_with_auto_hash_resolves_to_seven_hex_chars() -> None:
     # --- arrange ----------------------
-    text = '{"op": "branch", "name": "main"}\n{"op": "commit", "branch": "main", "id": "c1", "hash": "auto"}\n'
+    text = build_jsonl({"op": "branch", "name": "main"}, {"op": "commit", "branch": "main", "id": "c1", "hash": "auto"})
 
     # --- act --------------------------
     state, report = build_state_from_jsonl(text)
@@ -95,7 +96,9 @@ def test_root_commit_with_auto_hash_resolves_to_seven_hex_chars() -> None:
 
 def test_explicit_hash_is_left_alone() -> None:
     # --- arrange ----------------------
-    text = '{"op": "branch", "name": "main"}\n{"op": "commit", "branch": "main", "id": "c1", "hash": "deadbef"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"}, {"op": "commit", "branch": "main", "id": "c1", "hash": "deadbef"}
+    )
 
     # --- act --------------------------
     state, _ = build_state_from_jsonl(text)
@@ -106,7 +109,7 @@ def test_explicit_hash_is_left_alone() -> None:
 
 def test_no_hash_field_stays_none() -> None:
     # --- arrange ----------------------
-    text = '{"op": "branch", "name": "main"}\n{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
+    text = build_jsonl({"op": "branch", "name": "main"}, {"op": "commit", "branch": "main", "id": "c1", "msg": "x"})
 
     # --- act --------------------------
     state, _ = build_state_from_jsonl(text)
@@ -118,10 +121,10 @@ def test_no_hash_field_stays_none() -> None:
 def test_chain_uses_implicit_chain_parent() -> None:
     """A second commit on a branch hashes id + previous-commit-id."""
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "hash": "auto"}\n'
-        '{"op": "commit", "branch": "main", "id": "c2", "hash": "auto"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "hash": "auto"},
+        {"op": "commit", "branch": "main", "id": "c2", "hash": "auto"},
     )
 
     # --- act --------------------------
@@ -134,11 +137,11 @@ def test_chain_uses_implicit_chain_parent() -> None:
 
 def test_first_commit_on_fork_branch_uses_rooted_on_commit() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "feat", "id": "f1", "hash": "auto"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+        {"op": "branch", "name": "feat", "from_branch": "main"},
+        {"op": "commit", "branch": "feat", "id": "f1", "hash": "auto"},
     )
 
     # --- act --------------------------
@@ -154,12 +157,12 @@ def test_first_commit_on_fork_branch_uses_rooted_on_commit() -> None:
 # ==================================================================================================
 def test_merge_with_auto_hash_uses_both_parent_tips() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "feat", "id": "f1", "msg": "x"}\n'
-        '{"op": "merge", "from": "feat", "into": "main", "as": "m2", "hash": "auto"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+        {"op": "branch", "name": "feat", "from_branch": "main"},
+        {"op": "commit", "branch": "feat", "id": "f1", "msg": "x"},
+        {"op": "merge", "from": "feat", "into": "main", "as": "m2", "hash": "auto"},
     )
 
     # --- act --------------------------
@@ -178,13 +181,12 @@ def test_replaces_commit_uses_post_removal_chain_parent() -> None:
     """A `replaces:` commit's chain parent is the commit before the *first*
     replaced commit — because removals happen before the new commit is added."""
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "c2", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "c3", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "c4", "msg": "squash", '
-        '"hash": "auto", "replaces": ["c2", "c3"]}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "c2", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "c3", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "c4", "msg": "squash", "hash": "auto", "replaces": ["c2", "c3"]},
     )
 
     # --- act --------------------------
@@ -206,19 +208,19 @@ def test_renaming_an_upstream_id_changes_downstream_auto_hashes() -> None:
     with new auto-hashes, mirroring git's rebase semantics."""
     # --- arrange ----------------------
     # Scenario A: c1 → c2 → c3 (all auto)
-    text_a = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "hash": "auto"}\n'
-        '{"op": "commit", "branch": "main", "id": "c2", "hash": "auto"}\n'
-        '{"op": "commit", "branch": "main", "id": "c3", "hash": "auto"}\n'
+    text_a = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "hash": "auto"},
+        {"op": "commit", "branch": "main", "id": "c2", "hash": "auto"},
+        {"op": "commit", "branch": "main", "id": "c3", "hash": "auto"},
     )
 
     # Scenario B: same as A but c2 has been "rebased" — renamed to c2_prime
-    text_b = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "hash": "auto"}\n'
-        '{"op": "commit", "branch": "main", "id": "c2_prime", "hash": "auto"}\n'
-        '{"op": "commit", "branch": "main", "id": "c3", "hash": "auto"}\n'
+    text_b = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "hash": "auto"},
+        {"op": "commit", "branch": "main", "id": "c2_prime", "hash": "auto"},
+        {"op": "commit", "branch": "main", "id": "c3", "hash": "auto"},
     )
 
     # --- act --------------------------

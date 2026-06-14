@@ -2,6 +2,7 @@
 
 import pytest
 
+from tests._jsonl import build_jsonl
 from tests.state._helpers import build_state_from_jsonl
 
 
@@ -10,11 +11,11 @@ from tests.state._helpers import build_state_from_jsonl
 # ==================================================================================================
 def test_remove_closes_open_pr() -> None:
     # --- arrange / act ----------------
-    jsonl = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "pull_request", "id": "pr1", "from": "feat", "into": "main"}\n'
-        '{"op": "remove", "pull_requests": ["pr1"]}\n'
+    jsonl = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "branch", "name": "feat", "from_branch": "main"},
+        {"op": "pull_request", "id": "pr1", "from": "feat", "into": "main"},
+        {"op": "remove", "pull_requests": ["pr1"]},
     )
     state, report = build_state_from_jsonl(jsonl)
 
@@ -25,13 +26,13 @@ def test_remove_closes_open_pr() -> None:
 
 def test_remove_multiple_prs_in_one_op() -> None:
     # --- arrange / act ----------------
-    jsonl = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "branch", "name": "feat1", "from_branch": "main"}\n'
-        '{"op": "branch", "name": "feat2", "from_branch": "main"}\n'
-        '{"op": "pull_request", "id": "pr1", "from": "feat1", "into": "main"}\n'
-        '{"op": "pull_request", "id": "pr2", "from": "feat2", "into": "main"}\n'
-        '{"op": "remove", "pull_requests": ["pr1", "pr2"]}\n'
+    jsonl = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "branch", "name": "feat1", "from_branch": "main"},
+        {"op": "branch", "name": "feat2", "from_branch": "main"},
+        {"op": "pull_request", "id": "pr1", "from": "feat1", "into": "main"},
+        {"op": "pull_request", "id": "pr2", "from": "feat2", "into": "main"},
+        {"op": "remove", "pull_requests": ["pr1", "pr2"]},
     )
     state, report = build_state_from_jsonl(jsonl)
 
@@ -45,7 +46,7 @@ def test_remove_multiple_prs_in_one_op() -> None:
 # ==================================================================================================
 def test_remove_unknown_pr_id_emits_e215() -> None:
     # --- arrange / act ----------------
-    jsonl = '{"op": "branch", "name": "main"}\n{"op": "remove", "pull_requests": ["ghost"]}\n'
+    jsonl = build_jsonl({"op": "branch", "name": "main"}, {"op": "remove", "pull_requests": ["ghost"]})
     _state, report = build_state_from_jsonl(jsonl)
 
     # --- assert -----------------------
@@ -56,11 +57,11 @@ def test_remove_unknown_pr_id_emits_e215() -> None:
 def test_remove_continues_through_list_after_unknown_id() -> None:
     """One unknown id in the list doesn't stop the rest from being removed."""
     # --- arrange / act ----------------
-    jsonl = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "pull_request", "id": "pr1", "from": "feat", "into": "main"}\n'
-        '{"op": "remove", "pull_requests": ["ghost", "pr1"]}\n'
+    jsonl = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "branch", "name": "feat", "from_branch": "main"},
+        {"op": "pull_request", "id": "pr1", "from": "feat", "into": "main"},
+        {"op": "remove", "pull_requests": ["ghost", "pr1"]},
     )
     state, report = build_state_from_jsonl(jsonl)
 
@@ -77,10 +78,10 @@ def test_remove_continues_through_list_after_unknown_id() -> None:
 @pytest.mark.parametrize(
     "raw",
     [
-        '{"op": "remove"}',
-        '{"op": "remove", "commits": ["c1"], "pull_requests": ["pr1"]}',
-        '{"op": "remove", "branches": ["b1"], "pull_requests": ["pr1"]}',
-        '{"op": "remove", "commits": ["c1"], "branches": ["b1"], "pull_requests": ["pr1"]}',
+        build_jsonl({"op": "remove"}),
+        build_jsonl({"op": "remove", "commits": ["c1"], "pull_requests": ["pr1"]}),
+        build_jsonl({"op": "remove", "branches": ["b1"], "pull_requests": ["pr1"]}),
+        build_jsonl({"op": "remove", "commits": ["c1"], "branches": ["b1"], "pull_requests": ["pr1"]}),
     ],
 )
 def test_remove_rejects_zero_or_multiple_kinds(raw: str) -> None:

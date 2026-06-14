@@ -1,11 +1,12 @@
 """Tests for the `branch` op state-apply handler."""
 
+from tests._jsonl import build_jsonl
 from tests.state._helpers import build_state_from_jsonl
 
 
 def test_first_branch_no_root_is_accepted() -> None:
     # --- act --------------------------
-    state, report = build_state_from_jsonl('{"op": "branch", "name": "main"}\n')
+    state, report = build_state_from_jsonl(build_jsonl({"op": "branch", "name": "main"}))
 
     # --- assert -----------------------
     assert report.is_clean()
@@ -15,10 +16,10 @@ def test_first_branch_no_root_is_accepted() -> None:
 
 def test_branch_from_branch_resolves_root_to_source_tip() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "x"},
+        {"op": "branch", "name": "feat", "from_branch": "main"},
     )
 
     # --- act --------------------------
@@ -33,7 +34,7 @@ def test_branch_from_unborn_source_branch_has_no_root_commit() -> None:
     # Source `main` has no commits and no branch-off commit (unborn) → no ref
     # target to root on.
     # --- arrange ----------------------
-    text = '{"op": "branch", "name": "main"}\n{"op": "branch", "name": "feat", "from_branch": "main"}\n'
+    text = build_jsonl({"op": "branch", "name": "main"}, {"op": "branch", "name": "feat", "from_branch": "main"})
 
     # --- act --------------------------
     state, report = build_state_from_jsonl(text)
@@ -47,11 +48,11 @@ def test_branch_from_empty_rooted_source_roots_on_its_branch_off_commit() -> Non
     # Source `feat` has no commits of its own but points at `c1` (branched off
     # main): a branch off `feat` roots on `c1`, where feat's ref points — not None.
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_commit": "c1"}\n'
-        '{"op": "branch", "name": "sub", "from_branch": "feat"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "x"},
+        {"op": "branch", "name": "feat", "from_commit": "c1"},
+        {"op": "branch", "name": "sub", "from_branch": "feat"},
     )
 
     # --- act --------------------------
@@ -64,7 +65,7 @@ def test_branch_from_empty_rooted_source_roots_on_its_branch_off_commit() -> Non
 
 def test_duplicate_branch_name_emits_e202() -> None:
     # --- arrange ----------------------
-    text = '{"op": "branch", "name": "main"}\n{"op": "branch", "name": "main"}\n'
+    text = build_jsonl({"op": "branch", "name": "main"}, {"op": "branch", "name": "main"})
 
     # --- act --------------------------
     state, report = build_state_from_jsonl(text)
@@ -76,7 +77,7 @@ def test_duplicate_branch_name_emits_e202() -> None:
 
 def test_non_first_branch_without_root_emits_e204() -> None:
     # --- arrange ----------------------
-    text = '{"op": "branch", "name": "main"}\n{"op": "branch", "name": "feat"}\n'
+    text = build_jsonl({"op": "branch", "name": "main"}, {"op": "branch", "name": "feat"})
 
     # --- act --------------------------
     state, report = build_state_from_jsonl(text)
@@ -88,7 +89,7 @@ def test_non_first_branch_without_root_emits_e204() -> None:
 
 def test_from_branch_pointing_at_undeclared_branch_emits_e200() -> None:
     # --- arrange ----------------------
-    text = '{"op": "branch", "name": "main"}\n{"op": "branch", "name": "feat", "from_branch": "ghost"}\n'
+    text = build_jsonl({"op": "branch", "name": "main"}, {"op": "branch", "name": "feat", "from_branch": "ghost"})
 
     # --- act --------------------------
     _, report = build_state_from_jsonl(text)
@@ -99,7 +100,7 @@ def test_from_branch_pointing_at_undeclared_branch_emits_e200() -> None:
 
 def test_from_commit_pointing_at_undeclared_commit_emits_e201() -> None:
     # --- arrange ----------------------
-    text = '{"op": "branch", "name": "main"}\n{"op": "branch", "name": "feat", "from_commit": "ghost"}\n'
+    text = build_jsonl({"op": "branch", "name": "main"}, {"op": "branch", "name": "feat", "from_commit": "ghost"})
 
     # --- act --------------------------
     _, report = build_state_from_jsonl(text)
@@ -110,10 +111,10 @@ def test_from_commit_pointing_at_undeclared_commit_emits_e201() -> None:
 
 def test_from_branch_when_name_is_actually_a_commit_id_hints_at_from_commit() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "c1"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "x"},
+        {"op": "branch", "name": "feat", "from_branch": "c1"},
     )
 
     # --- act --------------------------
@@ -128,8 +129,8 @@ def test_from_branch_when_name_is_actually_a_commit_id_hints_at_from_commit() ->
 
 def test_branch_pos_override_is_stored_on_branch_state() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n{"op": "branch", "name": "feat", "from_branch": "main", "branch_pos": 5}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"}, {"op": "branch", "name": "feat", "from_branch": "main", "branch_pos": 5}
     )
 
     # --- act --------------------------
@@ -142,7 +143,7 @@ def test_branch_pos_override_is_stored_on_branch_state() -> None:
 
 def test_branch_pos_omitted_leaves_branch_state_value_none() -> None:
     # --- arrange ----------------------
-    text = '{"op": "branch", "name": "main"}\n'
+    text = build_jsonl({"op": "branch", "name": "main"})
 
     # --- act --------------------------
     state, report = build_state_from_jsonl(text)

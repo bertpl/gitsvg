@@ -1,5 +1,6 @@
 """End-to-end tests for the state engine — multiple ops, error accumulation, import skipping."""
 
+from tests._jsonl import build_jsonl
 from tests.state._helpers import build_state_from_jsonl
 
 
@@ -16,12 +17,12 @@ def test_empty_input_returns_empty_state_and_clean_report() -> None:
 def test_engine_continues_past_semantic_errors() -> None:
     """Each op is attempted; semantic errors don't halt the engine."""
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "ghost", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "highlight", "commit": "c1"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "ghost", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "x"},
+        {"op": "branch", "name": "main"},
+        {"op": "highlight", "commit": "c1"},
     )
 
     # --- act --------------------------
@@ -36,7 +37,7 @@ def test_engine_continues_past_semantic_errors() -> None:
 def test_import_op_is_skipped_during_state_apply() -> None:
     """Imports are schema-only at this layer; resolution comes later."""
     # --- arrange ----------------------
-    text = '{"op": "import", "path": "./other.gitsvg.jsonl"}\n{"op": "branch", "name": "main"}\n'
+    text = build_jsonl({"op": "import", "path": "./other.gitsvg.jsonl"}, {"op": "branch", "name": "main"})
 
     # --- act --------------------------
     state, report = build_state_from_jsonl(text)
@@ -48,14 +49,14 @@ def test_import_op_is_skipped_during_state_apply() -> None:
 
 def test_full_realistic_scenario_with_branches_commits_merge_highlight() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main", "color": "#aabbcc"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "init"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main", "color": "#ccbbaa"}\n'
-        '{"op": "commit", "branch": "feat", "id": "f1", "msg": "feat work"}\n'
-        '{"op": "commit", "branch": "feat", "id": "f2", "msg": "more feat"}\n'
-        '{"op": "merge", "from": "feat", "into": "main", "as": "merge1"}\n'
-        '{"op": "highlight", "commit": "merge1"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main", "color": "#aabbcc"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "init"},
+        {"op": "branch", "name": "feat", "from_branch": "main", "color": "#ccbbaa"},
+        {"op": "commit", "branch": "feat", "id": "f1", "msg": "feat work"},
+        {"op": "commit", "branch": "feat", "id": "f2", "msg": "more feat"},
+        {"op": "merge", "from": "feat", "into": "main", "as": "merge1"},
+        {"op": "highlight", "commit": "merge1"},
     )
 
     # --- act --------------------------
