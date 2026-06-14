@@ -31,6 +31,11 @@ runs:
       uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
       with:
         python-version: ${{ inputs.python-version }}
+        # Distinct cache key per resolution. setup-uv builds the key before the
+        # lockfile is dropped below, hashing the same uv.lock for every combo, so
+        # without this the `highest` and `lowest-direct` legs on one python+OS
+        # share a key and race to save it ("Unable to reserve cache" warning).
+        cache-suffix: ${{ inputs.resolution }}
 
     - name: Drop the lockfile so --resolution takes effect
       shell: bash
