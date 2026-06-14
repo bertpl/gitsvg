@@ -5,22 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
-
-### Added
-
-### Changed
-
-### Deprecated
-
-### Removed
-
-### Fixed
+## 0.3.6 (2026-06-14)
 
 ### Security
 
 - Harden the `--small` minifier's XML parsing with `defusedxml` (now a runtime dependency).
-
 ## 0.3.5 (2026-06-14)
 
 ### Changed

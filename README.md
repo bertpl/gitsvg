@@ -3,7 +3,7 @@
 CLI that renders git tree visualizations as SVG from JSONL input.
 
 [![CI](https://img.shields.io/github/actions/workflow/status/bertpl/gitsvg/push_to_main.yml?branch=main&label=CI)](https://github.com/bertpl/gitsvg/actions/workflows/push_to_main.yml)
-[![Coverage](https://img.shields.io/badge/coverage-98.51%25-brightgreen)](https://github.com/bertpl/gitsvg/actions/workflows/push_to_main.yml)
+[![Coverage](https://img.shields.io/badge/coverage-98.33%25-brightgreen)](https://github.com/bertpl/gitsvg/actions/workflows/push_to_main.yml)
 [![Tests](https://img.shields.io/badge/tests-1186-blue)](https://github.com/bertpl/gitsvg/actions/workflows/push_to_main.yml)
 [![PyPI](https://img.shields.io/pypi/v/gitsvg.svg)](https://pypi.org/project/gitsvg/)
 [![Python](https://img.shields.io/pypi/pyversions/gitsvg.svg)](https://pypi.org/project/gitsvg/)
