@@ -4,6 +4,7 @@ from gitsvg.parse import parse_jsonl_text
 from gitsvg.render._colors import resolve_branch_color
 from gitsvg.state import apply_ops
 from gitsvg.theme import DEFAULT_THEME, Theme
+from tests._jsonl import build_jsonl
 
 
 def _state_theme_from(text: str):
@@ -49,10 +50,12 @@ def test_override_uses_branch_id_not_name() -> None:
     important for the rebase-rebuild pattern (same name, fresh id)."""
     # --- arrange ----------------------
     state, theme = _state_theme_from(
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main", "color": "#111111"}\n'
-        '{"op": "remove", "branches": ["feat"]}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
+        build_jsonl(
+            {"op": "branch", "name": "main"},
+            {"op": "branch", "name": "feat", "from_branch": "main", "color": "#111111"},
+            {"op": "remove", "branches": ["feat"]},
+            {"op": "branch", "name": "feat", "from_branch": "main"},
+        )
     )
 
     # --- act --------------------------

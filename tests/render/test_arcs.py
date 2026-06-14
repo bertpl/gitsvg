@@ -4,6 +4,7 @@ from gitsvg.layout import compute_layout
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.render import render
 from gitsvg.state import apply_ops
+from tests._jsonl import build_jsonl
 
 
 def _render_from(text: str):
@@ -19,13 +20,13 @@ def _render_from(text: str):
 # ==================================================================================================
 def test_branch_off_emits_one_extra_path_per_non_root_branch() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "m2", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "feat", "id": "f1", "msg": "x"}\n'
-        '{"op": "commit", "branch": "feat", "id": "f2", "msg": "x"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "m2", "msg": "x"},
+        {"op": "branch", "name": "feat", "from_branch": "main"},
+        {"op": "commit", "branch": "feat", "id": "f1", "msg": "x"},
+        {"op": "commit", "branch": "feat", "id": "f2", "msg": "x"},
     )
 
     # --- act --------------------------
@@ -40,11 +41,11 @@ def test_branch_off_arc_color_matches_target_branch() -> None:
     """The branch-off arc takes the *new* (target) branch's color, matching
     the seed convention."""
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main", "color": "#aabbcc"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main", "color": "#112233"}\n'
-        '{"op": "commit", "branch": "feat", "id": "f1", "msg": "x"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main", "color": "#aabbcc"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+        {"op": "branch", "name": "feat", "from_branch": "main", "color": "#112233"},
+        {"op": "commit", "branch": "feat", "id": "f1", "msg": "x"},
     )
 
     # --- act --------------------------
@@ -59,11 +60,11 @@ def test_branch_off_from_explicit_commit_uses_that_commits_position() -> None:
     """`from_commit:` lets the author root a branch on a non-tip commit; the
     branch-off arc should originate at that commit, not at the parent's tip."""
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "m2", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_commit": "m1"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "m2", "msg": "x"},
+        {"op": "branch", "name": "feat", "from_commit": "m1"},
     )
 
     # --- act --------------------------
@@ -83,13 +84,13 @@ def test_merge_emits_an_extra_path_for_the_merge_arc() -> None:
     # --- arrange ----------------------
     # `merge_commit_style: circle` isolates the arc count from the default
     # checkmark dot, whose tick is an extra <path> unrelated to the merge arc.
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "feat", "id": "f1", "msg": "x"}\n'
-        '{"op": "merge", "from": "feat", "into": "main", "as": "m2"}\n'
-        '{"op": "theme", "merge_commit_style": "circle"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+        {"op": "branch", "name": "feat", "from_branch": "main"},
+        {"op": "commit", "branch": "feat", "id": "f1", "msg": "x"},
+        {"op": "merge", "from": "feat", "into": "main", "as": "m2"},
+        {"op": "theme", "merge_commit_style": "circle"},
     )
 
     # --- act --------------------------
@@ -106,12 +107,12 @@ def test_merge_arc_color_matches_source_branch() -> None:
     """The merge arc takes the *source* (from) branch's color, matching the
     seed convention — opposite of branch-off (which uses target)."""
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main", "color": "#aabbcc"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main", "color": "#112233"}\n'
-        '{"op": "commit", "branch": "feat", "id": "f1", "msg": "x"}\n'
-        '{"op": "merge", "from": "feat", "into": "main", "as": "m2"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main", "color": "#aabbcc"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+        {"op": "branch", "name": "feat", "from_branch": "main", "color": "#112233"},
+        {"op": "commit", "branch": "feat", "id": "f1", "msg": "x"},
+        {"op": "merge", "from": "feat", "into": "main", "as": "m2"},
     )
 
     # --- act --------------------------
@@ -128,11 +129,11 @@ def test_merge_arc_color_matches_source_branch() -> None:
 # ==================================================================================================
 def test_branch_guide_count_equals_unique_lane_count() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "feat", "id": "f1", "msg": "x"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+        {"op": "branch", "name": "feat", "from_branch": "main"},
+        {"op": "commit", "branch": "feat", "id": "f1", "msg": "x"},
     )
 
     # --- act --------------------------
@@ -147,7 +148,7 @@ def test_branch_guide_count_equals_unique_lane_count() -> None:
 
 def test_branch_guide_is_dashed_with_expected_pattern() -> None:
     # --- arrange ----------------------
-    text = '{"op": "branch", "name": "main"}\n'
+    text = build_jsonl({"op": "branch", "name": "main"})
 
     # --- act --------------------------
     svg_text = _render_from(text).as_svg()
@@ -163,10 +164,10 @@ def test_z_order_guides_precede_lines_precede_dots() -> None:
     # --- arrange ----------------------
     # Two commits so the branch line is drawn (one-commit branches now
     # suppress their line as a degenerate zero-length path).
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "c2", "msg": "x"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "c2", "msg": "x"},
     )
 
     # --- act --------------------------

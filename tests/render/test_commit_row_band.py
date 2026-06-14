@@ -10,15 +10,16 @@ from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._geometry import commit_row_band_rect
 from gitsvg.state import apply_ops
 from gitsvg.theme import DEFAULT_THEME, DefaultTheme
+from tests._jsonl import build_jsonl
 
 # A single branch with four commits → commit rows 0, 1, 2, 3 (n_commits == 4),
 # so odd-index rows 1 and 3 carry a band.
-_FOUR_ROWS = (
-    '{"op": "branch", "name": "main"}\n'
-    '{"op": "commit", "branch": "main", "id": "c1", "msg": "a"}\n'
-    '{"op": "commit", "branch": "main", "id": "c2", "msg": "b"}\n'
-    '{"op": "commit", "branch": "main", "id": "c3", "msg": "c"}\n'
-    '{"op": "commit", "branch": "main", "id": "c4", "msg": "d"}\n'
+_FOUR_ROWS = build_jsonl(
+    {"op": "branch", "name": "main"},
+    {"op": "commit", "branch": "main", "id": "c1", "msg": "a"},
+    {"op": "commit", "branch": "main", "id": "c2", "msg": "b"},
+    {"op": "commit", "branch": "main", "id": "c3", "msg": "c"},
+    {"op": "commit", "branch": "main", "id": "c4", "msg": "d"},
 )
 
 _BAND = "#0000ff80"

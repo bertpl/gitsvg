@@ -9,6 +9,7 @@ from gitsvg.render import render
 from gitsvg.render._canvas import compute_canvas, is_table_active
 from gitsvg.state import apply_ops
 from gitsvg.theme import DefaultTheme
+from tests._jsonl import build_jsonl
 
 
 def _table_render(text: str, **overrides):
@@ -26,10 +27,10 @@ def _texts(svg: str) -> list[ET.Element]:
     return [el for el in ET.fromstring(svg).iter() if el.tag.split("}")[-1] == "text"]
 
 
-_LINEAR = (
-    '{"op": "branch", "name": "main"}\n'
-    '{"op": "commit", "branch": "main", "id": "c1", "msg": "init", "hash": "abc1234"}\n'
-    '{"op": "commit", "branch": "main", "id": "c2", "msg": "second", "hash": "def5678"}\n'
+_LINEAR = build_jsonl(
+    {"op": "branch", "name": "main"},
+    {"op": "commit", "branch": "main", "id": "c1", "msg": "init", "hash": "abc1234"},
+    {"op": "commit", "branch": "main", "id": "c2", "msg": "second", "hash": "def5678"},
 )
 
 
@@ -123,9 +124,11 @@ def test_shared_tip_row_carries_multiple_pills() -> None:
     """An empty branch shares its parent's commit, so that row carries both names, same y."""
     # --- arrange / act ----------------
     _layout, _renderer, _canvas, svg = _table_render(
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "init"}\n'
-        '{"op": "branch", "name": "feature", "from_branch": "main"}\n'
+        build_jsonl(
+            {"op": "branch", "name": "main"},
+            {"op": "commit", "branch": "main", "id": "c1", "msg": "init"},
+            {"op": "branch", "name": "feature", "from_branch": "main"},
+        )
     )
     texts = _texts(svg)
 

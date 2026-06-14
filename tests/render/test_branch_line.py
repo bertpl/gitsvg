@@ -11,6 +11,7 @@ from gitsvg.render._canvas import RenderCanvas
 from gitsvg.render._primitives.branch_line import draw_branch_line
 from gitsvg.state import apply_ops
 from gitsvg.theme import DEFAULT_THEME
+from tests._jsonl import build_jsonl
 
 
 # ==================================================================================================
@@ -88,9 +89,11 @@ def test_diagram_with_empty_branches_emits_no_zero_length_paths() -> None:
     """Empty branches (declared but no commits) don't add zero-length `<path>` elements."""
     # --- arrange / act ----------------
     svg = _render(
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "branch", "name": "scratch", "from_branch": "main"}\n'
+        build_jsonl(
+            {"op": "branch", "name": "main"},
+            {"op": "commit", "branch": "main", "id": "c1", "msg": "x"},
+            {"op": "branch", "name": "scratch", "from_branch": "main"},
+        )
     )
 
     # --- assert -----------------------

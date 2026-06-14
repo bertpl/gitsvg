@@ -5,6 +5,7 @@ from gitsvg.parse import parse_jsonl_text
 from gitsvg.render import render
 from gitsvg.state import apply_ops
 from gitsvg.theme import DEFAULT_THEME, DefaultTheme
+from tests._jsonl import build_jsonl
 
 
 def _layout(text: str):
@@ -17,7 +18,9 @@ def test_default_theme_emits_no_background_rect() -> None:
     """With `background_color=None` (the default), the SVG carries no
     full-canvas background rectangle — output remains transparent."""
     # --- arrange ----------------------
-    layout = _layout('{"op": "branch", "name": "main"}\n{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n')
+    layout = _layout(
+        build_jsonl({"op": "branch", "name": "main"}, {"op": "commit", "branch": "main", "id": "c1", "msg": "x"})
+    )
 
     # --- act --------------------------
     svg = render(layout, DEFAULT_THEME.split()[1]).as_svg()
@@ -32,9 +35,11 @@ def test_background_color_accepts_alpha_hex() -> None:
     """Color fields take an optional alpha channel — a translucent background validates and resolves."""
     # --- arrange ----------------------
     parsed, report = parse_jsonl_text(
-        '{"op": "theme", "background_color": "#11223344"}\n'
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n',
+        build_jsonl(
+            {"op": "theme", "background_color": "#11223344"},
+            {"op": "branch", "name": "main"},
+            {"op": "commit", "branch": "main", "id": "c1", "msg": "x"},
+        ),
         file="x.jsonl",
     )
 
@@ -50,7 +55,9 @@ def test_theme_with_background_emits_full_canvas_rect_first() -> None:
     """A non-None `theme.background_color` emits a full-canvas `<rect>` as
     the first painted element (Z-order layer 0, behind all other content)."""
     # --- arrange ----------------------
-    layout = _layout('{"op": "branch", "name": "main"}\n{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n')
+    layout = _layout(
+        build_jsonl({"op": "branch", "name": "main"}, {"op": "commit", "branch": "main", "id": "c1", "msg": "x"})
+    )
     theme = DefaultTheme.build({"background_color": "#ff00ff"})
 
     # --- act --------------------------

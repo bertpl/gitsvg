@@ -15,6 +15,7 @@ from gitsvg.layout import compute_layout
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.render._renderer import _branch_through_point, _get_occupied_lanes
 from gitsvg.state import apply_ops
+from tests._jsonl import build_jsonl
 
 
 def _layout_from(text: str):
@@ -30,9 +31,11 @@ def _layout_from(text: str):
 def test_branch_through_point_resolves_new_branch_for_branch_off() -> None:
     # --- arrange ----------------------
     layout = _layout_from(
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
+        build_jsonl(
+            {"op": "branch", "name": "main"},
+            {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+            {"op": "branch", "name": "feat", "from_branch": "main"},
+        )
     )
     # branch-off: branch point above the trunk point.
     arc = next(a for a in layout.arcs if a.branch_point.commit_pos > a.trunk_point.commit_pos)
@@ -48,11 +51,13 @@ def test_branch_through_point_resolves_new_branch_for_branch_off() -> None:
 def test_branch_through_point_resolves_source_branch_for_merge() -> None:
     # --- arrange ----------------------
     layout = _layout_from(
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "feat", "id": "f1", "msg": "x"}\n'
-        '{"op": "merge", "from": "feat", "into": "main", "as": "m2"}\n'
+        build_jsonl(
+            {"op": "branch", "name": "main"},
+            {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+            {"op": "branch", "name": "feat", "from_branch": "main"},
+            {"op": "commit", "branch": "feat", "id": "f1", "msg": "x"},
+            {"op": "merge", "from": "feat", "into": "main", "as": "m2"},
+        )
     )
     # merge: branch point below the trunk point.
     arc = next(a for a in layout.arcs if a.branch_point.commit_pos < a.trunk_point.commit_pos)
@@ -68,11 +73,13 @@ def test_branch_through_point_resolves_source_branch_for_merge() -> None:
 def test_branch_through_point_resolves_source_branch_for_pull_request() -> None:
     # --- arrange ----------------------
     layout = _layout_from(
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "feat", "id": "f1", "msg": "x"}\n'
-        '{"op": "pull_request", "from": "feat", "into": "main", "id": "pr1"}\n'
+        build_jsonl(
+            {"op": "branch", "name": "main"},
+            {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+            {"op": "branch", "name": "feat", "from_branch": "main"},
+            {"op": "commit", "branch": "feat", "id": "f1", "msg": "x"},
+            {"op": "pull_request", "from": "feat", "into": "main", "id": "pr1"},
+        )
     )
     pr = layout.pull_requests[0]
     feat = next(b for b in layout.branches if b.name == "feat")
@@ -90,9 +97,11 @@ def test_branch_through_point_resolves_source_branch_for_pull_request() -> None:
 def test_get_occupied_lanes_one_per_unique_branch_pos() -> None:
     # --- arrange / act ----------------
     layout = _layout_from(
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "branch", "name": "docs", "from_branch": "main"}\n'
+        build_jsonl(
+            {"op": "branch", "name": "main"},
+            {"op": "branch", "name": "feat", "from_branch": "main"},
+            {"op": "branch", "name": "docs", "from_branch": "main"},
+        )
     )
 
     # --- assert -----------------------

@@ -6,6 +6,7 @@ from gitsvg.layout import compute_layout
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.render import render
 from gitsvg.state import apply_ops
+from tests._jsonl import build_jsonl
 
 
 def _render_from(text: str):
@@ -18,11 +19,11 @@ def _render_from(text: str):
 
 def test_render_produces_valid_svg_with_correct_root_dimensions() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "c2", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "c3", "msg": "x"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "c2", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "c3", "msg": "x"},
     )
 
     # --- act --------------------------
@@ -45,12 +46,12 @@ def test_render_emits_expected_path_and_circle_counts() -> None:
     line shows), the SVG carries: 2 guides + 1 branch-off arc + 1 branch line
     = 4 paths, plus one circle per commit."""
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "feat", "id": "f1", "msg": "x"}\n'
-        '{"op": "commit", "branch": "feat", "id": "f2", "msg": "x"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "x"},
+        {"op": "branch", "name": "feat", "from_branch": "main"},
+        {"op": "commit", "branch": "feat", "id": "f1", "msg": "x"},
+        {"op": "commit", "branch": "feat", "id": "f2", "msg": "x"},
     )
 
     # --- act --------------------------
@@ -65,11 +66,11 @@ def test_empty_branch_emits_no_branch_line() -> None:
     """A declared branch with no commits gets no branch-line element — empty
     branches are visually represented by their name pill alone."""
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "c2", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "c2", "msg": "x"},
+        {"op": "branch", "name": "feat", "from_branch": "main"},
     )
 
     # --- act --------------------------
@@ -92,14 +93,14 @@ def test_connectors_are_grouped_per_branch_in_declaration_order() -> None:
     before every `feature` stroke — rather than interleaved by element
     type."""
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main", "color": "#111111"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "a"}\n'
-        '{"op": "commit", "branch": "main", "id": "c2", "msg": "b"}\n'
-        '{"op": "branch", "name": "feature", "from_branch": "main", "color": "#222222"}\n'
-        '{"op": "commit", "branch": "feature", "id": "f1", "msg": "c"}\n'
-        '{"op": "commit", "branch": "feature", "id": "f2", "msg": "d"}\n'
-        '{"op": "merge", "from": "feature", "into": "main", "as": "m1", "msg": "m"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main", "color": "#111111"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "a"},
+        {"op": "commit", "branch": "main", "id": "c2", "msg": "b"},
+        {"op": "branch", "name": "feature", "from_branch": "main", "color": "#222222"},
+        {"op": "commit", "branch": "feature", "id": "f1", "msg": "c"},
+        {"op": "commit", "branch": "feature", "id": "f2", "msg": "d"},
+        {"op": "merge", "from": "feature", "into": "main", "as": "m1", "msg": "m"},
     )
 
     # --- act --------------------------
@@ -126,9 +127,8 @@ def test_connectors_are_grouped_per_branch_in_declaration_order() -> None:
 def test_render_preserves_branch_color_in_dot_fill() -> None:
     """Each commit's dot is filled with its branch's resolved color."""
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main", "color": "#aabbcc"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main", "color": "#aabbcc"}, {"op": "commit", "branch": "main", "id": "c1", "msg": "x"}
     )
 
     # --- act --------------------------

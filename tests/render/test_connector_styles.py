@@ -25,6 +25,7 @@ from gitsvg.render._primitives.connector_styles import (
     _ConnectorGeometry,
 )
 from gitsvg.state import apply_ops
+from tests._jsonl import build_jsonl
 
 # A representative non-degenerate connector: one lane and one row apart.
 _GEOM = _ConnectorGeometry(
@@ -167,13 +168,13 @@ def test_lane_change_stepped_centers_the_crossing() -> None:
 @pytest.mark.parametrize("style", [s.value for s in BranchLineStyle])
 def test_renders_in_every_orientation_and_style(orientation: str, style: str) -> None:
     # --- arrange ----------------------
-    jsonl = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "feat", "id": "f1", "msg": "y"}\n'
-        '{"op": "merge", "from": "feat", "into": "main", "as": "mg"}\n'
-        f'{{"op": "theme", "orientation": "{orientation}", "branch_line_style": "{style}"}}\n'
+    jsonl = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+        {"op": "branch", "name": "feat", "from_branch": "main"},
+        {"op": "commit", "branch": "feat", "id": "f1", "msg": "y"},
+        {"op": "merge", "from": "feat", "into": "main", "as": "mg"},
+        {"op": "theme", "orientation": orientation, "branch_line_style": style},
     )
     parsed, report = parse_jsonl_text(jsonl, file="x.jsonl")
     state, theme = apply_ops(parsed, report)

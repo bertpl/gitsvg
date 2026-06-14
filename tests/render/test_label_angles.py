@@ -15,6 +15,7 @@ from gitsvg.layout import compute_layout
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.render import render
 from gitsvg.state import apply_ops
+from tests._jsonl import build_jsonl
 
 
 def _render_from(text: str) -> str:
@@ -36,7 +37,7 @@ def test_default_render_emits_no_rotate_transform() -> None:
     """Byte-identical gate at default: no label-angle override, every
     angle resolves to 0°, no rotation group emitted anywhere."""
     # --- arrange ----------------------
-    text = '{"op": "branch", "name": "main"}\n{"op": "commit", "branch": "main", "id": "c1", "msg": "init"}\n'
+    text = build_jsonl({"op": "branch", "name": "main"}, {"op": "commit", "branch": "main", "id": "c1", "msg": "init"})
 
     # --- act --------------------------
     svg = _render_from(text)
@@ -50,10 +51,10 @@ def test_default_render_emits_no_rotate_transform() -> None:
 # ==================================================================================================
 def test_branch_label_angle_wraps_branch_pill() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "theme", "branch_label_angle": 30}\n'
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "init"}\n'
+    text = build_jsonl(
+        {"op": "theme", "branch_label_angle": 30},
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "init"},
     )
 
     # --- act --------------------------
@@ -70,11 +71,11 @@ def test_branch_label_angle_wraps_branch_pill() -> None:
 
 def test_commit_label_angle_wraps_commit_label() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "theme", "commit_label_angle": -45}\n'
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "init"}\n'
-        '{"op": "commit", "branch": "main", "id": "c2", "msg": "next"}\n'
+    text = build_jsonl(
+        {"op": "theme", "commit_label_angle": -45},
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "init"},
+        {"op": "commit", "branch": "main", "id": "c2", "msg": "next"},
     )
 
     # --- act --------------------------
@@ -91,13 +92,13 @@ def test_commit_label_angle_wraps_commit_label() -> None:
 
 def test_pull_request_label_angle_wraps_pr_pill() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "theme", "pull_request_label_angle": 60}\n'
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "init"}\n'
-        '{"op": "branch", "name": "feature", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "feature", "id": "c2", "msg": "work"}\n'
-        '{"op": "pull_request", "id": "pr1", "from": "feature", "into": "main", "title": "merge feature"}\n'
+    text = build_jsonl(
+        {"op": "theme", "pull_request_label_angle": 60},
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "init"},
+        {"op": "branch", "name": "feature", "from_branch": "main"},
+        {"op": "commit", "branch": "feature", "id": "c2", "msg": "work"},
+        {"op": "pull_request", "id": "pr1", "from": "feature", "into": "main", "title": "merge feature"},
     )
 
     # --- act --------------------------
@@ -117,10 +118,10 @@ def test_pull_request_label_angle_wraps_pr_pill() -> None:
 # ==================================================================================================
 def test_independent_angles_per_label_kind() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "theme", "branch_label_angle": 10, "commit_label_angle": 20}\n'
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "init"}\n'
+    text = build_jsonl(
+        {"op": "theme", "branch_label_angle": 10, "commit_label_angle": 20},
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "init"},
     )
 
     # --- act --------------------------
@@ -142,10 +143,10 @@ def test_rotation_pivot_matches_branch_pill_world_point(orientation: str) -> Non
     by checking the rotate(angle, px, py) pivot lands on the rect edge /
     center that the `BoxAnchor` resolves to."""
     # --- arrange ----------------------
-    text = (
-        f'{{"op": "theme", "orientation": "{orientation}", "branch_label_angle": 45}}\n'
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "init"}\n'
+    text = build_jsonl(
+        {"op": "theme", "orientation": orientation, "branch_label_angle": 45},
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "init"},
     )
 
     # --- act --------------------------
@@ -188,22 +189,22 @@ def test_rotation_pivot_for_commit_label_at_non_default_orientation() -> None:
     label offset along the branch axis), independent of the angle value."""
     # --- arrange ----------------------
     # Two commits to keep the pill out of the same area as the commit label.
-    base_text = (
-        '{"op": "theme", "orientation": "lr"}\n'
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "c2", "msg": "y"}\n'
+    base_text = build_jsonl(
+        {"op": "theme", "orientation": "lr"},
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "c2", "msg": "y"},
     )
 
     # --- act --------------------------
     # Render twice with different angles; pivot should be invariant.
     text_30 = base_text.replace(
-        '{"op": "theme", "orientation": "lr"}',
-        '{"op": "theme", "orientation": "lr", "commit_label_angle": 30}',
+        build_jsonl({"op": "theme", "orientation": "lr"}),
+        build_jsonl({"op": "theme", "orientation": "lr", "commit_label_angle": 30}),
     )
     text_60 = base_text.replace(
-        '{"op": "theme", "orientation": "lr"}',
-        '{"op": "theme", "orientation": "lr", "commit_label_angle": 60}',
+        build_jsonl({"op": "theme", "orientation": "lr"}),
+        build_jsonl({"op": "theme", "orientation": "lr", "commit_label_angle": 60}),
     )
     svg_30 = _render_from(text_30)
     svg_60 = _render_from(text_60)
