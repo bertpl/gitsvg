@@ -112,7 +112,8 @@ def _check_table_mode_conflicts(theme: Theme, overrides: UserOverrides, report: 
 
     # `orientation` is non-None on a resolved (built) Theme; the field is
     # typed `T | None` because Theme also models the pre-build state.
-    assert theme.orientation is not None
+    if theme.orientation is None:
+        raise AssertionError
 
     if not theme.orientation.is_vertical:
         entry = overrides.theme_fields.get("commit_label_layout")

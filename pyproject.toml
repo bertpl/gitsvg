@@ -28,6 +28,7 @@ classifiers = [
 ]
 dependencies = [
     "click>=8.2.0,!=8.3.0,!=8.3.1",
+    "defusedxml>=0.7.1",  # hardened XML parsing in the --small minifier
     "drawsvg>=2.4.0",
     # pydantic-core ships no Python 3.14 wheel before pydantic 2.12.0, so the
     # 2.10.0 floor is unbuildable there; raise the floor on 3.14 only.
@@ -133,6 +134,7 @@ select = [
     "FLY",     # flynt: static str-join → f-string
     "SLF",     # flake8-self: private-member access
     "INP",     # flake8-no-pep420: every package dir has an __init__.py
+    "S",       # flake8-bandit: security lint
 ]
 ignore = [
     "RUF001", "RUF002", "RUF003",  # intentional typography (→, ×, en-dash), not "ambiguous"
@@ -150,8 +152,8 @@ convention = "google"
 runtime-evaluated-base-classes = ["pydantic.BaseModel"]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**" = ["D", "ANN", "SLF001"]    # AAA tests: no docstrings, lighter typing, may access private members
-"scripts/**" = ["INP001"]              # standalone scripts, not an importable package
+"tests/**" = ["D", "ANN", "SLF001", "S101", "S314"]  # AAA tests: asserts + private-member access + parsing trusted output
+"scripts/**" = ["INP001", "S"]         # standalone maintainer tooling, not the shipped library
 "docs/**" = ["INP001"]                 # mkdocs generation scripts, not a package
 "__init__.py" = ["F401"]               # re-export modules: naked imports, no `as` alias
 

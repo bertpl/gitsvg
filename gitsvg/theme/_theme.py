@@ -348,10 +348,14 @@ class Theme(BaseModel):
         # split() runs only on a built (fully-resolved) theme; narrow the
         # layout-policy Optionals so both an unresolved value and the type
         # checker fail loudly here rather than downstream.
-        assert self.commit_row_mode is not None
-        assert self.auto_lane_change is not None
-        assert self.merge_lane_clearance is not None
-        assert self.pull_request_extend_target_line is not None
+        if self.commit_row_mode is None:
+            raise AssertionError
+        if self.auto_lane_change is None:
+            raise AssertionError
+        if self.merge_lane_clearance is None:
+            raise AssertionError
+        if self.pull_request_extend_target_line is None:
+            raise AssertionError
 
         # Table mode lays one commit per row, so it forces `unique` row packing
         # regardless of the `commit_row_mode` field. This is the single place

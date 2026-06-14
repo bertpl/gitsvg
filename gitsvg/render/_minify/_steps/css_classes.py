@@ -35,6 +35,8 @@ import xml.etree.ElementTree as ET
 from collections import defaultdict
 from collections.abc import Iterator
 
+from defusedxml.ElementTree import fromstring as _defused_fromstring
+
 _SVG_NS = "http://www.w3.org/2000/svg"
 ET.register_namespace("", _SVG_NS)
 
@@ -92,7 +94,7 @@ def extract_css_classes(svg: str) -> str:
     body = svg[len(xml_decl) :]
 
     try:
-        root = ET.fromstring(body)
+        root = _defused_fromstring(body)
     except ET.ParseError:
         return svg
 
