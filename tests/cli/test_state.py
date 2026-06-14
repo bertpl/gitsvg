@@ -6,13 +6,14 @@ from pathlib import Path
 from click.testing import CliRunner
 
 from gitsvg.cli._cli import cli
+from tests._jsonl import build_jsonl
 
-_OK_JSONL = (
-    '{"op": "branch", "name": "main"}\n'
-    '{"op": "commit", "branch": "main", "id": "c1", "msg": "first"}\n'
-    '{"op": "commit", "branch": "main", "id": "c2", "msg": "second"}\n'
+_OK_JSONL = build_jsonl(
+    {"op": "branch", "name": "main"},
+    {"op": "commit", "branch": "main", "id": "c1", "msg": "first"},
+    {"op": "commit", "branch": "main", "id": "c2", "msg": "second"},
 )
-_BAD_JSONL = '{"op": "commit", "branch": "main", "msg": "x"}\n'  # main not declared
+_BAD_JSONL = build_jsonl({"op": "commit", "branch": "main", "msg": "x"})  # main not declared
 
 
 def _write(path: Path, content: str) -> Path:

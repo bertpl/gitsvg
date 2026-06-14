@@ -3,6 +3,7 @@
 from pathlib import Path
 
 from gitsvg.cli._pipeline import run_validate_pipeline
+from tests._jsonl import build_jsonl
 
 
 def _write(path: Path, content: str) -> Path:
@@ -15,7 +16,7 @@ def test_run_validate_pipeline_clean_input_returns_state_clean_report_theme(tmp_
     # --- arrange ----------------------
     file = _write(
         tmp_path / "ok.gitsvg.jsonl",
-        '{"op": "branch", "name": "main"}\n{"op": "commit", "branch": "main", "msg": "x"}\n',
+        build_jsonl({"op": "branch", "name": "main"}, {"op": "commit", "branch": "main", "msg": "x"}),
     )
 
     # --- act --------------------------
@@ -31,7 +32,7 @@ def test_run_validate_pipeline_dirty_input_returns_errors(tmp_path: Path) -> Non
     # --- arrange ----------------------
     file = _write(
         tmp_path / "bad.gitsvg.jsonl",
-        '{"op": "commit", "branch": "main", "msg": "x"}\n',  # main not declared
+        build_jsonl({"op": "commit", "branch": "main", "msg": "x"}),  # main not declared
     )
 
     # --- act --------------------------
@@ -46,11 +47,11 @@ def test_run_validate_pipeline_resolves_imports(tmp_path: Path) -> None:
     # --- arrange ----------------------
     base = _write(
         tmp_path / "base.gitsvg.jsonl",
-        '{"op": "branch", "name": "main"}\n{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n',
+        build_jsonl({"op": "branch", "name": "main"}, {"op": "commit", "branch": "main", "id": "c1", "msg": "x"}),
     )
     derived = _write(
         tmp_path / "derived.gitsvg.jsonl",
-        f'{{"op": "import", "path": "./{base.name}"}}\n{{"op": "highlight", "commit": "c1"}}\n',
+        build_jsonl({"op": "import", "path": f"./{base.name}"}, {"op": "highlight", "commit": "c1"}),
     )
 
     # --- act --------------------------
@@ -65,10 +66,12 @@ def test_run_validate_pipeline_runs_end_of_file_checks(tmp_path: Path) -> None:
     file = _write(
         tmp_path / "dangling.gitsvg.jsonl",
         (
-            '{"op": "branch", "name": "main"}\n'
-            '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-            '{"op": "branch", "name": "feat", "from_commit": "c1"}\n'
-            '{"op": "remove", "commits": ["c1"]}\n'
+            build_jsonl(
+                {"op": "branch", "name": "main"},
+                {"op": "commit", "branch": "main", "id": "c1", "msg": "x"},
+                {"op": "branch", "name": "feat", "from_commit": "c1"},
+                {"op": "remove", "commits": ["c1"]},
+            )
         ),
     )
 

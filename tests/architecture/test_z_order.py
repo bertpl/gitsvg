@@ -18,18 +18,19 @@ from gitsvg.layout import compute_layout
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.render import render
 from gitsvg.state import apply_ops
+from tests._jsonl import build_jsonl
 
 # A diagram exercising every element type: two branches, a branch-off, a
 # merge, an open pull request, and commit messages (so dots, lines, arcs,
 # pills, and labels are all emitted).
-_ALL_ELEMENTS_DIAGRAM = (
-    '{"op": "branch", "name": "main"}\n'
-    '{"op": "commit", "branch": "main", "id": "c1", "msg": "init"}\n'
-    '{"op": "branch", "name": "feature", "from_branch": "main"}\n'
-    '{"op": "commit", "branch": "feature", "id": "f1", "msg": "wip"}\n'
-    '{"op": "pull_request", "id": "pr1", "from": "feature", "into": "main", "title": "PR 1"}\n'
-    '{"op": "commit", "branch": "feature", "id": "f2", "msg": "more"}\n'
-    '{"op": "merge", "from": "feature", "into": "main", "as": "m1", "msg": "merge"}\n'
+_ALL_ELEMENTS_DIAGRAM = build_jsonl(
+    {"op": "branch", "name": "main"},
+    {"op": "commit", "branch": "main", "id": "c1", "msg": "init"},
+    {"op": "branch", "name": "feature", "from_branch": "main"},
+    {"op": "commit", "branch": "feature", "id": "f1", "msg": "wip"},
+    {"op": "pull_request", "id": "pr1", "from": "feature", "into": "main", "title": "PR 1"},
+    {"op": "commit", "branch": "feature", "id": "f2", "msg": "more"},
+    {"op": "merge", "from": "feature", "into": "main", "as": "m1", "msg": "merge"},
 )
 
 

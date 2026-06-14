@@ -11,6 +11,7 @@ from gitsvg.errors import ValidationReport
 from gitsvg.file_format.ops import BranchOp, CommitOp
 from gitsvg.imports import resolve_imports
 from gitsvg.parse import parse_jsonl_file
+from tests._jsonl import build_jsonl
 
 
 def _resolve(file: Path, *, depth_limit: int = 1000) -> tuple[list, ValidationReport]:
@@ -26,7 +27,7 @@ def _resolve(file: Path, *, depth_limit: int = 1000) -> tuple[list, ValidationRe
 def test_no_import_returns_input_unchanged(tmp_path: Path) -> None:
     # --- arrange ----------------------
     file = tmp_path / "a.jsonl"
-    file.write_text('{"op": "branch", "name": "main"}\n')
+    file.write_text(build_jsonl({"op": "branch", "name": "main"}))
 
     # --- act --------------------------
     expanded, report = _resolve(file)
@@ -40,9 +41,13 @@ def test_no_import_returns_input_unchanged(tmp_path: Path) -> None:
 def test_simple_import_inlines_predecessor(tmp_path: Path) -> None:
     # --- arrange ----------------------
     base = tmp_path / "base.jsonl"
-    base.write_text('{"op": "branch", "name": "main"}\n{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n')
+    base.write_text(
+        build_jsonl({"op": "branch", "name": "main"}, {"op": "commit", "branch": "main", "id": "c1", "msg": "x"})
+    )
     derived = tmp_path / "derived.jsonl"
-    derived.write_text('{"op": "import", "path": "./base.jsonl"}\n{"op": "commit", "branch": "main", "msg": "y"}\n')
+    derived.write_text(
+        build_jsonl({"op": "import", "path": "./base.jsonl"}, {"op": "commit", "branch": "main", "msg": "y"})
+    )
 
     # --- act --------------------------
     expanded, report = _resolve(derived)
@@ -58,11 +63,15 @@ def test_simple_import_inlines_predecessor(tmp_path: Path) -> None:
 def test_import_chain_three_levels_deep(tmp_path: Path) -> None:
     # --- arrange ----------------------
     a = tmp_path / "a.jsonl"
-    a.write_text('{"op": "branch", "name": "main"}\n')
+    a.write_text(build_jsonl({"op": "branch", "name": "main"}))
     b = tmp_path / "b.jsonl"
-    b.write_text('{"op": "import", "path": "./a.jsonl"}\n{"op": "commit", "branch": "main", "id": "c1", "msg": "b"}\n')
+    b.write_text(
+        build_jsonl({"op": "import", "path": "./a.jsonl"}, {"op": "commit", "branch": "main", "id": "c1", "msg": "b"})
+    )
     c = tmp_path / "c.jsonl"
-    c.write_text('{"op": "import", "path": "./b.jsonl"}\n{"op": "commit", "branch": "main", "id": "c2", "msg": "c"}\n')
+    c.write_text(
+        build_jsonl({"op": "import", "path": "./b.jsonl"}, {"op": "commit", "branch": "main", "id": "c2", "msg": "c"})
+    )
 
     # --- act --------------------------
     expanded, report = _resolve(c)
@@ -76,9 +85,9 @@ def test_file_with_only_import_op_is_valid(tmp_path: Path) -> None:
     """A 'hold' frame: file is just an import, expansion equals the imported file."""
     # --- arrange ----------------------
     base = tmp_path / "base.jsonl"
-    base.write_text('{"op": "branch", "name": "main"}\n')
+    base.write_text(build_jsonl({"op": "branch", "name": "main"}))
     hold = tmp_path / "hold.jsonl"
-    hold.write_text('{"op": "import", "path": "./base.jsonl"}\n')
+    hold.write_text(build_jsonl({"op": "import", "path": "./base.jsonl"}))
 
     # --- act --------------------------
     expanded, report = _resolve(hold)
@@ -95,7 +104,7 @@ def test_file_with_only_import_op_is_valid(tmp_path: Path) -> None:
 def test_self_cycle_emits_e300(tmp_path: Path) -> None:
     # --- arrange ----------------------
     file = tmp_path / "self.jsonl"
-    file.write_text('{"op": "import", "path": "./self.jsonl"}\n')
+    file.write_text(build_jsonl({"op": "import", "path": "./self.jsonl"}))
 
     # --- act --------------------------
     _, report = _resolve(file)
@@ -108,8 +117,8 @@ def test_mutual_cycle_emits_e300(tmp_path: Path) -> None:
     # --- arrange ----------------------
     a = tmp_path / "a.jsonl"
     b = tmp_path / "b.jsonl"
-    a.write_text('{"op": "import", "path": "./b.jsonl"}\n')
-    b.write_text('{"op": "import", "path": "./a.jsonl"}\n')
+    a.write_text(build_jsonl({"op": "import", "path": "./b.jsonl"}))
+    b.write_text(build_jsonl({"op": "import", "path": "./a.jsonl"}))
 
     # --- act --------------------------
     _, report = _resolve(a)
@@ -125,8 +134,8 @@ def test_cycle_via_relative_paths_resolves_to_same_file(tmp_path: Path) -> None:
     sub.mkdir()
     a = tmp_path / "a.jsonl"
     b = sub / "b.jsonl"
-    a.write_text('{"op": "import", "path": "./sub/b.jsonl"}\n')
-    b.write_text('{"op": "import", "path": "../a.jsonl"}\n')
+    a.write_text(build_jsonl({"op": "import", "path": "./sub/b.jsonl"}))
+    b.write_text(build_jsonl({"op": "import", "path": "../a.jsonl"}))
 
     # --- act --------------------------
     _, report = _resolve(a)
@@ -145,9 +154,9 @@ def test_depth_limit_exceeded_emits_e301(tmp_path: Path) -> None:
     for i, name in enumerate(files):
         target = tmp_path / name
         if i + 1 < len(files):
-            target.write_text(f'{{"op": "import", "path": "./{files[i + 1]}"}}\n')
+            target.write_text(build_jsonl({"op": "import", "path": f"./{files[i + 1]}"}))
         else:
-            target.write_text('{"op": "branch", "name": "main"}\n')
+            target.write_text(build_jsonl({"op": "branch", "name": "main"}))
 
     # --- act --------------------------
     _, report = _resolve(tmp_path / "a.jsonl", depth_limit=2)
@@ -162,7 +171,7 @@ def test_depth_limit_exceeded_emits_e301(tmp_path: Path) -> None:
 def test_missing_imported_file_emits_e302(tmp_path: Path) -> None:
     # --- arrange ----------------------
     file = tmp_path / "main.jsonl"
-    file.write_text('{"op": "import", "path": "./does-not-exist.jsonl"}\n')
+    file.write_text(build_jsonl({"op": "import", "path": "./does-not-exist.jsonl"}))
 
     # --- act --------------------------
     _, report = _resolve(file)
@@ -177,11 +186,11 @@ def test_missing_imported_file_emits_e302(tmp_path: Path) -> None:
 def test_multiple_imports_emits_e303_for_each_extra(tmp_path: Path) -> None:
     # --- arrange ----------------------
     base = tmp_path / "base.jsonl"
-    base.write_text('{"op": "branch", "name": "main"}\n')
+    base.write_text(build_jsonl({"op": "branch", "name": "main"}))
     extra = tmp_path / "extra.jsonl"
-    extra.write_text('{"op": "branch", "name": "feat", "from_branch": "main"}\n')
+    extra.write_text(build_jsonl({"op": "branch", "name": "feat", "from_branch": "main"}))
     main = tmp_path / "main.jsonl"
-    main.write_text('{"op": "import", "path": "./base.jsonl"}\n{"op": "import", "path": "./extra.jsonl"}\n')
+    main.write_text(build_jsonl({"op": "import", "path": "./base.jsonl"}, {"op": "import", "path": "./extra.jsonl"}))
 
     # --- act --------------------------
     _, report = _resolve(main)
@@ -197,9 +206,9 @@ def test_multiple_imports_emits_e303_for_each_extra(tmp_path: Path) -> None:
 def test_import_not_first_emits_e304_and_drops_import(tmp_path: Path) -> None:
     # --- arrange ----------------------
     base = tmp_path / "base.jsonl"
-    base.write_text('{"op": "branch", "name": "main"}\n')
+    base.write_text(build_jsonl({"op": "branch", "name": "main"}))
     main = tmp_path / "main.jsonl"
-    main.write_text('{"op": "branch", "name": "main"}\n{"op": "import", "path": "./base.jsonl"}\n')
+    main.write_text(build_jsonl({"op": "branch", "name": "main"}, {"op": "import", "path": "./base.jsonl"}))
 
     # --- act --------------------------
     expanded, report = _resolve(main)
@@ -219,7 +228,7 @@ def test_imported_file_parse_errors_surface_in_report(tmp_path: Path) -> None:
     bad = tmp_path / "bad.jsonl"
     bad.write_text("{not json}\n")
     main = tmp_path / "main.jsonl"
-    main.write_text('{"op": "import", "path": "./bad.jsonl"}\n')
+    main.write_text(build_jsonl({"op": "import", "path": "./bad.jsonl"}))
 
     # --- act --------------------------
     _, report = _resolve(main)
@@ -236,11 +245,11 @@ def test_parent_escape_emits_e305_without_reading_the_file(tmp_path: Path) -> No
     """A `../` path out of the top-level file's directory is rejected before any read."""
     # --- arrange ----------------------
     outside = tmp_path / "outside.jsonl"
-    outside.write_text('{"op": "branch", "name": "secret-branch"}\n')
+    outside.write_text(build_jsonl({"op": "branch", "name": "secret-branch"}))
     sub = tmp_path / "sub"
     sub.mkdir()
     main = sub / "main.jsonl"
-    main.write_text('{"op": "import", "path": "../outside.jsonl"}\n{"op": "branch", "name": "main"}\n')
+    main.write_text(build_jsonl({"op": "import", "path": "../outside.jsonl"}, {"op": "branch", "name": "main"}))
 
     # --- act --------------------------
     expanded, report = _resolve(main)
@@ -258,7 +267,7 @@ def test_absolute_path_emits_e305_even_inside_the_root(tmp_path: Path) -> None:
     """Absolute paths are rejected outright, even when they point inside the root."""
     # --- arrange ----------------------
     base = tmp_path / "base.jsonl"
-    base.write_text('{"op": "branch", "name": "main"}\n')
+    base.write_text(build_jsonl({"op": "branch", "name": "main"}))
     main = tmp_path / "main.jsonl"
     # Build via json.dumps so the absolute path is JSON-escaped — on Windows
     # it contains backslashes that would otherwise be invalid JSON escapes.
@@ -276,13 +285,13 @@ def test_nested_import_escape_emits_e305(tmp_path: Path) -> None:
     """Containment is checked against the *top-level* file's directory for the whole chain."""
     # --- arrange ----------------------
     outside = tmp_path / "outside.jsonl"
-    outside.write_text('{"op": "branch", "name": "main"}\n')
+    outside.write_text(build_jsonl({"op": "branch", "name": "main"}))
     sub = tmp_path / "sub"
     sub.mkdir()
     inner = sub / "inner.jsonl"
-    inner.write_text('{"op": "import", "path": "../outside.jsonl"}\n')
+    inner.write_text(build_jsonl({"op": "import", "path": "../outside.jsonl"}))
     main = sub / "main.jsonl"
-    main.write_text('{"op": "import", "path": "./inner.jsonl"}\n')
+    main.write_text(build_jsonl({"op": "import", "path": "./inner.jsonl"}))
 
     # --- act --------------------------
     _, report = _resolve(main)
@@ -297,9 +306,9 @@ def test_descent_below_the_root_is_allowed(tmp_path: Path) -> None:
     shared = tmp_path / "shared"
     shared.mkdir()
     base = shared / "base.jsonl"
-    base.write_text('{"op": "branch", "name": "main"}\n')
+    base.write_text(build_jsonl({"op": "branch", "name": "main"}))
     main = tmp_path / "main.jsonl"
-    main.write_text('{"op": "import", "path": "./shared/base.jsonl"}\n')
+    main.write_text(build_jsonl({"op": "import", "path": "./shared/base.jsonl"}))
 
     # --- act --------------------------
     expanded, report = _resolve(main)
@@ -316,12 +325,12 @@ def test_symlink_escape_emits_e305(tmp_path: Path) -> None:
     outside_dir = tmp_path / "outside"
     outside_dir.mkdir()
     outside = outside_dir / "real.jsonl"
-    outside.write_text('{"op": "branch", "name": "main"}\n')
+    outside.write_text(build_jsonl({"op": "branch", "name": "main"}))
     root = tmp_path / "root"
     root.mkdir()
     (root / "link.jsonl").symlink_to(outside)
     main = root / "main.jsonl"
-    main.write_text('{"op": "import", "path": "./link.jsonl"}\n')
+    main.write_text(build_jsonl({"op": "import", "path": "./link.jsonl"}))
 
     # --- act --------------------------
     _, report = _resolve(main)
@@ -336,9 +345,9 @@ def test_symlink_escape_emits_e305(tmp_path: Path) -> None:
 def test_allow_imports_false_emits_e306_and_keeps_rest(tmp_path: Path) -> None:
     # --- arrange ----------------------
     base = tmp_path / "base.jsonl"
-    base.write_text('{"op": "branch", "name": "main"}\n')
+    base.write_text(build_jsonl({"op": "branch", "name": "main"}))
     main = tmp_path / "main.jsonl"
-    main.write_text('{"op": "import", "path": "./base.jsonl"}\n{"op": "branch", "name": "feat"}\n')
+    main.write_text(build_jsonl({"op": "import", "path": "./base.jsonl"}, {"op": "branch", "name": "feat"}))
     parsed, report = parse_jsonl_file(main)
 
     # --- act --------------------------
@@ -357,9 +366,11 @@ def test_imported_ops_point_at_their_source_file(tmp_path: Path) -> None:
     """Errors raised against an imported op should name the imported file."""
     # --- arrange ----------------------
     base = tmp_path / "base.jsonl"
-    base.write_text('{"op": "branch", "name": "main"}\n{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n')
+    base.write_text(
+        build_jsonl({"op": "branch", "name": "main"}, {"op": "commit", "branch": "main", "id": "c1", "msg": "x"})
+    )
     derived = tmp_path / "derived.jsonl"
-    derived.write_text('{"op": "import", "path": "./base.jsonl"}\n')
+    derived.write_text(build_jsonl({"op": "import", "path": "./base.jsonl"}))
 
     # --- act --------------------------
     expanded, report = _resolve(derived)

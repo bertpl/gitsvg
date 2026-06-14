@@ -7,11 +7,12 @@ import pytest
 
 import gitsvg
 from gitsvg import GitsvgValidationError, render_text
+from tests._jsonl import build_jsonl
 
-_VALID_SOURCE = (
-    '{"op": "branch", "name": "main"}\n'
-    '{"op": "commit", "branch": "main", "id": "c1", "msg": "initial"}\n'
-    '{"op": "commit", "branch": "main", "id": "c2", "msg": "second"}\n'
+_VALID_SOURCE = build_jsonl(
+    {"op": "branch", "name": "main"},
+    {"op": "commit", "branch": "main", "id": "c1", "msg": "initial"},
+    {"op": "commit", "branch": "main", "id": "c2", "msg": "second"},
 )
 
 
@@ -37,7 +38,7 @@ def test_render_text_valid_returns_inline_embeddable_svg() -> None:
 
 def test_render_text_invalid_raises_carrying_the_report() -> None:
     # --- arrange ----------------------
-    source = '{"op": "commit", "branch": "main", "msg": "x"}\n'  # main never declared
+    source = build_jsonl({"op": "commit", "branch": "main", "msg": "x"})  # main never declared
 
     # --- act --------------------------
     with pytest.raises(GitsvgValidationError) as excinfo:
@@ -50,7 +51,7 @@ def test_render_text_invalid_raises_carrying_the_report() -> None:
 
 def test_render_text_rejects_import_ops_with_e306() -> None:
     # --- arrange ----------------------
-    source = '{"op": "import", "path": "./some_base.gitsvg.jsonl"}\n'
+    source = build_jsonl({"op": "import", "path": "./some_base.gitsvg.jsonl"})
 
     # --- act --------------------------
     with pytest.raises(GitsvgValidationError) as excinfo:
@@ -65,9 +66,9 @@ def test_render_text_never_reads_an_existing_file_via_import(tmp_path: Path, mon
     # --- arrange ----------------------
     # A real, valid file both reachable relative to CWD and via its absolute path.
     foreign = tmp_path / "foreign.gitsvg.jsonl"
-    foreign.write_text('{"op": "branch", "name": "exfiltrated-branch"}\n')
+    foreign.write_text(build_jsonl({"op": "branch", "name": "exfiltrated-branch"}))
     monkeypatch.chdir(tmp_path)
-    relative_source = '{"op": "import", "path": "./foreign.gitsvg.jsonl"}\n'
+    relative_source = build_jsonl({"op": "import", "path": "./foreign.gitsvg.jsonl"})
     # Build via json.dumps so the absolute path is JSON-escaped — on Windows
     # it contains backslashes that would otherwise be invalid JSON escapes.
     absolute_source = json.dumps({"op": "import", "path": str(foreign)}) + "\n"

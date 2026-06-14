@@ -7,6 +7,7 @@ import pytest
 
 from gitsvg.file_format.ops import BranchOp, CommitOp
 from gitsvg.parse import ParsedOp, parse_jsonl_file, parse_jsonl_text
+from tests._jsonl import build_jsonl
 
 
 # ==================================================================================================
@@ -52,7 +53,7 @@ def test_parse_attaches_correct_file_and_line_to_each_op() -> None:
 def test_parse_jsonl_file_reads_from_disk(tmp_path: Path) -> None:
     # --- arrange ----------------------
     file = tmp_path / "input.gitsvg.jsonl"
-    file.write_text('{"op": "branch", "name": "main"}\n')
+    file.write_text(build_jsonl({"op": "branch", "name": "main"}))
 
     # --- act --------------------------
     parsed, report = parse_jsonl_file(file)
@@ -90,7 +91,7 @@ def test_missing_op_field_emits_e002() -> None:
 
 def test_unknown_op_value_emits_e003() -> None:
     # --- act --------------------------
-    parsed, report = parse_jsonl_text('{"op": "rebase"}\n', file="x.jsonl")
+    parsed, report = parse_jsonl_text(build_jsonl({"op": "rebase"}), file="x.jsonl")
 
     # --- assert -----------------------
     assert parsed == []
@@ -112,15 +113,15 @@ def test_non_object_line_emits_e004() -> None:
 @pytest.mark.parametrize(
     ("raw", "expected_code", "expected_field"),
     [
-        ('{"op": "branch", "name": "main", "unknown": 1}', "E100", "unknown"),
-        ('{"op": "branch"}', "E101", "name"),
-        ('{"op": "commit", "branch": "main", "msg": "x", "gap": "two"}', "E102", "gap"),
-        ('{"op": "commit", "branch": "main", "msg": "x", "gap": -1}', "E103", "gap"),
-        ('{"op": "branch", "name": "with space"}', "E104", "name"),
-        ('{"op": "commit", "branch": "main", "msg": ""}', "E105", "msg"),
-        ('{"op": "remove", "commits": []}', "E106", "commits"),
-        ('{"op": "commit", "branch": "main"}', "E107", None),
-        ('{"op": "branch", "name": "main", "label_side": "top"}', "E108", "label_side"),
+        (build_jsonl({"op": "branch", "name": "main", "unknown": 1}), "E100", "unknown"),
+        (build_jsonl({"op": "branch"}), "E101", "name"),
+        (build_jsonl({"op": "commit", "branch": "main", "msg": "x", "gap": "two"}), "E102", "gap"),
+        (build_jsonl({"op": "commit", "branch": "main", "msg": "x", "gap": -1}), "E103", "gap"),
+        (build_jsonl({"op": "branch", "name": "with space"}), "E104", "name"),
+        (build_jsonl({"op": "commit", "branch": "main", "msg": ""}), "E105", "msg"),
+        (build_jsonl({"op": "remove", "commits": []}), "E106", "commits"),
+        (build_jsonl({"op": "commit", "branch": "main"}), "E107", None),
+        (build_jsonl({"op": "branch", "name": "main", "label_side": "top"}), "E108", "label_side"),
     ],
 )
 def test_schema_errors_map_to_expected_codes(raw: str, expected_code: str, expected_field: str | None) -> None:
@@ -159,7 +160,7 @@ def test_parser_continues_past_errors_to_collect_full_report() -> None:
 
 def test_one_op_can_yield_multiple_schema_errors() -> None:
     # --- arrange ----------------------
-    text = '{"op": "commit", "branch": "with space", "msg": "x", "gap": -1}\n'
+    text = build_jsonl({"op": "commit", "branch": "with space", "msg": "x", "gap": -1})
 
     # --- act --------------------------
     parsed, report = parse_jsonl_text(text, file="x.jsonl")
