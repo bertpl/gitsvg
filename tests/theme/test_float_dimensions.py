@@ -17,6 +17,7 @@ from gitsvg.parse import parse_jsonl_text
 from gitsvg.render import render
 from gitsvg.state import apply_ops
 from gitsvg.theme import DefaultTheme
+from tests._jsonl import build_jsonl
 
 _SIZE_FIELDS = [
     "branch_spacing",
@@ -75,7 +76,7 @@ def test_fractional_theme_op_validates_cleanly_through_apply() -> None:
     raw traceback: a `theme:` op with a fractional spacing now resolves cleanly
     through the apply pass."""
     # --- arrange / act ----------------
-    parsed, report = parse_jsonl_text('{"op": "theme", "branch_spacing": 100.5}\n', file="x.jsonl")
+    parsed, report = parse_jsonl_text(build_jsonl({"op": "theme", "branch_spacing": 100.5}), file="x.jsonl")
     _state, theme = apply_ops(parsed, report)
 
     # --- assert -----------------------
@@ -91,10 +92,10 @@ def test_commit_radius_render_formatting(radius: float, expected_attr: str, forb
     """A fractional `commit_radius` reaches the SVG as a sub-pixel value; a whole
     one renders without a trailing `.0` (byte-identical to pre-float output)."""
     # --- arrange ----------------------
-    jsonl = (
-        f'{{"op": "theme", "commit_radius": {radius}}}\n'
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "msg": "x"}\n'
+    jsonl = build_jsonl(
+        {"op": "theme", "commit_radius": radius},
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "msg": "x"},
     )
     parsed, report = parse_jsonl_text(jsonl, file="x.jsonl")
     state, theme = apply_ops(parsed, report)

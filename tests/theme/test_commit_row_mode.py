@@ -4,6 +4,7 @@ from gitsvg._shared.value_types import CommitRowMode
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.state import apply_ops
 from gitsvg.theme import DefaultTheme
+from tests._jsonl import build_jsonl
 
 
 def test_default_commit_row_mode_is_shared() -> None:
@@ -37,7 +38,7 @@ def test_commit_row_mode_routes_into_layout_settings() -> None:
 def test_commit_row_mode_resolves_through_apply() -> None:
     """A `theme:` op with `commit_row_mode` ends up on the resolved theme."""
     # --- arrange / act ----------------
-    parsed, report = parse_jsonl_text('{"op": "theme", "commit_row_mode": "unique"}\n', file="x.jsonl")
+    parsed, report = parse_jsonl_text(build_jsonl({"op": "theme", "commit_row_mode": "unique"}), file="x.jsonl")
     _, theme = apply_ops(parsed, report)
 
     # --- assert -----------------------

@@ -3,6 +3,7 @@
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.state import apply_ops
 from gitsvg.theme import DefaultTheme
+from tests._jsonl import build_jsonl
 
 
 def test_default_auto_lane_change_is_false() -> None:
@@ -36,7 +37,7 @@ def test_auto_lane_change_routes_into_layout_settings() -> None:
 def test_auto_lane_change_resolves_through_apply() -> None:
     """A `theme:` op with `auto_lane_change` ends up on the resolved theme."""
     # --- arrange / act ----------------
-    parsed, report = parse_jsonl_text('{"op": "theme", "auto_lane_change": true}\n', file="x.jsonl")
+    parsed, report = parse_jsonl_text(build_jsonl({"op": "theme", "auto_lane_change": True}), file="x.jsonl")
     _, theme = apply_ops(parsed, report)
 
     # --- assert -----------------------

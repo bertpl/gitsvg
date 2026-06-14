@@ -11,6 +11,7 @@ from gitsvg.parse import parse_jsonl_text
 from gitsvg.state import apply_ops
 from gitsvg.theme import DEFAULT_THEME
 from gitsvg.theme.themes import MutedTheme
+from tests._jsonl import build_jsonl
 
 # The three fields the refresh changed, with their pre-refresh values.
 _PRE_REFRESH_PALETTE = {
@@ -97,7 +98,7 @@ def test_muted_theme_inherits_non_refresh_defaults() -> None:
 def test_theme_op_name_muted_resolves_through_apply() -> None:
     """A `theme:` op with `name: "muted"` resolves the diagram through `MutedTheme`."""
     # --- arrange / act ----------------
-    parsed, report = parse_jsonl_text('{"op": "theme", "name": "muted"}\n', file="x.jsonl")
+    parsed, report = parse_jsonl_text(build_jsonl({"op": "theme", "name": "muted"}), file="x.jsonl")
     _, theme = apply_ops(parsed, report)
 
     # --- assert -----------------------

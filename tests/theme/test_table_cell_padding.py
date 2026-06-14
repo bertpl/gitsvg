@@ -3,6 +3,7 @@
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.state import apply_ops
 from gitsvg.theme import DefaultTheme
+from tests._jsonl import build_jsonl
 
 
 def test_default_is_half_a_font_size() -> None:
@@ -33,7 +34,9 @@ def test_zero_is_allowed() -> None:
 
 def test_negative_rejected_on_theme_op() -> None:
     # --- arrange / act ----------------
-    parsed, report = parse_jsonl_text('{"op": "theme", "table_cell_padding_x_in_font_sizes": -0.5}\n', file="x.jsonl")
+    parsed, report = parse_jsonl_text(
+        build_jsonl({"op": "theme", "table_cell_padding_x_in_font_sizes": -0.5}), file="x.jsonl"
+    )
     apply_ops(parsed, report)
 
     # --- assert -----------------------

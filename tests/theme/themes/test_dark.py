@@ -6,6 +6,7 @@ from gitsvg.parse import parse_jsonl_text
 from gitsvg.render import render
 from gitsvg.state import apply_ops
 from gitsvg.theme.themes import DarkTheme
+from tests._jsonl import build_jsonl
 
 
 # ==================================================================================================
@@ -65,7 +66,7 @@ def test_dark_theme_build_with_user_overrides_layers_on_palette() -> None:
 def test_theme_op_name_dark_resolves_through_apply() -> None:
     """A `theme:` op with `name: "dark"` ends up resolving the diagram through `DarkTheme`."""
     # --- arrange / act ----------------
-    parsed, report = parse_jsonl_text('{"op": "theme", "name": "dark"}\n', file="x.jsonl")
+    parsed, report = parse_jsonl_text(build_jsonl({"op": "theme", "name": "dark"}), file="x.jsonl")
     _, theme = apply_ops(parsed, report)
 
     # --- assert -----------------------
@@ -79,7 +80,7 @@ def test_dark_then_user_field_layers_on_top() -> None:
     layers the field on top of dark's resolved defaults."""
     # --- arrange / act ----------------
     parsed, report = parse_jsonl_text(
-        '{"op": "theme", "name": "dark"}\n{"op": "theme", "background_color": "#101010"}\n', file="x.jsonl"
+        build_jsonl({"op": "theme", "name": "dark"}, {"op": "theme", "background_color": "#101010"}), file="x.jsonl"
     )
     _, theme = apply_ops(parsed, report)
 
@@ -94,7 +95,9 @@ def test_keep_prior_overrides_true_preserves_user_fields_into_dark() -> None:
     instead of wiping them — dark's defaults apply only to untouched fields."""
     # --- arrange / act ----------------
     parsed, report = parse_jsonl_text(
-        '{"op": "theme", "label_font_size": 14}\n{"op": "theme", "name": "dark", "keep_prior_overrides": true}\n',
+        build_jsonl(
+            {"op": "theme", "label_font_size": 14}, {"op": "theme", "name": "dark", "keep_prior_overrides": True}
+        ),
         file="x.jsonl",
     )
     _, theme = apply_ops(parsed, report)
@@ -112,12 +115,12 @@ def test_dark_theme_renders_with_expected_palette_colors() -> None:
     """A small diagram rendered through `DarkTheme` produces an SVG
     that contains every palette color the dark theme defines."""
     # --- arrange ----------------------
-    source = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "first"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "feat", "id": "c2", "msg": "feature"}\n'
-        '{"op": "theme", "name": "dark"}\n'
+    source = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "first"},
+        {"op": "branch", "name": "feat", "from_branch": "main"},
+        {"op": "commit", "branch": "feat", "id": "c2", "msg": "feature"},
+        {"op": "theme", "name": "dark"},
     )
 
     # --- act --------------------------

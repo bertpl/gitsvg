@@ -8,6 +8,7 @@ from gitsvg._shared.value_types import CommitLabelLayout, CommitRowMode
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.state import apply_ops
 from gitsvg.theme import DefaultTheme
+from tests._jsonl import build_jsonl
 
 
 def test_default_commit_label_layout_is_inline() -> None:
@@ -67,7 +68,7 @@ def test_inline_mode_leaves_row_mode_untouched_at_split() -> None:
 def test_commit_label_layout_resolves_through_apply() -> None:
     """A `theme:` op with `commit_label_layout` ends up on the resolved theme."""
     # --- arrange / act ----------------
-    parsed, report = parse_jsonl_text('{"op": "theme", "commit_label_layout": "table"}\n', file="x.jsonl")
+    parsed, report = parse_jsonl_text(build_jsonl({"op": "theme", "commit_label_layout": "table"}), file="x.jsonl")
     _, theme = apply_ops(parsed, report)
 
     # --- assert -----------------------
