@@ -3,6 +3,7 @@
 from gitsvg.layout import Layout, compute_layout
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.state import apply_ops
+from tests._jsonl import build_jsonl
 
 
 def _layout_from(text: str) -> Layout:
@@ -14,10 +15,10 @@ def _layout_from(text: str) -> Layout:
 
 def test_ordinary_commits_are_not_merges() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "c2", "msg": "x"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "c2", "msg": "x"},
     )
 
     # --- act --------------------------
@@ -30,12 +31,12 @@ def test_ordinary_commits_are_not_merges() -> None:
 
 def test_merge_commit_is_flagged() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "feat", "id": "f1", "msg": "x"}\n'
-        '{"op": "merge", "from": "feat", "into": "main", "as": "mg"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+        {"op": "branch", "name": "feat", "from_branch": "main"},
+        {"op": "commit", "branch": "feat", "id": "f1", "msg": "x"},
+        {"op": "merge", "from": "feat", "into": "main", "as": "mg"},
     )
 
     # --- act --------------------------

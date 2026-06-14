@@ -3,6 +3,7 @@
 from gitsvg.layout import compute_layout, layout_to_json
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.state import apply_ops
+from tests._jsonl import build_jsonl
 
 
 def _layout_json(text: str) -> dict:
@@ -26,10 +27,10 @@ def test_empty_input_emits_top_level_keys_with_empty_lists() -> None:
 
 def test_linear_chain_emits_branch_and_commits() -> None:
     # --- arrange ----------------------
-    jsonl = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "first"}\n'
-        '{"op": "commit", "branch": "main", "id": "c2", "msg": "second"}\n'
+    jsonl = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "first"},
+        {"op": "commit", "branch": "main", "id": "c2", "msg": "second"},
     )
 
     # --- act --------------------------
@@ -46,11 +47,11 @@ def test_linear_chain_emits_branch_and_commits() -> None:
 
 def test_branch_off_emits_branch_off_arc() -> None:
     # --- arrange ----------------------
-    jsonl = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feature", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "feature", "id": "f1", "msg": "y"}\n'
+    jsonl = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+        {"op": "branch", "name": "feature", "from_branch": "main"},
+        {"op": "commit", "branch": "feature", "id": "f1", "msg": "y"},
     )
 
     # --- act --------------------------
@@ -64,12 +65,12 @@ def test_branch_off_emits_branch_off_arc() -> None:
 
 def test_merge_emits_merge_arc() -> None:
     # --- arrange ----------------------
-    jsonl = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feature", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "feature", "id": "f1", "msg": "y"}\n'
-        '{"op": "merge", "into": "main", "from": "feature", "as": "mg", "msg": "merge"}\n'
+    jsonl = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+        {"op": "branch", "name": "feature", "from_branch": "main"},
+        {"op": "commit", "branch": "feature", "id": "f1", "msg": "y"},
+        {"op": "merge", "into": "main", "from": "feature", "as": "mg", "msg": "merge"},
     )
 
     # --- act --------------------------
@@ -82,12 +83,12 @@ def test_merge_emits_merge_arc() -> None:
 
 def test_pull_request_emits_pull_request_geometry() -> None:
     # --- arrange ----------------------
-    jsonl = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feature", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "feature", "id": "f1", "msg": "y"}\n'
-        '{"op": "pull_request", "id": "pr1", "from": "feature", "into": "main", "title": "ship it"}\n'
+    jsonl = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+        {"op": "branch", "name": "feature", "from_branch": "main"},
+        {"op": "commit", "branch": "feature", "id": "f1", "msg": "y"},
+        {"op": "pull_request", "id": "pr1", "from": "feature", "into": "main", "title": "ship it"},
     )
 
     # --- act --------------------------
@@ -105,7 +106,7 @@ def test_pull_request_emits_pull_request_geometry() -> None:
 def test_commits_serialized_as_list_not_dict() -> None:
     """The Layout dataclass keys commits by id; JSON serialization flattens to a list."""
     # --- arrange ----------------------
-    jsonl = '{"op": "branch", "name": "main"}\n{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
+    jsonl = build_jsonl({"op": "branch", "name": "main"}, {"op": "commit", "branch": "main", "id": "c1", "msg": "x"})
 
     # --- act --------------------------
     payload = _layout_json(jsonl)
@@ -117,11 +118,11 @@ def test_commits_serialized_as_list_not_dict() -> None:
 
 def test_grid_serialized_as_dict_with_slot_counts() -> None:
     # --- arrange ----------------------
-    jsonl = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "c2", "msg": "y"}\n'
-        '{"op": "commit", "branch": "main", "id": "c3", "msg": "z"}\n'
+    jsonl = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "c2", "msg": "y"},
+        {"op": "commit", "branch": "main", "id": "c3", "msg": "z"},
     )
 
     # --- act --------------------------
@@ -133,7 +134,7 @@ def test_grid_serialized_as_dict_with_slot_counts() -> None:
 
 def test_branch_carries_id_name_and_grid_positions() -> None:
     # --- arrange ----------------------
-    jsonl = '{"op": "branch", "name": "main"}\n'
+    jsonl = build_jsonl({"op": "branch", "name": "main"})
 
     # --- act --------------------------
     payload = _layout_json(jsonl)

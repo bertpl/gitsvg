@@ -9,6 +9,7 @@ from gitsvg.layout import compute_layout
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.render._canvas import compute_canvas
 from gitsvg.state import apply_ops
+from tests._jsonl import build_jsonl
 
 
 def _layout_and_canvas(text: str):
@@ -30,9 +31,11 @@ def test_grid_n_commits_override_pins_slot_count() -> None:
     """`grid.n_commits` pins the commit-axis slot count even when content has fewer commits."""
     # --- arrange / act ----------------
     layout, _, _ = _layout_and_canvas(
-        '{"op": "grid", "n_commits": 10}\n'
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
+        build_jsonl(
+            {"op": "grid", "n_commits": 10},
+            {"op": "branch", "name": "main"},
+            {"op": "commit", "branch": "main", "id": "c1", "msg": "x"},
+        )
     )
 
     # --- assert -----------------------
@@ -42,7 +45,7 @@ def test_grid_n_commits_override_pins_slot_count() -> None:
 def test_grid_n_branches_override_pins_lane_count() -> None:
     """`grid.n_branches` pins the branch-axis slot count even when fewer lanes are used."""
     # --- arrange / act ----------------
-    layout, _, _ = _layout_and_canvas('{"op": "grid", "n_branches": 5}\n{"op": "branch", "name": "main"}\n')
+    layout, _, _ = _layout_and_canvas(build_jsonl({"op": "grid", "n_branches": 5}, {"op": "branch", "name": "main"}))
 
     # --- assert -----------------------
     assert layout.grid.n_branches == 5
@@ -56,12 +59,20 @@ def test_pinned_grid_and_theme_spacing_govern_canvas_size() -> None:
     produces a canvas of exactly the expected pixel size, regardless of content."""
     # --- arrange / act ----------------
     _, _, canvas = _layout_and_canvas(
-        '{"op": "grid", "n_commits": 12, "n_branches": 4}\n'
-        '{"op": "theme", "commit_spacing": 50, "branch_spacing": 100, '
-        '"margin_left": 80, "margin_right": 100, '
-        '"margin_bottom": 60, "margin_top": 30}\n'
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
+        build_jsonl(
+            {"op": "grid", "n_commits": 12, "n_branches": 4},
+            {
+                "op": "theme",
+                "commit_spacing": 50,
+                "branch_spacing": 100,
+                "margin_left": 80,
+                "margin_right": 100,
+                "margin_bottom": 60,
+                "margin_top": 30,
+            },
+            {"op": "branch", "name": "main"},
+            {"op": "commit", "branch": "main", "id": "c1", "msg": "x"},
+        )
     )
 
     # --- assert -----------------------
@@ -81,7 +92,7 @@ def test_long_branch_name_auto_fits_lower_margin_when_default_too_small() -> Non
     # Default margin is 100. A pill with half-width > 100 should extend the margin.
     # 200 chars * 11 * 0.58 / 2 = 638 px half-width — comfortably more than 100.
     long_name = "a" * 200
-    text = f'{{"op": "branch", "name": "{long_name}"}}\n'
+    text = build_jsonl({"op": "branch", "name": long_name})
 
     # --- act --------------------------
     _, _, canvas = _layout_and_canvas(text)
@@ -95,8 +106,9 @@ def test_long_right_label_auto_fits_upper_margin() -> None:
     branch-axis margin."""
     # --- arrange ----------------------
     long_msg = "a" * 50  # 50 chars * 11 * 0.58 ≈ 319 px — past default 100 + LABEL_OFFSET.
-    text = (
-        f'{{"op": "branch", "name": "main"}}\n{{"op": "commit", "branch": "main", "id": "c1", "msg": "{long_msg}"}}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": long_msg},
     )
 
     # --- act --------------------------

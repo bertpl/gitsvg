@@ -3,17 +3,18 @@
 from gitsvg.layout import compute_layout
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.state import apply_ops
+from tests._jsonl import build_jsonl
 
 # Two branches whose commits interleave in declaration order, so `main`
 # and `feat` commits land on the same rows under `shared`.
-_INTERLEAVED = (
-    '{"op": "branch", "name": "main"}\n'
-    '{"op": "commit", "branch": "main", "id": "c1", "msg": "a"}\n'
-    '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-    '{"op": "commit", "branch": "feat", "id": "f1", "msg": "b"}\n'
-    '{"op": "commit", "branch": "main", "id": "c2", "msg": "c"}\n'
-    '{"op": "commit", "branch": "feat", "id": "f2", "msg": "d"}\n'
-    '{"op": "commit", "branch": "main", "id": "c3", "msg": "e"}\n'
+_INTERLEAVED = build_jsonl(
+    {"op": "branch", "name": "main"},
+    {"op": "commit", "branch": "main", "id": "c1", "msg": "a"},
+    {"op": "branch", "name": "feat", "from_branch": "main"},
+    {"op": "commit", "branch": "feat", "id": "f1", "msg": "b"},
+    {"op": "commit", "branch": "main", "id": "c2", "msg": "c"},
+    {"op": "commit", "branch": "feat", "id": "f2", "msg": "d"},
+    {"op": "commit", "branch": "main", "id": "c3", "msg": "e"},
 )
 
 
@@ -37,7 +38,7 @@ def test_shared_mode_lets_commits_share_rows() -> None:
 
 def test_unique_mode_gives_every_commit_its_own_row_in_declaration_order() -> None:
     # --- act --------------------------
-    rows = _rows(_INTERLEAVED + '{"op": "theme", "commit_row_mode": "unique"}\n')
+    rows = _rows(_INTERLEAVED + build_jsonl({"op": "theme", "commit_row_mode": "unique"}))
 
     # --- assert -----------------------
     # Every commit on its own row, numbered in declaration order.
@@ -48,14 +49,14 @@ def test_unique_mode_gives_every_commit_its_own_row_in_declaration_order() -> No
 def test_unique_mode_keeps_commits_below_their_parents() -> None:
     """Unique rows never violate the parent-below constraint, even with a merge."""
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "a"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "feat", "id": "f1", "msg": "b"}\n'
-        '{"op": "commit", "branch": "main", "id": "c2", "msg": "c"}\n'
-        '{"op": "merge", "from": "feat", "into": "main", "as": "m1", "msg": "m"}\n'
-        '{"op": "theme", "commit_row_mode": "unique"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "a"},
+        {"op": "branch", "name": "feat", "from_branch": "main"},
+        {"op": "commit", "branch": "feat", "id": "f1", "msg": "b"},
+        {"op": "commit", "branch": "main", "id": "c2", "msg": "c"},
+        {"op": "merge", "from": "feat", "into": "main", "as": "m1", "msg": "m"},
+        {"op": "theme", "commit_row_mode": "unique"},
     )
 
     # --- act --------------------------
@@ -70,11 +71,11 @@ def test_unique_mode_keeps_commits_below_their_parents() -> None:
 def test_unique_mode_composes_with_gap() -> None:
     """`gap` still leaves empty rows on top of the unique-row assignment."""
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "a"}\n'
-        '{"op": "commit", "branch": "main", "id": "c2", "msg": "b", "gap": 2}\n'
-        '{"op": "theme", "commit_row_mode": "unique"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "a"},
+        {"op": "commit", "branch": "main", "id": "c2", "msg": "b", "gap": 2},
+        {"op": "theme", "commit_row_mode": "unique"},
     )
 
     # --- act --------------------------

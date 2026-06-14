@@ -10,6 +10,7 @@ from gitsvg.imports import resolve_imports
 from gitsvg.layout import LaneSegment, Layout, LayoutArcKind, LayoutBranch, compute_layout
 from gitsvg.parse import parse_jsonl_file, parse_jsonl_text
 from gitsvg.state import apply_ops
+from tests._jsonl import build_jsonl
 
 
 def _layout_from(text: str) -> Layout:
@@ -24,7 +25,7 @@ def _layout_from(text: str) -> Layout:
 # ==================================================================================================
 def test_first_branch_gets_branch_pos_zero() -> None:
     # --- act --------------------------
-    layout = _layout_from('{"op": "branch", "name": "main"}\n')
+    layout = _layout_from(build_jsonl({"op": "branch", "name": "main"}))
 
     # --- assert -----------------------
     assert layout.branches[0].name == "main"
@@ -33,10 +34,10 @@ def test_first_branch_gets_branch_pos_zero() -> None:
 
 def test_branch_pos_increments_in_declaration_order() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "branch", "name": "docs", "from_branch": "main"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "branch", "name": "feat", "from_branch": "main"},
+        {"op": "branch", "name": "docs", "from_branch": "main"},
     )
 
     # --- act --------------------------
@@ -54,8 +55,8 @@ def test_branch_pos_increments_in_declaration_order() -> None:
 # ==================================================================================================
 def test_branch_pos_override_pins_lane_verbatim() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n{"op": "branch", "name": "feat", "from_branch": "main", "branch_pos": 7}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"}, {"op": "branch", "name": "feat", "from_branch": "main", "branch_pos": 7}
     )
 
     # --- act --------------------------
@@ -71,8 +72,8 @@ def test_branch_pos_override_to_zero_passes_through_lenient() -> None:
     # Lenient stance: even an override that visually clashes with the
     # parent branch's lane is taken verbatim. The author owns the layout.
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n{"op": "branch", "name": "feat", "from_branch": "main", "branch_pos": 0}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"}, {"op": "branch", "name": "feat", "from_branch": "main", "branch_pos": 0}
     )
 
     # --- act --------------------------
@@ -89,12 +90,12 @@ def test_branch_pos_override_pinned_lane_blocks_subsequent_heuristic_choices() -
     # the overridden branch contributes; lane choice for them follows
     # the usual rule (skip blocked lanes).
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main", "branch_pos": 5}\n'
-        '{"op": "commit", "branch": "feat", "msg": "x"}\n'
-        '{"op": "branch", "name": "docs", "from_branch": "main"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+        {"op": "branch", "name": "feat", "from_branch": "main", "branch_pos": 5},
+        {"op": "commit", "branch": "feat", "msg": "x"},
+        {"op": "branch", "name": "docs", "from_branch": "main"},
     )
 
     # --- act --------------------------
@@ -118,15 +119,15 @@ def test_lane_reclaimed_after_sibling_branch_removed() -> None:
     # rooted at a high row on the same parent reclaims that older
     # sibling's lane. (Story-1 compact-left pattern, in miniature.)
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "old_exp", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "old_exp", "id": "e1", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "m2", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "m3", "msg": "x"}\n'
-        '{"op": "branch", "name": "new_exp", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "new_exp", "id": "n1", "msg": "x"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+        {"op": "branch", "name": "old_exp", "from_branch": "main"},
+        {"op": "commit", "branch": "old_exp", "id": "e1", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "m2", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "m3", "msg": "x"},
+        {"op": "branch", "name": "new_exp", "from_branch": "main"},
+        {"op": "commit", "branch": "new_exp", "id": "n1", "msg": "x"},
     )
 
     # --- act --------------------------
@@ -145,15 +146,15 @@ def test_lane_skipped_when_existing_branch_has_recent_commits() -> None:
     # When an older branch on lane 1 has a commit at the new branch's
     # threshold or higher, lane 1 is blocked and new skips to lane 2.
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "ongoing", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "ongoing", "id": "o1", "msg": "x"}\n'
-        '{"op": "commit", "branch": "ongoing", "id": "o2", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "m2", "msg": "x"}\n'
-        '{"op": "branch", "name": "new", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "new", "id": "n1", "msg": "x"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+        {"op": "branch", "name": "ongoing", "from_branch": "main"},
+        {"op": "commit", "branch": "ongoing", "id": "o1", "msg": "x"},
+        {"op": "commit", "branch": "ongoing", "id": "o2", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "m2", "msg": "x"},
+        {"op": "branch", "name": "new", "from_branch": "main"},
+        {"op": "commit", "branch": "new", "id": "n1", "msg": "x"},
     )
 
     # --- act --------------------------
@@ -173,13 +174,13 @@ def test_lane_skipped_when_blocked_at_or_above_threshold() -> None:
     # second one can't reclaim the first one's lane (both parented at
     # the same row → first's commits will be at threshold).
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "first", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "first", "id": "f1", "msg": "x"}\n'
-        '{"op": "branch", "name": "second", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "second", "id": "s1", "msg": "x"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+        {"op": "branch", "name": "first", "from_branch": "main"},
+        {"op": "commit", "branch": "first", "id": "f1", "msg": "x"},
+        {"op": "branch", "name": "second", "from_branch": "main"},
+        {"op": "commit", "branch": "second", "id": "s1", "msg": "x"},
     )
 
     # --- act --------------------------
@@ -197,13 +198,13 @@ def test_empty_branch_pseudo_commit_blocks_lane_at_start_position() -> None:
     # An empty branch on lane 1 (start row 2) blocks any new branch
     # whose threshold is ≤ 2 from reusing lane 1.
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "m2", "msg": "x"}\n'
-        '{"op": "branch", "name": "ghost", "from_branch": "main"}\n'
-        '{"op": "branch", "name": "active", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "active", "id": "a1", "msg": "x"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "m2", "msg": "x"},
+        {"op": "branch", "name": "ghost", "from_branch": "main"},
+        {"op": "branch", "name": "active", "from_branch": "main"},
+        {"op": "commit", "branch": "active", "id": "a1", "msg": "x"},
     )
 
     # --- act --------------------------
@@ -223,17 +224,15 @@ def test_empty_branch_does_not_block_lane_below_its_start() -> None:
     # threshold is below 3. (Verifies the threshold check is `≥`, not
     # mere "any pseudo-commit on the lane".)
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "m2", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "m3", "msg": "x"}\n'
-        '{"op": "branch", "name": "ghost", "from_branch": "main"}\n'
-        # ghost: empty, start = m3.commit_pos + 1 = 3, on lane 1.
-        '{"op": "commit", "branch": "main", "id": "m4", "msg": "x"}\n'
-        # Now declare a sibling branching off m1 (early): its threshold is 1.
-        '{"op": "branch", "name": "early", "from_commit": "m1"}\n'
-        '{"op": "commit", "branch": "early", "id": "e1", "msg": "x"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "m2", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "m3", "msg": "x"},
+        {"op": "branch", "name": "ghost", "from_branch": "main"},
+        {"op": "commit", "branch": "main", "id": "m4", "msg": "x"},
+        {"op": "branch", "name": "early", "from_commit": "m1"},
+        {"op": "commit", "branch": "early", "id": "e1", "msg": "x"},
     )
 
     # --- act --------------------------
@@ -249,7 +248,7 @@ def test_empty_branch_does_not_block_lane_below_its_start() -> None:
 
 def test_first_branch_with_no_parent_gets_lane_zero() -> None:
     # --- arrange ----------------------
-    text = '{"op": "branch", "name": "main"}\n'
+    text = build_jsonl({"op": "branch", "name": "main"})
 
     # --- act --------------------------
     layout = _layout_from(text)
@@ -262,10 +261,10 @@ def test_branch_pos_override_short_circuits_heuristic() -> None:
     # An override skips the heuristic entirely; even a value that would
     # be flagged as "blocked" passes through.
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main", "branch_pos": 0}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+        {"op": "branch", "name": "feat", "from_branch": "main", "branch_pos": 0},
     )
 
     # --- act --------------------------
@@ -284,16 +283,16 @@ def test_forward_reference_to_later_declared_branch_is_resolved() -> None:
     # a commit on Y_new. The lane assignment must process Y_new before
     # X to know X's parent lane.
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "Y", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "Y", "id": "y_tip", "msg": "x"}\n'
-        '{"op": "branch", "name": "X", "from_commit": "y_tip"}\n'
-        '{"op": "commit", "branch": "X", "id": "x1", "msg": "x"}\n'
-        '{"op": "remove", "branches": ["Y"]}\n'
-        '{"op": "branch", "name": "Y", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "Y", "id": "y_tip", "msg": "x"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+        {"op": "branch", "name": "Y", "from_branch": "main"},
+        {"op": "commit", "branch": "Y", "id": "y_tip", "msg": "x"},
+        {"op": "branch", "name": "X", "from_commit": "y_tip"},
+        {"op": "commit", "branch": "X", "id": "x1", "msg": "x"},
+        {"op": "remove", "branches": ["Y"]},
+        {"op": "branch", "name": "Y", "from_branch": "main"},
+        {"op": "commit", "branch": "Y", "id": "y_tip", "msg": "x"},
     )
 
     # --- act --------------------------
@@ -312,7 +311,7 @@ def test_forward_reference_to_later_declared_branch_is_resolved() -> None:
 # ==================================================================================================
 def test_first_commit_on_root_branch_lands_at_zero() -> None:
     # --- arrange ----------------------
-    text = '{"op": "branch", "name": "main"}\n{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
+    text = build_jsonl({"op": "branch", "name": "main"}, {"op": "commit", "branch": "main", "id": "c1", "msg": "x"})
 
     # --- act --------------------------
     layout = _layout_from(text)
@@ -323,11 +322,11 @@ def test_first_commit_on_root_branch_lands_at_zero() -> None:
 
 def test_subsequent_commits_advance_by_one() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "c2", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "c3", "msg": "x"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "c2", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "c3", "msg": "x"},
     )
 
     # --- act --------------------------
@@ -339,10 +338,10 @@ def test_subsequent_commits_advance_by_one() -> None:
 
 def test_branch_end_is_latest_commit_position() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "c2", "msg": "x"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "c2", "msg": "x"},
     )
 
     # --- act --------------------------
@@ -356,10 +355,10 @@ def test_branch_end_is_latest_commit_position() -> None:
 def test_empty_branch_end_equals_start() -> None:
     """A branch declared but never committed-to has end == start."""
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "msg": "x"},
+        {"op": "branch", "name": "feat", "from_branch": "main"},
     )
 
     # --- act --------------------------
@@ -375,11 +374,11 @@ def test_empty_branch_end_equals_start() -> None:
 # ==================================================================================================
 def test_branch_from_branch_starts_one_above_parent_tip() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "m2", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "m2", "msg": "x"},
+        {"op": "branch", "name": "feat", "from_branch": "main"},
     )
 
     # --- act --------------------------
@@ -392,12 +391,12 @@ def test_branch_from_branch_starts_one_above_parent_tip() -> None:
 
 def test_branch_from_commit_starts_one_above_named_commit() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "m2", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "m3", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_commit": "m1"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "m2", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "m3", "msg": "x"},
+        {"op": "branch", "name": "feat", "from_commit": "m1"},
     )
 
     # --- act --------------------------
@@ -410,11 +409,11 @@ def test_branch_from_commit_starts_one_above_named_commit() -> None:
 
 def test_first_commit_on_fork_branch_lands_at_start() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "feat", "id": "f1", "msg": "x"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+        {"op": "branch", "name": "feat", "from_branch": "main"},
+        {"op": "commit", "branch": "feat", "id": "f1", "msg": "x"},
     )
 
     # --- act --------------------------
@@ -431,7 +430,9 @@ def test_first_commit_on_fork_branch_lands_at_start() -> None:
 # ==================================================================================================
 def test_gap_on_first_commit_shifts_landing_position() -> None:
     # --- arrange ----------------------
-    text = '{"op": "branch", "name": "main"}\n{"op": "commit", "branch": "main", "id": "c1", "msg": "x", "gap": 2}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"}, {"op": "commit", "branch": "main", "id": "c1", "msg": "x", "gap": 2}
+    )
 
     # --- act --------------------------
     layout = _layout_from(text)
@@ -442,11 +443,11 @@ def test_gap_on_first_commit_shifts_landing_position() -> None:
 
 def test_gap_on_subsequent_commit_shifts_only_that_commit_and_beyond() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "c2", "msg": "x", "gap": 1}\n'
-        '{"op": "commit", "branch": "main", "id": "c3", "msg": "x"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "c2", "msg": "x", "gap": 1},
+        {"op": "commit", "branch": "main", "id": "c3", "msg": "x"},
     )
 
     # --- act --------------------------
@@ -463,13 +464,13 @@ def test_gap_on_subsequent_commit_shifts_only_that_commit_and_beyond() -> None:
 # ==================================================================================================
 def test_merge_commit_lands_above_both_tips() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "feat", "id": "f1", "msg": "x"}\n'
-        '{"op": "commit", "branch": "feat", "id": "f2", "msg": "x"}\n'
-        '{"op": "merge", "from": "feat", "into": "main", "as": "m2"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+        {"op": "branch", "name": "feat", "from_branch": "main"},
+        {"op": "commit", "branch": "feat", "id": "f1", "msg": "x"},
+        {"op": "commit", "branch": "feat", "id": "f2", "msg": "x"},
+        {"op": "merge", "from": "feat", "into": "main", "as": "m2"},
     )
 
     # --- act --------------------------
@@ -482,12 +483,12 @@ def test_merge_commit_lands_above_both_tips() -> None:
 
 def test_merge_with_gap_shifts_above_natural_anchor() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "feat", "id": "f1", "msg": "x"}\n'
-        '{"op": "merge", "from": "feat", "into": "main", "as": "m2", "gap": 2}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+        {"op": "branch", "name": "feat", "from_branch": "main"},
+        {"op": "commit", "branch": "feat", "id": "f1", "msg": "x"},
+        {"op": "merge", "from": "feat", "into": "main", "as": "m2", "gap": 2},
     )
 
     # --- act --------------------------
@@ -504,12 +505,12 @@ def test_replaces_commit_inherits_position_via_inherited_gap() -> None:
     """When the squash inherits the earliest replaced commit's gap, it lands at
     that commit's original position."""
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "c2", "msg": "x", "gap": 2}\n'
-        '{"op": "commit", "branch": "main", "id": "c3", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "csquash", "msg": "squash", "replaces": ["c2", "c3"]}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "c2", "msg": "x", "gap": 2},
+        {"op": "commit", "branch": "main", "id": "c3", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "csquash", "msg": "squash", "replaces": ["c2", "c3"]},
     )
 
     # --- act --------------------------
@@ -526,12 +527,12 @@ def test_replaces_commit_inherits_position_via_inherited_gap() -> None:
 def test_replaces_compact_when_no_gap_in_chain() -> None:
     """The common case: gap=0 throughout. Squash compacts."""
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "c2", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "c3", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "csquash", "msg": "squash", "replaces": ["c2", "c3"]}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "c2", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "c3", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "csquash", "msg": "squash", "replaces": ["c2", "c3"]},
     )
 
     # --- act --------------------------
@@ -548,7 +549,7 @@ def test_replaces_compact_when_no_gap_in_chain() -> None:
 # ==================================================================================================
 def test_each_branch_carries_an_id() -> None:
     # --- arrange ----------------------
-    text = '{"op": "branch", "name": "main"}\n{"op": "branch", "name": "feat", "from_branch": "main"}\n'
+    text = build_jsonl({"op": "branch", "name": "main"}, {"op": "branch", "name": "feat", "from_branch": "main"})
 
     # --- act --------------------------
     layout = _layout_from(text)
@@ -562,7 +563,7 @@ def test_each_branch_carries_an_id() -> None:
 
 def test_commit_carries_its_branch_id() -> None:
     # --- arrange ----------------------
-    text = '{"op": "branch", "name": "main"}\n{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
+    text = build_jsonl({"op": "branch", "name": "main"}, {"op": "commit", "branch": "main", "id": "c1", "msg": "x"})
 
     # --- act --------------------------
     layout = _layout_from(text)
@@ -577,11 +578,11 @@ def test_commit_carries_its_branch_id() -> None:
 # ==================================================================================================
 def test_branch_off_arc_emitted_for_each_non_root_branch() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "feat", "id": "f1", "msg": "x"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+        {"op": "branch", "name": "feat", "from_branch": "main"},
+        {"op": "commit", "branch": "feat", "id": "f1", "msg": "x"},
     )
 
     # --- act --------------------------
@@ -599,12 +600,12 @@ def test_branch_off_arc_emitted_for_each_non_root_branch() -> None:
 
 def test_merge_arc_emitted_per_cross_lane_parent() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "feat", "id": "f1", "msg": "x"}\n'
-        '{"op": "merge", "from": "feat", "into": "main", "as": "m2"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+        {"op": "branch", "name": "feat", "from_branch": "main"},
+        {"op": "commit", "branch": "feat", "id": "f1", "msg": "x"},
+        {"op": "merge", "from": "feat", "into": "main", "as": "m2"},
     )
 
     # --- act --------------------------
@@ -624,11 +625,11 @@ def test_merge_arc_emitted_per_cross_lane_parent() -> None:
 def test_each_branch_emits_one_segment_spanning_its_life() -> None:
     """Without lane migration every branch is a single segment on its lane."""
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "feat", "id": "f1", "msg": "x"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+        {"op": "branch", "name": "feat", "from_branch": "main"},
+        {"op": "commit", "branch": "feat", "id": "f1", "msg": "x"},
     )
 
     # --- act --------------------------
@@ -662,11 +663,11 @@ def test_lane_at_clamps_below_and_above_segments() -> None:
 # ==================================================================================================
 def test_grid_extent_for_single_branch_three_commits() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "c2", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "c3", "msg": "x"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "c2", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "c3", "msg": "x"},
     )
 
     # --- act --------------------------
@@ -679,11 +680,11 @@ def test_grid_extent_for_single_branch_three_commits() -> None:
 
 def test_grid_widens_for_two_branches() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "feat", "id": "f1", "msg": "x"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+        {"op": "branch", "name": "feat", "from_branch": "main"},
+        {"op": "commit", "branch": "feat", "id": "f1", "msg": "x"},
     )
 
     # --- act --------------------------
@@ -696,11 +697,11 @@ def test_grid_widens_for_two_branches() -> None:
 def test_grid_includes_empty_branch_start_in_height() -> None:
     """An empty fork branch with start > max(commit_pos) extends the grid."""
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "m2", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "m2", "msg": "x"},
+        {"op": "branch", "name": "feat", "from_branch": "main"},
     )
 
     # --- act --------------------------
@@ -717,7 +718,7 @@ def test_resolved_auto_hash_in_layout_commit() -> None:
     """A commit declared with `hash: "auto"` shows up in layout with the
     resolved 7-char hex string."""
     # --- arrange ----------------------
-    text = '{"op": "branch", "name": "main"}\n{"op": "commit", "branch": "main", "id": "c1", "hash": "auto"}\n'
+    text = build_jsonl({"op": "branch", "name": "main"}, {"op": "commit", "branch": "main", "id": "c1", "hash": "auto"})
 
     # --- act --------------------------
     layout = _layout_from(text)

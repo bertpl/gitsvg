@@ -3,6 +3,7 @@
 from gitsvg.layout import Layout, compute_layout
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.state import apply_ops
+from tests._jsonl import build_jsonl
 
 
 def _layout_from(text: str) -> Layout:
@@ -19,7 +20,7 @@ def _layout_from(text: str) -> Layout:
 def test_layout_without_prs_has_empty_pull_requests_list() -> None:
     # --- act --------------------------
     layout = _layout_from(
-        '{"op": "branch", "name": "main"}\n{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
+        build_jsonl({"op": "branch", "name": "main"}, {"op": "commit", "branch": "main", "id": "c1", "msg": "x"})
     )
 
     # --- assert -----------------------
@@ -31,12 +32,12 @@ def test_layout_without_prs_has_empty_pull_requests_list() -> None:
 # ==================================================================================================
 def test_pr_endpoints_track_current_branch_tips() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "first"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "feat", "id": "f1", "msg": "wip"}\n'
-        '{"op": "pull_request", "id": "pr1", "from": "feat", "into": "main", "title": "Add the thing"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "first"},
+        {"op": "branch", "name": "feat", "from_branch": "main"},
+        {"op": "commit", "branch": "feat", "id": "f1", "msg": "wip"},
+        {"op": "pull_request", "id": "pr1", "from": "feat", "into": "main", "title": "Add the thing"},
     )
 
     # --- act --------------------------
@@ -68,9 +69,11 @@ def test_pr_endpoints_track_current_branch_tips() -> None:
 def test_pr_without_title_has_none_title() -> None:
     # --- act --------------------------
     layout = _layout_from(
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "pull_request", "from": "feat", "into": "main"}\n'
+        build_jsonl(
+            {"op": "branch", "name": "main"},
+            {"op": "branch", "name": "feat", "from_branch": "main"},
+            {"op": "pull_request", "from": "feat", "into": "main"},
+        )
     )
 
     # --- assert -----------------------
@@ -84,15 +87,17 @@ def test_pr_without_title_has_none_title() -> None:
 def test_pr_endpoints_advance_when_commits_land_after_pr_op() -> None:
     """Both endpoints recompute from the *final* state, not the state at PR-op time."""
     # --- arrange ----------------------
-    early = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "feat", "id": "f1", "msg": "wip"}\n'
-        '{"op": "pull_request", "id": "pr1", "from": "feat", "into": "main"}\n'
+    early = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "branch", "name": "feat", "from_branch": "main"},
+        {"op": "commit", "branch": "feat", "id": "f1", "msg": "wip"},
+        {"op": "pull_request", "id": "pr1", "from": "feat", "into": "main"},
     )
     later = early + (
-        '{"op": "commit", "branch": "feat", "id": "f2", "msg": "polish"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "side fix"}\n'
+        build_jsonl(
+            {"op": "commit", "branch": "feat", "id": "f2", "msg": "polish"},
+            {"op": "commit", "branch": "main", "id": "m1", "msg": "side fix"},
+        )
     )
 
     # --- act --------------------------
@@ -110,13 +115,13 @@ def test_pr_endpoints_advance_when_commits_land_after_pr_op() -> None:
 def test_pr_projected_merge_row_extends_canvas_auto_fit() -> None:
     """A PR's projected merge row sits one beyond the latest commit; canvas grows to fit it."""
     # --- arrange ----------------------
-    text_without_pr = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "first"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "feat", "id": "f1", "msg": "wip"}\n'
+    text_without_pr = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "first"},
+        {"op": "branch", "name": "feat", "from_branch": "main"},
+        {"op": "commit", "branch": "feat", "id": "f1", "msg": "wip"},
     )
-    text_with_pr = text_without_pr + ('{"op": "pull_request", "id": "pr1", "from": "feat", "into": "main"}\n')
+    text_with_pr = text_without_pr + (build_jsonl({"op": "pull_request", "id": "pr1", "from": "feat", "into": "main"}))
 
     # --- act --------------------------
     layout_without = _layout_from(text_without_pr)
@@ -133,12 +138,14 @@ def test_pinned_n_commits_wins_over_pr_endpoint() -> None:
     """When `grid.n_commits` is pinned, the PR's projected merge row does not extend it."""
     # --- arrange / act ----------------
     layout = _layout_from(
-        '{"op": "grid", "n_commits": 3}\n'
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "first"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "feat", "id": "f1", "msg": "wip"}\n'
-        '{"op": "pull_request", "id": "pr1", "from": "feat", "into": "main"}\n'
+        build_jsonl(
+            {"op": "grid", "n_commits": 3},
+            {"op": "branch", "name": "main"},
+            {"op": "commit", "branch": "main", "id": "m1", "msg": "first"},
+            {"op": "branch", "name": "feat", "from_branch": "main"},
+            {"op": "commit", "branch": "feat", "id": "f1", "msg": "wip"},
+            {"op": "pull_request", "id": "pr1", "from": "feat", "into": "main"},
+        )
     )
 
     # --- assert -----------------------
@@ -151,11 +158,13 @@ def test_pinned_n_commits_wins_over_pr_endpoint() -> None:
 def test_multiple_prs_preserve_declaration_order() -> None:
     # --- arrange / act ----------------
     layout = _layout_from(
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "branch", "name": "a", "from_branch": "main"}\n'
-        '{"op": "branch", "name": "b", "from_branch": "main"}\n'
-        '{"op": "pull_request", "id": "pr_a", "from": "a", "into": "main"}\n'
-        '{"op": "pull_request", "id": "pr_b", "from": "b", "into": "main"}\n'
+        build_jsonl(
+            {"op": "branch", "name": "main"},
+            {"op": "branch", "name": "a", "from_branch": "main"},
+            {"op": "branch", "name": "b", "from_branch": "main"},
+            {"op": "pull_request", "id": "pr_a", "from": "a", "into": "main"},
+            {"op": "pull_request", "id": "pr_b", "from": "b", "into": "main"},
+        )
     )
 
     # --- assert -----------------------
