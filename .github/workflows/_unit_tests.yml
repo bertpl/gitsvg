@@ -20,6 +20,7 @@ jobs:
           - { python: "3.13", os: ubuntu-latest, resolution: highest }
           - { python: "3.14", os: ubuntu-latest, resolution: highest }
           - { python: "3.14", os: macos-latest, resolution: highest }
+          - { python: "3.14", os: windows-latest, resolution: highest }
           # declared dependency floors (oldest supported range): oldest python
           # with oldest deps, and newest python with oldest deps (wheel stress)
           - { python: "3.11", os: ubuntu-latest, resolution: lowest-direct }

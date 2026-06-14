@@ -1,6 +1,7 @@
 """Tests for the import resolver — happy paths, cycles, depth, missing files,
 malformed import position, path sandboxing, and in-memory-input rejection."""
 
+import json
 import os
 from pathlib import Path
 
@@ -259,7 +260,9 @@ def test_absolute_path_emits_e305_even_inside_the_root(tmp_path: Path) -> None:
     base = tmp_path / "base.jsonl"
     base.write_text('{"op": "branch", "name": "main"}\n')
     main = tmp_path / "main.jsonl"
-    main.write_text(f'{{"op": "import", "path": "{base.resolve()}"}}\n')
+    # Build via json.dumps so the absolute path is JSON-escaped — on Windows
+    # it contains backslashes that would otherwise be invalid JSON escapes.
+    main.write_text(json.dumps({"op": "import", "path": str(base.resolve())}) + "\n")
 
     # --- act --------------------------
     expanded, report = _resolve(main)

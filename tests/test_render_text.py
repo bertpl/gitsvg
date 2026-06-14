@@ -1,5 +1,6 @@
 """Tests for the public `gitsvg.render_text` entry point."""
 
+import json
 from pathlib import Path
 
 import pytest
@@ -67,7 +68,9 @@ def test_render_text_never_reads_an_existing_file_via_import(tmp_path: Path, mon
     foreign.write_text('{"op": "branch", "name": "exfiltrated-branch"}\n')
     monkeypatch.chdir(tmp_path)
     relative_source = '{"op": "import", "path": "./foreign.gitsvg.jsonl"}\n'
-    absolute_source = f'{{"op": "import", "path": "{foreign}"}}\n'
+    # Build via json.dumps so the absolute path is JSON-escaped — on Windows
+    # it contains backslashes that would otherwise be invalid JSON escapes.
+    absolute_source = json.dumps({"op": "import", "path": str(foreign)}) + "\n"
 
     for source in (relative_source, absolute_source):
         # --- act ----------------------
