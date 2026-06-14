@@ -4,21 +4,22 @@ from gitsvg.layout import Layout, compute_layout
 from gitsvg.layout._layout_settings import LayoutSettings
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.state import apply_ops
+from tests._jsonl import build_jsonl
 
-PR_TEXT = (
-    '{"op": "branch", "name": "main"}\n'
-    '{"op": "commit", "branch": "main", "id": "m1", "msg": "first"}\n'
-    '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-    '{"op": "commit", "branch": "feat", "id": "f1", "msg": "wip"}\n'
-    '{"op": "pull_request", "id": "pr1", "from": "feat", "into": "main", "title": "Add the thing"}\n'
+PR_TEXT = build_jsonl(
+    {"op": "branch", "name": "main"},
+    {"op": "commit", "branch": "main", "id": "m1", "msg": "first"},
+    {"op": "branch", "name": "feat", "from_branch": "main"},
+    {"op": "commit", "branch": "feat", "id": "f1", "msg": "wip"},
+    {"op": "pull_request", "id": "pr1", "from": "feat", "into": "main", "title": "Add the thing"},
 )
 
-MERGE_TEXT = (
-    '{"op": "branch", "name": "main"}\n'
-    '{"op": "commit", "branch": "main", "id": "m1", "msg": "first"}\n'
-    '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-    '{"op": "commit", "branch": "feat", "id": "f1", "msg": "wip"}\n'
-    '{"op": "merge", "from": "feat", "into": "main", "as": "m2"}\n'
+MERGE_TEXT = build_jsonl(
+    {"op": "branch", "name": "main"},
+    {"op": "commit", "branch": "main", "id": "m1", "msg": "first"},
+    {"op": "branch", "name": "feat", "from_branch": "main"},
+    {"op": "commit", "branch": "feat", "id": "f1", "msg": "wip"},
+    {"op": "merge", "from": "feat", "into": "main", "as": "m2"},
 )
 
 

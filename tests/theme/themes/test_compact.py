@@ -6,6 +6,7 @@ from gitsvg.parse import parse_jsonl_text
 from gitsvg.render import render
 from gitsvg.state import apply_ops
 from gitsvg.theme.themes import CompactTheme
+from tests._jsonl import build_jsonl
 
 
 # ==================================================================================================
@@ -84,7 +85,7 @@ def test_compact_theme_build_with_user_overrides_layers_on_metrics() -> None:
 def test_theme_op_name_compact_resolves_through_apply() -> None:
     """A `theme:` op with `name: "compact"` ends up resolving the diagram through `CompactTheme`."""
     # --- arrange / act ----------------
-    parsed, report = parse_jsonl_text('{"op": "theme", "name": "compact"}\n', file="x.jsonl")
+    parsed, report = parse_jsonl_text(build_jsonl({"op": "theme", "name": "compact"}), file="x.jsonl")
     _, theme = apply_ops(parsed, report)
 
     # --- assert -----------------------
@@ -100,10 +101,10 @@ def test_compact_theme_renders_with_expected_font_size() -> None:
     """A small diagram rendered through `CompactTheme` produces an SVG
     that contains the compact label font-size string."""
     # --- arrange ----------------------
-    source = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "first"}\n'
-        '{"op": "theme", "name": "compact"}\n'
+    source = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "first"},
+        {"op": "theme", "name": "compact"},
     )
 
     # --- act --------------------------

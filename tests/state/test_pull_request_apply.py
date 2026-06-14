@@ -1,6 +1,7 @@
 """Tests for the `pull_request` apply handler and the validation rules
 it enforces together with `remove` and `merge`."""
 
+from tests._jsonl import build_jsonl
 from tests.state._helpers import build_state_from_jsonl
 
 
@@ -9,10 +10,10 @@ from tests.state._helpers import build_state_from_jsonl
 # ==================================================================================================
 def test_explicit_id_opens_pr() -> None:
     # --- arrange / act ----------------
-    jsonl = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "pull_request", "id": "pr1", "from": "feat", "into": "main", "title": "WIP"}\n'
+    jsonl = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "branch", "name": "feat", "from_branch": "main"},
+        {"op": "pull_request", "id": "pr1", "from": "feat", "into": "main", "title": "WIP"},
     )
     state, report = build_state_from_jsonl(jsonl)
 
@@ -27,10 +28,10 @@ def test_explicit_id_opens_pr() -> None:
 
 def test_auto_id_generated_when_omitted() -> None:
     # --- arrange / act ----------------
-    jsonl = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "pull_request", "from": "feat", "into": "main"}\n'
+    jsonl = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "branch", "name": "feat", "from_branch": "main"},
+        {"op": "pull_request", "from": "feat", "into": "main"},
     )
     state, report = build_state_from_jsonl(jsonl)
 
@@ -42,12 +43,12 @@ def test_auto_id_generated_when_omitted() -> None:
 
 def test_auto_id_increments_across_multiple_prs() -> None:
     # --- arrange / act ----------------
-    jsonl = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "branch", "name": "feat1", "from_branch": "main"}\n'
-        '{"op": "branch", "name": "feat2", "from_branch": "main"}\n'
-        '{"op": "pull_request", "from": "feat1", "into": "main"}\n'
-        '{"op": "pull_request", "from": "feat2", "into": "main"}\n'
+    jsonl = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "branch", "name": "feat1", "from_branch": "main"},
+        {"op": "branch", "name": "feat2", "from_branch": "main"},
+        {"op": "pull_request", "from": "feat1", "into": "main"},
+        {"op": "pull_request", "from": "feat2", "into": "main"},
     )
     state, report = build_state_from_jsonl(jsonl)
 
@@ -61,7 +62,7 @@ def test_auto_id_increments_across_multiple_prs() -> None:
 # ==================================================================================================
 def test_from_equals_into_rejected() -> None:
     # --- arrange / act ----------------
-    jsonl = '{"op": "branch", "name": "main"}\n{"op": "pull_request", "from": "main", "into": "main"}\n'
+    jsonl = build_jsonl({"op": "branch", "name": "main"}, {"op": "pull_request", "from": "main", "into": "main"})
     state, report = build_state_from_jsonl(jsonl)
 
     # --- assert -----------------------
@@ -76,7 +77,7 @@ def test_from_equals_into_rejected() -> None:
 # ==================================================================================================
 def test_unknown_from_branch_rejected() -> None:
     # --- arrange / act ----------------
-    jsonl = '{"op": "branch", "name": "main"}\n{"op": "pull_request", "from": "ghost", "into": "main"}\n'
+    jsonl = build_jsonl({"op": "branch", "name": "main"}, {"op": "pull_request", "from": "ghost", "into": "main"})
     _state, report = build_state_from_jsonl(jsonl)
 
     # --- assert -----------------------
@@ -88,7 +89,7 @@ def test_unknown_from_branch_rejected() -> None:
 
 def test_unknown_into_branch_rejected() -> None:
     # --- arrange / act ----------------
-    jsonl = '{"op": "branch", "name": "main"}\n{"op": "pull_request", "from": "main", "into": "ghost"}\n'
+    jsonl = build_jsonl({"op": "branch", "name": "main"}, {"op": "pull_request", "from": "main", "into": "ghost"})
     _state, report = build_state_from_jsonl(jsonl)
 
     # --- assert -----------------------
@@ -102,11 +103,11 @@ def test_unknown_into_branch_rejected() -> None:
 # ==================================================================================================
 def test_duplicate_open_pr_for_same_pair_rejected() -> None:
     # --- arrange / act ----------------
-    jsonl = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "pull_request", "id": "pr1", "from": "feat", "into": "main"}\n'
-        '{"op": "pull_request", "id": "pr2", "from": "feat", "into": "main"}\n'
+    jsonl = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "branch", "name": "feat", "from_branch": "main"},
+        {"op": "pull_request", "id": "pr1", "from": "feat", "into": "main"},
+        {"op": "pull_request", "id": "pr2", "from": "feat", "into": "main"},
     )
     state, report = build_state_from_jsonl(jsonl)
 
@@ -121,12 +122,12 @@ def test_duplicate_open_pr_for_same_pair_rejected() -> None:
 def test_duplicate_id_rejected() -> None:
     """E211 — explicit `id` collides with an existing open PR."""
     # --- arrange / act ----------------
-    jsonl = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "branch", "name": "feat1", "from_branch": "main"}\n'
-        '{"op": "branch", "name": "feat2", "from_branch": "main"}\n'
-        '{"op": "pull_request", "id": "pr1", "from": "feat1", "into": "main"}\n'
-        '{"op": "pull_request", "id": "pr1", "from": "feat2", "into": "main"}\n'
+    jsonl = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "branch", "name": "feat1", "from_branch": "main"},
+        {"op": "branch", "name": "feat2", "from_branch": "main"},
+        {"op": "pull_request", "id": "pr1", "from": "feat1", "into": "main"},
+        {"op": "pull_request", "id": "pr1", "from": "feat2", "into": "main"},
     )
     state, report = build_state_from_jsonl(jsonl)
 
@@ -142,11 +143,11 @@ def test_duplicate_id_rejected() -> None:
 # ==================================================================================================
 def test_remove_branch_blocked_by_open_pr_as_from() -> None:
     # --- arrange / act ----------------
-    jsonl = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "pull_request", "id": "pr1", "from": "feat", "into": "main"}\n'
-        '{"op": "remove", "branches": ["feat"]}\n'
+    jsonl = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "branch", "name": "feat", "from_branch": "main"},
+        {"op": "pull_request", "id": "pr1", "from": "feat", "into": "main"},
+        {"op": "remove", "branches": ["feat"]},
     )
     state, report = build_state_from_jsonl(jsonl)
 
@@ -160,11 +161,11 @@ def test_remove_branch_blocked_by_open_pr_as_from() -> None:
 
 def test_remove_branch_blocked_by_open_pr_as_into() -> None:
     # --- arrange / act ----------------
-    jsonl = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "pull_request", "id": "pr1", "from": "feat", "into": "main"}\n'
-        '{"op": "remove", "branches": ["main"]}\n'
+    jsonl = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "branch", "name": "feat", "from_branch": "main"},
+        {"op": "pull_request", "id": "pr1", "from": "feat", "into": "main"},
+        {"op": "remove", "branches": ["main"]},
     )
     state, report = build_state_from_jsonl(jsonl)
 
@@ -176,12 +177,12 @@ def test_remove_branch_blocked_by_open_pr_as_into() -> None:
 
 def test_remove_branch_succeeds_after_pr_closed() -> None:
     # --- arrange / act ----------------
-    jsonl = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "pull_request", "id": "pr1", "from": "feat", "into": "main"}\n'
-        '{"op": "remove", "pull_requests": ["pr1"]}\n'
-        '{"op": "remove", "branches": ["feat"]}\n'
+    jsonl = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "branch", "name": "feat", "from_branch": "main"},
+        {"op": "pull_request", "id": "pr1", "from": "feat", "into": "main"},
+        {"op": "remove", "pull_requests": ["pr1"]},
+        {"op": "remove", "branches": ["feat"]},
     )
     state, report = build_state_from_jsonl(jsonl)
 
@@ -196,13 +197,13 @@ def test_remove_branch_succeeds_after_pr_closed() -> None:
 # ==================================================================================================
 def test_merge_blocked_by_matching_open_pr() -> None:
     # --- arrange / act ----------------
-    jsonl = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "first"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "feat", "id": "f1", "msg": "wip"}\n'
-        '{"op": "pull_request", "id": "pr1", "from": "feat", "into": "main"}\n'
-        '{"op": "merge", "from": "feat", "into": "main"}\n'
+    jsonl = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "first"},
+        {"op": "branch", "name": "feat", "from_branch": "main"},
+        {"op": "commit", "branch": "feat", "id": "f1", "msg": "wip"},
+        {"op": "pull_request", "id": "pr1", "from": "feat", "into": "main"},
+        {"op": "merge", "from": "feat", "into": "main"},
     )
     state, report = build_state_from_jsonl(jsonl)
 
@@ -215,14 +216,14 @@ def test_merge_blocked_by_matching_open_pr() -> None:
 
 def test_merge_succeeds_after_matching_pr_closed() -> None:
     # --- arrange / act ----------------
-    jsonl = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "first"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "feat", "id": "f1", "msg": "wip"}\n'
-        '{"op": "pull_request", "id": "pr1", "from": "feat", "into": "main"}\n'
-        '{"op": "remove", "pull_requests": ["pr1"]}\n'
-        '{"op": "merge", "from": "feat", "into": "main", "as": "merged"}\n'
+    jsonl = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "first"},
+        {"op": "branch", "name": "feat", "from_branch": "main"},
+        {"op": "commit", "branch": "feat", "id": "f1", "msg": "wip"},
+        {"op": "pull_request", "id": "pr1", "from": "feat", "into": "main"},
+        {"op": "remove", "pull_requests": ["pr1"]},
+        {"op": "merge", "from": "feat", "into": "main", "as": "merged"},
     )
     state, report = build_state_from_jsonl(jsonl)
 
@@ -235,14 +236,14 @@ def test_merge_succeeds_after_matching_pr_closed() -> None:
 def test_merge_with_different_pair_not_blocked() -> None:
     """An open PR on one pair doesn't block merges on a different pair."""
     # --- arrange / act ----------------
-    jsonl = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "first"}\n'
-        '{"op": "branch", "name": "feat1", "from_branch": "main"}\n'
-        '{"op": "branch", "name": "feat2", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "feat2", "id": "f2", "msg": "wip"}\n'
-        '{"op": "pull_request", "id": "pr1", "from": "feat1", "into": "main"}\n'
-        '{"op": "merge", "from": "feat2", "into": "main", "as": "m2"}\n'
+    jsonl = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "first"},
+        {"op": "branch", "name": "feat1", "from_branch": "main"},
+        {"op": "branch", "name": "feat2", "from_branch": "main"},
+        {"op": "commit", "branch": "feat2", "id": "f2", "msg": "wip"},
+        {"op": "pull_request", "id": "pr1", "from": "feat1", "into": "main"},
+        {"op": "merge", "from": "feat2", "into": "main", "as": "m2"},
     )
     state, report = build_state_from_jsonl(jsonl)
 

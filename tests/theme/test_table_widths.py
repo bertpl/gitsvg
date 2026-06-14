@@ -6,6 +6,7 @@ from pydantic import ValidationError
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.state import apply_ops
 from gitsvg.theme import DefaultTheme
+from tests._jsonl import build_jsonl
 
 
 def test_table_widths_have_sensible_defaults() -> None:
@@ -39,7 +40,7 @@ def test_negative_table_width_rejected_at_theme_level(field: str) -> None:
 def test_negative_table_width_rejected_on_theme_op() -> None:
     """A negative width is rejected at schema level on the `theme:` op (with a line number)."""
     # --- arrange / act ----------------
-    parsed, report = parse_jsonl_text('{"op": "theme", "table_hash_width": -1}\n', file="x.jsonl")
+    parsed, report = parse_jsonl_text(build_jsonl({"op": "theme", "table_hash_width": -1}), file="x.jsonl")
     apply_ops(parsed, report)
 
     # --- assert -----------------------
@@ -49,7 +50,7 @@ def test_negative_table_width_rejected_on_theme_op() -> None:
 def test_table_widths_resolve_through_apply() -> None:
     # --- arrange / act ----------------
     parsed, report = parse_jsonl_text(
-        '{"op": "theme", "table_hash_width": 50, "table_msg_width": 300}\n',
+        build_jsonl({"op": "theme", "table_hash_width": 50, "table_msg_width": 300}),
         file="x.jsonl",
     )
     _, theme = apply_ops(parsed, report)

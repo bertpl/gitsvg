@@ -19,17 +19,18 @@ from gitsvg.render._primitives.merge_dot_styles import (
 )
 from gitsvg.state import apply_ops
 from gitsvg.theme import DEFAULT_THEME
+from tests._jsonl import build_jsonl
 
 # Renderer settings for builder-level tests (supplies stroke color / width).
 _, _RT = DEFAULT_THEME.split()
 
 # A diagram with a single merge commit (`mg`) on `main`.
-_MERGE_JSONL = (
-    '{"op": "branch", "name": "main"}\n'
-    '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-    '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-    '{"op": "commit", "branch": "feat", "id": "f1", "msg": "y"}\n'
-    '{"op": "merge", "from": "feat", "into": "main", "as": "mg", "msg": "merge"}\n'
+_MERGE_JSONL = build_jsonl(
+    {"op": "branch", "name": "main"},
+    {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+    {"op": "branch", "name": "feat", "from_branch": "main"},
+    {"op": "commit", "branch": "feat", "id": "f1", "msg": "y"},
+    {"op": "merge", "from": "feat", "into": "main", "as": "mg", "msg": "merge"},
 )
 
 
@@ -41,7 +42,7 @@ def _render(jsonl: str) -> str:
 
 
 def _with_style(style: MergeCommitStyle) -> str:
-    return _render(_MERGE_JSONL + f'{{"op": "theme", "merge_commit_style": "{style.value}"}}\n')
+    return _render(_MERGE_JSONL + build_jsonl({"op": "theme", "merge_commit_style": style.value}))
 
 
 # ==================================================================================================
@@ -101,15 +102,15 @@ def test_checkmark_enlarges_dot_but_keeps_tick_fixed() -> None:
 def test_non_merge_commits_unaffected_by_checkmark_style() -> None:
     """A diagram with no merge renders byte-identically under `checkmark`."""
     # --- arrange ----------------------
-    jsonl = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "c2", "msg": "x"}\n'
+    jsonl = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "c2", "msg": "x"},
     )
 
     # --- act --------------------------
     plain = _render(jsonl)
-    checked = _render(jsonl + '{"op": "theme", "merge_commit_style": "checkmark"}\n')
+    checked = _render(jsonl + build_jsonl({"op": "theme", "merge_commit_style": "checkmark"}))
 
     # --- assert -----------------------
     assert plain == checked
@@ -132,7 +133,9 @@ def test_highlighted_checkmark_merge_dot_composes_highlight_and_scale() -> None:
     # highlight base (7) composes with the checkmark dot scale (1.1) → 7.7.
     # --- arrange ----------------------
     jsonl = (
-        _MERGE_JSONL + '{"op": "highlight", "commit": "mg"}\n' + '{"op": "theme", "merge_commit_style": "checkmark"}\n'
+        _MERGE_JSONL
+        + build_jsonl({"op": "highlight", "commit": "mg"})
+        + build_jsonl({"op": "theme", "merge_commit_style": "checkmark"})
     )
 
     # --- act --------------------------
@@ -154,8 +157,8 @@ def test_merge_commit_radius_defaults_to_commit_radius() -> None:
 def test_unset_merge_commit_radius_matches_explicit_commit_radius_output() -> None:
     """Leaving `merge_commit_radius` unset renders byte-identically to setting it to `commit_radius`."""
     # --- arrange ----------------------
-    base = _MERGE_JSONL + '{"op": "theme", "merge_commit_style": "circle"}\n'
-    explicit = _MERGE_JSONL + '{"op": "theme", "merge_commit_style": "circle", "merge_commit_radius": 5}\n'
+    base = _MERGE_JSONL + build_jsonl({"op": "theme", "merge_commit_style": "circle"})
+    explicit = _MERGE_JSONL + build_jsonl({"op": "theme", "merge_commit_style": "circle", "merge_commit_radius": 5})
 
     # --- act / assert -----------------
     assert _render(base) == _render(explicit)
@@ -164,8 +167,8 @@ def test_unset_merge_commit_radius_matches_explicit_commit_radius_output() -> No
 def test_merge_commit_radius_sizes_only_merge_dots() -> None:
     """A large `merge_commit_radius` over a small `commit_radius` enlarges only the merge dot."""
     # --- arrange ----------------------
-    jsonl = (
-        _MERGE_JSONL + '{"op": "theme", "merge_commit_style": "circle", "commit_radius": 3, "merge_commit_radius": 8}\n'
+    jsonl = _MERGE_JSONL + build_jsonl(
+        {"op": "theme", "merge_commit_style": "circle", "commit_radius": 3, "merge_commit_radius": 8}
     )
 
     # --- act --------------------------
@@ -180,7 +183,7 @@ def test_merge_commit_radius_sizes_only_merge_dots() -> None:
 @pytest.mark.parametrize("style", [s.value for s in MergeCommitStyle])
 def test_renders_in_every_orientation_and_style(orientation: str, style: str) -> None:
     # --- arrange ----------------------
-    jsonl = _MERGE_JSONL + f'{{"op": "theme", "orientation": "{orientation}", "merge_commit_style": "{style}"}}\n'
+    jsonl = _MERGE_JSONL + build_jsonl({"op": "theme", "orientation": orientation, "merge_commit_style": style})
 
     # --- act --------------------------
     svg = _render(jsonl)

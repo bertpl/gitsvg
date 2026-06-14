@@ -3,6 +3,7 @@
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.state import apply_ops
 from gitsvg.theme import DefaultTheme
+from tests._jsonl import build_jsonl
 
 
 def test_default_pull_request_extend_target_line_is_false() -> None:
@@ -36,7 +37,9 @@ def test_pull_request_extend_target_line_routes_into_layout_settings() -> None:
 def test_pull_request_extend_target_line_resolves_through_apply() -> None:
     """A `theme:` op with `pull_request_extend_target_line` ends up on the resolved theme."""
     # --- arrange / act ----------------
-    parsed, report = parse_jsonl_text('{"op": "theme", "pull_request_extend_target_line": true}\n', file="x.jsonl")
+    parsed, report = parse_jsonl_text(
+        build_jsonl({"op": "theme", "pull_request_extend_target_line": True}), file="x.jsonl"
+    )
     _, theme = apply_ops(parsed, report)
 
     # --- assert -----------------------

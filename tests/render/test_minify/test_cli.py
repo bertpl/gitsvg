@@ -10,6 +10,7 @@ import pytest
 from click.testing import CliRunner
 
 from gitsvg.cli._render import render_command
+from tests._jsonl import build_jsonl
 
 # A minimal valid input file fixture path. The actual render produces an SVG;
 # we just need a clean validate so the command exits 0 and we can inspect side
@@ -23,8 +24,10 @@ def _ensure_fixture() -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
     if not path.exists():
         path.write_text(
-            '{"op": "branch", "name": "main", "label_side": "before"}\n'
-            '{"op": "commit", "branch": "main", "id": "c1", "msg": "one"}\n'
+            build_jsonl(
+                {"op": "branch", "name": "main", "label_side": "before"},
+                {"op": "commit", "branch": "main", "id": "c1", "msg": "one"},
+            )
         )
     return path
 

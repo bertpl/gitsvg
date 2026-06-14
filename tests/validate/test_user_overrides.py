@@ -4,6 +4,7 @@ from gitsvg.parse import parse_jsonl_text
 from gitsvg.state import apply_ops
 from gitsvg.theme import ThemeBuilder
 from gitsvg.validate import UserOverrides
+from tests._jsonl import build_jsonl
 
 
 def _collect(jsonl: str) -> UserOverrides:
@@ -16,7 +17,7 @@ def _collect(jsonl: str) -> UserOverrides:
 
 def test_collect_captures_set_theme_field_value_and_line() -> None:
     # --- arrange / act ----------------
-    overrides = _collect('{"op": "theme", "merge_lane_clearance": 2}\n')
+    overrides = _collect(build_jsonl({"op": "theme", "merge_lane_clearance": 2}))
 
     # --- assert -----------------------
     entry = overrides.theme_fields["merge_lane_clearance"]
@@ -27,7 +28,7 @@ def test_collect_captures_set_theme_field_value_and_line() -> None:
 
 def test_collect_omits_unset_theme_fields() -> None:
     # --- arrange / act ----------------
-    overrides = _collect('{"op": "branch", "name": "main"}\n')
+    overrides = _collect(build_jsonl({"op": "branch", "name": "main"}))
 
     # --- assert -----------------------
     assert overrides.theme_fields == {}
@@ -36,9 +37,11 @@ def test_collect_omits_unset_theme_fields() -> None:
 def test_collect_captures_branch_pin_name_and_line() -> None:
     # --- arrange / act ----------------
     overrides = _collect(
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main", "branch_pos": 3}\n'
+        build_jsonl(
+            {"op": "branch", "name": "main"},
+            {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+            {"op": "branch", "name": "feat", "from_branch": "main", "branch_pos": 3},
+        )
     )
 
     # --- assert -----------------------
@@ -51,7 +54,7 @@ def test_collect_captures_branch_pin_name_and_line() -> None:
 
 def test_collect_omits_unpinned_branches() -> None:
     # --- arrange / act ----------------
-    overrides = _collect('{"op": "branch", "name": "main"}\n')
+    overrides = _collect(build_jsonl({"op": "branch", "name": "main"}))
 
     # --- assert -----------------------
     assert overrides.branch_pins == ()

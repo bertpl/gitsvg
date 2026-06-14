@@ -1,5 +1,6 @@
 """Tests for the `remove`, `highlight`, and `canvas` op state-apply handlers."""
 
+from tests._jsonl import build_jsonl
 from tests.state._helpers import build_state_from_jsonl
 
 
@@ -8,11 +9,11 @@ from tests.state._helpers import build_state_from_jsonl
 # ==================================================================================================
 def test_remove_commits_drops_them_from_state() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "c2", "msg": "x"}\n'
-        '{"op": "remove", "commits": ["c1"]}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "c2", "msg": "x"},
+        {"op": "remove", "commits": ["c1"]},
     )
 
     # --- act --------------------------
@@ -26,12 +27,12 @@ def test_remove_commits_drops_them_from_state() -> None:
 
 def test_remove_branch_cascades_to_its_commits() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "feat", "id": "f1", "msg": "x"}\n'
-        '{"op": "commit", "branch": "feat", "id": "f2", "msg": "x"}\n'
-        '{"op": "remove", "branches": ["feat"]}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "branch", "name": "feat", "from_branch": "main"},
+        {"op": "commit", "branch": "feat", "id": "f1", "msg": "x"},
+        {"op": "commit", "branch": "feat", "id": "f2", "msg": "x"},
+        {"op": "remove", "branches": ["feat"]},
     )
 
     # --- act --------------------------
@@ -46,7 +47,9 @@ def test_remove_branch_cascades_to_its_commits() -> None:
 
 def test_remove_unknown_commit_emits_e201() -> None:
     # --- act --------------------------
-    _, report = build_state_from_jsonl('{"op": "branch", "name": "main"}\n{"op": "remove", "commits": ["ghost"]}\n')
+    _, report = build_state_from_jsonl(
+        build_jsonl({"op": "branch", "name": "main"}, {"op": "remove", "commits": ["ghost"]})
+    )
 
     # --- assert -----------------------
     assert [e.code for e in report.errors] == ["E201"]
@@ -54,7 +57,9 @@ def test_remove_unknown_commit_emits_e201() -> None:
 
 def test_remove_unknown_branch_emits_e200() -> None:
     # --- act --------------------------
-    _, report = build_state_from_jsonl('{"op": "branch", "name": "main"}\n{"op": "remove", "branches": ["ghost"]}\n')
+    _, report = build_state_from_jsonl(
+        build_jsonl({"op": "branch", "name": "main"}, {"op": "remove", "branches": ["ghost"]})
+    )
 
     # --- assert -----------------------
     assert [e.code for e in report.errors] == ["E200"]
@@ -63,11 +68,11 @@ def test_remove_unknown_branch_emits_e200() -> None:
 def test_remove_then_redeclare_branch_with_same_name_works() -> None:
     """The remove + redeclare pattern should leave a clean state."""
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "remove", "branches": ["feat"]}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "branch", "name": "feat", "from_branch": "main"},
+        {"op": "remove", "branches": ["feat"]},
+        {"op": "branch", "name": "feat", "from_branch": "main"},
     )
 
     # --- act --------------------------
@@ -83,10 +88,10 @@ def test_remove_then_redeclare_branch_with_same_name_works() -> None:
 # ==================================================================================================
 def test_highlight_existing_commit_sets_flag() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "highlight", "commit": "c1"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "x"},
+        {"op": "highlight", "commit": "c1"},
     )
 
     # --- act --------------------------
@@ -99,7 +104,9 @@ def test_highlight_existing_commit_sets_flag() -> None:
 
 def test_highlight_unknown_commit_emits_e201() -> None:
     # --- act --------------------------
-    _, report = build_state_from_jsonl('{"op": "branch", "name": "main"}\n{"op": "highlight", "commit": "ghost"}\n')
+    _, report = build_state_from_jsonl(
+        build_jsonl({"op": "branch", "name": "main"}, {"op": "highlight", "commit": "ghost"})
+    )
 
     # --- assert -----------------------
     assert [e.code for e in report.errors] == ["E201"]
@@ -110,7 +117,7 @@ def test_highlight_unknown_commit_emits_e201() -> None:
 # ==================================================================================================
 def test_grid_op_pins_dimensions_in_state() -> None:
     # --- arrange ----------------------
-    text = '{"op": "grid", "n_commits": 5, "n_branches": 2}\n'
+    text = build_jsonl({"op": "grid", "n_commits": 5, "n_branches": 2})
 
     # --- act --------------------------
     state, report = build_state_from_jsonl(text)
@@ -124,7 +131,7 @@ def test_grid_op_pins_dimensions_in_state() -> None:
 
 def test_grid_last_op_wins() -> None:
     # --- arrange ----------------------
-    text = '{"op": "grid", "n_commits": 5}\n{"op": "grid", "n_commits": 10}\n'
+    text = build_jsonl({"op": "grid", "n_commits": 5}, {"op": "grid", "n_commits": 10})
 
     # --- act --------------------------
     state, report = build_state_from_jsonl(text)

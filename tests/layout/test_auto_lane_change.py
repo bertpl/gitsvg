@@ -11,22 +11,23 @@ from gitsvg.layout import LayoutArcKind, compute_layout
 from gitsvg.layout._layout_settings import LayoutSettings
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.state import apply_ops
+from tests._jsonl import build_jsonl
 
 # A scenario that migrates under the flag: `A` branches off `main` and is
 # merged back; `C` branches off later and outlives `A`, so it slides down
 # into the lane `A` vacates once `A`'s merge connector lands. `main` keeps
 # a trailing commit so it stays on lane 0 throughout.
-_MIGRATION_TEXT = (
-    '{"op": "branch", "name": "main"}\n'
-    '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-    '{"op": "branch", "name": "A", "from_branch": "main"}\n'
-    '{"op": "commit", "branch": "A", "id": "a1", "msg": "x"}\n'
-    '{"op": "branch", "name": "C", "from_branch": "main"}\n'
-    '{"op": "commit", "branch": "C", "id": "c1", "msg": "x"}\n'
-    '{"op": "merge", "from": "A", "into": "main", "as": "mA", "msg": "x"}\n'
-    '{"op": "commit", "branch": "C", "id": "c2", "msg": "x"}\n'
-    '{"op": "commit", "branch": "C", "id": "c3", "msg": "x"}\n'
-    '{"op": "commit", "branch": "main", "id": "m2", "msg": "x"}\n'
+_MIGRATION_TEXT = build_jsonl(
+    {"op": "branch", "name": "main"},
+    {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+    {"op": "branch", "name": "A", "from_branch": "main"},
+    {"op": "commit", "branch": "A", "id": "a1", "msg": "x"},
+    {"op": "branch", "name": "C", "from_branch": "main"},
+    {"op": "commit", "branch": "C", "id": "c1", "msg": "x"},
+    {"op": "merge", "from": "A", "into": "main", "as": "mA", "msg": "x"},
+    {"op": "commit", "branch": "C", "id": "c2", "msg": "x"},
+    {"op": "commit", "branch": "C", "id": "c3", "msg": "x"},
+    {"op": "commit", "branch": "main", "id": "m2", "msg": "x"},
 )
 
 
@@ -127,16 +128,16 @@ def test_open_pull_request_extends_source_line_and_holds_its_lane() -> None:
     # --- arrange ----------------------
     # `A` has an open PR into `main`; `C` ends before the projection. `main`
     # is kept far-future via `gap` so it stays on lane 0.
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "A", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "A", "id": "a1", "msg": "x"}\n'
-        '{"op": "branch", "name": "C", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "C", "id": "c1", "msg": "x"}\n'
-        '{"op": "pull_request", "id": "pr1", "from": "A", "into": "main"}\n'
-        '{"op": "commit", "branch": "C", "id": "c2", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "m2", "msg": "x", "gap": 3}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+        {"op": "branch", "name": "A", "from_branch": "main"},
+        {"op": "commit", "branch": "A", "id": "a1", "msg": "x"},
+        {"op": "branch", "name": "C", "from_branch": "main"},
+        {"op": "commit", "branch": "C", "id": "c1", "msg": "x"},
+        {"op": "pull_request", "id": "pr1", "from": "A", "into": "main"},
+        {"op": "commit", "branch": "C", "id": "c2", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "m2", "msg": "x", "gap": 3},
     )
 
     # --- act --------------------------
@@ -195,21 +196,21 @@ def test_older_branch_merging_mid_life_keeps_lines_disjoint() -> None:
     distinct cells.
     """
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "Z", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "Z", "id": "z1", "msg": "x"}\n'
-        '{"op": "branch", "name": "X", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "X", "id": "x1", "msg": "x"}\n'
-        '{"op": "branch", "name": "W", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "W", "id": "w1", "msg": "x"}\n'
-        '{"op": "commit", "branch": "Z", "id": "z2", "msg": "x"}\n'
-        '{"op": "merge", "from": "Z", "into": "main", "as": "mZ", "msg": "x"}\n'
-        '{"op": "commit", "branch": "W", "id": "w2", "msg": "x"}\n'
-        '{"op": "merge", "from": "X", "into": "main", "as": "mX", "msg": "x"}\n'
-        '{"op": "commit", "branch": "W", "id": "w3", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "m2", "msg": "x", "gap": 2}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+        {"op": "branch", "name": "Z", "from_branch": "main"},
+        {"op": "commit", "branch": "Z", "id": "z1", "msg": "x"},
+        {"op": "branch", "name": "X", "from_branch": "main"},
+        {"op": "commit", "branch": "X", "id": "x1", "msg": "x"},
+        {"op": "branch", "name": "W", "from_branch": "main"},
+        {"op": "commit", "branch": "W", "id": "w1", "msg": "x"},
+        {"op": "commit", "branch": "Z", "id": "z2", "msg": "x"},
+        {"op": "merge", "from": "Z", "into": "main", "as": "mZ", "msg": "x"},
+        {"op": "commit", "branch": "W", "id": "w2", "msg": "x"},
+        {"op": "merge", "from": "X", "into": "main", "as": "mX", "msg": "x"},
+        {"op": "commit", "branch": "W", "id": "w3", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "m2", "msg": "x", "gap": 2},
     )
 
     # --- act --------------------------
@@ -225,17 +226,17 @@ def test_multi_lane_drop_in_a_single_step() -> None:
     # `A` and `B` dangle (last commit, never merged) on the same row, so both
     # free at the same boundary. `main` keeps a far-future commit (via `gap`)
     # so it stays on lane 0 while `C` collapses from lane 3 straight to lane 1.
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "A", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "A", "id": "a1", "msg": "x"}\n'
-        '{"op": "branch", "name": "B", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "B", "id": "b1", "msg": "x"}\n'
-        '{"op": "branch", "name": "C", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "C", "id": "c1", "msg": "x"}\n'
-        '{"op": "commit", "branch": "C", "id": "c2", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "m2", "msg": "x", "gap": 3}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+        {"op": "branch", "name": "A", "from_branch": "main"},
+        {"op": "commit", "branch": "A", "id": "a1", "msg": "x"},
+        {"op": "branch", "name": "B", "from_branch": "main"},
+        {"op": "commit", "branch": "B", "id": "b1", "msg": "x"},
+        {"op": "branch", "name": "C", "from_branch": "main"},
+        {"op": "commit", "branch": "C", "id": "c1", "msg": "x"},
+        {"op": "commit", "branch": "C", "id": "c2", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "m2", "msg": "x", "gap": 3},
     )
 
     # --- act --------------------------
@@ -256,9 +257,11 @@ def test_empty_branch_is_a_single_segment() -> None:
     """An empty branch (no commits) is one zero-length segment and never migrates."""
     # --- act --------------------------
     layout = _layout(
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "scratch", "from_branch": "main"}\n',
+        build_jsonl(
+            {"op": "branch", "name": "main"},
+            {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+            {"op": "branch", "name": "scratch", "from_branch": "main"},
+        ),
         auto_lane_change=True,
     )
 
@@ -272,13 +275,15 @@ def test_forward_reference_completes_under_the_sweep() -> None:
     """A child branching off a commit declared on a later-removed-then-rebuilt branch lays out cleanly."""
     # --- act --------------------------
     layout = _layout(
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feature", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "feature", "id": "f1", "msg": "x"}\n'
-        '{"op": "remove", "branches": ["feature"]}\n'
-        '{"op": "branch", "name": "feature", "from_commit": "m1"}\n'
-        '{"op": "commit", "branch": "feature", "id": "f2", "msg": "x"}\n',
+        build_jsonl(
+            {"op": "branch", "name": "main"},
+            {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+            {"op": "branch", "name": "feature", "from_branch": "main"},
+            {"op": "commit", "branch": "feature", "id": "f1", "msg": "x"},
+            {"op": "remove", "branches": ["feature"]},
+            {"op": "branch", "name": "feature", "from_commit": "m1"},
+            {"op": "commit", "branch": "feature", "id": "f2", "msg": "x"},
+        ),
         auto_lane_change=True,
     )
 
@@ -312,18 +317,18 @@ def test_composes_with_unique_commit_rows() -> None:
 # `A` merges into `main`; `C` (longer-lived) migrates into the lane `A`
 # frees. `C` reclaims that lane at `merge_row + clearance`. Gaps keep `C`
 # alive well past the widest clearance under test and keep `main` on lane 0.
-_CLEARANCE_TEXT = (
-    '{"op": "branch", "name": "main"}\n'
-    '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-    '{"op": "branch", "name": "A", "from_branch": "main"}\n'
-    '{"op": "commit", "branch": "A", "id": "a1", "msg": "x"}\n'
-    '{"op": "branch", "name": "C", "from_branch": "main"}\n'
-    '{"op": "commit", "branch": "C", "id": "c1", "msg": "x"}\n'
-    '{"op": "merge", "from": "A", "into": "main", "as": "mA", "msg": "x"}\n'
-    '{"op": "commit", "branch": "C", "id": "c2", "msg": "x", "gap": 1}\n'
-    '{"op": "commit", "branch": "C", "id": "c3", "msg": "x"}\n'
-    '{"op": "commit", "branch": "C", "id": "c4", "msg": "x"}\n'
-    '{"op": "commit", "branch": "main", "id": "m2", "msg": "x", "gap": 5}\n'
+_CLEARANCE_TEXT = build_jsonl(
+    {"op": "branch", "name": "main"},
+    {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+    {"op": "branch", "name": "A", "from_branch": "main"},
+    {"op": "commit", "branch": "A", "id": "a1", "msg": "x"},
+    {"op": "branch", "name": "C", "from_branch": "main"},
+    {"op": "commit", "branch": "C", "id": "c1", "msg": "x"},
+    {"op": "merge", "from": "A", "into": "main", "as": "mA", "msg": "x"},
+    {"op": "commit", "branch": "C", "id": "c2", "msg": "x", "gap": 1},
+    {"op": "commit", "branch": "C", "id": "c3", "msg": "x"},
+    {"op": "commit", "branch": "C", "id": "c4", "msg": "x"},
+    {"op": "commit", "branch": "main", "id": "m2", "msg": "x", "gap": 5},
 )
 
 

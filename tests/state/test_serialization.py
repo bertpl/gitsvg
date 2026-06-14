@@ -1,6 +1,7 @@
 """Tests for the resolved-state JSON serializer."""
 
 from gitsvg.state import state_to_json
+from tests._jsonl import build_jsonl
 from tests.state._helpers import build_state_from_jsonl
 
 
@@ -16,11 +17,11 @@ def test_empty_state_emits_empty_lists() -> None:
 
 def test_linear_chain_emits_chain_parents() -> None:
     # --- arrange ----------------------
-    jsonl = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "first"}\n'
-        '{"op": "commit", "branch": "main", "id": "c2", "msg": "second"}\n'
-        '{"op": "commit", "branch": "main", "id": "c3", "msg": "third"}\n'
+    jsonl = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "first"},
+        {"op": "commit", "branch": "main", "id": "c2", "msg": "second"},
+        {"op": "commit", "branch": "main", "id": "c3", "msg": "third"},
     )
     state, report = build_state_from_jsonl(jsonl)
 
@@ -36,11 +37,11 @@ def test_linear_chain_emits_chain_parents() -> None:
 
 def test_branch_off_first_commit_takes_rooted_on_commit_as_parent() -> None:
     # --- arrange ----------------------
-    jsonl = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feature", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "feature", "id": "f1", "msg": "y"}\n'
+    jsonl = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+        {"op": "branch", "name": "feature", "from_branch": "main"},
+        {"op": "commit", "branch": "feature", "id": "f1", "msg": "y"},
     )
     state, _report = build_state_from_jsonl(jsonl)
 
@@ -57,12 +58,12 @@ def test_branch_off_first_commit_takes_rooted_on_commit_as_parent() -> None:
 
 def test_merge_emits_two_parents_into_then_from() -> None:
     # --- arrange ----------------------
-    jsonl = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feature", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "feature", "id": "f1", "msg": "y"}\n'
-        '{"op": "merge", "into": "main", "from": "feature", "as": "mg", "msg": "merge"}\n'
+    jsonl = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+        {"op": "branch", "name": "feature", "from_branch": "main"},
+        {"op": "commit", "branch": "feature", "id": "f1", "msg": "y"},
+        {"op": "merge", "into": "main", "from": "feature", "as": "mg", "msg": "merge"},
     )
     state, _report = build_state_from_jsonl(jsonl)
 
@@ -77,8 +78,8 @@ def test_merge_emits_two_parents_into_then_from() -> None:
 
 def test_auto_hash_resolves_to_seven_char_hex() -> None:
     # --- arrange ----------------------
-    jsonl = (
-        '{"op": "branch", "name": "main"}\n{"op": "commit", "branch": "main", "id": "c1", "msg": "x", "hash": "auto"}\n'
+    jsonl = build_jsonl(
+        {"op": "branch", "name": "main"}, {"op": "commit", "branch": "main", "id": "c1", "msg": "x", "hash": "auto"}
     )
     state, _report = build_state_from_jsonl(jsonl)
 
@@ -95,7 +96,7 @@ def test_auto_hash_resolves_to_seven_char_hex() -> None:
 
 def test_commit_without_hash_emits_null() -> None:
     # --- arrange ----------------------
-    jsonl = '{"op": "branch", "name": "main"}\n{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
+    jsonl = build_jsonl({"op": "branch", "name": "main"}, {"op": "commit", "branch": "main", "id": "c1", "msg": "x"})
     state, _report = build_state_from_jsonl(jsonl)
 
     # --- act --------------------------
@@ -108,12 +109,12 @@ def test_commit_without_hash_emits_null() -> None:
 def test_rebuild_pattern_emits_only_surviving_commits() -> None:
     """Remove-then-readd: the survivor with the same id appears once."""
     # --- arrange ----------------------
-    jsonl = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "first"}\n'
-        '{"op": "commit", "branch": "main", "id": "c2", "msg": "second"}\n'
-        '{"op": "remove", "commits": ["c2"]}\n'
-        '{"op": "commit", "branch": "main", "id": "c2", "msg": "redo"}\n'
+    jsonl = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "first"},
+        {"op": "commit", "branch": "main", "id": "c2", "msg": "second"},
+        {"op": "remove", "commits": ["c2"]},
+        {"op": "commit", "branch": "main", "id": "c2", "msg": "redo"},
     )
     state, report = build_state_from_jsonl(jsonl)
 
@@ -130,12 +131,12 @@ def test_rebuild_pattern_emits_only_surviving_commits() -> None:
 
 def test_pull_request_emitted_with_from_into_and_title() -> None:
     # --- arrange ----------------------
-    jsonl = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feature", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "feature", "id": "f1", "msg": "y"}\n'
-        '{"op": "pull_request", "id": "pr1", "from": "feature", "into": "main", "title": "ship it"}\n'
+    jsonl = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+        {"op": "branch", "name": "feature", "from_branch": "main"},
+        {"op": "commit", "branch": "feature", "id": "f1", "msg": "y"},
+        {"op": "pull_request", "id": "pr1", "from": "feature", "into": "main", "title": "ship it"},
     )
     state, report = build_state_from_jsonl(jsonl)
 
@@ -151,12 +152,12 @@ def test_pull_request_emitted_with_from_into_and_title() -> None:
 
 def test_pull_request_without_title_emits_null() -> None:
     # --- arrange ----------------------
-    jsonl = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feature", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "feature", "id": "f1", "msg": "y"}\n'
-        '{"op": "pull_request", "id": "pr1", "from": "feature", "into": "main"}\n'
+    jsonl = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+        {"op": "branch", "name": "feature", "from_branch": "main"},
+        {"op": "commit", "branch": "feature", "id": "f1", "msg": "y"},
+        {"op": "pull_request", "id": "pr1", "from": "feature", "into": "main"},
     )
     state, _report = build_state_from_jsonl(jsonl)
 
@@ -169,11 +170,11 @@ def test_pull_request_without_title_emits_null() -> None:
 
 def test_branches_emitted_in_declaration_order() -> None:
     # --- arrange ----------------------
-    jsonl = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "z_branch", "from_branch": "main"}\n'
-        '{"op": "branch", "name": "a_branch", "from_branch": "main"}\n'
+    jsonl = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+        {"op": "branch", "name": "z_branch", "from_branch": "main"},
+        {"op": "branch", "name": "a_branch", "from_branch": "main"},
     )
     state, _report = build_state_from_jsonl(jsonl)
 
@@ -186,10 +187,10 @@ def test_branches_emitted_in_declaration_order() -> None:
 
 def test_empty_branch_emits_null_head() -> None:
     # --- arrange ----------------------
-    jsonl = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feature", "from_branch": "main"}\n'
+    jsonl = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+        {"op": "branch", "name": "feature", "from_branch": "main"},
     )
     state, _report = build_state_from_jsonl(jsonl)
 
@@ -203,11 +204,11 @@ def test_empty_branch_emits_null_head() -> None:
 
 def test_highlight_propagates_to_json() -> None:
     # --- arrange ----------------------
-    jsonl = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "c2", "msg": "y"}\n'
-        '{"op": "highlight", "commit": "c2"}\n'
+    jsonl = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "c2", "msg": "y"},
+        {"op": "highlight", "commit": "c2"},
     )
     state, _report = build_state_from_jsonl(jsonl)
 

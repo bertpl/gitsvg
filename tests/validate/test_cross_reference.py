@@ -2,6 +2,7 @@
 
 from gitsvg.errors import ValidationReport
 from gitsvg.validate import check_cross_reference
+from tests._jsonl import build_jsonl
 from tests.state._helpers import build_state_from_jsonl
 
 
@@ -10,11 +11,11 @@ from tests.state._helpers import build_state_from_jsonl
 # ==================================================================================================
 def test_clean_state_produces_no_errors() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_commit": "c1"}\n'
-        '{"op": "commit", "branch": "feat", "id": "f1", "msg": "x"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "x"},
+        {"op": "branch", "name": "feat", "from_commit": "c1"},
+        {"op": "commit", "branch": "feat", "id": "f1", "msg": "x"},
     )
 
     # --- act --------------------------
@@ -32,11 +33,11 @@ def test_clean_state_produces_no_errors() -> None:
 # ==================================================================================================
 def test_dangling_branch_root_via_from_commit_emits_e400() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_commit": "c1"}\n'
-        '{"op": "remove", "commits": ["c1"]}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "x"},
+        {"op": "branch", "name": "feat", "from_commit": "c1"},
+        {"op": "remove", "commits": ["c1"]},
     )
 
     # --- act --------------------------
@@ -50,11 +51,11 @@ def test_dangling_branch_root_via_from_commit_emits_e400() -> None:
 def test_dangling_branch_root_via_from_branch_emits_e400() -> None:
     """from_branch resolves to the source branch's tip; if that tip is later removed the root dangles."""
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "remove", "commits": ["c1"]}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "x"},
+        {"op": "branch", "name": "feat", "from_branch": "main"},
+        {"op": "remove", "commits": ["c1"]},
     )
 
     # --- act --------------------------
@@ -68,7 +69,7 @@ def test_dangling_branch_root_via_from_branch_emits_e400() -> None:
 def test_branch_with_no_resolved_root_does_not_dangle() -> None:
     """A branch whose source was empty has rooted_on_commit=None; that's not dangling."""
     # --- arrange ----------------------
-    text = '{"op": "branch", "name": "main"}\n{"op": "branch", "name": "feat", "from_branch": "main"}\n'
+    text = build_jsonl({"op": "branch", "name": "main"}, {"op": "branch", "name": "feat", "from_branch": "main"})
 
     # --- act --------------------------
     state, report = build_state_from_jsonl(text)
@@ -84,11 +85,11 @@ def test_branch_with_no_resolved_root_does_not_dangle() -> None:
 def test_dangling_chain_parent_emits_e401() -> None:
     """Removing a mid-chain commit dangles its successor's stored chain parent."""
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "c2", "msg": "x"}\n'
-        '{"op": "remove", "commits": ["c1"]}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "c2", "msg": "x"},
+        {"op": "remove", "commits": ["c1"]},
     )
 
     # --- act --------------------------
@@ -105,13 +106,13 @@ def test_dangling_chain_parent_emits_e401() -> None:
 def test_dangling_merge_parent_emits_e401() -> None:
     """Merge auto-generates parents from from/into tips; removing a tip dangles the merge."""
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "feat", "id": "f1", "msg": "x"}\n'
-        '{"op": "merge", "from": "feat", "into": "main", "as": "merge1"}\n'
-        '{"op": "remove", "commits": ["f1"]}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+        {"op": "branch", "name": "feat", "from_branch": "main"},
+        {"op": "commit", "branch": "feat", "id": "f1", "msg": "x"},
+        {"op": "merge", "from": "feat", "into": "main", "as": "merge1"},
+        {"op": "remove", "commits": ["f1"]},
     )
 
     # --- act --------------------------
@@ -129,12 +130,12 @@ def test_dangling_merge_parent_emits_e401() -> None:
 # ==================================================================================================
 def test_rebuild_pattern_with_same_id_restores_state_and_passes() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_commit": "c1"}\n'
-        '{"op": "remove", "commits": ["c1"]}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "rebuilt"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "x"},
+        {"op": "branch", "name": "feat", "from_commit": "c1"},
+        {"op": "remove", "commits": ["c1"]},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "rebuilt"},
     )
 
     # --- act --------------------------
@@ -147,14 +148,14 @@ def test_rebuild_pattern_with_same_id_restores_state_and_passes() -> None:
 
 def test_rebuild_pattern_for_branch_remove_then_redeclare() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_commit": "c1"}\n'
-        '{"op": "commit", "branch": "feat", "id": "f1", "msg": "x"}\n'
-        '{"op": "remove", "branches": ["feat"]}\n'
-        '{"op": "branch", "name": "feat", "from_commit": "c1"}\n'
-        '{"op": "commit", "branch": "feat", "id": "f1", "msg": "x"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "x"},
+        {"op": "branch", "name": "feat", "from_commit": "c1"},
+        {"op": "commit", "branch": "feat", "id": "f1", "msg": "x"},
+        {"op": "remove", "branches": ["feat"]},
+        {"op": "branch", "name": "feat", "from_commit": "c1"},
+        {"op": "commit", "branch": "feat", "id": "f1", "msg": "x"},
     )
 
     # --- act --------------------------
@@ -173,15 +174,15 @@ def test_multiple_missing_parents_emit_one_error_per_dangling_parent() -> None:
     # A merge commit carries two canonical parents (the into-side chain parent
     # `c1` and the merged-in tip `f1`). `feat` is rooted on `c0`, so removing
     # both `c1` and `f1` dangles exactly the two parents of `mg`.
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c0", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_commit": "c0"}\n'
-        '{"op": "commit", "branch": "feat", "id": "f1", "msg": "x"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "merge", "from": "feat", "into": "main", "as": "mg"}\n'
-        '{"op": "remove", "commits": ["c1"]}\n'
-        '{"op": "remove", "commits": ["f1"]}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c0", "msg": "x"},
+        {"op": "branch", "name": "feat", "from_commit": "c0"},
+        {"op": "commit", "branch": "feat", "id": "f1", "msg": "x"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "x"},
+        {"op": "merge", "from": "feat", "into": "main", "as": "mg"},
+        {"op": "remove", "commits": ["c1"]},
+        {"op": "remove", "commits": ["f1"]},
     )
 
     # --- act --------------------------

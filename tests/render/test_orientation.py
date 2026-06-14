@@ -8,18 +8,19 @@ from gitsvg.parse import parse_jsonl_text
 from gitsvg.render import render
 from gitsvg.render._canvas import compute_canvas
 from gitsvg.state import apply_ops
+from tests._jsonl import build_jsonl
 
 
 def _render_with_orientation(orientation: str):
     """Apply a small fixture under the given orientation; return (svg, canvas)."""
-    text = (
-        f'{{"op": "theme", "orientation": "{orientation}"}}\n'
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "init"}\n'
-        '{"op": "commit", "branch": "main", "id": "c2", "msg": "next"}\n'
-        '{"op": "branch", "name": "feature", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "feature", "id": "c3", "msg": "work"}\n'
-        '{"op": "merge", "into": "main", "from": "feature"}\n'
+    text = build_jsonl(
+        {"op": "theme", "orientation": orientation},
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "init"},
+        {"op": "commit", "branch": "main", "id": "c2", "msg": "next"},
+        {"op": "branch", "name": "feature", "from_branch": "main"},
+        {"op": "commit", "branch": "feature", "id": "c3", "msg": "work"},
+        {"op": "merge", "into": "main", "from": "feature"},
     )
     parsed, report = parse_jsonl_text(text, file="x.jsonl")
     state, theme = apply_ops(parsed, report)

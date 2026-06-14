@@ -6,6 +6,7 @@ checks read the *final* resolved state, a later named-theme switch that wipes pr
 overrides clears the conflict — exercised by the escape-hatch cases.
 """
 
+from tests._jsonl import build_jsonl
 from tests.validate._helpers import resolved_config_report
 
 
@@ -20,10 +21,12 @@ def _codes(text: str) -> list[str]:
 def test_pin_with_auto_lane_change_emits_e221() -> None:
     # --- arrange / act ----------------
     codes = _codes(
-        '{"op": "theme", "auto_lane_change": true}\n'
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main", "branch_pos": 3}\n'
+        build_jsonl(
+            {"op": "theme", "auto_lane_change": True},
+            {"op": "branch", "name": "main"},
+            {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+            {"op": "branch", "name": "feat", "from_branch": "main", "branch_pos": 3},
+        )
     )
 
     # --- assert -----------------------
@@ -33,9 +36,11 @@ def test_pin_with_auto_lane_change_emits_e221() -> None:
 def test_pin_without_auto_lane_change_is_clean() -> None:
     # --- arrange / act ----------------
     codes = _codes(
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main", "branch_pos": 3}\n'
+        build_jsonl(
+            {"op": "branch", "name": "main"},
+            {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+            {"op": "branch", "name": "feat", "from_branch": "main", "branch_pos": 3},
+        )
     )
 
     # --- assert -----------------------
@@ -45,10 +50,12 @@ def test_pin_without_auto_lane_change_is_clean() -> None:
 def test_auto_lane_change_without_pin_is_clean() -> None:
     # --- arrange / act ----------------
     codes = _codes(
-        '{"op": "theme", "auto_lane_change": true}\n'
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
+        build_jsonl(
+            {"op": "theme", "auto_lane_change": True},
+            {"op": "branch", "name": "main"},
+            {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+            {"op": "branch", "name": "feat", "from_branch": "main"},
+        )
     )
 
     # --- assert -----------------------
@@ -58,11 +65,11 @@ def test_auto_lane_change_without_pin_is_clean() -> None:
 def test_e221_attributed_to_the_pinned_branch_line() -> None:
     """The error points at the `branch:` op that set the pin, not the `theme:` op."""
     # --- arrange ----------------------
-    text = (
-        '{"op": "theme", "auto_lane_change": true}\n'
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main", "branch_pos": 3}\n'
+    text = build_jsonl(
+        {"op": "theme", "auto_lane_change": True},
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+        {"op": "branch", "name": "feat", "from_branch": "main", "branch_pos": 3},
     )
 
     # --- act --------------------------
@@ -79,7 +86,7 @@ def test_e221_attributed_to_the_pinned_branch_line() -> None:
 # ==================================================================================================
 def test_clearance_without_auto_lane_change_emits_e222() -> None:
     # --- arrange / act ----------------
-    codes = _codes('{"op": "theme", "merge_lane_clearance": 2}\n')
+    codes = _codes(build_jsonl({"op": "theme", "merge_lane_clearance": 2}))
 
     # --- assert -----------------------
     assert "E222" in codes
@@ -88,7 +95,7 @@ def test_clearance_without_auto_lane_change_emits_e222() -> None:
 def test_default_value_clearance_still_emits_e222() -> None:
     """Setting the field to its default `1` is still the mistake — explicit but inert."""
     # --- arrange / act ----------------
-    codes = _codes('{"op": "theme", "merge_lane_clearance": 1}\n')
+    codes = _codes(build_jsonl({"op": "theme", "merge_lane_clearance": 1}))
 
     # --- assert -----------------------
     assert "E222" in codes
@@ -96,7 +103,7 @@ def test_default_value_clearance_still_emits_e222() -> None:
 
 def test_clearance_with_auto_lane_change_is_clean() -> None:
     # --- arrange / act ----------------
-    codes = _codes('{"op": "theme", "auto_lane_change": true, "merge_lane_clearance": 2}\n')
+    codes = _codes(build_jsonl({"op": "theme", "auto_lane_change": True, "merge_lane_clearance": 2}))
 
     # --- assert -----------------------
     assert "E222" not in codes
@@ -104,7 +111,7 @@ def test_clearance_with_auto_lane_change_is_clean() -> None:
 
 def test_no_clearance_set_is_clean() -> None:
     # --- arrange / act ----------------
-    codes = _codes('{"op": "theme", "auto_lane_change": false}\n')
+    codes = _codes(build_jsonl({"op": "theme", "auto_lane_change": False}))
 
     # --- assert -----------------------
     assert "E222" not in codes
@@ -113,10 +120,10 @@ def test_no_clearance_set_is_clean() -> None:
 def test_e222_attributed_to_the_setting_op_line() -> None:
     """The error points at the `theme:` op that set the field, not the diagram start."""
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "theme", "merge_lane_clearance": 2}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+        {"op": "theme", "merge_lane_clearance": 2},
     )
 
     # --- act --------------------------
@@ -132,8 +139,9 @@ def test_named_theme_switch_wipes_clearance_and_clears_e222() -> None:
     """A later named-theme switch (default wipe) drops the override → no E222."""
     # --- arrange / act ----------------
     codes = _codes(
-        '{"op": "theme", "merge_lane_clearance": 2}\n'
-        '{"op": "theme", "name": "dark"}\n'  # default keep_prior_overrides=false → wipe
+        build_jsonl(
+            {"op": "theme", "merge_lane_clearance": 2}, {"op": "theme", "name": "dark"}
+        )  # default keep_prior_overrides=false → wipe
     )
 
     # --- assert -----------------------
@@ -143,7 +151,9 @@ def test_named_theme_switch_wipes_clearance_and_clears_e222() -> None:
 def test_keep_prior_overrides_preserves_clearance_and_keeps_e222() -> None:
     """`keep_prior_overrides: true` preserves the override → E222 still fires."""
     # --- arrange ----------------------
-    text = '{"op": "theme", "merge_lane_clearance": 2}\n{"op": "theme", "name": "dark", "keep_prior_overrides": true}\n'
+    text = build_jsonl(
+        {"op": "theme", "merge_lane_clearance": 2}, {"op": "theme", "name": "dark", "keep_prior_overrides": True}
+    )
 
     # --- act --------------------------
     report = resolved_config_report(text)
@@ -158,7 +168,7 @@ def test_keep_prior_overrides_preserves_clearance_and_keeps_e222() -> None:
 # ==================================================================================================
 def test_table_with_lr_emits_e223() -> None:
     # --- arrange / act ----------------
-    codes = _codes('{"op": "theme", "orientation": "lr", "commit_label_layout": "table"}\n')
+    codes = _codes(build_jsonl({"op": "theme", "orientation": "lr", "commit_label_layout": "table"}))
 
     # --- assert -----------------------
     assert "E223" in codes
@@ -166,7 +176,7 @@ def test_table_with_lr_emits_e223() -> None:
 
 def test_table_with_rl_emits_e223() -> None:
     # --- arrange / act ----------------
-    codes = _codes('{"op": "theme", "orientation": "rl", "commit_label_layout": "table"}\n')
+    codes = _codes(build_jsonl({"op": "theme", "orientation": "rl", "commit_label_layout": "table"}))
 
     # --- assert -----------------------
     assert "E223" in codes
@@ -174,7 +184,7 @@ def test_table_with_rl_emits_e223() -> None:
 
 def test_table_with_vertical_orientation_is_clean() -> None:
     # --- arrange / act ----------------
-    codes = _codes('{"op": "theme", "orientation": "tb", "commit_label_layout": "table"}\n')
+    codes = _codes(build_jsonl({"op": "theme", "orientation": "tb", "commit_label_layout": "table"}))
 
     # --- assert -----------------------
     assert "E223" not in codes
@@ -183,7 +193,7 @@ def test_table_with_vertical_orientation_is_clean() -> None:
 def test_table_with_default_orientation_is_clean() -> None:
     """Default orientation is `bt` (vertical) → no E223."""
     # --- arrange / act ----------------
-    codes = _codes('{"op": "theme", "commit_label_layout": "table"}\n')
+    codes = _codes(build_jsonl({"op": "theme", "commit_label_layout": "table"}))
 
     # --- assert -----------------------
     assert "E223" not in codes
@@ -191,10 +201,10 @@ def test_table_with_default_orientation_is_clean() -> None:
 
 def test_e223_attributed_to_the_layout_op_line() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "theme", "orientation": "lr"}\n'
-        '{"op": "theme", "commit_label_layout": "table"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "theme", "orientation": "lr"},
+        {"op": "theme", "commit_label_layout": "table"},
     )
 
     # --- act --------------------------
@@ -211,7 +221,7 @@ def test_e223_attributed_to_the_layout_op_line() -> None:
 # ==================================================================================================
 def test_table_with_explicit_shared_emits_e224() -> None:
     # --- arrange / act ----------------
-    codes = _codes('{"op": "theme", "commit_label_layout": "table", "commit_row_mode": "shared"}\n')
+    codes = _codes(build_jsonl({"op": "theme", "commit_label_layout": "table", "commit_row_mode": "shared"}))
 
     # --- assert -----------------------
     assert "E224" in codes
@@ -219,7 +229,7 @@ def test_table_with_explicit_shared_emits_e224() -> None:
 
 def test_table_with_explicit_unique_is_clean() -> None:
     # --- arrange / act ----------------
-    codes = _codes('{"op": "theme", "commit_label_layout": "table", "commit_row_mode": "unique"}\n')
+    codes = _codes(build_jsonl({"op": "theme", "commit_label_layout": "table", "commit_row_mode": "unique"}))
 
     # --- assert -----------------------
     assert "E224" not in codes
@@ -228,7 +238,7 @@ def test_table_with_explicit_unique_is_clean() -> None:
 def test_table_without_row_mode_is_clean() -> None:
     """Leaving `commit_row_mode` unset is fine — table mode forces unique on its own."""
     # --- arrange / act ----------------
-    codes = _codes('{"op": "theme", "commit_label_layout": "table"}\n')
+    codes = _codes(build_jsonl({"op": "theme", "commit_label_layout": "table"}))
 
     # --- assert -----------------------
     assert "E224" not in codes
@@ -237,7 +247,7 @@ def test_table_without_row_mode_is_clean() -> None:
 def test_shared_without_table_mode_is_clean() -> None:
     """`commit_row_mode: shared` is only a conflict under table mode."""
     # --- arrange / act ----------------
-    codes = _codes('{"op": "theme", "commit_row_mode": "shared"}\n')
+    codes = _codes(build_jsonl({"op": "theme", "commit_row_mode": "shared"}))
 
     # --- assert -----------------------
     assert "E224" not in codes
@@ -245,7 +255,7 @@ def test_shared_without_table_mode_is_clean() -> None:
 
 def test_e224_attributed_to_the_row_mode_op_line() -> None:
     # --- arrange ----------------------
-    text = '{"op": "theme", "commit_label_layout": "table"}\n{"op": "theme", "commit_row_mode": "shared"}\n'
+    text = build_jsonl({"op": "theme", "commit_label_layout": "table"}, {"op": "theme", "commit_row_mode": "shared"})
 
     # --- act --------------------------
     report = resolved_config_report(text)
@@ -263,8 +273,9 @@ def test_named_theme_switch_dropping_table_clears_e223() -> None:
     """A later named-theme switch (default wipe) drops table mode → the conflict clears."""
     # --- arrange / act ----------------
     codes = _codes(
-        '{"op": "theme", "orientation": "lr", "commit_label_layout": "table"}\n'
-        '{"op": "theme", "name": "dark"}\n'  # default keep_prior_overrides=false → wipes table mode
+        build_jsonl(
+            {"op": "theme", "orientation": "lr", "commit_label_layout": "table"}, {"op": "theme", "name": "dark"}
+        )  # default keep_prior_overrides=false → wipes table mode
     )
 
     # --- assert -----------------------

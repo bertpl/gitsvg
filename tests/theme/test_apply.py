@@ -6,6 +6,7 @@ from gitsvg._shared.value_types import LabelSide
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.state import apply_ops
 from gitsvg.theme import DEFAULT_THEME
+from tests._jsonl import build_jsonl
 
 
 def _apply(text: str):
@@ -19,7 +20,7 @@ def _apply(text: str):
 # ==================================================================================================
 def test_explicit_field_override_assigns_only_that_field() -> None:
     # --- arrange / act ----------------
-    _, theme, report = _apply('{"op": "theme", "background_color": "#abcdef"}\n')
+    _, theme, report = _apply(build_jsonl({"op": "theme", "background_color": "#abcdef"}))
 
     # --- assert -----------------------
     assert report.is_clean()
@@ -32,7 +33,7 @@ def test_explicit_field_override_assigns_only_that_field() -> None:
 def test_multiple_explicit_fields_in_one_op_all_apply() -> None:
     # --- arrange / act ----------------
     _, theme, report = _apply(
-        '{"op": "theme", "branch_spacing": 80, "background_color": "#101010", "label_font_size": 13}\n'
+        build_jsonl({"op": "theme", "branch_spacing": 80, "background_color": "#101010", "label_font_size": 13})
     )
 
     # --- assert -----------------------
@@ -47,7 +48,7 @@ def test_multiple_explicit_fields_in_one_op_all_apply() -> None:
 def test_sequential_explicit_overrides_accumulate() -> None:
     # --- arrange / act ----------------
     _, theme, report = _apply(
-        '{"op": "theme", "background_color": "#111111"}\n{"op": "theme", "label_font_size": 17}\n'
+        build_jsonl({"op": "theme", "background_color": "#111111"}, {"op": "theme", "label_font_size": 17})
     )
 
     # --- assert -----------------------
@@ -130,7 +131,7 @@ def test_anchor_field_rejects_out_of_unit_range(field: str, value: list[float]) 
 def test_second_explicit_op_overwrites_same_field() -> None:
     # --- arrange / act ----------------
     _, theme, report = _apply(
-        '{"op": "theme", "background_color": "#aaaaaa"}\n{"op": "theme", "background_color": "#bbbbbb"}\n'
+        build_jsonl({"op": "theme", "background_color": "#aaaaaa"}, {"op": "theme", "background_color": "#bbbbbb"})
     )
 
     # --- assert -----------------------
@@ -143,7 +144,7 @@ def test_second_explicit_op_overwrites_same_field() -> None:
 # ==================================================================================================
 def test_named_default_theme_keeps_defaults() -> None:
     # --- arrange / act ----------------
-    _, theme, report = _apply('{"op": "theme", "name": "default"}\n')
+    _, theme, report = _apply(build_jsonl({"op": "theme", "name": "default"}))
 
     # --- assert -----------------------
     assert report.is_clean()
@@ -156,7 +157,9 @@ def test_named_theme_replaces_prior_explicit_overrides() -> None:
     wipes prior explicit overrides — they do not survive into the new
     theme's resolved fields."""
     # --- arrange / act ----------------
-    _, theme, report = _apply('{"op": "theme", "background_color": "#deadbe"}\n{"op": "theme", "name": "default"}\n')
+    _, theme, report = _apply(
+        build_jsonl({"op": "theme", "background_color": "#deadbe"}, {"op": "theme", "name": "default"})
+    )
 
     # --- assert -----------------------
     assert report.is_clean()
@@ -171,7 +174,7 @@ def test_named_theme_wipes_prior_branch_color_overrides_by_default() -> None:
     `theme:` field overrides."""
     # --- arrange / act ----------------
     state, theme, report = _apply(
-        '{"op": "branch", "name": "main", "color": "#aabbcc"}\n{"op": "theme", "name": "default"}\n'
+        build_jsonl({"op": "branch", "name": "main", "color": "#aabbcc"}, {"op": "theme", "name": "default"})
     )
 
     # --- assert -----------------------
@@ -188,7 +191,7 @@ def test_named_theme_wipes_prior_branch_label_side_overrides_by_default() -> Non
     reset semantics as the color-override category."""
     # --- arrange / act ----------------
     state, theme, report = _apply(
-        '{"op": "branch", "name": "main", "label_side": "before"}\n{"op": "theme", "name": "default"}\n'
+        build_jsonl({"op": "branch", "name": "main", "label_side": "before"}, {"op": "theme", "name": "default"})
     )
 
     # --- assert -----------------------
@@ -206,7 +209,9 @@ def test_mixed_op_applies_name_first_then_explicit() -> None:
     on top."""
     # --- arrange / act ----------------
     _, theme, report = _apply(
-        '{"op": "theme", "background_color": "#111111"}\n{"op": "theme", "name": "default", "label_font_size": 17}\n'
+        build_jsonl(
+            {"op": "theme", "background_color": "#111111"}, {"op": "theme", "name": "default", "label_font_size": 17}
+        )
     )
 
     # --- assert -----------------------
@@ -221,7 +226,7 @@ def test_mixed_then_partial_sequence() -> None:
     """Mixed op replaces + overrides; a later partial op patches one more field."""
     # --- arrange / act ----------------
     _, theme, report = _apply(
-        '{"op": "theme", "name": "default", "label_font_size": 17}\n{"op": "theme", "branch_spacing": 80}\n'
+        build_jsonl({"op": "theme", "name": "default", "label_font_size": 17}, {"op": "theme", "branch_spacing": 80})
     )
 
     # --- assert -----------------------
@@ -239,8 +244,10 @@ def test_flag_true_preserves_prior_explicit_overrides() -> None:
     explicit `theme:` field overrides accumulated earlier."""
     # --- arrange / act ----------------
     _, theme, report = _apply(
-        '{"op": "theme", "background_color": "#deadbe"}\n'
-        '{"op": "theme", "name": "default", "keep_prior_overrides": true}\n'
+        build_jsonl(
+            {"op": "theme", "background_color": "#deadbe"},
+            {"op": "theme", "name": "default", "keep_prior_overrides": True},
+        )
     )
 
     # --- assert -----------------------
@@ -254,8 +261,10 @@ def test_flag_true_preserves_prior_branch_color_overrides() -> None:
     per-branch color overrides — both categories survive the switch."""
     # --- arrange / act ----------------
     state, theme, report = _apply(
-        '{"op": "branch", "name": "main", "color": "#aabbcc"}\n'
-        '{"op": "theme", "name": "default", "keep_prior_overrides": true}\n'
+        build_jsonl(
+            {"op": "branch", "name": "main", "color": "#aabbcc"},
+            {"op": "theme", "name": "default", "keep_prior_overrides": True},
+        )
     )
 
     # --- assert -----------------------
@@ -270,8 +279,10 @@ def test_flag_true_preserves_prior_branch_label_side_overrides() -> None:
     color-override category."""
     # --- arrange / act ----------------
     state, theme, report = _apply(
-        '{"op": "branch", "name": "main", "label_side": "before"}\n'
-        '{"op": "theme", "name": "default", "keep_prior_overrides": true}\n'
+        build_jsonl(
+            {"op": "branch", "name": "main", "label_side": "before"},
+            {"op": "theme", "name": "default", "keep_prior_overrides": True},
+        )
     )
 
     # --- assert -----------------------
@@ -285,9 +296,11 @@ def test_flag_false_explicit_matches_default_wipe() -> None:
     behavior — wipes both override categories, same as omitting the flag."""
     # --- arrange / act ----------------
     state, theme, report = _apply(
-        '{"op": "theme", "background_color": "#deadbe"}\n'
-        '{"op": "branch", "name": "main", "color": "#aabbcc"}\n'
-        '{"op": "theme", "name": "default", "keep_prior_overrides": false}\n'
+        build_jsonl(
+            {"op": "theme", "background_color": "#deadbe"},
+            {"op": "branch", "name": "main", "color": "#aabbcc"},
+            {"op": "theme", "name": "default", "keep_prior_overrides": False},
+        )
     )
 
     # --- assert -----------------------
@@ -304,8 +317,10 @@ def test_mixed_op_with_flag_true_layers_current_fields_on_prior_overrides() -> N
     flag-true means no reset happens either way."""
     # --- arrange / act ----------------
     _, theme, report = _apply(
-        '{"op": "theme", "background_color": "#deadbe"}\n'
-        '{"op": "theme", "name": "default", "keep_prior_overrides": true, "label_font_size": 17}\n'
+        build_jsonl(
+            {"op": "theme", "background_color": "#deadbe"},
+            {"op": "theme", "name": "default", "keep_prior_overrides": True, "label_font_size": 17},
+        )
     )
 
     # --- assert -----------------------
@@ -321,7 +336,7 @@ def test_colors_palette_override_replaces_palette_wholesale() -> None:
     """The `colors` field replaces the entire branch palette dict —
     keys not present in the new dict are not preserved."""
     # --- arrange / act ----------------
-    _, theme, report = _apply('{"op": "theme", "colors": {"main": "#d62728", "branch1": "#1f77b4"}}\n')
+    _, theme, report = _apply(build_jsonl({"op": "theme", "colors": {"main": "#d62728", "branch1": "#1f77b4"}}))
 
     # --- assert -----------------------
     assert report.is_clean()
@@ -333,9 +348,9 @@ def test_colors_override_does_not_alias_op_dict() -> None:
     the parsed op (defensive — pydantic shouldn't be re-applied, but the
     deep-copy keeps the invariant clean)."""
     # --- arrange / act ----------------
-    _, theme, _ = _apply('{"op": "theme", "colors": {"main": "#d62728"}}\n')
+    _, theme, _ = _apply(build_jsonl({"op": "theme", "colors": {"main": "#d62728"}}))
     theme.colors["main"] = "#000000"
-    _, theme2, _ = _apply('{"op": "theme", "colors": {"main": "#d62728"}}\n')
+    _, theme2, _ = _apply(build_jsonl({"op": "theme", "colors": {"main": "#d62728"}}))
 
     # --- assert -----------------------
     # Each apply pass produces an independent theme.colors.
@@ -347,7 +362,7 @@ def test_colors_override_does_not_alias_op_dict() -> None:
 # ==================================================================================================
 def test_empty_op_emits_e217() -> None:
     # --- arrange / act ----------------
-    _, theme, report = _apply('{"op": "theme"}\n')
+    _, theme, report = _apply(build_jsonl({"op": "theme"}))
 
     # --- assert -----------------------
     assert not report.is_clean()
@@ -359,7 +374,7 @@ def test_empty_op_emits_e217() -> None:
 
 def test_unknown_named_theme_emits_e216() -> None:
     # --- arrange / act ----------------
-    _, theme, report = _apply('{"op": "theme", "name": "midnight"}\n')
+    _, theme, report = _apply(build_jsonl({"op": "theme", "name": "midnight"}))
 
     # --- assert -----------------------
     assert not report.is_clean()
@@ -373,7 +388,7 @@ def test_unknown_named_theme_does_not_apply_explicit_fields() -> None:
     """When `name` is invalid, the *entire* op is rejected — explicit
     overrides on the same op also do not apply."""
     # --- arrange / act ----------------
-    _, theme, report = _apply('{"op": "theme", "name": "midnight", "background_color": "#abcdef"}\n')
+    _, theme, report = _apply(build_jsonl({"op": "theme", "name": "midnight", "background_color": "#abcdef"}))
 
     # --- assert -----------------------
     assert not report.is_clean()
@@ -400,7 +415,7 @@ def test_flag_alone_emits_e220_not_e217() -> None:
     is rejected via E220 — the empty-op check (E217) does not double-up
     since the flag counts as content."""
     # --- arrange / act ----------------
-    _, _theme, report = _apply('{"op": "theme", "keep_prior_overrides": true}\n')
+    _, _theme, report = _apply(build_jsonl({"op": "theme", "keep_prior_overrides": True}))
 
     # --- assert -----------------------
     codes = [e.code for e in report.errors]
@@ -412,7 +427,7 @@ def test_flag_without_name_does_not_block_other_fields_in_same_op() -> None:
     in the same op from accumulating — partial-application pattern
     matches E218 / E219."""
     # --- arrange / act ----------------
-    _, theme, report = _apply('{"op": "theme", "keep_prior_overrides": true, "background_color": "#abcdef"}\n')
+    _, theme, report = _apply(build_jsonl({"op": "theme", "keep_prior_overrides": True, "background_color": "#abcdef"}))
 
     # --- assert -----------------------
     codes = [e.code for e in report.errors]
@@ -428,7 +443,7 @@ def test_theme_mutation_does_not_leak_into_default() -> None:
     """Each apply pass starts with its own deep copy of DEFAULT_THEME — mutating
     one diagram's theme must not affect another."""
     # --- arrange / act ----------------
-    _, theme, _ = _apply('{"op": "theme", "background_color": "#123456"}\n')
+    _, theme, _ = _apply(build_jsonl({"op": "theme", "background_color": "#123456"}))
 
     # --- assert -----------------------
     assert theme.background_color == "#123456"
@@ -440,7 +455,9 @@ def test_branch_color_overrides_survive_explicit_theme_patch() -> None:
     leaves prior `branch.color` overrides intact in the resolved theme."""
     # --- arrange / act ----------------
     state, theme, report = _apply(
-        '{"op": "branch", "name": "main", "color": "#aabbcc"}\n{"op": "theme", "background_color": "#111111"}\n'
+        build_jsonl(
+            {"op": "branch", "name": "main", "color": "#aabbcc"}, {"op": "theme", "background_color": "#111111"}
+        )
     )
 
     # --- assert -----------------------
@@ -456,7 +473,7 @@ def test_branch_color_overrides_survive_explicit_theme_patch() -> None:
 @pytest.mark.parametrize("field", ["branch_spacing", "commit_spacing"])
 def test_spacing_must_be_positive_emits_e218(field: str) -> None:
     # --- arrange / act ----------------
-    _, _, report = _apply(f'{{"op": "theme", "{field}": 0}}\n')
+    _, _, report = _apply(build_jsonl({"op": "theme", field: 0}))
 
     # --- assert -----------------------
     codes = [e.code for e in report.errors]
@@ -467,7 +484,7 @@ def test_spacing_must_be_positive_emits_e218(field: str) -> None:
 def test_spacing_violation_does_not_block_other_fields_in_same_op() -> None:
     """An invalid spacing emits an error but other valid fields still apply."""
     # --- arrange / act ----------------
-    _, theme, report = _apply('{"op": "theme", "branch_spacing": 0, "background_color": "#abcdef"}\n')
+    _, theme, report = _apply(build_jsonl({"op": "theme", "branch_spacing": 0, "background_color": "#abcdef"}))
 
     # --- assert -----------------------
     assert [e.code for e in report.errors] == ["E218"]
@@ -479,7 +496,7 @@ def test_spacing_violation_does_not_block_other_fields_in_same_op() -> None:
 @pytest.mark.parametrize("field", ["label_font_size", "branch_label_font_size", "hash_font_size"])
 def test_font_size_must_be_positive_emits_e219(field: str) -> None:
     # --- arrange / act ----------------
-    _, _, report = _apply(f'{{"op": "theme", "{field}": 0}}\n')
+    _, _, report = _apply(build_jsonl({"op": "theme", field: 0}))
 
     # --- assert -----------------------
     codes = [e.code for e in report.errors]
@@ -494,7 +511,7 @@ def test_branch_op_with_color_writes_override_keyed_by_id() -> None:
     """When a `branch` op carries an explicit `color:` field, the override
     lands on `theme.branch_color_overrides[branch.id]`."""
     # --- arrange / act ----------------
-    state, theme, _ = _apply('{"op": "branch", "name": "main", "color": "#abcdef"}\n')
+    state, theme, _ = _apply(build_jsonl({"op": "branch", "name": "main", "color": "#abcdef"}))
 
     # --- assert -----------------------
     main_id = state.branches["main"].id
@@ -503,7 +520,7 @@ def test_branch_op_with_color_writes_override_keyed_by_id() -> None:
 
 def test_branch_op_without_color_writes_no_override() -> None:
     # --- arrange / act ----------------
-    _, theme, _ = _apply('{"op": "branch", "name": "main"}\n')
+    _, theme, _ = _apply(build_jsonl({"op": "branch", "name": "main"}))
 
     # --- assert -----------------------
     assert theme.branch_color_overrides == {}
@@ -514,11 +531,13 @@ def test_override_keyed_by_id_distinguishes_removed_and_redeclared_branch() -> N
     only the live branch's override survives in the resolved theme."""
     # --- arrange / act ----------------
     state, theme, _ = _apply(
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main", "color": "#111111"}\n'
-        '{"op": "remove", "branches": ["feat"]}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main", "color": "#222222"}\n'
+        build_jsonl(
+            {"op": "branch", "name": "main"},
+            {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+            {"op": "branch", "name": "feat", "from_branch": "main", "color": "#111111"},
+            {"op": "remove", "branches": ["feat"]},
+            {"op": "branch", "name": "feat", "from_branch": "main", "color": "#222222"},
+        )
     )
 
     # --- assert -----------------------

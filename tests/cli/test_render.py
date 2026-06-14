@@ -5,9 +5,10 @@ from pathlib import Path
 from click.testing import CliRunner
 
 from gitsvg.cli._cli import cli
+from tests._jsonl import build_jsonl
 
-_OK_JSONL = '{"op": "branch", "name": "main"}\n{"op": "commit", "branch": "main", "msg": "x"}\n'
-_BAD_JSONL = '{"op": "commit", "branch": "main", "msg": "x"}\n'  # main not declared
+_OK_JSONL = build_jsonl({"op": "branch", "name": "main"}, {"op": "commit", "branch": "main", "msg": "x"})
+_BAD_JSONL = build_jsonl({"op": "commit", "branch": "main", "msg": "x"})  # main not declared
 
 
 def _write(path: Path, content: str) -> Path:
@@ -21,7 +22,7 @@ def test_render_clean_file_writes_svg_and_exits_zero(tmp_path: Path) -> None:
     # --- arrange ----------------------
     input_file = _write(
         tmp_path / "ok.gitsvg.jsonl",
-        '{"op": "branch", "name": "main"}\n{"op": "commit", "branch": "main", "msg": "x"}\n',
+        build_jsonl({"op": "branch", "name": "main"}, {"op": "commit", "branch": "main", "msg": "x"}),
     )
     output_file = tmp_path / "out.svg"
     runner = CliRunner()
@@ -41,7 +42,7 @@ def test_render_invalid_file_exits_non_zero_and_writes_no_output(tmp_path: Path)
     # --- arrange ----------------------
     input_file = _write(
         tmp_path / "bad.gitsvg.jsonl",
-        '{"op": "commit", "branch": "main", "msg": "x"}\n',  # main not declared
+        build_jsonl({"op": "commit", "branch": "main", "msg": "x"}),  # main not declared
     )
     output_file = tmp_path / "out.svg"
     runner = CliRunner()
@@ -58,7 +59,7 @@ def test_render_requires_output_flag(tmp_path: Path) -> None:
     # --- arrange ----------------------
     input_file = _write(
         tmp_path / "ok.gitsvg.jsonl",
-        '{"op": "branch", "name": "main"}\n{"op": "commit", "branch": "main", "msg": "x"}\n',
+        build_jsonl({"op": "branch", "name": "main"}, {"op": "commit", "branch": "main", "msg": "x"}),
     )
     runner = CliRunner()
 

@@ -4,6 +4,7 @@ from gitsvg.layout import compute_layout
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.render import render
 from gitsvg.state import apply_ops
+from tests._jsonl import build_jsonl
 
 
 def _render_from(text: str):
@@ -19,11 +20,11 @@ def _render_from(text: str):
 # ==================================================================================================
 def test_branch_pill_emits_one_rect_and_one_text_per_branch() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "feat", "id": "f1", "msg": "x"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "x"},
+        {"op": "branch", "name": "feat", "from_branch": "main"},
+        {"op": "commit", "branch": "feat", "id": "f1", "msg": "x"},
     )
 
     # --- act --------------------------
@@ -40,7 +41,7 @@ def test_branch_pill_emits_one_rect_and_one_text_per_branch() -> None:
 
 def test_branch_pill_text_is_branch_name() -> None:
     # --- arrange ----------------------
-    text = '{"op": "branch", "name": "feature/x"}\n'
+    text = build_jsonl({"op": "branch", "name": "feature/x"})
 
     # --- act --------------------------
     svg_text = _render_from(text).as_svg()
@@ -51,7 +52,7 @@ def test_branch_pill_text_is_branch_name() -> None:
 
 def test_branch_pill_uses_branch_color() -> None:
     # --- arrange ----------------------
-    text = '{"op": "branch", "name": "main", "color": "#aabbcc"}\n'
+    text = build_jsonl({"op": "branch", "name": "main", "color": "#aabbcc"})
 
     # --- act --------------------------
     svg_text = _render_from(text).as_svg()
@@ -66,7 +67,9 @@ def test_branch_pill_uses_branch_color() -> None:
 # ==================================================================================================
 def test_commit_with_msg_only_emits_one_text_line() -> None:
     # --- arrange ----------------------
-    text = '{"op": "branch", "name": "main"}\n{"op": "commit", "branch": "main", "id": "c1", "msg": "initial"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"}, {"op": "commit", "branch": "main", "id": "c1", "msg": "initial"}
+    )
 
     # --- act --------------------------
     svg_text = _render_from(text).as_svg()
@@ -79,9 +82,9 @@ def test_commit_with_msg_only_emits_one_text_line() -> None:
 
 def test_commit_with_msg_and_hash_emits_two_text_lines() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "fix", "hash": "deadbef"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "fix", "hash": "deadbef"},
     )
 
     # --- act --------------------------
@@ -96,9 +99,9 @@ def test_commit_with_msg_and_hash_emits_two_text_lines() -> None:
 
 def test_commit_with_multiline_msg_emits_one_text_per_line() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "line one\\nline two\\nline three"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "line one\nline two\nline three"},
     )
 
     # --- act --------------------------
@@ -116,12 +119,12 @@ def test_commit_with_no_msg_no_hash_emits_no_label() -> None:
     """A `merge:` op produces a commit with neither msg nor hash by default,
     so the renderer should emit no commit-label text for it."""
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "feat", "id": "f1", "msg": "x"}\n'
-        '{"op": "merge", "from": "feat", "into": "main", "as": "m2"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "m1", "msg": "x"},
+        {"op": "branch", "name": "feat", "from_branch": "main"},
+        {"op": "commit", "branch": "feat", "id": "f1", "msg": "x"},
+        {"op": "merge", "from": "feat", "into": "main", "as": "m2"},
     )
 
     # --- act --------------------------
@@ -134,9 +137,9 @@ def test_commit_with_no_msg_no_hash_emits_no_label() -> None:
 
 def test_label_side_before_uses_text_anchor_end() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main", "label_side": "before"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main", "label_side": "before"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "x"},
     )
 
     # --- act --------------------------
@@ -158,12 +161,12 @@ def test_commit_label_anchor_per_side_dispatch() -> None:
     # main with label_side=before; feature with label_side=after. Override
     # only the `_before` side to a centered (0.5, 0.5) anchor; the `_after`
     # side should keep its BT default (0.0, 0.5).
-    text = (
-        '{"op": "theme", "commit_label_anchor_before": [0.5, 0.5]}\n'
-        '{"op": "branch", "name": "main", "label_side": "before"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "x"}\n'
-        '{"op": "branch", "name": "feature", "from_branch": "main", "label_side": "after"}\n'
-        '{"op": "commit", "branch": "feature", "id": "c2", "msg": "y"}\n'
+    text = build_jsonl(
+        {"op": "theme", "commit_label_anchor_before": [0.5, 0.5]},
+        {"op": "branch", "name": "main", "label_side": "before"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "x"},
+        {"op": "branch", "name": "feature", "from_branch": "main", "label_side": "after"},
+        {"op": "commit", "branch": "feature", "id": "c2", "msg": "y"},
     )
 
     # --- act --------------------------
@@ -178,9 +181,9 @@ def test_commit_label_anchor_per_side_dispatch() -> None:
 
 def test_highlight_renders_bold_msg_label() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "winner", "highlight": true}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "winner", "highlight": True},
     )
 
     # --- act --------------------------
@@ -196,10 +199,10 @@ def test_highlight_renders_bold_msg_label() -> None:
 def test_highlight_enlarges_commit_dot() -> None:
     """A highlighted commit's dot uses HIGHLIGHT_RADIUS instead of COMMIT_RADIUS."""
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "winner", "highlight": true}\n'
-        '{"op": "commit", "branch": "main", "id": "c2", "msg": "normal"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "winner", "highlight": True},
+        {"op": "commit", "branch": "main", "id": "c2", "msg": "normal"},
     )
 
     # --- act --------------------------
@@ -216,9 +219,9 @@ def test_highlight_enlarges_commit_dot() -> None:
 # ==================================================================================================
 def test_hash_secondary_line_uses_smaller_font_size() -> None:
     # --- arrange ----------------------
-    text = (
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "fix", "hash": "deadbef"}\n'
+    text = build_jsonl(
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "fix", "hash": "deadbef"},
     )
 
     # --- act --------------------------

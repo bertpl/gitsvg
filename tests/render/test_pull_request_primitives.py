@@ -9,6 +9,7 @@ from gitsvg.layout import compute_layout
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.render import render
 from gitsvg.state import apply_ops
+from tests._jsonl import build_jsonl
 
 
 def _render(text: str) -> str:
@@ -26,11 +27,13 @@ def test_open_pr_renders_a_dashed_path() -> None:
     """A `<path>` with a `stroke-dasharray` attribute appears once per open PR."""
     # --- arrange / act ----------------
     svg = _render(
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "m1", "msg": "first"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "commit", "branch": "feat", "id": "f1", "msg": "wip"}\n'
-        '{"op": "pull_request", "from": "feat", "into": "main"}\n'
+        build_jsonl(
+            {"op": "branch", "name": "main"},
+            {"op": "commit", "branch": "main", "id": "m1", "msg": "first"},
+            {"op": "branch", "name": "feat", "from_branch": "main"},
+            {"op": "commit", "branch": "feat", "id": "f1", "msg": "wip"},
+            {"op": "pull_request", "from": "feat", "into": "main"},
+        )
     )
 
     # --- assert -----------------------
@@ -42,7 +45,9 @@ def test_open_pr_renders_a_dashed_path() -> None:
 def test_no_pr_renders_no_pr_dash() -> None:
     """No PR ops → no `2,6` dash anywhere in the output."""
     # --- arrange / act ----------------
-    svg = _render('{"op": "branch", "name": "main"}\n{"op": "commit", "branch": "main", "id": "m1", "msg": "first"}\n')
+    svg = _render(
+        build_jsonl({"op": "branch", "name": "main"}, {"op": "commit", "branch": "main", "id": "m1", "msg": "first"})
+    )
 
     # --- assert -----------------------
     assert "2,6" not in svg
@@ -55,9 +60,11 @@ def test_pr_with_title_renders_pill_text() -> None:
     """A PR with `title:` produces a `<text>` containing the title string."""
     # --- arrange / act ----------------
     svg = _render(
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "pull_request", "from": "feat", "into": "main", "title": "Add the thing"}\n'
+        build_jsonl(
+            {"op": "branch", "name": "main"},
+            {"op": "branch", "name": "feat", "from_branch": "main"},
+            {"op": "pull_request", "from": "feat", "into": "main", "title": "Add the thing"},
+        )
     )
 
     # --- assert -----------------------
@@ -67,11 +74,15 @@ def test_pr_with_title_renders_pill_text() -> None:
 def test_pr_without_title_renders_no_pill_text() -> None:
     """A PR without `title:` produces no extra `<text>` element beyond what other ops emit."""
     # --- arrange / act ----------------
-    svg_without = _render('{"op": "branch", "name": "main"}\n{"op": "branch", "name": "feat", "from_branch": "main"}\n')
+    svg_without = _render(
+        build_jsonl({"op": "branch", "name": "main"}, {"op": "branch", "name": "feat", "from_branch": "main"})
+    )
     svg_with_pr = _render(
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "branch", "name": "feat", "from_branch": "main"}\n'
-        '{"op": "pull_request", "from": "feat", "into": "main"}\n'
+        build_jsonl(
+            {"op": "branch", "name": "main"},
+            {"op": "branch", "name": "feat", "from_branch": "main"},
+            {"op": "pull_request", "from": "feat", "into": "main"},
+        )
     )
 
     # --- assert -----------------------

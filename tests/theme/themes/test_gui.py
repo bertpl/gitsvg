@@ -4,6 +4,7 @@ from gitsvg._shared.value_types import BranchLineStyle, CommitLabelLayout, Merge
 from gitsvg.parse import parse_jsonl_text
 from gitsvg.state import apply_ops
 from gitsvg.theme.themes import GuiTheme
+from tests._jsonl import build_jsonl
 
 
 # ==================================================================================================
@@ -80,10 +81,10 @@ def test_theme_op_name_gui_resolves_through_apply_without_table_errors() -> None
     row mode to `split()`, so a clean diagram validates.
     """
     # --- arrange ----------------------
-    source = (
-        '{"op": "theme", "name": "gui"}\n'
-        '{"op": "branch", "name": "main"}\n'
-        '{"op": "commit", "branch": "main", "id": "c1", "msg": "first"}\n'
+    source = build_jsonl(
+        {"op": "theme", "name": "gui"},
+        {"op": "branch", "name": "main"},
+        {"op": "commit", "branch": "main", "id": "c1", "msg": "first"},
     )
 
     # --- act --------------------------
