@@ -7,6 +7,7 @@ name: Scorecard
 # moves no individual check itself.
 
 on:
+  workflow_dispatch:        # allow an on-demand re-score from the Actions tab
   branch_protection_rule:   # re-score when branch-protection settings change
   push:
     branches: [main]
