@@ -50,15 +50,20 @@ jobs:
           subject-path: |
             dist/*.whl
             dist/*.tar.gz
+      # Extension is `.intoto.jsonl`, not `.sigstore.jsonl`: each line is a
+      # Sigstore bundle whose DSSE payload is an in-toto statement with a SLSA
+      # build-provenance predicate, and OpenSSF Scorecard's Signed-Releases
+      # check credits provenance purely by this filename suffix (it never opens
+      # the file). Do not "correct" it back — the rename is what scores 10/10.
       - name: Stage the provenance bundle under a stable name
         env:
           BUNDLE_PATH: ${{ steps.attest.outputs.bundle-path }}  # via env, not inline — keep it out of the run: template
-        run: cp "$BUNDLE_PATH" provenance.sigstore.jsonl
+        run: cp "$BUNDLE_PATH" provenance.intoto.jsonl
       - name: Hand the provenance bundle to the release job
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: provenance-bundle
-          path: provenance.sigstore.jsonl
+          path: provenance.intoto.jsonl
           if-no-files-found: error
       - uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b # v1.14.0
 
@@ -88,4 +93,4 @@ jobs:
           gh release create "$TAG" \
             --title "$TAG" \
             --notes-file release_notes.md \
-            provenance.sigstore.jsonl
+            provenance.intoto.jsonl

@@ -153,7 +153,8 @@ include = ["gitsvg"]
 # glyph-width LUTs, and the example layout/state snapshots.
 skip = "uv.lock,*.svg,gitsvg/render/_glyph_widths/*,tests/examples/_layout_snapshots/*,tests/examples/_state_snapshots/*"
 # Intentional hyphenated spellings used consistently across the prose + code.
-ignore-words-list = "pre-empt,re-declare,re-declared,re-declares"
+# `intoto`: the in-toto provenance format (`.intoto.jsonl`), not a typo for "into".
+ignore-words-list = "pre-empt,re-declare,re-declared,re-declares,intoto"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
