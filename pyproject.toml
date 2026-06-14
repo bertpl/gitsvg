@@ -125,6 +125,14 @@ select = [
     "D",       # pydocstyle (Google convention; D401 enforced)
     "RUF",     # ruff-native
     "C901",    # mccabe complexity gate (threshold below)
+    "PLE", "PLW",  # pylint errors + warnings (PLC/PLR excluded — noisy on this domain)
+    "PGH",     # pygrep-hooks: no blanket `noqa` / `type: ignore`
+    "BLE",     # flake8-blind-except
+    "A",       # flake8-builtins: shadowing
+    "RSE",     # flake8-raise: no needless parens on `raise`
+    "FLY",     # flynt: static str-join → f-string
+    "SLF",     # flake8-self: private-member access
+    "INP",     # flake8-no-pep420: every package dir has an __init__.py
 ]
 ignore = [
     "RUF001", "RUF002", "RUF003",  # intentional typography (→, ×, en-dash), not "ambiguous"
@@ -142,8 +150,10 @@ convention = "google"
 runtime-evaluated-base-classes = ["pydantic.BaseModel"]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**" = ["D", "ANN"]    # AAA tests: no docstrings, lighter typing
-"__init__.py" = ["F401"]     # re-export modules: naked imports, no `as` alias
+"tests/**" = ["D", "ANN", "SLF001"]    # AAA tests: no docstrings, lighter typing, may access private members
+"scripts/**" = ["INP001"]              # standalone scripts, not an importable package
+"docs/**" = ["INP001"]                 # mkdocs generation scripts, not a package
+"__init__.py" = ["F401"]               # re-export modules: naked imports, no `as` alias
 
 [tool.ty.src]
 include = ["gitsvg"]

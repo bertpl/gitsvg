@@ -34,7 +34,9 @@ SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+$")
 # ==================================================================================================
 def run_command(cmd: list[str], **kw: object) -> str:
     """Run a subprocess and return stdout, or exit on failure."""
-    result = subprocess.run(cmd, capture_output=True, text=True, **kw)
+    # check=False is deliberate: the return code is handled below with
+    # richer diagnostics than subprocess's own CalledProcessError.
+    result = subprocess.run(cmd, capture_output=True, text=True, check=False, **kw)
     if result.returncode != 0:
         sys.stderr.write(f"\n$ {' '.join(cmd)}\n")
         if result.stdout:

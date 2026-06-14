@@ -77,8 +77,8 @@ def _extract_summary(body: str, code: str) -> str:
         The extracted summary, or an empty string when the convention is not
         followed.
     """
-    for line in body.splitlines():
-        line = line.strip()
+    for raw_line in body.splitlines():
+        line = raw_line.strip()
         if not line:
             continue
         if line.startswith("# "):

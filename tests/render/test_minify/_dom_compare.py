@@ -178,9 +178,10 @@ def _inline_element_classes(elem: ET.Element, class_defs: dict[str, dict[str, st
             # attribute `font-size="11"`). Strip the suffix when copying
             # into attribute form so the canonical comparison sees the
             # same string from both sides.
+            attr_value = value
             if value.endswith("px") and _is_bare_number(value[:-2]):
-                value = value[:-2]
-            elem.set(attr, value)
+                attr_value = value[:-2]
+            elem.set(attr, attr_value)
     del elem.attrib["class"]
 
 
@@ -221,9 +222,9 @@ def _normalize_attr_values(root: ET.Element) -> None:
     """Expand short hex colors and round decimal numbers to 1dp (in-place)."""
     for elem in root.iter():
         for attr, value in list(elem.attrib.items()):
-            value = _HEX_SHORT_RE.sub(lambda m: f"#{m[1]}{m[1]}{m[2]}{m[2]}{m[3]}{m[3]}", value)
-            value = _NUMBER_RE.sub(_round_1dp, value)
-            elem.set(attr, value)
+            normalized = _HEX_SHORT_RE.sub(lambda m: f"#{m[1]}{m[1]}{m[2]}{m[2]}{m[3]}{m[3]}", value)
+            normalized = _NUMBER_RE.sub(_round_1dp, normalized)
+            elem.set(attr, normalized)
 
 
 def _round_1dp(match: re.Match[str]) -> str:
