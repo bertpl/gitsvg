@@ -80,6 +80,29 @@ jobs:
     needs: [preflight]
     uses: ./.github/workflows/_unit_tests.yml
 
+  # Synchronous dependency-CVE gate: audits the locked runtime dependencies
+  # against the advisory DB at PR time — the blocking complement to the async,
+  # repo-level Dependabot alerts. Hard-fails on any advisory; accepted ones go
+  # in `ignore-vulns` below with a justification.
+  pip-audit:
+    needs: [preflight]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+      - name: Set up uv
+        uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
+      - name: Export the locked runtime dependencies
+        run: uv export --frozen --no-emit-project --no-dev --no-hashes --format requirements-txt -o requirements.txt
+      - uses: pypa/gh-action-pip-audit@1220774d901786e6f652ae159f7b6bc8fea6d266 # v1.1.0
+        with:
+          inputs: requirements.txt
+          no-deps: "true"  # requirements.txt is already the full pinned closure
+          # Accepted/unfixable advisories go here (one id per line) with a reason:
+          # ignore-vulns: |
+          #   GHSA-xxxx-xxxx-xxxx  # why accepted
+
   ci-gate:
     name: CI gate
     # The single stable required check on main: branch protection requires only
@@ -89,7 +112,7 @@ jobs:
     # passing. Fails on any failure/cancellation; success and skipped are OK
     # (a skipped pre-commit/test means preflight failed, which itself trips it).
     if: always()
-    needs: [preflight, pre-commit, test]
+    needs: [preflight, pre-commit, test, pip-audit]
     runs-on: ubuntu-latest
     steps:
       - name: Fail if any required job did not succeed
