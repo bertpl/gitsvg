@@ -111,7 +111,8 @@ def _expand(
     # First op is import — resolve it.
     import_parsed = parsed_ops[0]
     import_op = import_parsed.op
-    assert isinstance(import_op, ImportOp)
+    if not isinstance(import_op, ImportOp):
+        raise AssertionError
     rest = list(parsed_ops[1:])
 
     # --- No-root input --------------------------

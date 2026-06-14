@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
+- Harden the `--small` minifier's XML parsing with `defusedxml` (now a runtime dependency).
+
 ## 0.3.5 (2026-06-14)
 
 ### Changed
