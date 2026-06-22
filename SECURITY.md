@@ -3,8 +3,8 @@
 ## Supported versions
 
 gitsvg is pre-1.0 and ships frequent releases. Security fixes land in a
-new release on top of the latest published version; older versions are
-not patched in place.
+new release on top of the latest published version; older versions are not
+patched in place.
 
 | Version          | Supported          |
 | ---------------- | ------------------ |
@@ -20,8 +20,8 @@ Please report security issues **privately** — do not open a public issue,
 discussion, or pull request for a suspected vulnerability.
 
 Use GitHub's [Private Vulnerability Reporting](https://github.com/bertpl/gitsvg/security/advisories/new)
-to open a confidential advisory. This is the only supported reporting
-channel; the project publishes no maintainer email address.
+to open a confidential advisory. This is the only supported reporting channel;
+the project publishes no maintainer email address.
 
 When reporting, please include:
 

@@ -2,9 +2,9 @@ name: Scorecard
 
 # OpenSSF Scorecard: continuously scores the repo's security posture (branch
 # protection, pinned dependencies, SAST/fuzzing presence, signed releases, …)
-# and publishes the result so the README badge stays live. The capstone of the
-# v0.3.x security-hardening work — it makes the score visible and tracked, but
-# moves no individual check itself.
+# and publishes the result so the README badge stays live. It makes that
+# posture externally visible and tracked; it does not itself change any
+# individual check.
 
 on:
   workflow_dispatch:        # allow an on-demand re-score from the Actions tab
