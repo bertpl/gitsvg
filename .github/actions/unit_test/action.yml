@@ -28,7 +28,7 @@ runs:
   using: composite
   steps:
     - name: Set up uv
-      uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
+      uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
       with:
         python-version: ${{ inputs.python-version }}
         # Distinct cache key per resolution. setup-uv builds the key before the
@@ -60,7 +60,7 @@ runs:
 
     - name: Upload coverage + node-id data
       if: inputs.coverage == 'true'
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       with:
         name: coverage-data-${{ inputs.python-version }}-${{ runner.os }}-${{ inputs.resolution }}
         path: |
